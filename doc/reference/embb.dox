@@ -1,0 +1,42 @@
+/**
+
+\mainpage Overview
+
+The Embedded Multicore Building Blocks (EMB<sup>2</sup>) are an easy to
+use yet powerful and efficient C/C++ library for the development of
+parallel applications. EMB<sup>2</sup> has been specifically designed
+for embedded systems and the typical requirements that accompany them,
+such as real-time capability and constraints on memory consumption. As a
+major advantage, low-level operations are hidden in the library which
+relieves software developers from the burden of thread management and
+synchronization. This not only improves productivity of parallel
+software development, but also results in increased reliability and
+performance of the applications.
+
+EMB<sup>2</sup> is independent of the hardware architecture (x86, ARM,
+...) and runs on various platforms, from small devices to large systems
+containing numerous processor cores. It builds on MTAPI, a standardized
+programming interface for leveraging task parallelism in embedded
+systems containing symmetric or asymmetric multicore processors. A core
+feature of MTAPI is low-overhead scheduling of fine-grained tasks among
+the available cores during runtime. Unlike existing libraries,
+EMB<sup>2</sup> supports task priorities, which allows the creation of
+soft real-time systems. Additionally, the scheduling strategy can be
+optimized for non-functional requirements such as minimal latency and
+fairness.
+
+Besides the task scheduler, EMB<sup>2</sup> provides basic parallel
+algorithms, concurrent data structures, and skeletons for implementing
+stream processing applications (see figure below). These building blocks
+are largely implemented in a non-blocking fashion, thus preventing
+frequently encountered pitfalls like lock contention, deadlocks, and
+priority inversion. As another advantage in real-time systems, the
+algorithms and data structures give certain progress guarantees. For
+example, wait-free data structures guarantee system-wide progress which
+means that every operation completes within a finite number of steps
+independently of any other concurrent operations on the same data
+structure.
+
+\image html ../images/embb.png
+
+*/

@@ -1,0 +1,21 @@
+# The following files are ignored by Git
+
+*.TMP
+*.o
+*.exe
+build*
+*~
+*#
+
+# Eclipse CDT project files
+.project
+.cproject
+.settings/
+
+# Latex output files
+*.aux
+*.log
+*.out
+*.pdf
+*.toc
+*.synctex.gz

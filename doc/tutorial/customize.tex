@@ -1,0 +1,175 @@
+
+% ===================================
+%  document formatting refinement
+% ===================================
+
+% No indents for whole text
+\setlength{\parindent}{0pt}
+
+% improve the line breaking 
+\setlength{\emergencystretch}{1em}
+
+% pic width = \textwidth - \chapterpicwidth
+\def\chapterpicwidth{0.43}
+
+% line breaks for URLs
+\renewcommand{\UrlBreaks}{\do\/}
+
+
+%
+% custom hyphenation
+%
+\hyphenation{in-stru-men-ta-tion analy-sis con-cur-ren-cy}
+
+
+% ===================================
+%  settings for the listings package
+% ===================================
+
+\definecolor{lightGray}{RGB}{242,242,242}
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  keepspaces=true, % To have spaces monsized
+  tabsize=2,
+  frame=none, % = single
+  breaklines=true,
+  numbers=left,
+  numberstyle=\tiny,
+  escapeinside={//@}{@},
+  showstringspaces=false,
+  resetmargins=true,
+  xleftmargin=18pt,
+  xrightmargin=0pt,
+  %resetmargins=true,
+  %framextopmargin=0pt
+  backgroundcolor=\color{lightGray},
+  captionpos=b,
+  %abovecaptionskip=0pt,
+  %belowcaptionskip=0pt,
+  %aboveskip=3pt,
+  %belowskip=0pt,
+  %framesep=1pt,
+  numberbychapter=false,
+}
+
+% coloring for listings
+\lstdefinestyle{colored}{
+  moredelim=[is][\color{blue}]{@}{@},
+  moredelim=[is][\color{red}]{|}{|},
+}
+
+% 
+% Counter and caption for listings
+%
+
+%\newcounter{lstlisting}  % already defined by pkg listing at \begin{document}
+\counterwithout{lstlisting}{chapter}
+
+\newcommand{\inputlisting}[1]{  
+  \begin{minipage}{\columnwidth}
+  \lstinputlisting{#1}
+  \end{minipage}
+}
+
+\newcommand{\lstgname}{Listing}
+\newcommand{\listingcaption}[1]% 
+{%
+  {%
+    \refstepcounter{lstlisting}
+    \noindent\footnotesize{\lstgname~\thelstlisting{:}~#1\hfill}
+  }%
+}%
+
+
+
+% ===========================
+%  cover generation commands
+% ===========================
+
+\def\backcover{
+\genbackpage{
+  \textbf{Siemens AG}\newline
+  Corporate Technology\newline
+  Multicore Expert Center\newline
+  \newline
+  Otto-Hahn-Ring 6\newline
+  81739 Muenchen\newline
+  Germany\newline
+  \newline
+  {http://multicore.ct.siemens.de}
+  }
+}
+% ======================
+%  convenience commands
+% ======================
+
+\def\chaptername{Chapter}
+\def\algname{Algorithm}
+\def\sectionname{Section}
+
+%
+% Programming languages and frameworks
+%
+
+\def\qt{Qt}
+\def\cE{C11}
+\def\cpp{C\raisebox{0.17ex}{\small\textbf{++}}}
+\def\cppFootnote{C\raisebox{0.08ex}{\small{++}}}
+\def\cppE{{\cpp}11}
+\newcommand{\csharp}{%
+  {\settoheight{\dimen0}{C}C\kern-.05em\hspace{0.5pt}\resizebox{!}{\dimen0}{\raisebox{\depth}{\#}}}}
+\def\dotnet{.NET}
+
+%
+% Special characters
+%
+\def\myCheck{\ding{51}} % check
+\def\myCross{\ding{55}} % cross
+
+
+%
+% Various stuff
+%
+\def\time#1{#1}
+
+\def\markup#1{{\color{NavyBlue}#1}}
+
+\newcommand{\toolcard}[9]{
+  \begin{table}
+    \caption{Quick card for {#2}}
+    {\small
+      \begin{tabular}{>{\bfseries}p{0.295\columnwidth}p{0.605\columnwidth}}
+        \thickhline 
+        {Tool} & #2 \\
+        {Detectable bugs} & #3 \\
+        {License} & #4 \\
+        {Platforms} & #5 \\
+        {Operating systems} & #6 \\
+        {\mbox{Languages}} & #7 \\
+        {Threading libraries} & {#8} \\
+        {Additional facts} & {#9} \\
+        \thickhline
+      \end{tabular}
+    }
+    \label{qc:#1}
+  \end{table}
+}
+
+% table cell that allows line breaks (e.g., for toolcard)
+%   first (optional) parameter defines alignment (l,c,r)
+%   second parameter is the content
+\def\lbcell[#1]#2{\rule{0pt}{4ex}\shortstack[#1]{#2}}
+
+
+% =======================
+%  other (various) stuff
+% =======================
+
+%
+% very custom stuff
+%
+\def\hb#1{\hbImpl(#1)}
+\def\hbRel{\rightarrow}
+\def\hbImpl(#1,#2){$#1 \hbRel #2$}

@@ -1,0 +1,139 @@
+\chapter{Algorithms}
+\label{cha:algorithms}
+
+The \emph{Algorithms} building block of \embb provides high-level constructs for typical parallelization tasks. They are aligned to the functions provided by the C++ Standard Library, but contain additional functionality typical for embedded systems such as task priorities. Although the algorithms can be used in a black-box way, it is good to have a basic understanding of their implementation: The algorithms split computations to be performed in parallel into tasks which are executed by the MTAPI task scheduler (cf. Chapter~\ref{cha:mtapi}). For that purpose, the tasks are stored in queues and mapped to a fixed number of worker threads at runtime. Since MTAPI allocates the necessary data structures during initialization, the maximum number of tasks in flight is fixed. In case one of the algorithms exceeds this limit, an exception is thrown. 
+
+In the following, we look at parallel function invocation (Section~\ref{sec:algorithms_invoke}), sorting (Section~\ref{sec:algorithms_sorting}), counting (Section~\ref{sec:algorithms_counting}), foreach loops (Section~\ref{sec:algorithms_foreach}), reductions (Section~\ref{sec:algorithms_reductions}), and prefix computations (Section~\ref{sec:algorithms_prefix}).
+
+\section{Function Invocation}
+\label{sec:algorithms_invoke}
+
+%In the previous section, we have considered data parallelism, that is, parallel execution of the same operation on a range of elements. Next, we consider parallel execution of several work packages encapsulated in functions.
+Let us start with the parallel execution of several work packages encapsulated in functions. Suppose that the following functions operate on different data sets, and thus are independent of each other:
+%
+\\\inputlisting{../examples/algorithms/invoke/packages-snippet.h}
+%
+The functions can be executed in parallel using the \lstinline|ParallelInvoke| construct provided by {\embb}:
+%
+\\\inputlisting{../examples/algorithms/invoke/invocation-snippet.h}
+%
+Note that \lstinline|ParallelInvoke| waits until all its arguments have finished execution.
+
+Next, let us consider a more elaborate example. The following piece of code shows a serial quick sort algorithm which we want to parallelize (do not care about the details of the \lstinline|Partition| function for the moment):
+%
+\\\inputlisting{../examples/algorithms/invoke/quick_sort-snippet.h}
+%
+A straightforward approach to parallelize this algorithm is to execute the recursive calls to \lstinline|Quicksort| in parallel. With \lstinline|ParallelInvoke| and lambdas, it is as simple as that:
+%
+\\\inputlisting{../examples/algorithms/invoke/parallel_quick_sort-snippet.h}
+%
+The lambdas capture the \lstinline|first|, \lstinline|mid|, and \lstinline|last| pointers to the range to be sorted and forward them to the recursive calls of quick sort. These are executed in parallel, where \lstinline|Invoke| does not return before both have finished execution. The above implementation of parallel quick sort is of course not yet optimal. In particular, the creation of new tasks should be stopped when a certain lower bound on the size of the subranges has been reached. The subranges can then be sorted sequentially in order to reduce the overhead for task creation and management. Fortunately, {\embb} already provides solutions for parallel sorting, which will be covered in the following section.
+
+\section{Sorting}
+\label{sec:algorithms_sorting}
+
+%As sorting is a prominent problem that can benefit from multicore processors, {\embb} provides ready-to-use algorithms for parallel sorting.
+For systems with constraints on memory consumption, the quick sort algorithm provided by \embb is usually the best choice, since it works in-place which means that it does not require additional memory. Considering real-time systems, however, its worst-case runtime of $O(N^2)$, where $N$ is the number of elements to be sorted, can be a problem. For this reason, {\embb} also provides a parallel merge sort algorithm. Merge sort does not work in-place, but has a predictable runtime complexity of $\Theta(N \log N)$. Assume we want to sort a vector of integers:
+%
+\\\inputlisting{../examples/algorithms/sorting/range_define-snippet.h}
+%
+Using quick sort, we simply write:
+%
+\\\inputlisting{../examples/algorithms/sorting/quick_sort-snippet.h}
+%
+The default invocation of \lstinline|QuickSort| uses \lstinline|std::less| with the iterators' \lstinline|value_type| as comparison operation. As a result, the range is sorted in ascending order. It is possible to provide a custom comparison operation, for example \lstinline|std::greater|, by passing it as a function object to the algorithm. Sorting the elements in descending can be accomplished as follows:
+%
+\\\inputlisting{../examples/algorithms/sorting/quick_sort_custom_compare-snippet.h}
+
+The merge sort algorithm comes in two versions. The first version automatically allocates dynamic memory for temporary values when the algorithm is called. Its name is \lstinline|MergeSortAllocate| and it has the same parameters as \lstinline|QuickSort|. To enable the use of merge sort in environments that forbid dynamic memory allocation after initialization, the second version can be called with a pre-allocated temporary range of values:
+%
+\\\inputlisting{../examples/algorithms/sorting/merge_sort_preallocated-snippet.h}
+%
+The temporary range can be allocated at any time, e.g., during the initialization phase of the system.
+
+\section{Counting}
+\label{sec:algorithms_counting}
+
+%Related to the above described summation reductions are the so-called counting operations. 
+\embb also provides functions for counting the number of elements in a range. Consider a range of integers from 0 to 3:
+%
+\\\inputlisting{../examples/algorithms/counting/setup-snippet.h}
+%
+To determine how often a specific value appears within the range, we could simply iterate over it and compare each element with the specified one. The \lstinline|Count| function does this in parallel, where the first two arguments specify the range and the third one the element to be counted:
+%have to go through each of them, perform a comparison, and count the elements that compare equal. As in the reduction, the problem here is that a global counter is involved. The counting with equal comparison can be realized using the \lstinline|Count| function as
+%
+\\\inputlisting{../examples/algorithms/counting/count-snippet.h}
+%
+For the range given above, we have \lstinline|count == 2|.
+
+In case the comparison operation is not equality, we can employ the \lstinline|CountIf| function. Here, the third argument is a unary predicate which evaluates to \lstinline|true| for each element to be counted. The following example shows how to count the number of values greater than 0:
+%
+\\\inputlisting{../examples/algorithms/counting/count_if-snippet.h}
+
+\section{Foreach Loops}
+\label{sec:algorithms_foreach}
+
+A frequently encountered task in parallel programming is to apply some operation on a range of values, as illustrated in the example of Section~\ref{sec:introduction_function_objects}. In principle, one could apply the operation to all elements in parallel provided that there are no data dependencies. However, this results in unnecessary overhead if the number of elements is greater than the number of available processor cores $p$. A better solution is to partition the range into $p$ blocks and to process the elements of a block sequentially. With the \lstinline|ForEach| construct provided by \embb, users do not have to care about the partitioning, since this is done automatically. Similar to the Standard Library's \lstinline|for_each| function, it is sufficient to pass the operation in form of a function object. The following piece of code shows how to implement the example of Section~\ref{sec:introduction_function_objects} using \embb:
+%
+\\\inputlisting{../examples/algorithms/for_each/doubling-snippet.h}
+
+In the above code snippet, the results of the computation overwrite the input. If the input has to be left unchanged, the results must be written to a separate output range. Thus, the operation requires two ranges. {\embb} supports such scenarios by the \lstinline|ZipIterator|, which wraps two iterators into one. Consider the following revised example for doubling the elements of a vector:
+%
+\\\inputlisting{../examples/algorithms/for_each/setup_zip-snippet.h}
+%
+Using the \lstinline|Zip| function as convenient way to create a zip iterator, the doubling can be performed as follows:
+%
+\\\inputlisting{../examples/algorithms/for_each/doubling_zip-snippet.h}
+%
+The argument to the lambda function is a \lstinline|ZipPair| with the iterators' reference value as template parameters. The elements pointed to by the zip iterator can be accessed via \lstinline|First()| and \lstinline|Second()|, similar to \lstinline|std::pair|.
+
+\section{Reductions}
+\label{sec:algorithms_reductions}
+
+As mentioned in the previous section, the \lstinline|ForEach| construct requires the loop iterations do be independent of each other. However, this is not always the case. Imagine we want to sum up the values of a range, e.g., a vector of integers:
+%
+\\\inputlisting{../examples/algorithms/reduce/range_init-snippet.h}
+%
+Sequentially, this can be done by a simple loop:
+%
+\\\inputlisting{../examples/algorithms/reduce/sequential-snippet.h}
+%
+One might be tempted to sum up the elements in parallel using a foreach loop. The problem is that parallel accesses to \lstinline|sum| must be synchronized to avoid race conditions, which in fact sequentializes the loop. A more efficient approach is to compute intermediate sums for each block of the range and to sum them up at the end. For such purposes, {\embb} provides the function \lstinline|Reduce|:
+%
+\\\inputlisting{../examples/algorithms/reduce/parallel-snippet.h}
+%
+The third argument to \lstinline|Reduce| is the neutral element of the reduction operation, i.e., the element that does not change the result. In case of addition (\lstinline|std::plus|), the neutral element is 0. If we wanted to compute the product of the vector elements, the neutral element would be 1.
+
+Next, let us consider the parallel computation of a dot product. Given two input ranges, we want to multiply each pair of input elements and sum up the products. The second input range is given as follows:
+%
+\\\inputlisting{../examples/algorithms/reduce/second_range_init-snippet.h}
+%
+The reduction consists of two steps: First, the input ranges are transformed and then, the reduction is performed on the transformed range. For that purpose, the \lstinline|Reduce| function allows to specify a transformation function object. By default, this is the identity functor which does not modify the input range. To implement the dot product, we can use the \lstinline|Zip| function (see Section~\ref{sec:algorithms_foreach}) and a lambda function for computing the transformed range:
+%
+\\\inputlisting{../examples/algorithms/reduce/dot_product-snippet.h}
+
+\section{Prefix Computations}
+\label{sec:algorithms_prefix}
+
+Prefix computations (or scans) can be viewed as a generalization of reductions. They transform an input range $x_i \in X$ into an output range $y_i \in Y$ with $i=1,...,n$ such that
+\begin{eqnarray*}
+y_0 &=& id \cdot x_0 \\
+y_1 &=& y_0 \cdot x_1 \\
+&\vdots& \\
+y_i &=& y_{i-1} \cdot x_i \\
+&\vdots& \\
+y_n &=& y_{n-1} \cdot x_n
+\end{eqnarray*}
+where $id$ is the identity (neutral element) with respect to the operation $(\cdot): X \times X \rightarrow Y$. As an example, consider the following range:
+%
+\\\inputlisting{../examples/algorithms/scan/setup-snippet.h}
+%
+Computing the prefix sums of \lstinline|input_range| sequentially is easy:
+%
+\\\inputlisting{../examples/algorithms/scan/sequential_prefix_sum-snippet.h}
+%
+Note the dependency on loop iteration $i-1$ to compute the result in iteration $i$. A special two-pass algorithm is used in the {\embb} function \lstinline|Scan| to perform prefix computations in parallel. Using \lstinline|Scan| to compute the prefix sums, we get:
+%
+\\\inputlisting{../examples/algorithms/scan/prefix_sum-snippet.h}
+%
+As in the case of reductions, the neutral element has to be given explicitly. Also, a transformation function can be passed as additional argument to \lstinline|Scan|. The elements of the input range are then transformed before given to the prefix operation.

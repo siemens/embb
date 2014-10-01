@@ -1,0 +1,327 @@
+% Copyright (C) nemadesign GbR
+% $Rev: 56 $:     
+% $Date: 2014-09-02 21:55:06 +0200 (Di, 02. Sep 2014) $:    
+
+% definitions for single column style sheet
+
+\usepackage{sty/siemens_core}
+
+\usepackage{geometry}
+\geometry
+{
+ left=2.3cm,   %linker Seitenrand
+ right=2.3cm,  %rechter Seitenrand
+ top=25mm,     %oben der Abstand
+ bottom=32mm   %Unten der Abstand
+}
+% gap between columns
+\setlength{\columnsep}{12mm}
+
+% gap between paragraphs
+\setlength{\parskip}{1ex}
+
+\renewcommand\section{\@startsection
+  {section}{1}{0mm}	  % name, ebene, einzug
+  {1.3\baselineskip}  % vor-abstand
+  {0.1\baselineskip}  % nach-abstand
+  {\bfseries\sffamily\fontsize{13pt}{1.0}\color{orange}} % layout
+}
+
+\renewcommand\subsection{\@startsection
+  {subsection}{2}{0mm}
+  {0.8\baselineskip}
+  {0.1\baselineskip}
+  {\bfseries\sffamily\fontsize{13pt}{1.0}\color{grey1}}
+}
+
+\newcommand\sectionnonum{\@startsection
+  {section}{1}{0mm}
+  {1.3\baselineskip}
+  {0.1\baselineskip}
+  {\normalfont\fontsize{13pt}{1.0}\bfseries\color{orange}}*}
+
+\newcommand\subsectionnonum{\@startsection
+  {subsection}{2}{0mm}
+  {0.8\baselineskip}
+  {0.01\baselineskip}
+  {\bfseries\sffamily\fontsize{13pt}{1.0}\color{grey1}}*}
+
+% TOC without indents
+% add space before TOC
+\addtocontents{toc}{\protect\vspace{100pt}}
+\renewcommand*{\@dotsep}{0.5}
+\renewcommand*\l@chapter{\bfseries\bprot@dottedtocline{1}{0em}{3.0em}}
+\renewcommand*\l@section{\mdseries\bprot@dottedtocline{2}{0em}{3.0em}}
+\renewcommand*\l@subsection{\mdseries\bprot@dottedtocline{3}{0em}{3.0em}}
+\renewcommand*\l@subsubsection{\mdseries\bprot@dottedtocline{4}{0em}{3.0em}}
+
+\def\chapterpictopnum#1#2#3#4{
+  \cleardoublepage
+  \begin{minipage}[t]{\textwidth}
+    \picgap
+    \includegraphics[width=#3\textwidth]{#2}
+  \end{minipage}
+  \begin{minipage}[t]{\textwidth}
+    \vspace{0pt}\raggedright
+    \chapter{#1}\label{#4}
+  \end{minipage}
+}
+
+\def\chapterpictopnonum#1#2#3#4{
+  \cleardoublepage
+  \begin{minipage}[t]{\textwidth}
+    \picgap
+    \includegraphics[width=#3\textwidth]{#2}
+  \end{minipage}
+  \begin{minipage}[t]{\textwidth}
+    \vspace{0pt}\raggedright
+    \chapter*{#1}\label{#4}
+  \end{minipage}
+}
+
+\def\chapterpicrightnum#1#2#3#4{
+  \cleardoublepage
+  \begin{minipage}[t]{#3\textwidth}
+    \vspace{0pt}\raggedright
+    \chapter{#1}\label{#4}
+  \end{minipage}
+  \hspace{0.04\textwidth}
+  \FPsub{\bla}{0.95}{#3}
+  \begin{minipage}[t]{\bla\textwidth}
+    \picgap
+    \includegraphics[width=\textwidth]{#2}
+  \end{minipage}
+  \vspace{2em}
+
+}
+
+\def\chapterpicrightnonum#1#2#3#4{
+  \cleardoublepage
+  \begin{minipage}[t]{#3\textwidth}
+    \vspace{0pt}\raggedright
+    \chapter*{#1}\label{#4}
+  \end{minipage}
+  \hspace{0.04\textwidth}
+  \FPsub{\bla}{0.95}{#3}
+  \begin{minipage}[t]{\bla\textwidth}
+    \picgap
+    \includegraphics[width=\textwidth]{#2}
+  \end{minipage}
+  \vspace{2em}
+
+}
+
+\newcolumntype{a}[1]{>{\LARGE\raggedright\color{white}\columncolor{grey1}}p{#1}} 
+\newcolumntype{b}[1]{>{\columncolor{white}}p{#1}} 
+%\renewcommand*{\arraystretch}{0.0}
+%\setlength{\arrayrulewidth}{0pt}
+\arrayrulecolor{grey1}
+\def\chapterpicteasernum#1#2#3#4#5{
+  \cleardoublepage
+  \setlength{\tabcolsep}{0mm}
+
+  \begin{minipage}[t]{\textwidth}
+    \vspace{0pt}\raggedright
+    \chapter{#1}\label{#4}
+    \end{minipage}
+  \begin{table}[ht]
+  \FPsub{\blah}{0.96}{#3}
+  \FPsub{\blub}{#3}{0.1}
+  \begin{tabular}[m]{b{\blah\textwidth} b{.05\textwidth} a{20pt} a{\blub\textwidth} a{19pt} }
+    \raisebox{-.92\totalheight}{\includegraphics[width=\blah\textwidth]{#2}} & & & #5 & \\ 
+  \end{tabular}
+\end{table}
+\setlength{\tabcolsep}{6pt}
+
+}
+
+\def\chapterpicteasernonum#1#2#3#4#5{
+  \cleardoublepage
+  \setlength{\tabcolsep}{0mm}
+
+  \begin{minipage}[t]{\textwidth}
+    \vspace{0pt}\raggedright
+    \chapter*{#1}\label{#4}
+    \end{minipage}
+  \begin{table}[ht]
+  \FPsub{\blah}{0.96}{#3}
+  \FPsub{\blub}{#3}{0.1}
+  \begin{tabular}[m]{b{\blah\textwidth} b{.05\textwidth} a{20pt} a{\blub\textwidth} a{19pt} }
+    \raisebox{-.92\totalheight}{\includegraphics[width=\blah\textwidth]{#2}} & & & #5 & \\ 
+  \end{tabular}
+\end{table}
+\setlength{\tabcolsep}{6pt}
+
+}
+
+\def\gentitlepagenopic#1#2{
+\fboxrule 0.0pt
+\begin{titlepage}
+\phantom{Die Titelseite}
+\lefoot{\copyright \; Siemens AG \the\year. All rights reserved.}
+% Siemens Logo 4cm width, 1.5cm from left corner
+\AddToShipoutPictureFG*{
+  \AtPageUpperLeft{%
+    \put(1.3cm,0cm){%
+      \makebox(0,0)[lt]{\includegraphics[width=4cm]{pics/cover/sie_logo_layer_petrol_rgb2.png}}%
+    }%
+  }%
+}
+% Siemens Logo 4cm width, 1.5cm from left corner
+\AddToShipoutPictureFG*{
+  \AtPageLowerLeft{%
+    \put(1.3cm,3cm){%
+      \makebox(0,0)[lt]{\includegraphics[width=3cm]{pics/cover/logo_multicore_expert-center_siemens.png}}%
+    }%
+  }%
+}
+\begin{textblock}{4}[0.0,0.0](1,0)
+  \vspace{\paperwidth}
+  \vspace{-1.2cm}
+  \fcolorbox{black}{grey2}{
+     \begin{minipage}[c][1cm]{\paperwidth}
+        \hspace{0.8cm}
+        \fontsize{16}{20}\selectfont
+        \textcolor{white}{#1}
+     \end{minipage}
+  }
+\end{textblock}
+\begin{textblock}{4}[0.0,0.0](1,0)
+  \vspace{\paperwidth}
+  \vspace{-0.2cm}
+  \fcolorbox{black}{grey1}{
+     \begin{minipage}[c][4cm]{\paperwidth}
+        \textcolor{white}{}
+     \end{minipage}
+  }
+\end{textblock}
+\begin{textblock}{4}[0.0,0.0](1,0)
+  \vspace{\paperwidth}
+  \vspace{-0.2cm}
+     \hspace{0.8cm}
+     \begin{minipage}[c][4cm]{0.8\paperwidth}
+        \fontsize{36}{44}\selectfont
+        \textcolor{white}{#2}
+     \end{minipage}
+\end{textblock}
+\end{titlepage}
+\ClearShipoutPicture
+}
+
+\def\gentitlepage#1#2#3{
+\fboxrule 0.0pt
+\begin{titlepage}
+\phantom{Die Titelseite}
+\lefoot{\copyright \; Siemens AG \the\year. All rights reserved.}
+\AddToShipoutPictureBG{
+  \AtPageUpperLeft{\raisebox{-\height}
+    {\includegraphics[width=\paperwidth]{#1}}}
+}
+% Siemens Logo 4cm width, 1.5cm from left corner
+\AddToShipoutPictureFG*{
+  \AtPageUpperLeft{%
+    \put(1.3cm,0cm){%
+      \makebox(0,0)[lt]{\includegraphics[width=4cm]{pics/cover/sie_logo_layer_petrol_rgb.png}}%
+    }%
+  }%
+}
+% Siemens Logo 4cm width, 1.5cm from left corner
+\AddToShipoutPictureFG*{
+  \AtPageLowerLeft{%
+    \put(1.3cm,3cm){%
+      \makebox(0,0)[lt]{\includegraphics[width=3cm]{pics/cover/logo_multicore_expert-center_siemens.png}}%
+    }%
+  }%
+}
+\begin{textblock}{4}[0.0,0.0](1,0)
+  \vspace{\paperwidth}
+  \vspace{-1.2cm}
+  \fcolorbox{black}{grey2}{
+     \begin{minipage}[c][1cm]{\paperwidth}
+        \hspace{0.8cm}
+        \fontsize{16}{20}\selectfont
+        \textcolor{white}{#2}
+     \end{minipage}
+  }
+\end{textblock}
+\begin{textblock}{4}[0.0,0.0](1,0)
+  \vspace{\paperwidth}
+  \vspace{-0.2cm}
+  \fcolorbox{black}{grey1}{
+     \begin{minipage}[c][4cm]{\paperwidth}
+        \textcolor{white}{}
+     \end{minipage}
+  }
+\end{textblock}
+\begin{textblock}{4}[0.0,0.0](1,0)
+  \vspace{\paperwidth}
+  \vspace{-0.2cm}
+     \hspace{0.8cm}
+     \begin{minipage}[c][4cm]{0.8\paperwidth}
+        \fontsize{36}{44}\selectfont
+        \textcolor{white}{#3}
+     \end{minipage}
+\end{textblock}
+\end{titlepage}
+\ClearShipoutPicture
+}
+
+\def\genbackpage#1{
+\pagebreak
+\cleardoubleevenemptypage
+\thispagestyle{empty}
+\renewcommand{\baselinestretch}{1.1}\normalsize
+\begin{textblock}{4}[0.0,0.0](0,0)
+  \fcolorbox{black}{grey1}{
+     \begin{minipage}[c][0.9\paperwidth]{\paperwidth}
+        \textcolor{white}{}
+     \end{minipage}
+  }
+\end{textblock}
+\begin{textblock}{4}[0.0,0.0](0,0)
+    \vspace{0.38\paperheight}
+    \hspace{1.8cm}
+     \begin{minipage}[t][\paperwidth]{\paperwidth}
+        \textcolor{white}{#1}
+     \end{minipage}
+\end{textblock}
+\begin{textblock}{4}[0.0,0.0](0,0)
+  \vspace{\paperwidth}
+  \vspace{-4.0cm}
+     \begin{minipage}[c][1cm]{\paperwidth}
+        \hspace{1.8cm}
+        \textcolor{black}{Printed in Germany\;|\;\copyright\;\copyrightdate \;Siemens AG}
+     \end{minipage}
+\end{textblock}
+}
+
+\def\tableofcontentspic#1#2#3{
+  \cleardoublepage
+  \onecolumn
+  \begin{minipage}[t]{\textwidth}
+    \begin{minipage}[t]{#3\textwidth}
+      \vspace{0pt}\raggedright
+      \chapter*{#1}
+    \end{minipage}
+    \hspace{0.04\textwidth}
+    \FPsub{\bla}{0.95}{#3}
+    \begin{minipage}[t]{\bla\textwidth}
+      \picgap
+      \includegraphics[width=\textwidth]{#2}
+    \end{minipage}
+  \end{minipage}
+
+
+\tableofcontents
+}
+
+\def\genlistoffigures#1{
+  \cleardoublepage
+  \onecolumn{
+    \chapter*{#1}
+    \vspace{1.5cm}
+    \begin{addmargin}[0cm]{0cm}
+        \listoffigures
+   \end{addmargin}
+  }
+}

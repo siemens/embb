@@ -1,0 +1,192 @@
+\chapter{MTAPI}
+\label{cha:mtapi}
+
+Leveraging the power of multicore processors requires to split computations into fine-grained tasks that can be executed in parallel. Threads are usually too heavy-weight for that purpose, since context switches consume a significant amount of time. Moreover, programming with threads is complex and error-prone due to typical pitfalls such as race conditions and deadlocks. To solve these problems, efficient task scheduling techniques have been developed which dynamically distribute the available tasks among a fixed number of worker threads. To reduce overhead, there is usually exactly one worker thread for each processor core.
+
+While task schedulers are nowadays widely employed, especially in desktop and server applications, they are typically limited to a single operating system running on a homogeneous multicore processor. System-wide task management in heterogeneous embedded systems must be realized explicitly with low-level communication mechanisms. MTAPI~\cite{MTAPI} addresses those issues by providing an API which allows parallel embedded software to be designed in a straightforward way, covering homogeneous and heterogeneous multicore architectures, as well as acceleration units. It abstracts from the hardware details and lets software developers focus on the application. Moreover, MTAPI takes into account typical requirements of embedded systems such as real-time constraints and predictable memory consumption.
+
+The remainder of this chapter is structured as follows: The next section explains the basic terms and concepts of MTAPI as given in the specification~\cite{MTAPI}. Section~\ref{sec:mtapi_c_interface} describes the C API using a simple example taken from~\cite{MTAPI}. Finally, Section~\ref{sec:mtapi_cpp_interface} outlines the use of MTAPI in C++ applications. Note that the C++ interface is provided by \embb for convenience but it is not part of the standard.
+
+\section{Foundations}
+
+\subsection{Domains}
+
+An MTAPI system is composed of one or more MTAPI domains. An MTAPI domain is a unique system global entity. Each MTAPI domain comprises a set of MTAPI nodes. An MTAPI node may only belong to one MTAPI domain, while an MTAPI domain may contain one or more MTAPI nodes. This allows the programmer to use MTAPI domains as namespaces for all kinds of IDs (e.g., nodes, actions, queues, etc.).
+
+\subsection{Nodes}
+
+An MTAPI node is an independent unit of execution, such as a process, thread, thread pool, processor, hardware accelerator, or instance of an operating system. A given MTAPI implementation specifies what constitutes a node for that implementation.
+
+The intent is to avoid a mixture of node definitions in the same implementation (or in different domains within an implementation). If a node is defined as a unit of execution with its private address space (like a process), then a core with a single unprotected address space OS is equivalent to a node, whereas a core with a virtual memory OS can host multiple nodes.
+
+On a shared memory SMP processor, a node can be defined as a subset of cores. A quad-core processor, for example, could be divided into two nodes, one node representing three cores and one node representing the fourth core reserved exclusively for certain tasks. The definition of a node is flexible because this allows applications to be written in the most portable fashion supported by the underlying hardware, while at the same time supporting more general-purpose multicore and many-core devices.
+
+The definition allows portability of software at the interface level (e.g., the functional interface between nodes). However, the software implementation of a particular node cannot (and often should not) necessarily be preserved across a multicore SoC product line (or across product lines from different silicon providers) because a given node's functionality may be provided in different ways, depending on the chosen multicore SoC.
+
+\subsection{Tasks}
+
+A task represents the computation associated with the data to be processed. A task is executed concurrently to the code starting the task. The main API functions are \lstinline|mtapi_task_start()| and \lstinline|mtapi_task_wait()|. The semantics are similar to the corresponding thread functions (e.g. \lstinline|pthread_create|$/$\lstinline|pthread_join| in Pthreads). The lifetime of a task is limited; it can be started only once.
+
+\subsection{Actions}
+
+In order to cope with heterogeneous systems and computations implemented in hardware, a task is not directly associated with an entry function as it is done in other task-parallel APIs. Instead, it is associated with at least one action object representing the calculation. The association is indirect: one or more actions implement a job, one job is associated with a task. If the action is implemented in software, this is either a function on the same node (which can represent the same processor or core) or a function implemented on a different node that does not share memory with the core starting the task.
+
+Starting a task consists of three steps:
+\begin{enumerate}
+  \item Create the action object with a job ID (software-implemented actions only).
+  \item Obtain a job reference.
+  \item Start the task using the job reference.
+\end{enumerate}
+
+\subsection{Synchronization}
+
+The basic synchronization mechanism provided with in MTAPI is waiting for task completion. Calling \lstinline|mtapi_task_wait()| with a task handle blocks the current thread or task until the task referenced by the handle has completed. Depending on the implementation, the calling thread can be used for executing other tasks while waiting for the task to be completed. In order to synchronize with a set of tasks, every task can be associated with a task group. The methods \lstinline|mtapi_group_wait_all()| and \lstinline|mtapi_group_wait_any()| wait for a group of tasks or completion of any task in the group, respectively.
+%MTAPI only provides synchronization on task granularity. Synchronization inside a task implementation can be done by MCAPI messages, MRAPI synchronization primitives, and the MRAPI memory primitives. If MCAPI or MRAPI implementations are not available, synchronization mechanisms provided by the operating system or a threading library must be used. In this case, the MTAPI implementation must define the consequences of using those mechanisms in the task context.
+
+\subsection{Queues}
+
+Queues are used for guaranteeing sequential order of execution of tasks. A common use case is packet processing in the communication domain: for every connection all packets must be processed sequentially, while the packets of different connections can be processed in parallel to each other.
+
+Sequential execution is accomplished by using a queue for every connection and queuing all packets of one connection into the same queue. In some systems, queues are implemented in hardware, otherwise MTAPI implements software queues. MTAPI is designed for handling thousands of queues that are processed in parallel.
+
+The procedure for setting up and using a queue is as follows:
+\begin{enumerate}
+  \item Create the action object (software-implemented actions only).
+  \item Obtain a job reference.
+  \item Create a queue object and attach the job to the queue (software-implemented queues only).
+  \item Obtain a queue handle if the queue was created on a different node, or if the queue is hardware-implemented.
+  \item Use the queue: enqueue the work using the queue.
+\end{enumerate}
+Another important purpose of queues is that different queues can express different scheduling attributes for the same job. For example, in contrast to order-preserving queues, non-order-preserving queues can be used for load-balancing purposes between different computation nodes. In this case, the queue must be associated with more than one action implementing the same task on different nodes (i.e., different processors or cores implementing different instruction set architectures). If a queue is configured this way, the order will not be preserved.
+
+\subsection{Attributes}
+
+Attributes are provided as a means to extend the API. Different implementations may define and support additional attributes beyond those predefined by the API. To promote portability and implementation flexibility, attributes are maintained in an opaque data object that may not be directly examined by the user. Each object (e.g., task, action, queue) has an attributes data object associated with it, and many attributes have a small set of predefined values that must be supported by MTAPI implementations. The user may initialize, get, and set these attributes. For default behavior, it is not necessary to call the initialize, get, and set attribute functions. However, to get non-default behavior, the typical four-step process is:
+\begin{enumerate}
+  \item Declare an attributes object of the \lstinline|mtapi_<object>_attributes_t| data type.
+  \item \lstinline|mtapi_<object>attr_init()|: Returns an attributes object with all attributes set to their default values.
+  \item \lstinline|mtapi_<object>attr_set()|: (Repeat for all attributes to be set). Assigns a value to the specified attribute of the specified attributes object.
+  \item \lstinline|mtapi_<object>_create()|: Passes the attributes object modified in the previous step as a parameter when creating the object.
+\end{enumerate}
+At any time, the user can call \lstinline|mtapi_<object>_get_attribute()| to query the value of an attribute. After an object has been created, some objects allow to change attributes by calling \lstinline|mtapi_<object>_set_attribute()|.
+
+\section{C Interface}
+\label{sec:mtapi_c_interface}
+
+The calculation of Fibonacci numbers is a simple example for a recursive algorithm that can easily be parallelized. Listing~\ref{lst:mtapi_fibonacci_sequential} shows a sequential version.
+
+\begin{lstlisting}[frame=none,caption={Sequential program for computing Fibonacci numbers},label={lst:mtapi_fibonacci_sequential}]
+int fib(int n) {
+  int x,y;
+  if (n < 2) {
+    return n;
+  } else {
+    x = fib(n - 1);
+    y = fib(n - 2);
+    return x + y;
+  }
+}
+
+int fibonacci(int n) {
+  return fib(n);
+}
+
+void main(void) {
+  int n = 6;
+  int result = fibonacci(n);
+  printf("fib(%i) = %i\n", n, result);
+}
+\end{lstlisting}
+
+This algorithm can be parallelized by spawning a task for one of the recursive calls (\lstinline|fib(n - 1)|, for example). When doing this with MTAPI, an action function that represents \lstinline|fib(int n)| is needed. It has the following signature: 
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_action_signature-snippet.h}
+%
+Within the action function, the arguments should be checked, since the user might supply a buffer that is too small:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_validate_arguments-snippet.h}
+%
+Here, \lstinline|mtapi_context_status_set()| is used to report errors. The error code will be returned by \lstinline|mtapi_task_wait()|. Also, care has to be taken when using the result buffer. The user might not want to use the result and supply a NULL pointer or accidentally a buffer that is too small:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_validate_result_buffer-snippet.h}
+%
+At this point, calculation of the result can commence. First, the terminating condition of the recursion is checked:
+%
+\\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
+%
+After that, the first part of the computation is launched as a task using \lstinline|mtapi_task_start()| (the action function is registered with the job \lstinline|FIBONACCI_JOB| in the \lstinline|fibonacci()| function and the resulting handle is stored in the global variable \lstinline|mtapi_job_hndl_t fibonacciJob|):
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_calc_task-snippet.h}
+%
+The second part can be executed directly:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_calc_direct-snippet.h}
+%
+Then, completion of the MTAPI task has to be waited for by calling \lstinline|mtapi_task_wait()|:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_wait_task-snippet.h}
+%
+Finally, the results can be added and written into the result buffer:
+%
+\\\inputlisting{../examples/mtapi/mtapi_write_back-snippet.h}
+% 
+
+The \lstinline|fibonacci()| function gets a bit more complicated now. The MTAPI runtime has to be initialized first by (optionally) initializing node attributes and then calling \lstinline|mtapi_initialize()|:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_initialize-snippet.h}
+%
+Then, the action function needs to be associated to a job. By calling \lstinline|mtapi_action_create()|, the action function is registered with the job \lstinline|FIBONACCI_JOB|. The job handle of this job is stored in the global variable \lstinline|mtapi_job_hndl_t fibonacciJob| so that it can be accessed by the action function later on:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_register_action-snippet.h}
+%
+Now that the action is registered with a job, the root task can be started with \lstinline|mtapi_task_start()|:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_start_task-snippet.h}
+%
+%The started task has to be waited for before the result can be returned.
+After everything is done, the action is deleted (\lstinline|mtapi_action_delete()|) and the runtime is shut down (\lstinline|mtapi_finalize()|):
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_finalize-snippet.h}
+%
+
+\section{C++ Interface}
+\label{sec:mtapi_cpp_interface}
+
+\embb provides C++ wrappers for the MTAPI C interface. Using the example from the previous section, the signature of the action function for the C++ interface looks like this:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_action_signature-snippet.h}
+%
+First, the node instance needs to be obtained. If the node is not initialized yet, this function will do it.
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
+%
+Checking the arguments and the result buffer is not necessary, since everything is safely typed. However, the terminating condition of the recursion still needs to be checked:
+%
+\\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
+%
+After that, the first part of the computation is launched as an MTAPI task using \lstinline|embb::mtapi::Node::Spawn()| (registering an action function with a job is done automatically):
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_task-snippet.h}
+%
+The second part can be executed directly:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_direct-snippet.h}
+%
+Then, completion of the MTAPI task has to be waited for using \lstinline|embb::mtapi::Task::Wait()|:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_wait_task-snippet.h}
+%
+Finally, the two parts can be added and written into the result buffer:
+%
+\\\inputlisting{../examples/mtapi/mtapi_write_back-snippet.h}
+% 
+
+The \lstinline|fibonacci()| function also gets simpler compared to the C version. The MTAPI runtime is initialized automatically, only the node instance has to be fetched:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
+%
+The root task can be started using \lstinline|embb::mtapi::Node::Spawn()| directly, registering with a job is done automatically:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
+%
+Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task::Wait()|) before the result can be returned. The runtime is shut down automatically in an \lstinline|atexit()| handler.

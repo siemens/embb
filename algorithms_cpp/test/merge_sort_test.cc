@@ -1,0 +1,238 @@
+/*
+ * Copyright (c) 2014, Siemens AG. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <merge_sort_test.h>
+#include <embb/algorithms/merge_sort.h>
+#include <embb/algorithms/execution_policy.h>
+#include <vector>
+#include <deque>
+#include <sstream>
+#include <algorithm>
+#include <functional>
+
+static bool DescendingComparisonFunction(double lhs, double rhs) {
+  return lhs < rhs ? true : false;
+}
+
+MergeSortTest::MergeSortTest() {
+  CreateUnit("Different data structures")
+    .Add(&MergeSortTest::TestDataStructures, this);
+  CreateUnit("Function Pointers").Add(&MergeSortTest::TestFunctionPointers,
+      this);
+  CreateUnit("Ranges").Add(&MergeSortTest::TestRanges, this);
+  //CreateUnit("Block sizes").Add(&MergeSortTest::TestBlockSizes, this);
+  CreateUnit("Policies").Add(&MergeSortTest::TestPolicy, this);
+  CreateUnit("Stress test").Add(&MergeSortTest::StressTest, this);
+}
+
+void MergeSortTest::TestDataStructures() {
+  using embb::algorithms::MergeSortAllocate;
+  using embb::algorithms::ExecutionPolicy;
+  int array[kCountSize];
+  std::vector<int> vector(kCountSize);
+  std::deque<int> deque(kCountSize);
+  for (size_t i = 0; i < kCountSize; i++) {
+    array[i] = static_cast<int>(i+2);
+    vector[i] = static_cast<int>(i+2);
+    deque[i] = static_cast<int>(i+2);
+  }
+  std::vector<int> vector_copy(vector);
+  std::sort(vector_copy.begin(), vector_copy.end());
+  MergeSortAllocate(array, array + kCountSize);
+  MergeSortAllocate(vector.begin(), vector.end());
+  MergeSortAllocate(array, array + kCountSize, std::less<int>(),
+    ExecutionPolicy(), 0);
+  MergeSortAllocate(deque.begin(), deque.end());
+  for (size_t i = 0; i < kCountSize; i++) {
+    PT_EXPECT_EQ(vector_copy[i], array[i]);
+    PT_EXPECT_EQ(vector_copy[i], vector[i]);
+    PT_EXPECT_EQ(vector_copy[i], deque[i]);
+  }
+}
+
+void MergeSortTest::TestFunctionPointers() {
+  using embb::algorithms::MergeSortAllocate;
+  using embb::algorithms::ExecutionPolicy;
+
+  std::vector<int> vector(kCountSize);
+  for (size_t i = kCountSize - 1; i > 0; i--) {
+    vector[i] = static_cast<int>(i + 2);
+  }
+  std::vector<int> vector_copy(vector);
+  std::sort(vector_copy.begin(), vector_copy.end(),
+            &DescendingComparisonFunction);
+  MergeSortAllocate(vector.begin(), vector.end(),
+    &DescendingComparisonFunction);
+  for (size_t i = 0; i < kCountSize; i++) {
+    PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+}
+
+void MergeSortTest::TestRanges() {
+  using embb::algorithms::MergeSortAllocate;
+  size_t count = 4;
+  std::vector<int> init(count);
+  std::vector<int> vector(count);
+  std::vector<int> vector_copy(count);
+  for (size_t i = count - 1; i > 0; i--) {
+    init[i] = static_cast<int>(i+2);
+  }
+
+  // Ommit first element
+  vector = init;
+  vector_copy = init;
+  std::sort(vector_copy.begin() + 1, vector_copy.end());
+  MergeSortAllocate(vector.begin() + 1, vector.end());
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  // Ommit last element
+  vector = init;
+  vector_copy = init;
+  std::sort(vector_copy.begin(), vector_copy.end() - 1);
+  MergeSortAllocate(vector.begin(), vector.end() - 1);
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  // Ommit first and last element
+  vector = init;
+  vector_copy = init;
+  std::sort(vector_copy.begin() + 1, vector_copy.end() - 1);
+  MergeSortAllocate(vector.begin() + 1, vector.end() - 1);
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  // Only do first two elements
+  vector = init;
+  vector_copy = init;
+  std::sort(vector_copy.begin(), vector_copy.begin() + 2);
+  MergeSortAllocate(vector.begin(), vector.begin() + 2);
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  // Only do last two elements
+  vector = init;
+  vector_copy = init;
+  std::sort(vector_copy.end() - 2, vector_copy.end());
+  MergeSortAllocate(vector.end() - 2, vector.end());
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  // Only do second & third elements
+  vector = init;
+  vector_copy = init;
+  std::sort(vector_copy.begin() + 1, vector_copy.begin() + 3);
+  MergeSortAllocate(vector.begin() + 1, vector.begin() + 3);
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+}
+
+//void MergeSortTest::TestBlockSizes() {
+//  using embb::algorithms::MergeSortAllocate;
+//  using embb::algorithms::ExecutionPolicy;
+//  size_t count = 4;
+//  std::vector<int> init(count);
+//  std::vector<int> vector(count);
+//  std::vector<int> vector_copy(count);
+//  for (size_t i = count - 1; i > 0; i--) {
+//    init[i] = static_cast<int>(i+2);
+//  }
+//  vector_copy = init;
+//  std::sort(vector_copy.begin(), vector_copy.end());
+//
+//  for (size_t block_size = 1; block_size < count + 2; block_size++) {
+//    vector = init;
+//    MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
+//      ExecutionPolicy(), block_size);
+//    for (size_t i = 0; i < count; i++) {
+//      PT_EXPECT_EQ(vector[i], vector_copy[i]);
+//    }
+//  }
+//}
+
+void MergeSortTest::TestPolicy() {
+  using embb::algorithms::MergeSortAllocate;
+  using embb::algorithms::ExecutionPolicy;
+  size_t count = 4;
+  std::vector<int> init(count);
+  std::vector<int> vector(count);
+  std::vector<int> vector_copy(count);
+  for (size_t i = count - 1; i > 0; i--) {
+    init[i] = static_cast<int>(i+2);
+  }
+  vector = init;
+  vector_copy = init;
+  std::sort(vector_copy.begin(), vector_copy.end());
+
+  MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
+                    ExecutionPolicy());
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  vector = init;
+  MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
+            ExecutionPolicy(true));
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  vector = init;
+  MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
+            ExecutionPolicy(false));
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  vector = init;
+  MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
+            ExecutionPolicy(true, 1));
+  for (size_t i = 0; i < count; i++) {
+     PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+}
+
+void MergeSortTest::StressTest() {
+  using embb::algorithms::MergeSortAllocate;
+  size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() * 10;
+  std::vector<int> large_vector(count);
+  std::vector<int> vector_copy(count);
+  for (size_t i = count - 1; i > 0; i--) {
+    large_vector[i] = static_cast<int>((i + 2) % 1000);
+  }
+  vector_copy = large_vector;
+  std::sort(vector_copy.begin(), vector_copy.end());
+  MergeSortAllocate(large_vector.begin(), large_vector.end());
+  for (size_t i = 0; i < count; i++) {
+    PT_EXPECT_EQ(large_vector[i], vector_copy[i]);
+  }
+}
