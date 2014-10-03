@@ -94,12 +94,22 @@ void embb_core_set_init(embb_core_set_t* core_set, int initializer) {
 #ifdef EMBB_HAS_HEADER_SYSINFO
 #include <sys/sysinfo.h>
 #endif
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
 
 unsigned int embb_core_count_available() {
 #ifdef EMBB_HAS_HEADER_SYSINFO
   return get_nprocs();
+#elif defined __FreeBSD__
+  const size_t bs = sizeof(unsigned int);
+  char buf[bs];
+  size_t len = bs;
+  sysctlbyname("hw.ncpu", buf, &len, NULL, 0);
+  return *(unsigned int*)&buf;
 #else
-#error "No header sysinfo available!"
+#error "No implementation for embb_core_count_available()!"
 #endif
 }
 
