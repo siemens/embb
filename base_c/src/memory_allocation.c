@@ -28,7 +28,7 @@
 #include <embb/base/c/internal/config.h>
 #include <embb/base/c/atomic.h>
 #include <embb/base/c/internal/unused.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #ifdef EMBB_DEBUG
