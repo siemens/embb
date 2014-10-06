@@ -33,7 +33,7 @@ function(SetInstallPaths)
     # Default install path is in build directory.
     if (DEFINED UNIX)
       set(CMAKE_INSTALL_PREFIX "/usr/local")
-      set(INSTALL_PREFIX_DOCS "/usr/local/share/doc/${CMAKE_PROJECT_NAME}-${EMBB_BASE_VERSION_MAJOR}.${EMBB_BASE_VERSION_MINOR}")
+      set(INSTALL_PREFIX_DOCS "/usr/local/share/doc/${CMAKE_PROJECT_NAME}-${EMBB_BASE_VERSION_MAJOR}.${EMBB_BASE_VERSION_MINOR}.${EMBB_BASE_VERSION_PATCH}")
     else()
       file(TO_CMAKE_PATH "$ENV{ProgramFiles}" _PROG_FILES) # 32-bit dir on win32, useless to us on win64
       file(TO_CMAKE_PATH "$ENV{ProgramFiles(x86)}" _PROG_FILES_X86) # 32-bit dir: only set on win64
