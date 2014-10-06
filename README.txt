@@ -71,7 +71,7 @@ the following OS/compiler/architecture combinations:
   - Linux (Ubuntu 12.10) / GCC 4.8.1 / x86, x86_64
   - Linux (Ubuntu 14.04) / GCC 4.8.2 / ARMv7
   - Windows
-  	* MSVC 12.0.21005.1 REL / x86, x86_64
+    * MSVC 12.0.21005.1 REL / x86, x86_64
     * MSVC 11.0.50727.42 VSLRSTAGE / x86, x86_64
 
 Other compilers and operating systems may be supported without any changes to
@@ -242,10 +242,10 @@ given order:
 
 The C++ header files can be included as follows:
 
-	#include<embb/mtapi/mtapi.h>
-	#include<embb/base/base.h>
-	#include<embb/containers/containers.h>
-	#include<embb/dataflow/dataflow.h>
+  #include<embb/mtapi/mtapi.h>
+  #include<embb/base/base.h>
+  #include<embb/containers/containers.h>
+  #include<embb/dataflow/dataflow.h>
 
 2. Using C
 ----------
@@ -256,8 +256,8 @@ The following libraries have to be linked in the given order:
 
 The C header files can be included as follows:
 
-	#include<embb/mtapi/c/mtapi.h>  or  #include<mtapi.h>
-	#include<embb/base/c/base.h>
+  #include<embb/mtapi/c/mtapi.h>  or  #include<mtapi.h>
+  #include<embb/base/c/base.h>
 
 
 Documentation
@@ -283,9 +283,9 @@ code using Cppcheck, a static analysis tool for C++.
 Known Bugs and Limitations
 ==========================
 
-- The usage of EMBB atomic operations with types of size 1 or 2 bytes such
-  as 'bool' does not work on ARMv7. This is an alignment issue which can cause
-  stack corruption.
+  - The usage of EMBB atomic operations with types of size 1 or 2 bytes such
+    as 'bool' does not work on ARMv7. This is an alignment issue which can
+    cause stack corruption.
   
 
 Links
