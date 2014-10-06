@@ -143,6 +143,7 @@ rsync \
  --exclude "doc/reference/*.xml" \
  --exclude "doc/reference/*.dox" \
  --exclude "doc/reference/*.in" \
+ --exclude "doc/reference/header.html" \
  --exclude "doc/reference/*.css" \
  --exclude "doc/examples/insert_snippets.py" \
  --archive --recursive ${d} $MYTMPDIR/${n}
