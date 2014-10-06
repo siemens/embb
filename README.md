@@ -134,7 +134,7 @@ Choose an appropriate build file generator for your system.
 A list of all available generators can be displayed by typing "cmake" without
 any options. The build files can be generated using the following command:
 
-  cmake -G <generator> .. [OPTIONS]
+    cmake -G <generator> .. [OPTIONS]
 
 Note that on Linux, the architecture (32/64 bit) cannot be selected by the
 generator. However, the build mode (Release/Debug) can be specified using the
@@ -156,11 +156,11 @@ Now you can generate the build files as shown by the following examples.
 
 For a Linux Debug build with exception handling, type
 
-  cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug
+    cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug
 
 For a Windows build (VS 2013, x86) without exception handling, type
 
-  cmake -G "Visual Studio 12" .. -DUSE_EXCEPTIONS=OFF
+    cmake -G "Visual Studio 12" .. -DUSE_EXCEPTIONS=OFF
 
 Note that "Visual Studio 12" refers to the version number of Visual Studio and
 not to the year in which it was released (2013).
@@ -174,11 +174,11 @@ whereas on Windows, it has to be specified now.
 
 For a Linux build, type
 
-  cmake --build .
+    cmake --build .
 
 For a Windows Release build, type
 
-  cmake --build . --config Release
+    cmake --build . --config Release
 
 3. Running the tests
 --------------------
@@ -188,11 +188,11 @@ executables are contained in the subfolder "binaries".
 
 On Linux, type
 
-  binaries/run_tests.sh
+    binaries/run_tests.sh
 
 On Windows, type
 
-  binaries\run_tests.bat
+    binaries\run_tests.bat
 
 If no error message occurs, EMBB is working fine.
 
@@ -201,23 +201,23 @@ If no error message occurs, EMBB is working fine.
 
 The default installation path on Linux is
 
-  /usr/local/
+    /usr/local/
 
 and on Windows
 
-  C:\Program Files\embb-X.Y.Z\ or C:\Program Files (x86)\embb-X.Y.Z
+    C:\Program Files\embb-X.Y.Z\ or C:\Program Files (x86)\embb-X.Y.Z
 
 depending on the target architecture.
 
 If you want a different installation path, you can change it now by typing
 
-  cmake -DINSTALL_PREFIX=YourCustomPath ..
+    cmake -DINSTALL_PREFIX=YourCustomPath ..
 
 The option "-DINSTALL_PREFIX=YourCustomPath" can also be given in Step 1.
 
 To install the files, use the command
 
-  cmake --build . --target install
+    cmake --build . --target install
 
 which copies the contents of the "install" folder to the "bin", "lib", and
 "include" folders in the installation path. For the default paths, the
@@ -237,27 +237,27 @@ If you want to use the C++ functionalities of EMBB, you have to link the
 following libraries (names will be different on Windows and on Linux) in the
 given order:
 
-  embb_base, embb_base_cpp, embb_mtapi_c, embb_mtapi_cpp, embb_containers_cpp,
-  embb_algorithms_cpp, embb_dataflow_cpp
+    embb_base, embb_base_cpp, embb_mtapi_c, embb_mtapi_cpp, embb_containers_cpp,
+    embb_algorithms_cpp, embb_dataflow_cpp
 
 The C++ header files can be included as follows:
 
-	#include<embb/mtapi/mtapi.h>
-	#include<embb/base/base.h>
-	#include<embb/containers/containers.h>
-	#include<embb/dataflow/dataflow.h>
+    #include<embb/mtapi/mtapi.h>
+    #include<embb/base/base.h>
+    #include<embb/containers/containers.h>
+    #include<embb/dataflow/dataflow.h>
 
 2. Using C
 ----------
 
 The following libraries have to be linked in the given order:
 
-  embb_base_c, mtapi_c
+    embb_base_c, mtapi_c
 
 The C header files can be included as follows:
 
-	#include<embb/mtapi/c/mtapi.h>  or  #include<mtapi.h>
-	#include<embb/base/c/base.h>
+    #include<embb/mtapi/c/mtapi.h>  or  #include<mtapi.h>
+    #include<embb/base/c/base.h>
 
 
 Documentation
