@@ -36,7 +36,7 @@ namespace base {
 
 namespace test {
   /**
-   * Pre-declaration for friending.
+   * Forward declaration for friending.
    */
   class ThreadSpecificStorageTest;
 }
