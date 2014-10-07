@@ -150,14 +150,14 @@ HazardPointerThreadEntry(GuardType undefined_guard, int guards_per_thread,
   undefined_guard(undefined_guard),
   guards_per_thread(guards_per_thread),
   max_size_retired_list(max_size_retired_list),
-  retired_list(max_size_retired_list),
-  retired_list_temp(max_size_retired_list),
   // initially, each potential thread is active... if that is not the case
   // another thread could call "HelpScan", and block this thread in making 
   // progress.
   // Still, threads can be leave the hazard pointer processing (deactivation),
   // but this can only be done once, i.e., this is not revertable...
   is_active(1),
+  retired_list(max_size_retired_list),
+  retired_list_temp(max_size_retired_list),
   hazard_pointer_list_temp(embb::base::Thread::GetThreadsMaxCount() *
     guards_per_thread) {
   // Initialize guarded pointer list
@@ -239,9 +239,6 @@ HazardPointer< GuardType >::GetHazardPointerElementForCurrentThread() {
   // This means that the current thread tells that he is about to
   // stop operating, and the others are responsible for his retired
   // list.
-
-  HazardPointerThreadEntry_t* current_thread_entry =
-    &hazard_pointer_thread_entry_array[GetCurrentThreadIndex()];
 
   return hazard_pointer_thread_entry_array[GetCurrentThreadIndex()];
 }
