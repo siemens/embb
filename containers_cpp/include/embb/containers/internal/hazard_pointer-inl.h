@@ -97,18 +97,18 @@ FixedSizeList<ElementT>::~FixedSizeList() {
 
 template< typename GuardType >
 bool HazardPointerThreadEntry<GuardType>::IsActive() {
-  return (is_active == 1);
+  return is_active;
 }
 
 template< typename GuardType >
 bool HazardPointerThreadEntry<GuardType>::TryReserve() {
-  int expected = 0;
-  return is_active.CompareAndSwap(expected, 1);
+  bool expected = false;
+  return is_active.CompareAndSwap(expected, true);
 }
 
 template< typename GuardType >
 void HazardPointerThreadEntry<GuardType>::Deactivate() {
-  is_active = 0;
+  is_active = false;
 }
 
 template< typename GuardType >
@@ -198,10 +198,7 @@ GuardPointer(int guardNumber, GuardType pointerToGuard) {
 
 template< typename GuardType >
 void HazardPointerThreadEntry<GuardType>::SetActive(bool active) {
-  if (active == true)
-    is_active = 1;
-  else
-    is_active = 0;
+  is_active = active;
 }
 
 template< typename GuardType >

@@ -99,7 +99,7 @@ GetIndexOfObject(const T &obj) const {
 
 template<class T, typename ValuePool, class ObjectAllocator>
 T* ObjectPool<T, ValuePool, ObjectAllocator>::AllocateRaw() {
-  int val;
+  bool val;
   int allocated_index = p.Allocate(val);
   if (allocated_index == -1) {
     return NULL;
@@ -128,7 +128,7 @@ void ObjectPool<T, ValuePool, ObjectAllocator>::Free(T* obj) {
   int index = GetIndexOfObject(*obj);
   obj->~T();
 
-  p.Free(1, index);
+  p.Free(true, index);
 }
 
 template<class T, typename ValuePool, class ObjectAllocator>
