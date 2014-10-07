@@ -135,8 +135,11 @@ SetInstallPaths()
 
 ## DOXYGEN 
 #
-include(CMakeCommon/CreateDoxygenDocumentationTarget.cmake)
-CreateDoxygenDocumentationTarget()
+if(EXISTS "${EMBB_SOURCE_DIR}/doc/reference/Doxyfile.in")
+  include(CMakeCommon/CreateDoxygenDocumentationTarget.cmake)
+  CreateDoxygenDocumentationTarget()
+endif()
+
 
 if (INSTALL_DOCS STREQUAL ON)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/

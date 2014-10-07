@@ -39,7 +39,12 @@ function (CreateDoxygenDocumentationTarget)
     #-- Add a custom target to run Doxygen when ever the project is built
     if (TARGET doxygen)
       # Do nothing, since the repeated adding causes an error
-    else()    
+    else()
+      set(DOXYGEN_TEMPLATE_FILES
+      "doc/reference/header.html")
+
+      file(COPY ${DOXYGEN_TEMPLATE_FILES} DESTINATION ${PROJECT_BINARY_DIR})
+
       add_custom_target (
         doxygen 
         #ALL

@@ -27,6 +27,7 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SWITCH_H_
 #define EMBB_DATAFLOW_INTERNAL_SWITCH_H_
 
+#include <embb/dataflow/internal/action.h>
 #include <embb/dataflow/internal/signal.h>
 #include <embb/dataflow/internal/node.h>
 #include <embb/dataflow/internal/inputs.h>

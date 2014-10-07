@@ -169,7 +169,17 @@ class FixedSizeList {
  */
 template< typename GuardType >
 class HazardPointerThreadEntry {
- private:
+
+#ifdef EMBB_DEBUG
+  public:
+    embb::base::Atomic<int>& GetScanningThread()
+    {
+      return who_is_scanning;
+    }
+  private:
+    embb::base::Atomic<int> who_is_scanning;
+#endif
+  private:
    /**
     * Value of the undefined guard (means that no guard is set).
     */

@@ -144,9 +144,18 @@ template< typename GuardType >
 HazardPointerThreadEntry<GuardType>::
 HazardPointerThreadEntry(GuardType undefined_guard, int guards_per_thread,
   size_t max_size_retired_list) :
+#ifdef EMBB_DEBUG
+  who_is_scanning(-1),
+#endif
   undefined_guard(undefined_guard),
   guards_per_thread(guards_per_thread),
   max_size_retired_list(max_size_retired_list),
+  // initially, each potential thread is active... if that is not the case
+  // another thread could call "HelpScan", and block this thread in making 
+  // progress.
+  // Still, threads can be leave the hazard pointer processing (deactivation),
+  // but this can only be done once, i.e., this is not revertable...
+  is_active(1),
   retired_list(max_size_retired_list),
   retired_list_temp(max_size_retired_list),
   hazard_pointer_list_temp(embb::base::Thread::GetThreadsMaxCount() *
@@ -190,7 +199,7 @@ GuardPointer(int guardNumber, GuardType pointerToGuard) {
 template< typename GuardType >
 void HazardPointerThreadEntry<GuardType>::SetActive(bool active) {
   if (active == true)
-  is_active = 1;
+    is_active = 1;
   else
     is_active = 0;
 }
@@ -231,16 +240,6 @@ HazardPointer< GuardType >::GetHazardPointerElementForCurrentThread() {
   // stop operating, and the others are responsible for his retired
   // list.
 
-  // int expected = false;
-  HazardPointerThreadEntry_t* current_thread_entry =
-    &hazard_pointer_thread_entry_array[GetCurrentThreadIndex()];
-
-  // If not active, activate it
-  if (!current_thread_entry->IsActive()) {
-    current_thread_entry->SetActive(true);
-    active_hazard_pointer++;
-  }
-
   return hazard_pointer_thread_entry_array[GetCurrentThreadIndex()];
 }
 
@@ -270,6 +269,16 @@ void HazardPointer< GuardType >::HelpScan() {
 template< typename GuardType >
 void HazardPointer< GuardType >::
 Scan(HazardPointerThreadEntry_t* currentHazardPointerEntry) {
+#ifdef EMBB_DEBUG
+  // scan should only be executed by one thread at a time, otherwise we have
+  // a bug... this assertions checks that
+  int expected = -1;
+  if (!currentHazardPointerEntry->GetScanningThread().CompareAndSwap(
+    expected, GetCurrentThreadIndex()))
+  {
+    assert(false);
+  }
+#endif
   // In this function, we compute the intersection between local retired
   // pointers and all hazard pointers. This intersection cannot be deleted and
   // forms the new local retired pointers list.
@@ -320,6 +329,10 @@ Scan(HazardPointerThreadEntry_t* currentHazardPointerEntry) {
   }
   currentHazardPointerEntry->SetRetired(
     currentHazardPointerEntry->GetRetiredTemp());
+
+#ifdef EMBB_DEBUG
+  currentHazardPointerEntry->GetScanningThread().Store(-1);
+#endif
 }
 
 template< typename GuardType >
@@ -335,7 +348,8 @@ HazardPointer< GuardType >::HazardPointer(
   GuardType undefined_guard, int guards_per_thread) :
   undefined_guard(undefined_guard),
   guards_per_thread(guards_per_thread),
-  active_hazard_pointer(0),
+  //initially, all potential hazard pointers are active...
+  active_hazard_pointer(embb::base::Thread::GetThreadsMaxCount()),
   free_guard_callback(free_guard_callback) {
   hazard_pointers = embb::base::Thread::GetThreadsMaxCount();
 
@@ -388,6 +402,7 @@ void HazardPointer< GuardType >::EnqueuePointerForDeletion(
   if (IsThresholdExceeded()) {
     HazardPointerThreadEntry_t* currentHazardPointerEntry =
       &GetHazardPointerElementForCurrentThread();
+
     Scan(currentHazardPointerEntry);
 
     // Help deactivated threads to clean their retired nodes.
