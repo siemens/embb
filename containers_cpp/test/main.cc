@@ -45,28 +45,26 @@ PT_MAIN("Data Structures C++") {
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
-  for (;;)
-  {
-    PT_RUN(embb::containers::test::PoolTest <
-      embb::containers::WaitFreeArrayValuePool<int COMMA - 1> > );
-    PT_RUN(embb::containers::test::PoolTest <
-      embb::containers::LockFreeTreeValuePool<int COMMA - 1> > );
 
-    PT_RUN(embb::containers::test::HazardPointerTest);
+  PT_RUN(embb::containers::test::PoolTest<
+    embb::containers::WaitFreeArrayValuePool<int COMMA -1> >);
+  PT_RUN(embb::containers::test::PoolTest<
+    embb::containers::LockFreeTreeValuePool<int COMMA -1> >);
 
-    PT_RUN(embb::containers::test::QueueTest<
-      embb::containers::WaitFreeSPSCQueue<int> >);
+  PT_RUN(embb::containers::test::HazardPointerTest);
 
-    PT_RUN(embb::containers::test::QueueTest <
-      embb::containers::LockFreeMPMCQueue<int> COMMA true COMMA true > );
+  PT_RUN(embb::containers::test::QueueTest<
+    embb::containers::WaitFreeSPSCQueue<int> >);
 
-    PT_RUN(embb::containers::test::StackTest<
-      embb::containers::LockFreeStack<int> >);
+  PT_RUN(embb::containers::test::QueueTest<
+    embb::containers::LockFreeMPMCQueue<int> COMMA true COMMA true >);
 
-    PT_RUN(embb::containers::test::ObjectPoolTest
-      <embb::containers::LockFreeTreeValuePool<int COMMA 0 > >);
+  PT_RUN(embb::containers::test::StackTest<
+    embb::containers::LockFreeStack<int> >);
 
-    PT_RUN(embb::containers::test::ObjectPoolTest
-      <embb::containers::WaitFreeArrayValuePool<int COMMA 0> >);
-  }
+  PT_RUN(embb::containers::test::ObjectPoolTest
+    <embb::containers::LockFreeTreeValuePool<int COMMA 0 > >);
+
+  PT_RUN(embb::containers::test::ObjectPoolTest
+    <embb::containers::WaitFreeArrayValuePool<int COMMA 0> >);
 }
