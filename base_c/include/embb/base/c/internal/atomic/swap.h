@@ -91,23 +91,20 @@ EMBB_DEFINE_SWAP(8, "q")
   volatile* pointer_to_value, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value)\
   { \
-  register \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
-  t1, t2; \
+  tmp, result; \
   __asm__ __volatile__ ( \
   "dmb\n\t" \
   "loop_%=:\n\t" \
-  "ldrex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %2, %0\n\t" \
-  "strex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %3, %1, %0\n\t" \
-  "teq %3, #0\n\t" \
+  "ldrex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %0, [%3]\n\t" \
+  "strex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %1, %2, [%3]\n\t" \
+  "teq %1, #0\n\t" \
   "bne loop_%=\n\t" \
-  "mov %1, %2\n\t" \
   "isb" \
-  : "+m" (*pointer_to_value), \
-  "+r" (new_value), "=r" (t1), "=r" (t2) \
-  : \
+  : "=&r" (result), "=&r" (tmp) \
+  : "r" (new_value), "r" (pointer_to_value) \
   : "memory", "cc" );               \
-  return new_value; \
+  return result; \
   }
 #else
 #error "No atomic fetch and store implementation found"

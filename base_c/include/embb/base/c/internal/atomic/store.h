@@ -89,11 +89,15 @@ EMBB_DEFINE_STORE(8, "q")
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value) {\
   __asm__ __volatile__( \
   "dmb\n\t" \
-  "str" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %1, %0" \
-  : "+m" (*pointer_to_value), "+r" (new_value) \
+  "str" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %1, [%0]" \
   : \
+  : "r" (pointer_to_value), "r" (new_value) \
   : "memory"); \
   }
+/*    __sync_synchronize(); \
+    *pointer_to_value = new_value; \
+    __sync_synchronize(); \
+  }*/
 #else
 #error "No atomic fetch and store implementation found"
 #endif
