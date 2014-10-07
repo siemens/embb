@@ -95,29 +95,27 @@ EMBB_DEFINE_COMPARE_AND_SWAP(8, "q")
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
   volatile* expected, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) desired) { \
-  register \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
-  result, t1, t2; \
+  oldval, res; \
+  __asm__ __volatile__ ("dmb" : : : "memory"); \
+  do { \
   __asm__ __volatile__ ( \
-  "dmb\n\t" \
-  "ldr %4, %1\n\t" \
-  "loop_%=:\n\t" \
-  "ldrex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %3, %0\n\t" \
-  "mov %2, #1\n\t" \
-  "cmp %3, %4\n\t" \
-  "bne fail_%=\n\t" \
-  "strex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %2, %5, %0\n\t" \
-  "teq %2, #0\n\t" \
-  "bne loop_%=\n\t" \
-  "fail_%=:\n\t" \
-  "str %3, %1\n\t" \
-  "eor %2, %2, #1\n\t" \
-  "isb" \
-  : "+m" (*pointer_to_value), "+m" (*expected), \
-  "=r" (result), "=r" (t1), "=r" (t2), "+r" (desired) \
-  :                  \
-  : "memory", "cc" );               \
-  return result; \
+  "ldrex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %1, [%2]\n\t" \
+  "mov %0, #0\n\t" \
+  "teq %1, %3\n\t" \
+  "it eq\n\t" \
+  "strex" EMBB_ATOMIC_ARM_SIZE_SUFFIX "eq %0, %4, [%2]\n\t" \
+  : "=&r" (res), "=&r" (oldval) \
+  : "r" (pointer_to_value), "Ir" (*expected), "r" (desired) \
+  : "cc" ); \
+  } while (res); \
+  __asm__ __volatile__ ("isb" : : : "memory"); \
+  if (oldval == *expected) { \
+  return 1; \
+  } else { \
+  *expected = oldval; \
+  return 0; \
+  } \
   }
 #else
 #error "No atomic fetch and store implementation found"
