@@ -567,11 +567,11 @@ template <class C, typename R,
 Function<R, T1, T2, T3, T4, T5> Bind(
   C & obj,
   R(C::*func)(T1, T2, T3, T4, T5),
-  Placeholder::Arg_1 p1,
-  Placeholder::Arg_2 p2,
-  Placeholder::Arg_3 p3,
-  Placeholder::Arg_4 p4,
-  Placeholder::Arg_5 p5) {
+  Placeholder::Arg_1,
+  Placeholder::Arg_2,
+  Placeholder::Arg_3,
+  Placeholder::Arg_4,
+  Placeholder::Arg_5) {
   return Function<R, T1, T2, T3, T4, T5>(obj, func);
 }
 
@@ -579,11 +579,11 @@ template <typename R,
   typename T1, typename T2, typename T3, typename T4, typename T5>
 Function<R, T1, T2, T3, T4, T5> Bind(
   R(*func)(T1, T2, T3, T4, T5),
-  Placeholder::Arg_1 p1,
-  Placeholder::Arg_2 p2,
-  Placeholder::Arg_3 p3,
-  Placeholder::Arg_4 p4,
-  Placeholder::Arg_5 p5) {
+  Placeholder::Arg_1,
+  Placeholder::Arg_2,
+  Placeholder::Arg_3,
+  Placeholder::Arg_4,
+  Placeholder::Arg_5) {
   return Function<R, T1, T2, T3, T4, T5>(func);
 }
 
