@@ -1,4 +1,3 @@
-=========================================
 Embedded Multicore Building Blocks (EMBB)
 =========================================
 
@@ -41,24 +40,30 @@ of any other concurrent operations on the same data structure.
 Community and Contact
 =====================
 
-Project home:   https://github.com/siemens/embb
+Project home:
+  - https://github.com/siemens/embb
 
-Git:            https://github.com/siemens/embb.git
-                git@github.com:siemens/embb.git
+Git:
+  - https://github.com/siemens/embb.git (HTTP)
+  - git@github.com:siemens/embb.git (SSH)
 
-Mailing lists:  embb-announcements@googlegroups.com
-                embb-dev@googlegroups.com (development)
+Mailing lists:
+  - embb-announcements@googlegroups.com (announcements)
+  - embb-dev@googlegroups.com (development)
 
-Subscription:   https://groups.google.com/forum/#!forum/embb-announcements/join
-                https://groups.google.com/forum/#!forum/embb-dev/join
+Subscription:
+  - https://groups.google.com/forum/#!forum/embb-announcements/join
+  - https://groups.google.com/forum/#!forum/embb-dev/join
 
-Contact:        embb.info@gmail.com or tobias.schuele@siemens.com
+Contact:
+  - embb.info@gmail.com or
+  - tobias.schuele@siemens.com
 
 
 License
 =======
 
-See the file "COPYING.txt" in the project's root directory.
+See the file "COPYING.md" in the project's root directory.
 
 
 Requirements
@@ -71,7 +76,7 @@ the following OS/compiler/architecture combinations:
   - Linux (Ubuntu 12.10) / GCC 4.8.1 / x86, x86_64
   - Linux (Ubuntu 14.04) / GCC 4.8.2 / ARMv7
   - Windows
-  	* MSVC 12.0.21005.1 REL / x86, x86_64
+    * MSVC 12.0.21005.1 REL / x86, x86_64
     * MSVC 11.0.50727.42 VSLRSTAGE / x86, x86_64
 
 Other compilers and operating systems may be supported without any changes to
@@ -283,10 +288,9 @@ code using Cppcheck, a static analysis tool for C++.
 Known Bugs and Limitations
 ==========================
 
-- The usage of EMBB atomic operations with types of size 1 or 2 bytes such
-  as 'bool' does not work on ARMv7. This is an alignment issue which can cause
-  stack corruption.
-  
+- The MTAPI implementation is currently limited to homogeneous systems.
+  Support for heterogeneous systems will be added in the near future.
+
 
 Links
 =====
