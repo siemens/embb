@@ -41,7 +41,6 @@ extern "C" {
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
 #include <embb_mtapi_task_context_t_fwd.h>
-#include <embb_mtapi_task_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */

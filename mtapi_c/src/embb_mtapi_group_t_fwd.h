@@ -47,4 +47,4 @@ typedef struct embb_mtapi_group_pool_struct embb_mtapi_group_pool_t;
 }
 #endif
 
-#endif // MTAPI_C_SRC_EMBB_MTAPI_GROUP_T_H_
+#endif // MTAPI_C_SRC_EMBB_MTAPI_GROUP_T_FWD_H_
