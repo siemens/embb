@@ -36,6 +36,14 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   RelWithDebInfo MinSizeRel." FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+# Check for clang, masquerade it as GNU
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_COMPILER_IS_GNUCC true)
+endif ()
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_COMPILER_IS_GNUCXX true)
+endif()
+
 ## Command line options
 #
 # The set option will be converted to uppercase letters by cmake!! --> ON/OFF
