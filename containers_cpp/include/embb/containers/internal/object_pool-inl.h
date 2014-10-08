@@ -49,7 +49,7 @@ ReturningTrueIterator::operator++() {
 template<class T, typename ValuePool, class ObjectAllocator>
 typename ObjectPool<T, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::self_type ObjectPool<T, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::operator++(int junk) {
+ReturningTrueIterator::operator++(int) {
   count_value++;
   return *this;
 }

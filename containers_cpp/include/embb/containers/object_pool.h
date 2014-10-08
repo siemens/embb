@@ -94,7 +94,7 @@ class ObjectPool {
     typedef int difference_type;
     explicit ReturningTrueIterator(size_t count_value);
     self_type operator++();
-    self_type operator++(int junk);
+    self_type operator++(int);
     reference operator*();
     pointer operator->();
     bool operator==(const self_type& rhs);

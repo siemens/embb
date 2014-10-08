@@ -36,9 +36,6 @@ namespace containers {
 namespace test {
 class ObjectPoolTestStruct {
  private:
-  int a;
-  int b;
-  int c[40];
   int thread_id;
  public:
   explicit ObjectPoolTestStruct(int thread_id);
