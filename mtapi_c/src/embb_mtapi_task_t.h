@@ -40,8 +40,8 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_task_context_struct embb_mtapi_task_context_t;
-typedef struct embb_mtapi_task_pool_struct embb_mtapi_task_pool_t;
+#include <embb_mtapi_task_context_t_fwd.h>
+#include <embb_mtapi_task_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -73,11 +73,7 @@ struct embb_mtapi_task_struct {
   mtapi_status_t error_code;
 };
 
-/**
- * Task type.
- * \memberof embb_mtapi_task_struct
- */
-typedef struct embb_mtapi_task_struct embb_mtapi_task_t;
+#include <embb_mtapi_task_t_fwd.h>
 
 /**
  * Pooled operator new.

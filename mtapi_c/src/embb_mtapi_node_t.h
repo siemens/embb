@@ -39,12 +39,12 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_job_struct embb_mtapi_job_t;
-typedef struct embb_mtapi_scheduler_struct embb_mtapi_scheduler_t;
-typedef struct embb_mtapi_action_pool_struct embb_mtapi_action_pool_t;
-typedef struct embb_mtapi_group_pool_struct embb_mtapi_group_pool_t;
-typedef struct embb_mtapi_task_pool_struct embb_mtapi_task_pool_t;
-typedef struct embb_mtapi_queue_pool_struct embb_mtapi_queue_pool_t;
+#include <embb_mtapi_job_t_fwd.h>
+#include <embb_mtapi_scheduler_t_fwd.h>
+#include <embb_mtapi_action_t_fwd.h>
+#include <embb_mtapi_group_t_fwd.h>
+#include <embb_mtapi_task_t_fwd.h>
+#include <embb_mtapi_queue_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -73,11 +73,7 @@ struct embb_mtapi_node_struct {
   mtapi_affinity_t affinity_all;
 };
 
-/**
- * Node type.
- * \memberof embb_mtapi_node_struct
- */
-typedef struct embb_mtapi_node_struct embb_mtapi_node_t;
+#include <embb_mtapi_node_t_fwd.h>
 
 /**
  * Checks if the node singleton was initialized already.

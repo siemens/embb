@@ -36,8 +36,8 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_node_struct embb_mtapi_node_t;
-typedef struct embb_mtapi_action_struct embb_mtapi_action_t;
+#include <embb_mtapi_node_t_fwd.h>
+#include <embb_mtapi_action_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -58,11 +58,7 @@ struct embb_mtapi_job_struct {
   mtapi_action_hndl_t* actions;
 };
 
-/**
- * Job type.
- * \memberof embb_mtapi_job_struct
- */
-typedef struct embb_mtapi_job_struct embb_mtapi_job_t;
+#include <embb_mtapi_job_t_fwd.h>
 
 /**
  * Constructs the global job list.

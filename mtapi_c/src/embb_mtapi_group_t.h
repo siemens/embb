@@ -40,7 +40,7 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_node_struct embb_mtapi_node_t;
+#include <embb_mtapi_node_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -61,11 +61,7 @@ struct embb_mtapi_group_struct {
   embb_mtapi_task_queue_t queue;
 };
 
-/**
- * Group type
- * \memberof embb_mtapi_group_struct
- */
-typedef struct embb_mtapi_group_struct embb_mtapi_group_t;
+#include <embb_mtapi_group_t_fwd.h>
 
 /**
  * Default constructor.
