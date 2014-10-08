@@ -127,6 +127,7 @@ const Type& ThreadSpecificStorage<Type>::Get() const {
   unsigned int thread_index = 0;
   int status = embb_internal_thread_index(&thread_index);
   assert(status == EMBB_SUCCESS);
+  EMBB_UNUSED_IN_RELEASE(status);
   usage_flags_[thread_index] = true;
   return *value;
 }
