@@ -105,7 +105,7 @@ else()
   set(test_script_out run_tests.bat)
 endif()
 execute_process(
-  COMMAND ${CMAKE_COMMAND} -E copy ../scripts/${test_script_in} binaries/${test_script_out}
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/scripts/${test_script_in} binaries/${test_script_out}
   )
 
 ## Test and Partest build

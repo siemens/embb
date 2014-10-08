@@ -15,7 +15,7 @@ ENDFOREACH(src_tmp)
 ENDIF()
    
 # Execute the GroupSources macro
-include(../CMakeCommon/GroupSourcesMSVC.cmake)
+include(${CMAKE_SOURCE_DIR}/CMakeCommon/GroupSourcesMSVC.cmake)
 GroupSourcesMSVC(include)
 GroupSourcesMSVC(src)
 GroupSourcesMSVC(test)
