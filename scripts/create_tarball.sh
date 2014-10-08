@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2014, Siemens AG. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,7 @@ rsync \
  
 echo "Replace version number in README"
 
-README_FILE="$MYTMPDIR/${n}/README.txt"
+README_FILE="$MYTMPDIR/${n}/README.md"
 
 if [ -f $README_FILE ]; then
   sed -i "s/\[VERSION_NUMBER_TEMPLATE\]/$VERSION_NUMBER/g" $README_FILE
