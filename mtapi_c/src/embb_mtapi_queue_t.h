@@ -40,7 +40,7 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_task_queue_struct embb_mtapi_task_queue_t;
+#include <embb_mtapi_task_queue_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -63,11 +63,7 @@ struct embb_mtapi_queue_struct {
   mtapi_affinity_t ordered_affinity;
 };
 
-/**
- * Queue type.
- * \memberof embb_mtapi_queue_struct
- */
-typedef struct embb_mtapi_queue_struct embb_mtapi_queue_t;
+#include <embb_mtapi_queue_t_fwd.h>
 
 /**
  * Default constructor.

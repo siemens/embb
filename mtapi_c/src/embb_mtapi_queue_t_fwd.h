@@ -24,57 +24,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_C_SRC_EMBB_MTAPI_TASK_CONTEXT_T_H_
-#define MTAPI_C_SRC_EMBB_MTAPI_TASK_CONTEXT_T_H_
-
-#include <embb/mtapi/c/mtapi.h>
+#ifndef MTAPI_C_SRC_EMBB_MTAPI_QUEUE_T_FWD_H_
+#define MTAPI_C_SRC_EMBB_MTAPI_QUEUE_T_FWD_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-/* ---- FORWARD DECLARATIONS ----------------------------------------------- */
-
-#include <embb_mtapi_thread_context_t_fwd.h>
-#include <embb_mtapi_task_t_fwd.h>
-
-
-/* ---- CLASS DECLARATION -------------------------------------------------- */
+/**
+ * Queue type.
+ * \memberof embb_mtapi_queue_struct
+ */
+typedef struct embb_mtapi_queue_struct embb_mtapi_queue_t;
 
 /**
- * \internal
- * Task context class.
- *
- * \ingroup INTERNAL
- */
-struct embb_mtapi_task_context_struct {
-  mtapi_uint_t instance_num;
-  mtapi_uint_t num_instances;
-  embb_mtapi_task_t* task;
-  embb_mtapi_thread_context_t* thread_context;
-};
-
-#include <embb_mtapi_task_context_t_fwd.h>
-
-/**
- * Constructor from a thread_context and a task.
- * \memberof embb_mtapi_task_context_struct
- */
-void embb_mtapi_task_context_initialize_with_thread_context_and_task(
-  embb_mtapi_task_context_t* that,
-  embb_mtapi_thread_context_t* thread_context,
-  embb_mtapi_task_t* task);
-
-/**
- * Destructor.
- * \memberof embb_mtapi_task_context_struct
- */
-void embb_mtapi_task_context_finalize(embb_mtapi_task_context_t* that);
-
+ * Queue pool type.
+ * \memberof embb_mtapi_queue_pool_struct
+ */ 
+typedef struct embb_mtapi_queue_pool_struct embb_mtapi_queue_pool_t;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // MTAPI_C_SRC_EMBB_MTAPI_TASK_CONTEXT_T_H_
+#endif // MTAPI_C_SRC_EMBB_MTAPI_QUEUE_T_FWD_H_

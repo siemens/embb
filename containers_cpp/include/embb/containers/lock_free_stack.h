@@ -170,7 +170,7 @@ class LockFreeStackNode {
  *         which stores the elements.
  */
 template< typename T,
-typename ValuePool = embb::containers::LockFreeTreeValuePool < int, 0 > >
+typename ValuePool = embb::containers::LockFreeTreeValuePool < bool, false > >
 class LockFreeStack {
  private:
   /**

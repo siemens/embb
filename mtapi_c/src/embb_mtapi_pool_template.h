@@ -45,11 +45,6 @@ struct embb_mtapi_##TYPE##_pool_struct \
   embb_mtapi_##TYPE##_t * storage; \
 }; \
 \
-/** TYPE pool type.
-\memberof embb_mtapi_##TYPE##_pool_struct
-*/ \
-typedef struct embb_mtapi_##TYPE##_pool_struct embb_mtapi_##TYPE##_pool_t; \
-\
 /** operator new with configurable capacity.
 \memberof embb_mtapi_##TYPE##_pool_struct
 */ \

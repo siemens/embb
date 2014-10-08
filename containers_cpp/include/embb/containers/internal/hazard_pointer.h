@@ -201,7 +201,7 @@ class HazardPointerThreadEntry {
    * signal that it is leaving. If a thread has left, the other threads are
    * responsible for cleaning up its retired list.
    */
-  embb::base::Atomic< int > is_active;
+  embb::base::Atomic< bool > is_active;
 
   /**
    * The guarded pointer of this thread, has size \c guard_per_thread.

@@ -497,7 +497,7 @@ function make_functionN(arg_cnt)
 
   local bound_param_list_c = ""
   for i = 1, arg_cnt, 1 do
-    bound_param_list_c = bound_param_list_c..",\n  Placeholder::Arg_"..i.." p"..i
+    bound_param_list_c = bound_param_list_c..",\n  Placeholder::Arg_"..i
   end
 
   file:write(CR_templ.."\n")
