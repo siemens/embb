@@ -284,14 +284,14 @@ AtomicTest::AtomicTest() {
 typedef enum { RED, GREEN, BLUE } colors_t;
 
 void AtomicTest::BasicTests() {
-  //embb::base::Atomic<bool> b;          // Boolean
+  embb::base::Atomic<bool> b;          // Boolean
   embb::base::Atomic<colors_t> c;        // Enumeration
   embb::base::Atomic<void*> v;         // Void pointer
   embb::base::Atomic<int> i;           // Integer
   embb::base::Atomic<int*> n;          // Non-void pointer
 
   //template specializations
-  //PT_EXPECT(!b.IsArithmetic() && !b.IsInteger() && !b.IsPointer());
+  PT_EXPECT(!b.IsArithmetic() && !b.IsInteger() && !b.IsPointer());
   PT_EXPECT(!c.IsArithmetic() && !c.IsInteger() && !c.IsPointer());
   PT_EXPECT(!v.IsArithmetic() && !v.IsInteger() && !v.IsPointer());
   PT_EXPECT(i.IsArithmetic() && i.IsInteger() && !i.IsPointer());
