@@ -59,7 +59,7 @@
   EMBB_INLINE EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
   EMBB_CAT2(embb_internal__atomic_load_, EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value) { \
   /* no fence required for loads */ \
-  register EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) result; \
+  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) result; \
   __asm__ __volatile__("mov" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "=q" (result) \
   : "m" (*pointer_to_value) \

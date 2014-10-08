@@ -58,7 +58,7 @@
   EMBB_INLINE int EMBB_CAT2(embb_internal__atomic_compare_and_swap_, \
   EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* expected, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) desired) { \
-  register char result;                   \
+  char result; \
   __asm__ __volatile__ ("lock cmpxchg" EMBB_ATOMIC_X86_SIZE_SUFFIX\
   " %3, %0 \n\t" \
   "setz %2 \n\t" \
