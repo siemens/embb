@@ -40,8 +40,8 @@ template<typename Queue_t,
   bool MultipleConsumers = false>
 class QueueTest : public partest::TestCase {
  private:
-  static const unsigned int QUEUE_SIZE = 100;
-  static const unsigned int TOTAL_PRODUCE_CONSUME_COUNT = 10000;
+  static const int QUEUE_SIZE = 100;
+  static const int TOTAL_PRODUCE_CONSUME_COUNT = 10000;
   int n_threads;
   embb::base::Atomic<int> thread_selector_producer;
   embb::base::Atomic<int> produce_count;
