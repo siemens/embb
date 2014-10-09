@@ -271,7 +271,7 @@ Scan(HazardPointerThreadEntry_t* currentHazardPointerEntry) {
   // a bug... this assertions checks that
   int expected = -1;
   if (!currentHazardPointerEntry->GetScanningThread().CompareAndSwap(
-    expected, GetCurrentThreadIndex()))
+    expected, static_cast<int>(GetCurrentThreadIndex())))
   {
     assert(false);
   }
