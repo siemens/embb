@@ -151,7 +151,7 @@ HazardPointerThreadEntry(GuardType undefined_guard, int guards_per_thread,
   guards_per_thread(guards_per_thread),
   max_size_retired_list(max_size_retired_list),
   // initially, each potential thread is active... if that is not the case
-  // another thread could call "HelpScan", and block this thread in making 
+  // another thread could call "HelpScan", and block this thread in making
   // progress.
   // Still, threads can be leave the hazard pointer processing (deactivation),
   // but this can only be done once, i.e., this is not revertable...
@@ -271,8 +271,7 @@ Scan(HazardPointerThreadEntry_t* currentHazardPointerEntry) {
   // a bug... this assertions checks that
   int expected = -1;
   if (!currentHazardPointerEntry->GetScanningThread().CompareAndSwap(
-    expected, static_cast<int>(GetCurrentThreadIndex())))
-  {
+    expected, static_cast<int>(GetCurrentThreadIndex()))) {
     assert(false);
   }
 #endif
