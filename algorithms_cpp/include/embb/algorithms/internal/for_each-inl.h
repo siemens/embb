@@ -91,7 +91,7 @@ class ForEachFunctor {
 };
 
 template<typename RAI, typename Function>
-void ForEachRecurcive(RAI first, RAI last, Function unary,
+void ForEachRecursive(RAI first, RAI last, Function unary,
                       const ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
@@ -121,7 +121,7 @@ template<typename RAI, typename Function>
 void ForEachIteratorCheck(RAI first, RAI last, Function unary,
                           const ExecutionPolicy& policy, size_t block_size,
                           std::random_access_iterator_tag) {
-  return ForEachRecurcive(first, last, unary, policy, block_size);
+  return ForEachRecursive(first, last, unary, policy, block_size);
 }
 
 }  // namespace internal

@@ -105,7 +105,7 @@ class ReduceFunctor {
 
 template<typename RAI, typename ReturnType, typename ReductionFunction,
          typename TransformationFunction>
-ReturnType ReduceRecurcive(RAI first, RAI last, ReturnType neutral,
+ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
                            ReductionFunction reduction,
                            TransformationFunction transformation,
                            const ExecutionPolicy& policy, size_t block_size) {
@@ -144,7 +144,7 @@ ReturnType ReduceIteratorCheck(RAI first, RAI last, ReductionFunction reduction,
                                ReturnType neutral,
                                const ExecutionPolicy& policy, size_t block_size,
                                std::random_access_iterator_tag) {
-    return ReduceRecurcive(first, last, neutral, reduction, transformation,
+    return ReduceRecursive(first, last, neutral, reduction, transformation,
                            policy, block_size);
 }
 

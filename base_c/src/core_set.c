@@ -103,9 +103,9 @@ unsigned int embb_core_count_available() {
 #ifdef EMBB_HAS_HEADER_SYSINFO
   return get_nprocs();
 #elif defined __FreeBSD__
-  const size_t bs = sizeof(unsigned int);
-  char buf[bs];
-  size_t len = bs;
+  const size_t kBufferSize = sizeof(unsigned int);
+  char buf[kBufferSize];
+  size_t len = kBufferSize;
   sysctlbyname("hw.ncpu", buf, &len, NULL, 0);
   return *(unsigned int*)&buf;
 #else
