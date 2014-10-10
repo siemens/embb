@@ -117,6 +117,10 @@ data structures for storing object in an organized and thread-safe way.
 Build and Installation
 ======================
 
+Note: It is recommended to build from a packaged release file and not from a
+snapshot of the repository in order to get the documentation and the examples
+out-of-the box.
+
 EMB² is built using CMake (version 2.8.9 or higher). CMake is a build file
 generator which allows to abstract from the concrete build tools. To generate
 and invoke the platform-specific build files, open a shell (on Windows, use
@@ -294,6 +298,14 @@ Known Bugs and Limitations
   is bounded by a predefined but modifiable constant (see functions
   embb_thread_get_max_count() / embb_thread_set_max_count() and class
   embb::base::Thread).
+
+
+Development and Contribution
+============================
+
+The EMB² team welcomes all kinds of contributions, preferably as pull requests
+or patches via the development mailing lists (see above). If possible, please
+refer to a current snapshot of the development branch.
 
 
 Links
