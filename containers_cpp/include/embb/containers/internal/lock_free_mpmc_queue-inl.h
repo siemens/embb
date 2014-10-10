@@ -116,28 +116,28 @@ bool LockFreeMPMCQueue<T, ValuePool>::TryEnqueue(T const& element) {
   internal::LockFreeMPMCQueueNode<T>* my_tail;
   for (;;) {
     my_tail = tail;
-    internal::LockFreeMPMCQueueNode<T>* my_tail_next = my_tail->GetNext();
 
     hazardPointer.GuardPointer(0, my_tail);
 
     // Check if pointer is still valid after guarding.
     if (my_tail != tail) {
-      hazardPointer.GuardPointer(0, NULL);
       continue; // Hazard pointer outdated, retry
     }
+
+    internal::LockFreeMPMCQueueNode<T>* my_tail_next = my_tail->GetNext();
 
     if (my_tail == tail) {
       // If the next pointer of the tail node is null, the tail pointer
       // points to the last object. We try to set the next pointer of the
       // tail node to our new node.
       if (my_tail_next == NULL) {
+        internal::LockFreeMPMCQueueNode<T>* expected = NULL;
         // This fails if the next pointer of the "cached" tail is not null
         // anymore, i.e., another thread added a node before we could complete.
-        if (my_tail->GetNext().CompareAndSwap(my_tail_next, node))
-
-        // We successfully added our node. Still missing: increase tail pointer.
-        break;
-      // The tail pointer points not to the last object, first increase
+        if (my_tail->GetNext().CompareAndSwap(expected, node))
+          break; // We successfully added our node.
+        //Still missing: increase tail pointer.
+        // The tail pointer points not to the last object, first increase
       } else {
         // Try to increase the tail pointer.
         tail.CompareAndSwap(my_tail, my_tail_next);
@@ -147,66 +147,45 @@ bool LockFreeMPMCQueue<T, ValuePool>::TryEnqueue(T const& element) {
   // We added our node. Try to update tail pointer. Need not succeed, if we
   // fail, another thread will help us.
   tail.CompareAndSwap(my_tail, node);
-  // Release guard
-  hazardPointer.GuardPointer(0, NULL);
 
   return true;
 }
 
 template< typename T, typename ValuePool >
 bool LockFreeMPMCQueue<T, ValuePool>::TryDequeue(T & element) {
-  T value;
+  internal::LockFreeMPMCQueueNode<T>* my_head;
+  internal::LockFreeMPMCQueueNode<T>* my_tail;
+  internal::LockFreeMPMCQueueNode<T>* my_next;
+  internal::LockFreeMPMCQueueNode<T>* expected;
+  T data;
   for (;;) {
-    internal::LockFreeMPMCQueueNode<T>* my_head = head;
-    internal::LockFreeMPMCQueueNode<T>* my_tail = tail;
-    internal::LockFreeMPMCQueueNode<T>* my_head_next = my_head->GetNext();
+    my_head = head;
+    hazardPointer.GuardPointer(0, my_head);
+    if (my_head != head) continue;
 
-    // Head did not change
-    if (my_head == head) {
-      // Guard head
-      hazardPointer.GuardPointer(0, my_head);
+    my_tail = tail;
+    my_next = my_head->GetNext();
+    hazardPointer.GuardPointer(1, my_next);
+    if (head != my_head) continue;
 
-      // Check if pointer is still valid after guarding. This check is
-      // essential, tests really crash if missing
-      if (my_head != head) {
-        hazardPointer.GuardPointer(0, NULL);
-        continue; // Hazard pointer outdated, retry
-      }
+    if (my_next == NULL)
+      return false;
 
-      // Check if pointer is still valid after guarding. This check is
-      // essential, tests really crash if missing
-      hazardPointer.GuardPointer(1, my_head_next);
-      if (my_head_next != my_head->GetNext()) {
-        hazardPointer.GuardPointer(1, NULL);
-        continue; // Hazard pointer outdated, retry
-      }
-
-      if (my_tail == my_head) {
-        if (my_head_next == NULL) {
-          // Queue is empty. Release guards and return false.
-
-          hazardPointer.GuardPointer(0, NULL);
-          hazardPointer.GuardPointer(1, NULL);
-
-          // Queue is empty;
-          return false;
-        }
-        // Tail is not pointing to last element, help to increase
-        tail.CompareAndSwap(my_head, my_head_next);
-      } else {
-        value = my_head_next->GetElement();
-        if (head.CompareAndSwap(my_head, my_head_next)) {
-          // It's our element. Release guard and enqueue my_head for
-          // deletion and leave.
-          hazardPointer.GuardPointer(0, NULL);
-          hazardPointer.GuardPointer(1, NULL);
-          hazardPointer.EnqueuePointerForDeletion(my_head);
-          break;
-        }
-      }
+    if (my_head == my_tail) {
+      expected = my_tail;
+      tail.CompareAndSwap(expected, my_next);
+      continue;
     }
+
+    data = my_next->GetElement();
+
+    expected = my_head;
+    if (head.CompareAndSwap(expected, my_next))
+      break;
   }
-  element = value;
+
+  hazardPointer.EnqueuePointerForDeletion(my_head);
+  element = data;
   return true;
 }
 } // namespace containers
