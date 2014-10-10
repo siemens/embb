@@ -1,4 +1,4 @@
-Embedded Multicore Building Blocks (EMBB)
+﻿Embedded Multicore Building Blocks (EMB²)
 =========================================
 
 Overview
