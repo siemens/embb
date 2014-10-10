@@ -3,7 +3,7 @@
 
 
 Overview
-========
+--------
 
 The Embedded Multicore Building Blocks (EMB²) are an easy to use yet powerful
 and efficient C/C++ library for the development of parallel applications. EMB²
@@ -38,7 +38,7 @@ of any other concurrent operations on the same data structure.
 
 
 Community and Contact
-=====================
+---------------------
 
 Project home:
   - https://github.com/siemens/embb
@@ -61,13 +61,13 @@ Contact:
 
 
 License
-=======
+-------
 
 See the file "COPYING.md" in the project's root directory.
 
 
 Requirements
-============
+------------
 
 This project is based on the standards C99 (for C code) and C++03 (for C++
 code) to be usable on a wide range of target systems. It has been tested on
@@ -87,7 +87,7 @@ contact us: embb-dev@googlegroups.com.
 
 
 Directory Structure
-===================
+-------------------
 
 EMB² is a technology stack consisting of various building blocks. For some of
 them, there exist C and C++ versions, others are only implemented in C++. The
@@ -115,7 +115,7 @@ data structures for storing object in an organized and thread-safe way.
 
 
 Build and Installation
-======================
+----------------------
 
 Note: It is recommended to build from a packaged release file and not from a
 snapshot of the repository in order to get the documentation and the examples
@@ -129,8 +129,7 @@ and change to the project's root directory. Create a subdirectory, where you
 want to build the library, e.g., "build". Change to that subdirectory. It is
 assumed that the project's root directory is now the parent directory.
 
-1. Generation of native build files
------------------------------------
+### 1. Generation of native build files
 
 Choose an appropriate build file generator for your system.
 
@@ -174,8 +173,7 @@ For a Windows build (VS 2013, x86) without exception handling, type
 Note that "Visual Studio 12" refers to the version number of Visual Studio and
 not to the year in which it was released (2013).
 
-2. Compiling and linking
-------------------------
+### 2. Compiling and linking
 
 As the next step, you can compile the library using the generated build files.
 On Linux, the build mode (Release|Debug) is already given in the build files,
@@ -189,8 +187,7 @@ For a Windows Release build, type
 
     cmake --build . --config Release
 
-3. Running the tests
---------------------
+### 3. Running the tests
 
 To check whether EMB² was compiled correctly, run the tests. The test
 executables are contained in the subfolder "binaries".
@@ -205,8 +202,7 @@ On Windows, type
 
 If no error message occurs, EMB² is working fine.
 
-4. Installation
----------------
+### 4. Installation
 
 The default installation path on Linux is
 
@@ -234,13 +230,12 @@ installation has to be run with administrator / root privileges.
 
 
 Using the Library
-=================
+-----------------
 
 To use EMB², the include files have to be made available during compilation of
 your application and the libraries have to be added during linking.
 
-1. Using C++
-------------
+### 1. Using C++
 
 If you want to use the C++ functionalities of EMB², you have to link the
 following libraries (names will be different on Windows and on Linux) in the
@@ -256,8 +251,7 @@ The C++ header files can be included as follows:
     #include<embb/containers/containers.h>
     #include<embb/dataflow/dataflow.h>
 
-2. Using C
-----------
+### 2. Using C
 
 The following libraries have to be linked in the given order:
 
@@ -270,7 +264,7 @@ The C header files can be included as follows:
 
 
 Documentation
-=============
+-------------
 
 EMB² comes with a tutorial, example programs, and an HTML reference
 documentation describing the APIs, which can be found in the "doc" folder.
@@ -278,7 +272,7 @@ The root document of the HTML reference is "doc/reference/index.html".
 
 
 Code Quality
-============
+------------
 
 For the C++ parts of EMB², we respect most rules of the "Google C++ Style
 Guide" which are checked using the cpplint tool. However, we ignore some
@@ -290,7 +284,7 @@ code using Cppcheck, a static analysis tool for C++.
 
 
 Known Bugs and Limitations
-==========================
+--------------------------
 
 - The MTAPI implementation is currently limited to homogeneous systems.
   Support for heterogeneous systems will be added in the near future.
@@ -301,7 +295,7 @@ Known Bugs and Limitations
 
 
 Development and Contribution
-============================
+----------------------------
 
 The EMB² team welcomes all kinds of contributions, preferably as pull requests
 or patches via the development mailing lists (see above). If possible, please
@@ -309,7 +303,7 @@ refer to a current snapshot of the development branch.
 
 
 Links
-=====
+-----
 
   - Multicore Association:
     http://www.multicore-association.org
