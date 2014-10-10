@@ -146,6 +146,7 @@ rsync \
  --exclude "doc/reference/header.html" \
  --exclude "doc/reference/*.css" \
  --exclude "doc/examples/insert_snippets.py" \
+ --exclude ".travis.yml" \
  --archive --recursive ${d} $MYTMPDIR/${n}
  
 echo "Replace version number in README"
