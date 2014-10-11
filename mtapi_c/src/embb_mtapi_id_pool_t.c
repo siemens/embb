@@ -42,7 +42,7 @@ void embb_mtapi_id_pool_initialize(
   for (ii = 1; ii < capacity; ii++) {
     that->id_buffer[ii] = ii;
   }
-  that->ids_availabe = capacity - 1;
+  that->ids_available = capacity - 1;
   that->put_id_position = 0;
   that->get_id_position = 1;
   embb_mtapi_spinlock_initialize(&that->lock);
@@ -50,7 +50,7 @@ void embb_mtapi_id_pool_initialize(
 
 void embb_mtapi_id_pool_finalize(embb_mtapi_id_pool_t * that) {
   that->capacity = 0;
-  that->ids_availabe = 0;
+  that->ids_available = 0;
   that->get_id_position = 0;
   that->put_id_position = 0;
   embb_mtapi_alloc_deallocate(that->id_buffer);
@@ -64,9 +64,9 @@ mtapi_uint_t embb_mtapi_id_pool_allocate(embb_mtapi_id_pool_t * that) {
   assert(MTAPI_NULL != that);
 
   if (embb_mtapi_spinlock_acquire(&that->lock)) {
-    if (0 < that->ids_availabe) {
+    if (0 < that->ids_available) {
       /* take away one id */
-      that->ids_availabe--;
+      that->ids_available--;
 
       /* acquire position to fetch id from */
       mtapi_uint_t id_position = that->get_id_position;
@@ -93,7 +93,7 @@ void embb_mtapi_id_pool_deallocate(
   assert(MTAPI_NULL != that);
 
   if (embb_mtapi_spinlock_acquire(&that->lock)) {
-    if (that->capacity > that->ids_availabe) {
+    if (that->capacity > that->ids_available) {
       /* acquire position to put id to */
       mtapi_uint_t id_position = that->put_id_position;
       that->put_id_position++;
@@ -105,7 +105,7 @@ void embb_mtapi_id_pool_deallocate(
       that->id_buffer[id_position] = id;
 
       /* make it available */
-      that->ids_availabe++;
+      that->ids_available++;
     }
     embb_mtapi_spinlock_release(&that->lock);
   } else {

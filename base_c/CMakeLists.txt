@@ -1,6 +1,6 @@
 project (project_embb_base_c)
 
-include(../CMakeCommon/GroupSourcesMSVC.cmake)
+include(${CMAKE_SOURCE_DIR}/CMakeCommon/GroupSourcesMSVC.cmake)
 
 
 ## CODE FILE DETECTION

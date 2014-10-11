@@ -55,7 +55,7 @@ namespace containers {
  */
 template<class T,
   typename ValuePool    =
-    embb::containers::WaitFreeArrayValuePool< int, 0 >,
+    embb::containers::WaitFreeArrayValuePool< bool, false >,
   class ObjectAllocator = embb::base::Allocator<T> >
 class ObjectPool {
  private:
@@ -87,14 +87,14 @@ class ObjectPool {
   class ReturningTrueIterator {
    public:
     typedef ReturningTrueIterator self_type;
-    typedef int value_type;
-    typedef int& reference;
-    typedef int* pointer;
+    typedef bool value_type;
+    typedef bool& reference;
+    typedef bool* pointer;
     typedef std::forward_iterator_tag iterator_category;
     typedef int difference_type;
     explicit ReturningTrueIterator(size_t count_value);
     self_type operator++();
-    self_type operator++(int junk);
+    self_type operator++(int);
     reference operator*();
     pointer operator->();
     bool operator==(const self_type& rhs);
@@ -102,7 +102,7 @@ class ObjectPool {
 
    private:
     size_t count_value;
-    int ret_value;
+    bool ret_value;
   };
 
   bool IsContained(const T &obj) const;

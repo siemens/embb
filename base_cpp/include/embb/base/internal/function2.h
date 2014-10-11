@@ -422,8 +422,8 @@ template <class C, typename R,
 Function<R, T1, T2> Bind(
   C & obj,
   R(C::*func)(T1, T2),
-  Placeholder::Arg_1 p1,
-  Placeholder::Arg_2 p2) {
+  Placeholder::Arg_1,
+  Placeholder::Arg_2) {
   return Function<R, T1, T2>(obj, func);
 }
 
@@ -431,8 +431,8 @@ template <typename R,
   typename T1, typename T2>
 Function<R, T1, T2> Bind(
   R(*func)(T1, T2),
-  Placeholder::Arg_1 p1,
-  Placeholder::Arg_2 p2) {
+  Placeholder::Arg_1,
+  Placeholder::Arg_2) {
   return Function<R, T1, T2>(func);
 }
 

@@ -14,7 +14,7 @@ configure_file("include/embb/base/internal/cmake_config.h.in"
                "include/embb/base/internal/cmake_config.h")
 
 # Execute the GroupSources macro
-include(../CMakeCommon/GroupSourcesMSVC.cmake)
+include(${CMAKE_SOURCE_DIR}/CMakeCommon/GroupSourcesMSVC.cmake)
 GroupSourcesMSVC(include/embb/base)
 GroupSourcesMSVC(src)
 if (BUILD_TESTS STREQUAL ON)

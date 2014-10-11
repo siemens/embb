@@ -5,7 +5,7 @@ file(GLOB_RECURSE EMBB_ALGORITHMS_CPP_HEADERS "include/*.h")
 file(GLOB_RECURSE EMBB_ALGORITHMS_CPP_TEST_SOURCES "test/*.cc" "test/*.h")
 
 # Execute the GroupSources macro
-include(../CMakeCommon/GroupSourcesMSVC.cmake)
+include(${CMAKE_SOURCE_DIR}/CMakeCommon/GroupSourcesMSVC.cmake)
 GroupSourcesMSVC(include)
 GroupSourcesMSVC(src)
 GroupSourcesMSVC(test)

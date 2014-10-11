@@ -1,0 +1,19 @@
+# Copyright (c) 2014, Siemens AG. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
+language: cpp
+compiler:
+  - gcc
+  - clang
+install:
+  - sudo apt-get install -qq cppcheck
+  - sudo add-apt-repository --yes ppa:kalakris/cmake
+  - sudo apt-get update -qq
+  - sudo apt-get install cmake
+script:
+  - cppcheck -q --enable=all *_c*
+  - mkdir build && cd build
+  - cmake ..
+  - make
+  - chmod a+x binaries/run_tests.sh
+  - ./binaries/run_tests.sh

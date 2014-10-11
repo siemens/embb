@@ -15,7 +15,7 @@
 \usepackage{pifont} % for \myCheck, \myCross
 \usepackage[hyphens]{url}
 \usepackage[hidelinks]{hyperref} % hyperref without colored links
-%\usepackage{draftwatermark}
+\usepackage{draftwatermark}
 \usepackage{xspace}
 \usepackage{pgf}
 \usepackage{tikz}
@@ -36,7 +36,7 @@
 
 \def\lstwidth{0.8\columnwidth}
 \def\embb{EMB$^\mathsf{2}$\xspace}
-%\SetWatermarkColor[gray]{0.9}
+\SetWatermarkColor[gray]{0.95}
 \newcommand{\leadingzero}[1]{\ifnum #1<10 0\the#1\else\the#1\fi}
 \newcommand{\monthword}[1]{\ifcase#1\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
 
@@ -73,7 +73,7 @@
 
 % Set title and author
 % short title is used on the front cover and on each page header
-\renewcommand{\shorttitle}{\embb Tutorial}
+\renewcommand{\shorttitle}{\embb Introduction and Tutorial}
 % short date is printed on each page header, right next to short title
 \renewcommand{\shortdate}{\monthword{\month} \the\year}
 % copyright date is printed on the back cover

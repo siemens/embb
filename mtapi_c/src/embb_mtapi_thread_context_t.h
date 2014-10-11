@@ -39,9 +39,9 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_task_queue_struct embb_mtapi_task_queue_t;
-typedef struct embb_mtapi_node_struct embb_mtapi_node_t;
-typedef struct embb_mtapi_scheduler_struct embb_mtapi_scheduler_t;
+#include <embb_mtapi_task_queue_t_fwd.h>
+#include <embb_mtapi_node_t_fwd.h>
+#include <embb_mtapi_scheduler_t_fwd.h>
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
 
@@ -68,11 +68,7 @@ struct embb_mtapi_thread_context_struct {
   mtapi_status_t status;
 };
 
-/**
- * Thread context type.
- * \memberof embb_mtapi_thread_context_struct
- */
-typedef struct embb_mtapi_thread_context_struct embb_mtapi_thread_context_t;
+#include <embb_mtapi_thread_context_t_fwd.h>
 
 /**
  * Constructor using attributes from node and a given core number.

@@ -74,8 +74,7 @@ class LockFreeMPMCQueueNode {
    */
   LockFreeMPMCQueueNode(
     T const& element
-    /**< [IN] The element of this queue node */
-  );
+    /**< [IN] The element of this queue node */);
 
   /**
    * Returns the next pointer
@@ -105,7 +104,7 @@ class LockFreeMPMCQueueNode {
  *         which stores the elements.
  */
 template< typename T,
-  typename ValuePool = embb::containers::LockFreeTreeValuePool < int, 0 >
+  typename ValuePool = embb::containers::LockFreeTreeValuePool < bool, false >
 >
 class LockFreeMPMCQueue {
  private:
@@ -121,14 +120,14 @@ class LockFreeMPMCQueue {
    * Callback to the method that is called by hazard pointers if a pointer is
    * not hazardous anymore, i.e., can safely be reused.
    */
-  embb::base::Function<void, internal::LockFreeMPMCQueueNode<T>*>
+  embb::base::Function < void, internal::LockFreeMPMCQueueNode<T>* >
     delete_pointer_callback;
 
   /**
    * The hazard pointer object, used for memory management.
    */
-  embb::containers::internal::HazardPointer<internal::LockFreeMPMCQueueNode<T>*>
-    hazardPointer;
+  embb::containers::internal::HazardPointer
+    < internal::LockFreeMPMCQueueNode<T>* > hazardPointer;
 
   /**
    * The object pool, used for lock-free memory allocation.
@@ -200,8 +199,7 @@ class LockFreeMPMCQueue {
    */
   bool TryEnqueue(
     T const& element
-    /**< [IN] Const reference to the element that shall be enqueued */
-  );
+    /**< [IN] Const reference to the element that shall be enqueued */);
 
   /**
    * Tries to dequeue an element from the queue.
@@ -215,9 +213,9 @@ class LockFreeMPMCQueue {
    */
   bool TryDequeue(
     T & element
-    /**< [IN,OUT] Reference to the dequeued element. Unchanged, if the operation
-                  was not successful. */
-  );
+    /**< [IN, OUT] Reference to the dequeued element.
+                   Unchanged, if the operation
+                   was not successful. */);
 };
 } // namespace containers
 } // namespace embb

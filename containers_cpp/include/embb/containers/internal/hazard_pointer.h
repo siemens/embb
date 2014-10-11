@@ -169,6 +169,17 @@ class FixedSizeList {
  */
 template< typename GuardType >
 class HazardPointerThreadEntry {
+#ifdef EMBB_DEBUG
+
+ public:
+    embb::base::Atomic<int>& GetScanningThread() {
+      return who_is_scanning;
+    }
+
+ private:
+    embb::base::Atomic<int> who_is_scanning;
+#endif
+
  private:
    /**
     * Value of the undefined guard (means that no guard is set).
@@ -191,7 +202,7 @@ class HazardPointerThreadEntry {
    * signal that it is leaving. If a thread has left, the other threads are
    * responsible for cleaning up its retired list.
    */
-  embb::base::Atomic< int > is_active;
+  embb::base::Atomic< bool > is_active;
 
   /**
    * The guarded pointer of this thread, has size \c guard_per_thread.

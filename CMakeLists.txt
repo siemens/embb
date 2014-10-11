@@ -36,6 +36,14 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   RelWithDebInfo MinSizeRel." FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+# Check for clang, masquerade it as GNU
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_COMPILER_IS_GNUCC true)
+endif ()
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_COMPILER_IS_GNUCXX true)
+endif()
+
 ## Command line options
 #
 # The set option will be converted to uppercase letters by cmake!! --> ON/OFF
@@ -97,7 +105,7 @@ else()
   set(test_script_out run_tests.bat)
 endif()
 execute_process(
-  COMMAND ${CMAKE_COMMAND} -E copy ../scripts/${test_script_in} binaries/${test_script_out}
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/scripts/${test_script_in} binaries/${test_script_out}
   )
 
 ## Test and Partest build
@@ -135,8 +143,11 @@ SetInstallPaths()
 
 ## DOXYGEN 
 #
-include(CMakeCommon/CreateDoxygenDocumentationTarget.cmake)
-CreateDoxygenDocumentationTarget()
+if(EXISTS "${EMBB_SOURCE_DIR}/doc/reference/Doxyfile.in")
+  include(CMakeCommon/CreateDoxygenDocumentationTarget.cmake)
+  CreateDoxygenDocumentationTarget()
+endif()
+
 
 if (INSTALL_DOCS STREQUAL ON)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/

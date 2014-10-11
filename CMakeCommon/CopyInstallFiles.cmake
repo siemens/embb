@@ -28,12 +28,10 @@ function(CopyBin
          BIN bin
          DEST destination
          )         
-    get_target_property(bin_full_name ${bin} LOCATION)
 
     add_custom_command(
       TARGET ${bin}
       POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${bin_full_name} ${destination}
-      #COMMENT "Copying ${bin} to ${destination}"
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${bin}> ${destination}
     )
 endfunction()

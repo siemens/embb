@@ -60,11 +60,7 @@ struct embb_mtapi_action_struct {
   embb_atomic_int num_tasks;
 };
 
-/**
- * Action type
- * \memberof embb_mtapi_action_struct
- */
-typedef struct embb_mtapi_action_struct embb_mtapi_action_t;
+#include <embb_mtapi_action_t_fwd.h>
 
 /**
  * Default constructor.

@@ -428,7 +428,7 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
   embb_atomic_store_int(&that->affine_task_counter, 0);
 
   /* Paranoia sanitizing of scheduler mode */
-  if (mode < 0 || mode >= NUM_SCHEDULER_MODES) {
+  if (mode >= NUM_SCHEDULER_MODES) {
     mode = WORK_STEAL_VHPF;
   }
   that->mode = mode;

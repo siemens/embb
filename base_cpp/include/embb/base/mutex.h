@@ -42,7 +42,7 @@ namespace base {
  */
 
 /**
- * Pre-declaration for friending.
+ * Forward declaration for friending.
  */
 class ConditionVariable;
 

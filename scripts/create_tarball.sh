@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2014, Siemens AG. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -140,12 +140,18 @@ rsync \
  --exclude "doc/tutorial/content" \
  --exclude "doc/tutorial/*.tex" \
  --exclude "doc/tutorial/*.bib" \
+ --exclude "doc/reference/*.xml" \
+ --exclude "doc/reference/*.dox" \
+ --exclude "doc/reference/*.in" \
+ --exclude "doc/reference/header.html" \
+ --exclude "doc/reference/*.css" \
  --exclude "doc/examples/insert_snippets.py" \
+ --exclude ".travis.yml" \
  --archive --recursive ${d} $MYTMPDIR/${n}
  
 echo "Replace version number in README"
 
-README_FILE="$MYTMPDIR/${n}/README.txt"
+README_FILE="$MYTMPDIR/${n}/README.md"
 
 if [ -f $README_FILE ]; then
   sed -i "s/\[VERSION_NUMBER_TEMPLATE\]/$VERSION_NUMBER/g" $README_FILE

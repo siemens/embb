@@ -63,8 +63,8 @@ PT_MAIN("Data Structures C++") {
     embb::containers::LockFreeStack<int> >);
 
   PT_RUN(embb::containers::test::ObjectPoolTest
-    <embb::containers::LockFreeTreeValuePool<int COMMA 0 > >);
+    <embb::containers::LockFreeTreeValuePool<bool COMMA false > >);
 
   PT_RUN(embb::containers::test::ObjectPoolTest
-    <embb::containers::WaitFreeArrayValuePool<int COMMA 0> >);
+    <embb::containers::WaitFreeArrayValuePool<bool COMMA false> >);
 }

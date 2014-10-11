@@ -40,7 +40,7 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_task_struct embb_mtapi_task_t;
+#include <embb_mtapi_task_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -60,11 +60,7 @@ struct embb_mtapi_task_queue_struct {
   embb_mtapi_spinlock_t lock;
 };
 
-/**
- * Task queue type.
- * \memberof embb_mtapi_task_queue_struct
- */
-typedef struct embb_mtapi_task_queue_struct embb_mtapi_task_queue_t;
+#include <embb_mtapi_task_queue_t_fwd.h>
 
 /**
  * Default constructor.

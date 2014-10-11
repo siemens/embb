@@ -36,7 +36,7 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_task_struct embb_mtapi_task_t;
+#include <embb_mtapi_task_t_fwd.h>
 
 
 /* ---- TYPE DEFINITIONS --------------------------------------------------- */

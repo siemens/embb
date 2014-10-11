@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2014, Siemens AG. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,9 @@ do
     fi
     if [[ $file == *atomic_arithmetic.h ]]; then 
       current_rules+=",-readability/function" # All parameters should be named in a function
+    fi
+    if [[ $file == *object_pool-inl.h ]]; then 
+      current_rules+=",-readability/function" # All parameters should be named in a function (triggers error with clang if named...)
     fi
     for filename in "${RAND_FILES[@]}"; do
       if [[ $file =~ $filename ]]; then 

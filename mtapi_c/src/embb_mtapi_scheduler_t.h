@@ -39,10 +39,10 @@ extern "C" {
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
 
-typedef struct embb_mtapi_queue_struct embb_mtapi_queue_t;
-typedef struct embb_mtapi_thread_context_struct embb_mtapi_thread_context_t;
-typedef struct embb_mtapi_task_struct embb_mtapi_task_t;
-typedef struct embb_mtapi_node_struct embb_mtapi_node_t;
+#include <embb_mtapi_queue_t_fwd.h>
+#include <embb_mtapi_thread_context_t_fwd.h>
+#include <embb_mtapi_task_t_fwd.h>
+#include <embb_mtapi_node_t_fwd.h>
 typedef int (embb_mtapi_scheduler_worker_func_t)(void * args);
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -87,11 +87,7 @@ struct embb_mtapi_scheduler_struct {
   embb_atomic_int affine_task_counter;
 };
 
-/**
- * Scheduler type.
- * \memberof embb_mtapi_scheduler_struct
- */
-typedef struct embb_mtapi_scheduler_struct embb_mtapi_scheduler_t;
+#include <embb_mtapi_scheduler_t_fwd.h>
 
 /**
  * The default worker thread function used by the scheduler. Implements
