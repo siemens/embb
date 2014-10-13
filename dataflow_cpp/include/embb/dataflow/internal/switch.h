@@ -98,7 +98,7 @@ class Switch
 
   template <typename T>
   void operator >> (T & target) {
-    GetOutput<0>() >> target.GetInput<0>();
+    GetOutput<0>() >> target.template GetInput<0>();
   }
 
   virtual void OnClock(int clock) {

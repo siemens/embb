@@ -100,7 +100,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
 
   template <typename T>
   void operator >> (T & target) {
-    GetOutput<0>() >> target.GetInput<0>();
+    GetOutput<0>() >> target.template GetInput<0>();
   }
 
   virtual void OnClock(int clock) {
