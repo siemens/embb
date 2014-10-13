@@ -25,15 +25,10 @@
 ## Sets the install base path for headers, libraries, and the documentation
 # 
 function(SetInstallPaths)
-  if (DEFINED INSTALL_PREFIX)
-    # User given install path given when calling cmake as "-DINSTALL_PREFIX=...".
-    set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX})
-    set(INSTALL_PREFIX_DOCS "${CMAKE_INSTALL_PREFIX}/doc")
-  else()
-    # Default install path is in build directory.
-    if (DEFINED UNIX)
-      set(CMAKE_INSTALL_PREFIX "/usr/local")
-      set(INSTALL_PREFIX_DOCS "/usr/local/share/doc/${CMAKE_PROJECT_NAME}-${EMBB_BASE_VERSION_MAJOR}.${EMBB_BASE_VERSION_MINOR}.${EMBB_BASE_VERSION_PATCH}")
+  if(WIN32)
+    if (DEFINED INSTALL_PREFIX)
+      # User given install path given when calling cmake as "-DINSTALL_PREFIX=...".
+      set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX})
     else()
       file(TO_CMAKE_PATH "$ENV{ProgramFiles}" _PROG_FILES) # 32-bit dir on win32, useless to us on win64
       file(TO_CMAKE_PATH "$ENV{ProgramFiles(x86)}" _PROG_FILES_X86) # 32-bit dir: only set on win64
@@ -52,16 +47,20 @@ function(SetInstallPaths)
         endif()
       endif()
       set(CMAKE_INSTALL_PREFIX "${_PROGFILESDIR}/${CMAKE_PROJECT_NAME}-${EMBB_BASE_VERSION_MAJOR}.${EMBB_BASE_VERSION_MINOR}.${EMBB_BASE_VERSION_PATCH}")
-      
-      set(INSTALL_PREFIX_DOCS "${CMAKE_INSTALL_PREFIX}/doc")
-	  message(${INSTALL_PREFIX_DOCS})
-      IF (WIN32)
-        STRING(REPLACE "\\" "\\\\" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
-        STRING(REPLACE "/" "\\\\" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
-        STRING(REPLACE "\\" "\\\\" INSTALL_PREFIX_DOCS ${INSTALL_PREFIX_DOCS} )
-        STRING(REPLACE "/" "\\\\" INSTALL_PREFIX_DOCS ${INSTALL_PREFIX_DOCS} )
-      endif()
     endif()
+    set(INSTALL_PREFIX_DOCS "${CMAKE_INSTALL_PREFIX}/doc")
+    #STRING(REPLACE "\\" "\\\\" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+    #STRING(REPLACE "/" "\\\\" CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+    #STRING(REPLACE "/" "\\\\" INSTALL_PREFIX_DOCS ${INSTALL_PREFIX_DOCS} )
+    #STRING(REPLACE "\\" "\\\\" INSTALL_PREFIX_DOCS ${INSTALL_PREFIX_DOCS} )
+  else()
+    if (DEFINED INSTALL_PREFIX)
+      # User given install path given when calling cmake as "-DINSTALL_PREFIX=...".
+      set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX})
+    else()
+      set(CMAKE_INSTALL_PREFIX "/usr/local")
+    endif()
+    set(INSTALL_PREFIX_DOCS "${CMAKE_INSTALL_PREFIX}/share/doc/${CMAKE_PROJECT_NAME}-${EMBB_BASE_VERSION_MAJOR}.${EMBB_BASE_VERSION_MINOR}.${EMBB_BASE_VERSION_PATCH}")
   endif()
   
   set(INSTALL_PREFIX ${INSTALL_PREFIX} PARENT_SCOPE)
