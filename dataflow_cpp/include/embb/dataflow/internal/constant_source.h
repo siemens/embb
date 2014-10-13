@@ -68,6 +68,11 @@ class ConstantSource
   typename TypeAt<typename OutputsType::Types, Index>::Result & GetOutput() {
     return outputs_.template Get<Index>();
   }
+
+  template <typename T>
+  void operator >> (T & target) {
+    GetOutput<0>() >> target.GetInput<0>();
+  }
 };
 
 } // namespace internal

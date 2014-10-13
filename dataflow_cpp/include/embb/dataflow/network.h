@@ -235,6 +235,14 @@ class Network {
      */
     template <int Index>
     typename OutputsType::Types<Index>::Result & GetOutput();
+
+    /**
+     * Connects output port 0 to input port 0 of \c target.
+     * \param target Process to connect to.
+     * \tparam T Type of target process.
+     */
+    template <typename T>
+    void operator >> (T & target);
   };
 
   /**
@@ -315,6 +323,14 @@ class Network {
     */
     template <int Index>
     typename OutputsType::Types<Index>::Result & GetOutput();
+
+    /**
+     * Connects output port 0 to input port 0 of \c target.
+     * \param target Process to connect to.
+     * \tparam T Type of target process.
+     */
+    template <typename T>
+    void operator >> (T & target);
   };
 
   /**
@@ -385,6 +401,14 @@ class Network {
      */
     template <int Index>
     typename OutputsType::Types<Index>::Result & GetOutput();
+
+    /**
+     * Connects output port 0 to input port 0 of \c target.
+     * \param target Process to connect to.
+     * \tparam T Type of target process.
+     */
+    template <typename T>
+    void operator >> (T & target);
   };
 
   /**
@@ -455,6 +479,14 @@ class Network {
      */
     template <int Index>
     typename OutputsType::Types<Index>::Result & GetOutput();
+
+    /**
+     * Connects output port 0 to input port 0 of \c target.
+     * \param target Process to connect to.
+     * \tparam T Type of target process.
+     */
+    template <typename T>
+    void operator >> (T & target);
   };
 
   /**
@@ -588,6 +620,14 @@ class Network {
      */
     template <int Index>
     typename OutputsType::Types<Index>::Result & GetOutput();
+
+    /**
+     * Connects output port 0 to input port 0 of \c target.
+     * \param target Process to connect to.
+     * \tparam T Type of target process.
+     */
+    template <typename T>
+    void operator >> (T & target);
   };
 
   /**
@@ -639,6 +679,14 @@ class Network {
      */
     template <int Index>
     typename OutputsType::Types<Index>::Result & GetOutput();
+
+    /**
+     * Connects output port 0 to input port 0 of \c target.
+     * \param target Process to connect to.
+     * \tparam T Type of target process.
+     */
+    template <typename T>
+    void operator >> (T & target);
   };
 
   /**

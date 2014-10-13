@@ -98,6 +98,11 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
     return outputs_.template Get<Index>();
   }
 
+  template <typename T>
+  void operator >> (T & target) {
+    GetOutput<0>() >> target.GetInput<0>();
+  }
+
   virtual void OnClock(int clock) {
     const int idx = clock % Slices;
     if (!inputs_.AreAtClock(clock))

@@ -81,6 +81,11 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
     return outputs_.template Get<Index>();
   }
 
+  template <typename T>
+  void operator >> (T & target) {
+    GetOutput<0>() >> target.GetInput<0>();
+  }
+
  private:
   OutputsType outputs_;
   ExecutorType executor_;
