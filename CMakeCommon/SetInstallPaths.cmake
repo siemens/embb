@@ -28,7 +28,7 @@ function(SetInstallPaths)
   if (DEFINED INSTALL_PREFIX)
     # User given install path given when calling cmake as "-DINSTALL_PREFIX=...".
     set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX})
-    set(INSTALL_PREFIX_DOCS "${CMAKE_INSTALL_PREFIX}/doc")
+    set(INSTALL_PREFIX_DOCS "${CMAKE_INSTALL_PREFIX}/share/doc/embb")
   else()
     # Default install path is in build directory.
     if (DEFINED UNIX)
