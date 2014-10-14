@@ -42,16 +42,17 @@ class SourceExecutor;
 template <int Slices, typename O1>
 class SourceExecutor< Outputs<Slices, O1> > {
  public:
-  typedef embb::base::Function<void, O1 &> FunctionType;
+  typedef embb::base::Function<bool, O1 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
 
-  void Execute(
+  bool Execute(
     int clock,
     Outputs<Slices, O1> & outputs) {
     O1 o1;
-    function_(o1);
+    bool result = function_(o1);
     outputs.template Get<0>().Send(Signal<O1>(clock, o1));
+    return result;
   }
 
  private:
@@ -61,18 +62,19 @@ class SourceExecutor< Outputs<Slices, O1> > {
 template <int Slices, typename O1, typename O2>
 class SourceExecutor< Outputs<Slices, O1, O2> > {
  public:
-  typedef embb::base::Function<void, O1 &, O2 &> FunctionType;
+  typedef embb::base::Function<bool, O1 &, O2 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
 
-  void Execute(
+  bool Execute(
     int clock,
     Outputs<Slices, O1, O2> & outputs) {
     O1 o1;
     O2 o2;
-    function_(o1, o2);
+    bool result = function_(o1, o2);
     outputs.template Get<0>().Send(Signal<O1>(clock, o1));
     outputs.template Get<1>().Send(Signal<O2>(clock, o2));
+    return result;
   }
 
  private:
@@ -82,20 +84,21 @@ class SourceExecutor< Outputs<Slices, O1, O2> > {
 template <int Slices, typename O1, typename O2, typename O3>
 class SourceExecutor< Outputs<Slices, O1, O2, O3> > {
  public:
-  typedef embb::base::Function<void, O1 &, O2 &, O3 &> FunctionType;
+  typedef embb::base::Function<bool, O1 &, O2 &, O3 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
 
-  void Execute(
+  bool Execute(
     int clock,
     Outputs<Slices, O1, O2, O3> & outputs) {
     O1 o1;
     O2 o2;
     O3 o3;
-    function_(o1, o2, o3);
+    bool result = function_(o1, o2, o3);
     outputs.template Get<0>().Send(Signal<O1>(clock, o1));
     outputs.template Get<1>().Send(Signal<O2>(clock, o2));
     outputs.template Get<2>().Send(Signal<O3>(clock, o3));
+    return result;
   }
 
  private:
@@ -105,22 +108,23 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3> > {
 template <int Slices, typename O1, typename O2, typename O3, typename O4>
 class SourceExecutor< Outputs<Slices, O1, O2, O3, O4> > {
  public:
-  typedef embb::base::Function<void, O1 &, O2 &, O3 &, O4 &> FunctionType;
+  typedef embb::base::Function<bool, O1 &, O2 &, O3 &, O4 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
 
-  void Execute(
+  bool Execute(
     int clock,
     Outputs<Slices, O1, O2, O3, O4> & outputs) {
     O1 o1;
     O2 o2;
     O3 o3;
     O4 o4;
-    function_(o1, o2, o3, o4);
+    bool result = function_(o1, o2, o3, o4);
     outputs.template Get<0>().Send(Signal<O1>(clock, o1));
     outputs.template Get<1>().Send(Signal<O2>(clock, o2));
     outputs.template Get<2>().Send(Signal<O3>(clock, o3));
     outputs.template Get<3>().Send(Signal<O4>(clock, o4));
+    return result;
   }
 
  private:
@@ -131,11 +135,11 @@ template <int Slices, typename O1, typename O2, typename O3, typename O4,
   typename O5>
 class SourceExecutor< Outputs<Slices, O1, O2, O3, O4, O5> > {
  public:
-  typedef embb::base::Function<void, O1 &, O2 &, O3 &, O4 &, O5 &> FunctionType;
+  typedef embb::base::Function<bool, O1 &, O2 &, O3 &, O4 &, O5 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
 
-  void Execute(
+  bool Execute(
     int clock,
     Outputs<Slices, O1, O2, O3, O4, O5> & outputs) {
     O1 o1;
@@ -143,12 +147,13 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3, O4, O5> > {
     O3 o3;
     O4 o4;
     O5 o5;
-    function_(o1, o2, o3, o4, o5);
+    bool result = function_(o1, o2, o3, o4, o5);
     outputs.template Get<0>().Send(Signal<O1>(clock, o1));
     outputs.template Get<1>().Send(Signal<O2>(clock, o2));
     outputs.template Get<2>().Send(Signal<O3>(clock, o3));
     outputs.template Get<3>().Send(Signal<O4>(clock, o4));
     outputs.template Get<4>().Send(Signal<O5>(clock, o5));
+    return result;
   }
 
  private:

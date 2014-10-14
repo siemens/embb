@@ -697,10 +697,9 @@ class Network {
   void Add(ConstantSource<Type> & source);
 
   /**
-   * Executes the network for at most \c elements tokens.
-   * \param elements Maximum number of tokens to process.
+   * Executes the network until one of the the sources returns \c false.
    */
-  void operator () (int elements);
+  void operator () ();
 };
 
 #else
@@ -862,7 +861,7 @@ class Network : public internal::ClockListener {
     sources_.push_back(&source);
   }
 
-  void operator () (int elements) {
+  void operator () () {
     internal::SchedulerSequential sched_seq;
     internal::SchedulerMTAPI<Slices> sched_mtapi;
     internal::Scheduler * sched = &sched_mtapi;
@@ -876,16 +875,22 @@ class Network : public internal::ClockListener {
 
     for (int ii = 0; ii < Slices; ii++) sink_count_[ii] = 0;
 
-    for (int clock = 0; clock < elements; clock++) {
+    int clock = 0;
+    while (clock >= 0) {
       const int idx = clock % Slices;
       while (sink_count_[idx] > 0) embb::base::Thread::CurrentYield();
       sched->WaitForSlice(idx);
-      SpawnClock(clock);
+      if (!SpawnClock(clock))
+        break;
+      clock++;
     }
 
-    for (int ii = 0; ii < Slices; ii++) {
-      while (sink_count_[ii] > 0) embb::base::Thread::CurrentYield();
-      sched->WaitForSlice(ii);
+    int ii = clock - Slices + 1;
+    if (ii < 0) ii = 0;
+    for (; ii < clock; ii++) {
+      const int idx = ii % Slices;
+      while (sink_count_[idx] > 0) embb::base::Thread::CurrentYield();
+      sched->WaitForSlice(idx);
     }
   }
 
@@ -912,15 +917,17 @@ class Network : public internal::ClockListener {
   std::vector<int> spawn_history_[Slices];
 #endif
 
-  void SpawnClock(int clock) {
+  bool SpawnClock(int clock) {
     const int idx = clock % Slices;
+    bool result = true;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
     spawn_history_[idx].push_back(clock);
 #endif
     sink_count_[idx] = static_cast<int>(sinks_.size());
     for (size_t kk = 0; kk < sources_.size(); kk++) {
-      sources_[kk]->Start(clock);
+      result &= sources_[kk]->Start(clock);
     }
+    return result;
   }
 };
 

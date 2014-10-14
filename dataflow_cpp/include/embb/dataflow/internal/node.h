@@ -42,7 +42,7 @@ class Node {
   virtual bool HasInputs() const { return false; }
   virtual bool HasOutputs() const { return false; }
   virtual void Run(int clock) = 0;
-  virtual void Start(int /*clock*/) {
+  virtual bool Start(int /*clock*/) {
     EMBB_THROW(embb::base::ErrorException,
       "Nodes are started implicitly.");
   }

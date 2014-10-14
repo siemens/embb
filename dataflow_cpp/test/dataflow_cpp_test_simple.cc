@@ -53,11 +53,13 @@ typedef MyNetwork::Select< int > MySelect;
 embb::base::Atomic<int> source_counter;
 int source_array[TEST_COUNT];
 
-void sourceFunc(int & out) {
+bool sourceFunc(int & out) {
   out = source_counter;
 
   source_array[source_counter] = out;
   source_counter++;
+
+  return source_counter < 12;
 }
 
 embb::base::Atomic<int> pred_counter;
@@ -195,7 +197,7 @@ void SimpleTest::TestBasic() {
 
     network.Add(sink);
 
-    network(TEST_COUNT);
+    network();
 
     PT_EXPECT(asink.Check());
   }

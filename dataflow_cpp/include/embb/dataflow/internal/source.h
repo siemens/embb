@@ -52,7 +52,7 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
   typedef typename ExecutorType::FunctionType FunctionType;
 
   explicit Source(FunctionType function)
-    : executor_(function) {
+    : executor_(function), not_done_(true) {
     next_clock_ = 0;
   }
 
@@ -61,15 +61,18 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
   }
 
   virtual void Run(int clock) {
-    executor_.Execute(clock, outputs_);
+    not_done_ = executor_.Execute(clock, outputs_);
     next_clock_++;
   }
 
-  virtual void Start(int clock) {
+  virtual bool Start(int clock) {
     while (clock != next_clock_) embb::base::Thread::CurrentYield();
-    const int idx = clock % Slices;
-    action_[idx] = Action(this, clock);
-    sched_->Spawn(action_[idx]);
+    if (not_done_) {
+      const int idx = clock % Slices;
+      action_[idx] = Action(this, clock);
+      sched_->Spawn(action_[idx]);
+    }
+    return not_done_;
   }
 
   OutputsType & GetOutputs() {
@@ -90,6 +93,7 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
   OutputsType outputs_;
   ExecutorType executor_;
   Action action_[Slices];
+  volatile bool not_done_;
   embb::base::Atomic<int> next_clock_;
 };
 

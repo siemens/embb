@@ -56,8 +56,9 @@ class ConstantSource
     GetOutput<0>().Send(Signal<Type>(clock, value_));
   }
 
-  virtual void Start(int clock) {
+  virtual bool Start(int clock) {
     Run(clock);
+    return true;
   }
 
   OutputsType & GetOutputs() {
