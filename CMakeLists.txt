@@ -33,7 +33,7 @@ set (EMBB_BASE_VERSION_PATCH 1)
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Choose the type of build, options are: Debug Release
-  RelWithDebInfo MinSizeRel." FORCE)
+  RelWithDebInfo MinSizeRel Coverage." FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # Check for clang, masquerade it as GNU
@@ -58,7 +58,7 @@ option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors
 ## LOCAL INSTALLATION OF SUBPROJECT BINARIES
 #
 include(CMakeCommon/CopyInstallFiles.cmake) # Needed in all subprojects
-set(local_install_dir ${CMAKE_CURRENT_BINARY_DIR}/binaries) 
+set(local_install_dir ${CMAKE_CURRENT_BINARY_DIR}/binaries)
 
 if (WARNINGS_ARE_ERRORS STREQUAL ON)
   message("-- Warnings are treated as errors")
@@ -93,7 +93,7 @@ endif()
 message("   (set with command line option -DUSE_EXCEPTIONS=ON/OFF)")
 
 ## Copy test execution script to local binaries folder
-#   
+#
 if (DEFINED CYGWIN)
   set(test_script_in run_tests_cygwin.sh)
   set(test_script_out run_tests.sh)
@@ -141,7 +141,7 @@ message("   (set with command line option -DBUILD_EXAMPLES=ON/OFF)")
 include(CMakeCommon/SetInstallPaths.cmake)
 SetInstallPaths()
 
-## DOXYGEN 
+## DOXYGEN
 #
 if(EXISTS "${EMBB_SOURCE_DIR}/doc/reference/Doxyfile.in")
   include(CMakeCommon/CreateDoxygenDocumentationTarget.cmake)

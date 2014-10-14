@@ -31,9 +31,9 @@ function(SetGNUCompilerFlags compiler_libs)
     # -Wextra -> Even more warnings
     # -Werror -> Warnings are errors
     set(warning_flags "-Wall -Wextra")
-	if (WARNINGS_ARE_ERRORS STREQUAL ON)
+    if (WARNINGS_ARE_ERRORS STREQUAL ON)
       set(warning_flags "${warning_flags} -Werror")
-	endif()
+    endif()
     if(CMAKE_COMPILER_IS_GNUCC)
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -std=c99 ${warning_flags}"
           PARENT_SCOPE)
@@ -41,6 +41,9 @@ function(SetGNUCompilerFlags compiler_libs)
           PARENT_SCOPE)
       set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DNDEBUG"
           PARENT_SCOPE)
+      set(CMAKE_C_FLAGS_COVERAGE
+         "${CMAKE_C_FLAGS_COVERAGE} -O0 -fprofile-arcs -ftest-coverage"
+         PARENT_SCOPE)
     endif()
     if(CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++03 ${warning_flags}"
@@ -49,6 +52,9 @@ function(SetGNUCompilerFlags compiler_libs)
           PARENT_SCOPE)
       set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG"
           PARENT_SCOPE)
+      set(CMAKE_CXX_FLAGS_COVERAGE
+         "${CMAKE_CXX_FLAGS_COVERAGE} -O0 -fprofile-arcs -ftest-coverage"
+         PARENT_SCOPE)
     endif()
   endif()
 endfunction()
