@@ -198,13 +198,15 @@ bool Node::IsInitialized() {
 
 Node & Node::GetInstance() {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
-  init_mutex.Lock();
   if (!IsInitialized()) {
-    Node::Initialize(
-      MTAPI_CPP_AUTOMATIC_DOMAIN_ID, MTAPI_CPP_AUTOMATIC_NODE_ID);
-    atexit(Node::Finalize);
+    init_mutex.Lock();
+    if (!IsInitialized()) {
+      Node::Initialize(
+        MTAPI_CPP_AUTOMATIC_DOMAIN_ID, MTAPI_CPP_AUTOMATIC_NODE_ID);
+      atexit(Node::Finalize);
+    }
+    init_mutex.Unlock();
   }
-  init_mutex.Unlock();
   return *node_instance;
 #else
   if (IsInitialized()) {
