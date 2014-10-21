@@ -118,6 +118,6 @@ do
         current_rules+=",-runtime/threadsafe_fn" # These tests are allowed to use the thread unsafe rand()
       fi
     done
-    python ${c} --filter=$current_rules --root="$project/include" $file
+    python ${c} --filter=$current_rules --root="$project/include" --output=vs7 $file
   done
 done
