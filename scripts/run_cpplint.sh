@@ -75,6 +75,8 @@ PARENTHESIS_RULE=",-whitespace/parens"
 C_CAST_RULE=",-readability/casting"
 LONG_LINES_RULE=",-whitespace/line_length"
 
+retval=true
+
 ##Excluded files
 RAND_FILES=( embb_mtapi_test_group.cc embb_mtapi_test_queue.cc embb_mtapi_test_task.cc queue_test-inl.h )
 for project in base_c mtapi_c base_cpp mtapi_cpp algorithms_cpp containers_cpp dataflow_cpp
@@ -90,7 +92,7 @@ do
   do
     echo "--> Run cpplint on file $file"
     current_rules=$EXCLUDED_RULES
-    if [[ $file =~ \.h$ ]]; then 
+    if [[ $file =~ \.h$ ]]; then
       current_rules+=$PARENTHESIS_RULE
     fi
     if [[ $file =~ \.c$ ]] || [[ $file =~ \mtapi.h$ ]]; then
@@ -101,23 +103,28 @@ do
     fi
     ############
     #Per file exclusion rules
-    if [[ $file == *generate_atomic_implementation_template.h ]]; then 
+    if [[ $file == *generate_atomic_implementation_template.h ]]; then
       current_rules+=",-build/header_guard" # This file needs to be included multiple times
     fi
-    if [[ $file == *atomic.h ]]; then 
+    if [[ $file == *atomic.h ]]; then
       current_rules+=",-whitespace/indent" # indention is misinterpreted for this file
     fi
-    if [[ $file == *atomic_arithmetic.h ]]; then 
+    if [[ $file == *atomic_arithmetic.h ]]; then
       current_rules+=",-readability/function" # All parameters should be named in a function
     fi
-    if [[ $file == *object_pool-inl.h ]]; then 
+    if [[ $file == *object_pool-inl.h ]]; then
       current_rules+=",-readability/function" # All parameters should be named in a function (triggers error with clang if named...)
     fi
     for filename in "${RAND_FILES[@]}"; do
-      if [[ $file =~ $filename ]]; then 
+      if [[ $file =~ $filename ]]; then
         current_rules+=",-runtime/threadsafe_fn" # These tests are allowed to use the thread unsafe rand()
       fi
     done
     python ${c} --filter=$current_rules --root="$project/include" --output=vs7 $file
+    if [ $? != $0 ]; then
+      retval=false
+    fi
   done
 done
+
+$retval
