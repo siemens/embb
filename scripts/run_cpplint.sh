@@ -75,7 +75,7 @@ PARENTHESIS_RULE=",-whitespace/parens"
 C_CAST_RULE=",-readability/casting"
 LONG_LINES_RULE=",-whitespace/line_length"
 
-retval=true
+retval=0
 
 ##Excluded files
 RAND_FILES=( embb_mtapi_test_group.cc embb_mtapi_test_queue.cc embb_mtapi_test_task.cc queue_test-inl.h )
@@ -121,10 +121,10 @@ do
       fi
     done
     python ${c} --filter=$current_rules --root="$project/include" --output=vs7 $file
-    if [ $? != $0 ]; then
-      retval=false
+    if [[ ! $? -eq 0 ]]; then
+      retval=$((retval+1))
     fi
   done
 done
-
-$retval
+echo "$retval files contained errors."
+exit $retval
