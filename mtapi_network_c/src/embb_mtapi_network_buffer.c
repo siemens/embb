@@ -45,7 +45,7 @@ int embb_mtapi_network_buffer_push_back_int16(
   }
   memcpy(that->data + that->size, &value, 2);
   that->size += 2;
-  return 1;
+  return 2;
 }
 
 int embb_mtapi_network_buffer_push_back_int32(
@@ -56,7 +56,7 @@ int embb_mtapi_network_buffer_push_back_int32(
   }
   memcpy(that->data + that->size, &value, 4);
   that->size += 4;
-  return 1;
+  return 4;
 }
 
 int embb_mtapi_network_buffer_push_back_rawdata(
@@ -68,7 +68,7 @@ int embb_mtapi_network_buffer_push_back_rawdata(
   }
   memcpy(that->data + that->size, rawdata, size);
   that->size += size;
-  return 1;
+  return size;
 }
 
 int embb_mtapi_network_buffer_pop_front_int8(

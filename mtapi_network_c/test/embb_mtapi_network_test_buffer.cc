@@ -25,7 +25,10 @@
  */
 
 #include <embb_mtapi_network_test_buffer.h>
+
 #include <embb_mtapi_network_buffer.h>
+
+#include <embb/base/c/memory_allocation.h>
 
 
 NetworkBufferTest::NetworkBufferTest() {
@@ -34,20 +37,31 @@ NetworkBufferTest::NetworkBufferTest() {
 
 void NetworkBufferTest::TestBasic() {
   embb_mtapi_network_buffer_t buffer;
+  int err;
+
   embb_mtapi_network_buffer_initialize(&buffer, 1024);
-  embb_mtapi_network_buffer_push_back_int8(&buffer, -1);
-  embb_mtapi_network_buffer_push_back_int16(&buffer, -2);
+
+  err = embb_mtapi_network_buffer_push_back_int8(&buffer, -1);
+  PT_EXPECT(err == 1);
+  err = embb_mtapi_network_buffer_push_back_int16(&buffer, -2);
+  PT_EXPECT(err == 2);
+
   int8_t val8 = 0;
-  int result = embb_mtapi_network_buffer_pop_front_int8(&buffer, &val8);
-  PT_EXPECT(result == 1);
+  err = embb_mtapi_network_buffer_pop_front_int8(&buffer, &val8);
+  PT_EXPECT(err == 1);
   PT_EXPECT(val8 == -1);
+
   int32_t val32 = 0;
-  result = embb_mtapi_network_buffer_pop_front_int32(&buffer, &val32);
-  PT_EXPECT(result == 0);
+  err = embb_mtapi_network_buffer_pop_front_int32(&buffer, &val32);
+  PT_EXPECT(err == 0);
   PT_EXPECT(val32 == 0);
+
   int16_t val16 = 0;
-  result = embb_mtapi_network_buffer_pop_front_int16(&buffer, &val16);
-  PT_EXPECT(result == 2);
+  err = embb_mtapi_network_buffer_pop_front_int16(&buffer, &val16);
+  PT_EXPECT(err == 2);
   PT_EXPECT(val16 == -2);
+
   embb_mtapi_network_buffer_finalize(&buffer);
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }
