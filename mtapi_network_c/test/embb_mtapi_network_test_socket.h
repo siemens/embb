@@ -24,12 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MTAPI_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+#define MTAPI_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+
 #include <partest/partest.h>
 
-#include <embb_mtapi_network_test_buffer.h>
-#include <embb_mtapi_network_test_socket.h>
+class NetworkSocketTest : public partest::TestCase {
+ public:
+   NetworkSocketTest();
 
-PT_MAIN("MTAPI NETWORK") {
-  PT_RUN(NetworkBufferTest);
-  PT_RUN(NetworkSocketTest);
-}
+ private:
+  void TestBasic();
+};
+
+#endif // MTAPI_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
