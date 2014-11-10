@@ -22,16 +22,6 @@ void embb_mtapi_network_socket_finalize(
   }
 }
 
-int embb_mtapi_network_socket_setnonblock(
-  embb_mtapi_network_socket_t * that) {
-  u_long mode = 1;
-  if (SOCKET_ERROR == ioctlsocket(that->handle, FIONBIO, &mode)) {
-    return 0;
-  } else {
-    return 1;
-  }
-}
-
 int embb_mtapi_network_socket_bind_and_listen(
   embb_mtapi_network_socket_t * that,
   char const * host,
@@ -61,8 +51,7 @@ int embb_mtapi_network_socket_bind_and_listen(
     return 0;
   }
 
-  // set non-block
-  return embb_mtapi_network_socket_setnonblock(that);
+  return 1;
 }
 
 int embb_mtapi_network_socket_accept(
@@ -96,6 +85,41 @@ int embb_mtapi_network_socket_connect(
   return 1;
 }
 
+int embb_mtapi_network_socket_select(
+  embb_mtapi_network_socket_t * that,
+  int timeout
+  ) {
+  fd_set read_set;
+  int max_fd;
+  int err;
+  struct timeval tv;
+  tv.tv_sec = timeout / 1000;
+  tv.tv_usec = timeout % 1000;
+
+  FD_ZERO(&read_set);
+  FD_SET(that->handle, &read_set);
+  max_fd = that->handle;
+
+  if (timeout >= 0) {
+    err = select(max_fd, &read_set, NULL, NULL, &tv);
+  } else {
+    err = select(max_fd, &read_set, NULL, NULL, NULL);
+  }
+  if (0 == err) {
+    // timeout
+    return 0;
+  }
+  if (SOCKET_ERROR == err) {
+    return 0;
+  }
+
+  if (FD_ISSET(that->handle, &read_set)) {
+    return 1;
+  }
+
+  return 0;
+}
+
 int embb_mtapi_network_socket_sendbuffer(
   embb_mtapi_network_socket_t * that,
   embb_mtapi_network_buffer_t * buffer) {
@@ -111,12 +135,13 @@ int embb_mtapi_network_socket_recvbuffer(
   embb_mtapi_network_socket_t * that,
   embb_mtapi_network_buffer_t * buffer) {
   u_long bytes_available = 0;
+  int err;
   if (0 != ioctlsocket(that->handle, FIONREAD, &bytes_available))
     return 0;
   if (buffer->capacity > (int)bytes_available)
     return 0;
-  int result = recv(that->handle, buffer->data, buffer->capacity, 0);
-  if (result != buffer->capacity)
+  err = recv(that->handle, buffer->data, buffer->capacity, 0);
+  if (err != buffer->capacity)
     return 0;
   buffer->size = buffer->capacity;
   return buffer->size;

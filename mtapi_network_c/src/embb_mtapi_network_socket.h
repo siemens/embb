@@ -66,6 +66,11 @@ int embb_mtapi_network_socket_connect(
   uint16_t port
 );
 
+int embb_mtapi_network_socket_select(
+  embb_mtapi_network_socket_t * that,
+  int timeout
+);
+
 int embb_mtapi_network_socket_sendbuffer(
   embb_mtapi_network_socket_t * that,
   embb_mtapi_network_buffer_t * buffer
