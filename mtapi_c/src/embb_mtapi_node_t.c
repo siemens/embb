@@ -38,6 +38,7 @@
 #include <embb_mtapi_queue_t.h>
 #include <embb_mtapi_scheduler_t.h>
 #include <embb_mtapi_attr.h>
+#include <embb_mtapi_control_plugin_t.h>
 
 
 static embb_mtapi_node_t* embb_mtapi_node_instance = NULL;
@@ -131,6 +132,15 @@ void mtapi_initialize(
 
           /* initialization succeeded, tell workers to start working */
           embb_atomic_store_int(&node->is_scheduler_running, MTAPI_TRUE);
+
+          /* initialize plugins */
+          embb_mtapi_ext_control_plugin_initialize(
+            domain_id, node_id, &local_status);
+
+          if (MTAPI_SUCCESS != local_status) {
+            mtapi_finalize(MTAPI_NULL);
+            local_status = MTAPI_ERR_NODE_INITFAILED;
+          }
         } else {
           mtapi_finalize(MTAPI_NULL);
           local_status = MTAPI_ERR_NODE_INITFAILED;
@@ -153,6 +163,9 @@ void mtapi_finalize(MTAPI_OUT mtapi_status_t* status) {
 
   if (embb_mtapi_node_is_initialized()) {
     embb_mtapi_node_t* node = embb_mtapi_node_get_instance();
+
+    /* finalize plugins */
+    embb_mtapi_ext_control_plugin_finalize(MTAPI_NULL);
 
     /* finalize scheduler */
     if (MTAPI_NULL != node->scheduler) {
