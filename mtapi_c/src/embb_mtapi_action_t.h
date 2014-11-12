@@ -27,7 +27,7 @@
 #ifndef MTAPI_C_SRC_EMBB_MTAPI_ACTION_T_H_
 #define MTAPI_C_SRC_EMBB_MTAPI_ACTION_T_H_
 
-#include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/c/mtapi_ext.h>
 #include <embb/base/c/atomic.h>
 
 #include <embb_mtapi_pool_template.h>
@@ -56,6 +56,10 @@ struct embb_mtapi_action_struct {
   mtapi_size_t node_local_data_size;
   mtapi_action_attributes_t attributes;
   mtapi_boolean_t enabled;
+
+  mtapi_boolean_t is_plugin_action;
+  mtapi_ext_plugin_action_start_function_t plugin_start_function;
+  mtapi_ext_plugin_action_cancel_function_t plugin_cancel_function;
 
   embb_atomic_int num_tasks;
 };

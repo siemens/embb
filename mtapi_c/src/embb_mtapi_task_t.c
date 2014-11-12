@@ -230,11 +230,22 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
         if (MTAPI_SUCCESS == local_status) {
           embb_mtapi_scheduler_t * scheduler = node->scheduler;
           mtapi_boolean_t was_scheduled;
+          embb_mtapi_action_t * local_action =
+            embb_mtapi_action_pool_get_storage_for_handle(
+              node->action_pool, task->action);
 
           embb_mtapi_task_set_state(task, MTAPI_TASK_SCHEDULED);
 
-          was_scheduled =
-            embb_mtapi_scheduler_schedule_task(scheduler, task);
+          if (local_action->is_plugin_action) {
+            /* schedule plugin task */
+            mtapi_status_t plugin_status = MTAPI_ERR_UNKNOWN;
+            local_action->plugin_start_function(task_hndl, &plugin_status);
+            was_scheduled = (MTAPI_SUCCESS == plugin_status) ? MTAPI_TRUE : MTAPI_FALSE;
+          } else {
+            /* schedule local task */
+            was_scheduled =
+              embb_mtapi_scheduler_schedule_task(scheduler, task);
+          }
 
           if (was_scheduled) {
             /* if task is detached, do not return a handle, it will be deleted
@@ -452,7 +463,17 @@ void mtapi_task_cancel(
       embb_mtapi_task_t* local_task =
         embb_mtapi_task_pool_get_storage_for_handle(node->task_pool, task);
       embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
-      local_status = MTAPI_SUCCESS;
+
+      /* call plugin action cancel function */
+      if (embb_mtapi_action_pool_is_handle_valid(node->action_pool, local_task->action)) {
+        embb_mtapi_action_t* local_action =
+          embb_mtapi_action_pool_get_storage_for_handle(node->action_pool, local_task->action);
+        if (local_action->is_plugin_action) {
+          local_action->plugin_cancel_function(task, &local_status);
+        }
+      } else {
+        local_status = MTAPI_SUCCESS;
+      }
     } else {
       local_status = MTAPI_ERR_TASK_INVALID;
     }
