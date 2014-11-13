@@ -24,24 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MTAPI_C_TEST_EMBB_MTAPI_TEST_PLUGIN_H_
+#define MTAPI_C_TEST_EMBB_MTAPI_TEST_PLUGIN_H_
+
 #include <partest/partest.h>
 
-#include <stdio.h>
+class PluginTest : public partest::TestCase {
+ public:
+  PluginTest();
 
-#include <embb_mtapi_log.h>
+ private:
+  void TestBasic();
+};
 
-#include <embb_mtapi_test_plugin.h>
-#include <embb_mtapi_test_init_finalize.h>
-#include <embb_mtapi_test_task.h>
-#include <embb_mtapi_test_group.h>
-#include <embb_mtapi_test_queue.h>
-
-PT_MAIN("MTAPI C") {
-  embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
-
-  PT_RUN(PluginTest);
-  PT_RUN(InitFinalizeTest);
-  PT_RUN(TaskTest);
-  PT_RUN(GroupTest);
-  PT_RUN(QueueTest);
-}
+#endif // MTAPI_C_TEST_EMBB_MTAPI_TEST_PLUGIN_H_

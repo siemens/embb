@@ -29,6 +29,7 @@
 
 #include <partest/partest.h>
 #include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/c/mtapi_ext.h>
 
 #include <embb_mtapi_log.h>
 
