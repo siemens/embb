@@ -1,8 +1,11 @@
 #include <embb_mtapi_network.h>
 
+#ifdef _WIN32
 #include <WinSock2.h>
+#endif
 
 int embb_mtapi_network_initialize() {
+#ifdef _WIN32
   WORD ver_request;
   WSADATA wsa_data;
   int err;
@@ -15,8 +18,13 @@ int embb_mtapi_network_initialize() {
   } else {
     return 1;
   }
+#else
+  return 1;
+#endif
 }
 
 void embb_mtapi_network_finalize() {
+#ifdef _WIN32
   WSACleanup();
+#endif
 }

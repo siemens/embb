@@ -36,7 +36,11 @@ extern "C" {
 
 
 struct embb_mtapi_network_socket_struct {
+#ifdef _WIN32
   unsigned int handle;
+#else
+  int handle;
+#endif
 };
 
 typedef struct embb_mtapi_network_socket_struct embb_mtapi_network_socket_t;

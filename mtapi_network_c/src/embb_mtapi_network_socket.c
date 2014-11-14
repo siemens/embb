@@ -2,7 +2,19 @@
 
 #include <embb_mtapi_network_socket.h>
 #include <string.h>
+#ifdef _WIN32
 #include <WinSock2.h>
+#else
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <errno.h>
+#endif
 
 int embb_mtapi_network_socket_initialize(
   embb_mtapi_network_socket_t * that) {
@@ -17,7 +29,11 @@ int embb_mtapi_network_socket_initialize(
 void embb_mtapi_network_socket_finalize(
   embb_mtapi_network_socket_t * that) {
   if (INVALID_SOCKET != that->handle) {
+#ifdef _WIN32
     closesocket(that->handle);
+#else
+    close(that->handle);
+#endif
     that->handle = INVALID_SOCKET;
   }
 }
@@ -78,7 +94,11 @@ int embb_mtapi_network_socket_connect(
 
   if (SOCKET_ERROR == connect(that->handle, (struct sockaddr *)&addr,
     sizeof(addr))) {
+#ifdef _WIN32
     if (WSAEWOULDBLOCK != WSAGetLastError())
+#else
+    if (EAGAIN != errno)
+#endif
       return 0;
   }
 
@@ -101,9 +121,9 @@ int embb_mtapi_network_socket_select(
   max_fd = that->handle;
 
   if (timeout >= 0) {
-    err = select(max_fd, &read_set, NULL, NULL, &tv);
+    err = select(max_fd + 1, &read_set, NULL, NULL, &tv);
   } else {
-    err = select(max_fd, &read_set, NULL, NULL, NULL);
+    err = select(max_fd + 1, &read_set, NULL, NULL, NULL);
   }
   if (0 == err) {
     // timeout
@@ -134,9 +154,14 @@ int embb_mtapi_network_socket_sendbuffer(
 int embb_mtapi_network_socket_recvbuffer(
   embb_mtapi_network_socket_t * that,
   embb_mtapi_network_buffer_t * buffer) {
-  u_long bytes_available = 0;
   int err;
+#ifdef _WIN32
+  u_long bytes_available = 0;
   if (0 != ioctlsocket(that->handle, FIONREAD, &bytes_available))
+#else
+  int bytes_available = 0;
+  if (0 != ioctl(that->handle, FIONREAD, &bytes_available))
+#endif
     return 0;
   if (buffer->capacity > (int)bytes_available)
     return 0;
