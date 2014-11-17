@@ -33,8 +33,10 @@
 
 mtapi_action_hndl_t mtapi_ext_plugin_action_create(
   MTAPI_IN mtapi_job_id_t job_id,
-  MTAPI_IN mtapi_ext_plugin_action_start_function_t start_function,
-  MTAPI_IN mtapi_ext_plugin_action_cancel_function_t cancel_function,
+  MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
+  MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
+  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
+  MTAPI_IN void* plugin_data,
   MTAPI_IN void* node_local_data,
   MTAPI_IN mtapi_size_t node_local_data_size,
   MTAPI_IN mtapi_action_attributes_t* attributes,
@@ -61,8 +63,10 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
         new_action->is_plugin_action = MTAPI_TRUE;
         embb_atomic_store_int(&new_action->num_tasks, 0);
 
-        new_action->plugin_start_function = start_function;
-        new_action->plugin_cancel_function = cancel_function;
+        new_action->plugin_task_start_function = task_start_function;
+        new_action->plugin_task_cancel_function = task_cancel_function;
+        new_action->plugin_action_finalize_function = action_finalize_function;
+        new_action->plugin_data = (void*)plugin_data;
 
         /* set defaults if no attributes were given */
         if (MTAPI_NULL != attributes) {

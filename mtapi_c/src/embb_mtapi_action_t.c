@@ -60,6 +60,10 @@ void embb_mtapi_action_initialize(embb_mtapi_action_t* that) {
 }
 
 void embb_mtapi_action_finalize(embb_mtapi_action_t* that) {
+  if (that->is_plugin_action) {
+    // TODO: check status
+    that->plugin_action_finalize_function(that->handle, NULL);
+  }
   embb_mtapi_action_initialize(that);
 }
 
@@ -324,7 +328,8 @@ void mtapi_action_delete(
           node, local_action->job_id);
         embb_mtapi_job_remove_action(local_job, local_action);
       }
-      embb_mtapi_action_finalize(local_action);
+      /* this is done by pool deallocate:
+         embb_mtapi_action_finalize(local_action); */
       embb_mtapi_action_pool_deallocate(node->action_pool, local_action);
     } else {
       local_status = MTAPI_ERR_ACTION_INVALID;

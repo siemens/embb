@@ -34,6 +34,7 @@
 
 #include <embb/base/c/thread.h>
 #include <embb/base/c/atomic.h>
+#include <embb/base/c/internal/unused.h>
 
 #define PLUGIN_JOB_ID 2
 
@@ -43,6 +44,7 @@ mtapi_task_hndl_t plugin_task;
 embb_atomic_int plugin_task_available;
 
 int plugin_thread_function(void * args) {
+  EMBB_UNUSED(args);
   while (embb_atomic_load_int(&plugin_running)) {
     /* wait for incoming task */
     while (embb_atomic_load_int(&plugin_running) && !embb_atomic_load_int(&plugin_task_available))
@@ -70,6 +72,9 @@ void plugin_initialize(
   MTAPI_IN mtapi_node_t node_id,
   MTAPI_OUT mtapi_status_t* status
   ) {
+  EMBB_UNUSED(domain_id);
+  EMBB_UNUSED(node_id);
+
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
   int err;
 
@@ -102,7 +107,7 @@ void plugin_finalize(
   mtapi_status_set(status, local_status);
 }
 
-void plugin_action_start(
+void plugin_task_start(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status) {
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
@@ -125,13 +130,22 @@ void plugin_action_start(
   mtapi_status_set(status, local_status);
 }
 
-void plugin_action_cancel(
+void plugin_task_cancel(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status
   ) {
+  EMBB_UNUSED(task);
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
 
   mtapi_status_set(status, local_status);
+}
+
+void plugin_action_finalize(
+  MTAPI_IN mtapi_action_hndl_t action,
+  MTAPI_OUT mtapi_status_t* status
+  ) {
+  EMBB_UNUSED(action);
+  mtapi_status_set(status, MTAPI_SUCCESS);
 }
 
 PluginTest::PluginTest() {
@@ -180,8 +194,10 @@ void PluginTest::TestBasic() {
   status = MTAPI_ERR_UNKNOWN;
   action = mtapi_ext_plugin_action_create(
     PLUGIN_JOB_ID,
-    plugin_action_start,
-    plugin_action_cancel,
+    plugin_task_start,
+    plugin_task_cancel,
+    plugin_action_finalize,
+    MTAPI_NULL,
     MTAPI_NULL,
     0,
     MTAPI_DEFAULT_ACTION_ATTRIBUTES,

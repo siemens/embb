@@ -36,20 +36,27 @@ extern "C" {
 #endif
 
 
-typedef void(*mtapi_ext_plugin_action_start_function_t)(
+typedef void(*mtapi_ext_plugin_task_start_function_t)(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status
 );
 
-typedef void(*mtapi_ext_plugin_action_cancel_function_t)(
+typedef void(*mtapi_ext_plugin_task_cancel_function_t)(
   MTAPI_IN mtapi_task_hndl_t task,
+  MTAPI_OUT mtapi_status_t* status
+);
+
+typedef void(*mtapi_ext_plugin_action_finalize_function_t)(
+  MTAPI_IN mtapi_action_hndl_t action,
   MTAPI_OUT mtapi_status_t* status
 );
 
 mtapi_action_hndl_t mtapi_ext_plugin_action_create(
   MTAPI_IN mtapi_job_id_t job_id,
-  MTAPI_IN mtapi_ext_plugin_action_start_function_t start_function,
-  MTAPI_IN mtapi_ext_plugin_action_cancel_function_t cancel_function,
+  MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
+  MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
+  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
+  MTAPI_IN void* plugin_data,
   MTAPI_IN void* node_local_data,
   MTAPI_IN mtapi_size_t node_local_data_size,
   MTAPI_IN mtapi_action_attributes_t* attributes,

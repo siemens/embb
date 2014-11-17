@@ -58,8 +58,10 @@ struct embb_mtapi_action_struct {
   mtapi_boolean_t enabled;
 
   mtapi_boolean_t is_plugin_action;
-  mtapi_ext_plugin_action_start_function_t plugin_start_function;
-  mtapi_ext_plugin_action_cancel_function_t plugin_cancel_function;
+  void* plugin_data;
+  mtapi_ext_plugin_task_start_function_t plugin_task_start_function;
+  mtapi_ext_plugin_task_cancel_function_t plugin_task_cancel_function;
+  mtapi_ext_plugin_action_finalize_function_t plugin_action_finalize_function;
 
   embb_atomic_int num_tasks;
 };
