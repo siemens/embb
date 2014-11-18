@@ -24,13 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
+#define MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
+
 #include <partest/partest.h>
 
-#include <embb_mtapi_opencl_test_linker.h>
-#include <embb_mtapi_opencl_test_task.h>
+class TaskTest : public partest::TestCase {
+ public:
+  TaskTest();
 
+ private:
+  void TestBasic();
+};
 
-PT_MAIN("MTAPI OPENCL") {
-  PT_RUN(LinkerTest);
-  PT_RUN(TaskTest);
-}
+#endif // MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
