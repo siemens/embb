@@ -25,6 +25,7 @@ include_directories(${EMBB_MTAPI_OPENCL_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_SOURCE_DIR}/../base_c/include
                     ${CMAKE_CURRENT_BINARY_DIR}/../base_c/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/../mtapi_c/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../mtapi_c/src
                     )
 
 add_library(embb_mtapi_opencl_c ${EMBB_MTAPI_OPENCL_C_SOURCES} ${EMBB_MTAPI_OPENCL_C_HEADERS})

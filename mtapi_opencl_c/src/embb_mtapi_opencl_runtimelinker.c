@@ -53,6 +53,11 @@ DECLARECLFUNC(cl_int, clBuildProgram, (cl_program program, cl_uint num_devices, 
   return clBuildProgram_Dynamic(program, num_devices, device_list, options, pfn_notify, user_data);
 }
 
+DECLARECLFUNC(cl_int, clGetProgramBuildInfo, (cl_program program, cl_device_id device, cl_program_build_info param_name, size_t param_value_size, void * param_value, size_t * param_value_size_ret))
+{
+  return clGetProgramBuildInfo_Dynamic(program, device, param_name, param_value_size, param_value, param_value_size_ret);
+}
+
 DECLARECLFUNC(cl_kernel, clCreateKernel, (cl_program program, const char * kernel_name, cl_int * errcode_ret))
 {
   return clCreateKernel_Dynamic(program, kernel_name, errcode_ret);
@@ -78,6 +83,16 @@ DECLARECLFUNC(cl_int, clEnqueueReadBuffer, (cl_command_queue command_queue, cl_m
   return clEnqueueReadBuffer_Dynamic(command_queue, buffer, blocking_read, offset, cb, ptr, num_events_in_wait_list, event_wait_list, event);
 }
 
+DECLARECLFUNC(cl_int, clSetEventCallback, (cl_event event, cl_int command_exec_callback_type, void (CL_CALLBACK * pfn_notify)(cl_event, cl_int, void *), void * user_data))
+{
+  return clSetEventCallback_Dynamic(event, command_exec_callback_type, pfn_notify, user_data);
+}
+
+DECLARECLFUNC(cl_int, clWaitForEvents, (cl_uint num_events, const cl_event * event_list))
+{
+  return clWaitForEvents_Dynamic(num_events, event_list);
+}
+
 DECLARECLFUNC(cl_int, clReleaseKernel, (cl_kernel kernel))
 {
   return clReleaseKernel_Dynamic(kernel);
@@ -101,6 +116,11 @@ DECLARECLFUNC(cl_int, clReleaseContext, (cl_context context))
 DECLARECLFUNC(cl_int, clReleaseMemObject, (cl_mem memobj))
 {
   return clReleaseMemObject_Dynamic(memobj);
+}
+
+DECLARECLFUNC(cl_int, clFlush, (cl_command_queue command_queue))
+{
+  return clFlush_Dynamic(command_queue);
 }
 
 DECLARECLFUNC(cl_int, clFinish, (cl_command_queue command_queue))
@@ -166,16 +186,20 @@ int embb_mtapi_opencl_link_at_runtime() {
   CHECKEDIMPORT(clCreateBuffer);
   CHECKEDIMPORT(clCreateProgramWithSource);
   CHECKEDIMPORT(clBuildProgram);
+  CHECKEDIMPORT(clGetProgramBuildInfo);
   CHECKEDIMPORT(clCreateKernel);
   CHECKEDIMPORT(clSetKernelArg);
   CHECKEDIMPORT(clEnqueueWriteBuffer);
   CHECKEDIMPORT(clEnqueueNDRangeKernel);
   CHECKEDIMPORT(clEnqueueReadBuffer);
+  CHECKEDIMPORT(clSetEventCallback);
+  CHECKEDIMPORT(clWaitForEvents);
   CHECKEDIMPORT(clReleaseKernel);
   CHECKEDIMPORT(clReleaseProgram);
   CHECKEDIMPORT(clReleaseCommandQueue);
   CHECKEDIMPORT(clReleaseContext);
   CHECKEDIMPORT(clReleaseMemObject);
+  CHECKEDIMPORT(clFlush);
   CHECKEDIMPORT(clFinish);
   CHECKEDIMPORT(clCreateSampler);
   CHECKEDIMPORT(clReleaseSampler);
