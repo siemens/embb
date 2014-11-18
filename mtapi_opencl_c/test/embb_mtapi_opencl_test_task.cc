@@ -31,6 +31,10 @@
 #define MTAPI_CHECK_STATUS(status) \
 PT_ASSERT(MTAPI_SUCCESS == status)
 
+#define OPENCL_DOMAIN 1
+#define OPENCL_NODE 2
+#define OPENCL_JOB 2
+
 // OpenCL Kernel Function for element by element vector addition
 const char * kernel =
 "__kernel void test(\n"
@@ -74,8 +78,8 @@ void TaskTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   mtapi_initialize(
-    1,
-    1,
+    OPENCL_DOMAIN,
+    OPENCL_NODE,
     MTAPI_NULL,
     MTAPI_NULL,
     &status);
@@ -83,14 +87,14 @@ void TaskTest::TestBasic() {
 
   float node_local = 1.0f;
   action = mtapi_opencl_action_create(
-    1,
+    OPENCL_JOB,
     kernel, "test", 32, 4,
     &node_local, sizeof(float),
     &status);
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
-  job = mtapi_job_get(1, 1, &status);
+  job = mtapi_job_get(OPENCL_JOB, OPENCL_DOMAIN, &status);
   MTAPI_CHECK_STATUS(status);
 
   task = mtapi_task_start(
@@ -110,5 +114,8 @@ void TaskTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   mtapi_finalize(&status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_opencl_plugin_finalize(&status);
   MTAPI_CHECK_STATUS(status);
 }

@@ -166,14 +166,26 @@ DECLARECLFUNC(cl_mem, clCreateFromGLBuffer, (cl_context context, cl_mem_flags fl
 //////////////////////////////////////////////////////////////////////////
 // system specific functions
 
-//---- Windows Functions -------------------------------------------------
+#ifdef _WIN32
 
 #include <Windows.h>
 
 #define CHECKEDIMPORT(name) name##_Dynamic = (name##Proc)GetProcAddress( opencl_dll_handle, #name ); if ( name##_Dynamic == 0 ) return 0;
 
+#else
+
+#include <dlfcn.h>
+
+#define CHECKEDIMPORT(name) name##_Dynamic = (name##Proc)dlsym( opencl_dll_handle, #name ); if ( name##_Dynamic == 0 ) return 0;
+
+#endif
+
 int embb_mtapi_opencl_link_at_runtime() {
+#ifdef _WIN32
   HMODULE opencl_dll_handle = LoadLibraryA("opencl.dll");
+#else
+  void * opencl_dll_handle = dlopen("libOpenCL.so", RTLD_LAZY);
+#endif
   if (opencl_dll_handle == 0)
     return 0;
 

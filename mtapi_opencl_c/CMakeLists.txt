@@ -13,7 +13,11 @@ FOREACH(src_tmp ${EMBB_MTAPI_OPENCL_C_SOURCES})
     SET_PROPERTY(SOURCE ${src_tmp} PROPERTY LANGUAGE CXX)
 ENDFOREACH(src_tmp)
 ENDIF()
-   
+
+IF(CMAKE_COMPILER_IS_GNUCC)
+  set (EMBB_MAPI_OPENCL_LIBS dl)
+ENDIF()
+
 # Execute the GroupSources macro
 include(${CMAKE_SOURCE_DIR}/CMakeCommon/GroupSourcesMSVC.cmake)
 GroupSourcesMSVC(include)
@@ -34,7 +38,7 @@ target_link_libraries(embb_mtapi_opencl_c embb_mtapi_c embb_base_c)
 if (BUILD_TESTS STREQUAL ON)
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/../partest/include)
   add_executable (embb_mtapi_opencl_c_test ${EMBB_MTAPI_OPENCL_TEST_SOURCES})
-  target_link_libraries(embb_mtapi_opencl_c_test embb_mtapi_opencl_c embb_mtapi_c partest embb_base_c ${compiler_libs})
+  target_link_libraries(embb_mtapi_opencl_c_test embb_mtapi_opencl_c embb_mtapi_c partest embb_base_c ${compiler_libs} ${EMBB_MAPI_OPENCL_LIBS})
   CopyBin(BIN embb_mtapi_c_test DEST ${local_install_dir})
 endif()
 
