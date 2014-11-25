@@ -110,6 +110,10 @@ void TaskTest::TestBasic() {
   mtapi_task_wait(task, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
+  for (int ii = 0; ii < elements; ii++) {
+    PT_EXPECT_EQ(results[ii], ii * 2 + 1);
+  }
+
   mtapi_action_delete(action, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
