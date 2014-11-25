@@ -37,7 +37,7 @@ progress which means that every operation completes within a finite number of
 steps independently of any other concurrent operations on the same data
 structure.
 
-![Building blocks of EMB²](doc/images/embb.png =500x)
+<img src="doc/images/embb.png" alt="Building blocks of EMB²" width="500"/>
 
 Community and Contact
 ---------------------
