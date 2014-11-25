@@ -27,15 +27,17 @@ be optimized for non-functional requirements such as minimal latency and
 fairness.
 
 Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent
-data structures, and skeletons for implementing stream processing
-applications. These building blocks are largely implemented in a non-blocking
-fashion, thus preventing frequently encountered pitfalls like lock contention,
-deadlocks, and priority inversion. As another advantage in real-time systems,
-the algorithms and data structures give certain progress guarantees. For
-example, wait-free data structures guarantee system-wide progress which means
-that every operation completes within a finite number of steps independently
-of any other concurrent operations on the same data structure.
+data structures, and skeletons for implementing stream processing applications
+(see figure below). These building blocks are largely implemented in a
+non-blocking fashion, thus preventing frequently encountered pitfalls like
+lock contention, deadlocks, and priority inversion. As another advantage in
+real-time systems, the algorithms and data structures give certain progress
+guarantees. For example, wait-free data structures guarantee system-wide
+progress which means that every operation completes within a finite number of
+steps independently of any other concurrent operations on the same data
+structure.
 
+(doc\images\embb.png)
 
 Community and Contact
 ---------------------
