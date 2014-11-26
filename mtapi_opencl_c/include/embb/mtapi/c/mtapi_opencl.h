@@ -41,7 +41,7 @@ extern "C" {
  *
  * \ingroup C_MTAPI_EXT
  *
- *
+ * Provides functionality to execute tasks on OpenCL devices.
  */
 
 
