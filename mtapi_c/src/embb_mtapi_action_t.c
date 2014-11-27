@@ -56,6 +56,7 @@ void embb_mtapi_action_initialize(embb_mtapi_action_t* that) {
   that->enabled = MTAPI_FALSE;
   that->node_local_data = NULL;
   that->node_local_data_size = 0;
+  that->plugin_data = MTAPI_NULL;
   embb_atomic_store_int(&that->num_tasks, 0);
 }
 

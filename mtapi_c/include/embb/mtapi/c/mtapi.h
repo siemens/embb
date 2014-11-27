@@ -557,6 +557,17 @@ enum mtapi_node_attributes_enum {
 #define MTAPI_NODE_TYPE_SMP 1
 #define MTAPI_NODE_TYPE_DSP 2
 
+/**
+ * Task handle type.
+ * \memberof mtapi_task_hndl_struct
+ */
+typedef struct mtapi_task_hndl_struct mtapi_task_hndl_t;
+
+/** task completion callback */
+typedef void(*mtapi_task_complete_function_t)(
+  MTAPI_IN mtapi_task_hndl_t task,
+  MTAPI_OUT mtapi_status_t* status);
+
 /** task attributes */
 enum mtapi_task_attributes_enum {
   MTAPI_TASK_DETACHED,                 /**< task is detached, i.e., the runtime
@@ -574,7 +585,9 @@ enum mtapi_task_attributes_enum {
                                             executed n times, if possible in
                                             parallel */
   MTAPI_TASK_PRIORITY,
-  MTAPI_TASK_AFFINITY
+  MTAPI_TASK_AFFINITY,
+  MTAPI_TASK_USER_DATA,
+  MTAPI_TASK_COMPLETE_FUNCTION
 };
 /** size of the \a MTAPI_TASK_DETACHED attribute */
 #define MTAPI_TASK_DETACHED_SIZE sizeof(mtapi_boolean_t)
@@ -671,6 +684,10 @@ struct mtapi_task_attributes_struct {
   mtapi_uint_t num_instances;          /**< stores MTAPI_TASK_INSTANCES */
   mtapi_uint_t priority;               /**< stores MTAPI_TASK_PRIORITY */
   mtapi_affinity_t affinity;           /**< stores MTAPI_TASK_AFFINITY */
+  void * user_data;                    /**< stores MTAPI_TASK_USER_DATA */
+  mtapi_task_complete_function_t
+    complete_func;                     /**< stores
+                                            MTAPI_TASK_COMPLETE_FUNCTION */
 };
 
 /**
@@ -869,11 +886,8 @@ struct mtapi_task_hndl_struct {
   mtapi_task_id_t id;                  /**< pool index of this handle */
 };
 
-/**
- * Task handle type.
- * \memberof mtapi_task_hndl_struct
- */
-typedef struct mtapi_task_hndl_struct mtapi_task_hndl_t;
+// was forward declared
+//typedef struct mtapi_task_hndl_struct mtapi_task_hndl_t;
 
 
 /* ---- BASIC CONSTANTS ---------------------------------------------------- */

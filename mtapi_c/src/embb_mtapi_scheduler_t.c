@@ -345,6 +345,11 @@ int embb_mtapi_scheduler_worker(void * arg) {
         /* do nothing, although this is an error */
         break;
       }
+
+      /* issue task complete callback if set */
+      if (MTAPI_NULL != task->attributes.complete_func) {
+        task->attributes.complete_func(task->handle, MTAPI_NULL);
+      }
     } else if (counter < 1024) {
       /* spin and yield for a while before going to sleep */
       embb_thread_yield();
