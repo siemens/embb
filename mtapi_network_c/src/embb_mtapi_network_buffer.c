@@ -52,6 +52,12 @@ void embb_mtapi_network_buffer_finalize(
   }
 }
 
+void embb_mtapi_network_buffer_clear(
+  embb_mtapi_network_buffer_t * that) {
+  that->position = 0;
+  that->size = 0;
+}
+
 int embb_mtapi_network_buffer_push_back_int8(
   embb_mtapi_network_buffer_t * that,
   int8_t value) {
@@ -88,7 +94,7 @@ int embb_mtapi_network_buffer_push_back_int32(
 int embb_mtapi_network_buffer_push_back_rawdata(
   embb_mtapi_network_buffer_t * that,
   int32_t size,
-  void * rawdata) {
+  void const * rawdata) {
   if (that->size + size > that->capacity) {
     return 0;
   }
