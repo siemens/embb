@@ -56,7 +56,8 @@ void embb_mtapi_network_socket_finalize(
 int embb_mtapi_network_socket_bind_and_listen(
   embb_mtapi_network_socket_t * that,
   char const * host,
-  uint16_t port
+  uint16_t port,
+  uint16_t max_connections
 );
 
 int embb_mtapi_network_socket_accept(
@@ -71,7 +72,8 @@ int embb_mtapi_network_socket_connect(
 );
 
 int embb_mtapi_network_socket_select(
-  embb_mtapi_network_socket_t * that,
+  embb_mtapi_network_socket_t * sockets,
+  int count,
   int timeout
 );
 
@@ -83,6 +85,12 @@ int embb_mtapi_network_socket_sendbuffer(
 int embb_mtapi_network_socket_recvbuffer(
   embb_mtapi_network_socket_t * that,
   embb_mtapi_network_buffer_t * buffer
+);
+
+int embb_mtapi_network_socket_recvbuffer_sized(
+  embb_mtapi_network_socket_t * that,
+  embb_mtapi_network_buffer_t * buffer,
+  int size
 );
 
 #ifdef __cplusplus

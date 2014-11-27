@@ -67,7 +67,8 @@ void embb_mtapi_network_socket_finalize(
 int embb_mtapi_network_socket_bind_and_listen(
   embb_mtapi_network_socket_t * that,
   char const * host,
-  uint16_t port) {
+  uint16_t port,
+  uint16_t max_connections) {
   struct sockaddr_in in_addr;
   int reuseaddr_on = 1;
 
@@ -89,7 +90,7 @@ int embb_mtapi_network_socket_bind_and_listen(
     return 0;
   }
 
-  if (SOCKET_ERROR == listen(that->handle, 5)) {
+  if (SOCKET_ERROR == listen(that->handle, max_connections)) {
     return 0;
   }
 
@@ -132,38 +133,45 @@ int embb_mtapi_network_socket_connect(
 }
 
 int embb_mtapi_network_socket_select(
-  embb_mtapi_network_socket_t * that,
+  embb_mtapi_network_socket_t * sockets,
+  int count,
   int timeout
   ) {
   fd_set read_set;
-  int max_fd;
+  embb_mtapi_network_socket_t max_fd = { 0 };
   int err;
+  int ii;
   struct timeval tv;
   tv.tv_sec = timeout / 1000;
   tv.tv_usec = timeout % 1000;
 
   FD_ZERO(&read_set);
-  FD_SET(that->handle, &read_set);
-  max_fd = that->handle;
+  for (ii = 0; ii < count; ii++) {
+    FD_SET(sockets[ii].handle, &read_set);
+    if (sockets[ii].handle > max_fd.handle)
+      max_fd.handle = sockets[ii].handle;
+  }
 
   if (timeout >= 0) {
-    err = select(max_fd + 1, &read_set, NULL, NULL, &tv);
+    err = select(max_fd.handle + 1, &read_set, NULL, NULL, &tv);
   } else {
-    err = select(max_fd + 1, &read_set, NULL, NULL, NULL);
+    err = select(max_fd.handle + 1, &read_set, NULL, NULL, NULL);
   }
   if (0 == err) {
     // timeout
-    return 0;
+    return -1;
   }
   if (SOCKET_ERROR == err) {
-    return 0;
+    return -1;
   }
 
-  if (FD_ISSET(that->handle, &read_set)) {
-    return 1;
+  for (ii = 0; ii < count; ii++) {
+    if (FD_ISSET(sockets[ii].handle, &read_set)) {
+      return ii;
+    }
   }
 
-  return 0;
+  return -1;
 }
 
 int embb_mtapi_network_socket_sendbuffer(
@@ -177,10 +185,12 @@ int embb_mtapi_network_socket_sendbuffer(
   }
 }
 
-int embb_mtapi_network_socket_recvbuffer(
+int embb_mtapi_network_socket_recvbuffer_sized(
   embb_mtapi_network_socket_t * that,
-  embb_mtapi_network_buffer_t * buffer) {
+  embb_mtapi_network_buffer_t * buffer,
+  int size) {
   int err;
+  /*
 #ifdef _WIN32
   u_long bytes_available = 0;
   if (0 != ioctlsocket(that->handle, FIONREAD, &bytes_available))
@@ -189,11 +199,22 @@ int embb_mtapi_network_socket_recvbuffer(
   if (0 != ioctl(that->handle, FIONREAD, &bytes_available))
 #endif
     return 0;
-  if (buffer->capacity > (int)bytes_available)
+  */
+  if (buffer->capacity < size)
     return 0;
-  err = recv(that->handle, buffer->data, buffer->capacity, 0);
-  if (err != buffer->capacity)
+  /*
+  if (size > (int)bytes_available)
     return 0;
-  buffer->size = buffer->capacity;
+  */
+  err = recv(that->handle, buffer->data, size, 0);
+  if (err != size)
+    return 0;
+  buffer->size = size;
   return buffer->size;
+}
+
+int embb_mtapi_network_socket_recvbuffer(
+  embb_mtapi_network_socket_t * that,
+  embb_mtapi_network_buffer_t * buffer) {
+  return embb_mtapi_network_socket_recvbuffer_sized(that, buffer, buffer->capacity);
 }
