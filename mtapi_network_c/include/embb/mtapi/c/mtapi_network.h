@@ -24,14 +24,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <partest/partest.h>
+#ifndef EMBB_MTAPI_C_MTAPI_NETWORK_H_
+#define EMBB_MTAPI_C_MTAPI_NETWORK_H_
 
-#include <embb_mtapi_network_test_buffer.h>
-#include <embb_mtapi_network_test_socket.h>
-#include <embb_mtapi_network_test_task.h>
 
-PT_MAIN("MTAPI NETWORK") {
-  PT_RUN(NetworkBufferTest);
-  PT_RUN(NetworkSocketTest);
-  PT_RUN(NetworkTaskTest);
+#include <embb/mtapi/c/mtapi_ext.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+void mtapi_network_plugin_initialize(
+  MTAPI_IN char * host,
+  MTAPI_IN mtapi_uint16_t port,
+  MTAPI_IN mtapi_uint16_t max_connections,
+  MTAPI_IN mtapi_size_t buffer_size,
+  MTAPI_OUT mtapi_status_t* status
+);
+
+void mtapi_network_plugin_finalize(
+  MTAPI_OUT mtapi_status_t* status
+);
+
+mtapi_action_hndl_t mtapi_network_action_create(
+  MTAPI_IN mtapi_domain_t domain_id,
+  MTAPI_IN mtapi_job_id_t local_job_id,
+  MTAPI_IN mtapi_job_id_t remote_job_id,
+  MTAPI_IN char * host,
+  MTAPI_IN mtapi_uint16_t port,
+  MTAPI_OUT mtapi_status_t* status
+);
+
+
+#ifdef __cplusplus
 }
+#endif
+
+
+#endif // EMBB_MTAPI_C_MTAPI_NETWORK_H_
