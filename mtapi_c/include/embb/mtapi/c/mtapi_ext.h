@@ -64,23 +64,6 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
 );
 
 
-typedef void(*mtapi_ext_control_plugin_initialize_function_t)(
-  MTAPI_IN mtapi_domain_t domain_id,
-  MTAPI_IN mtapi_node_t node_id,
-  MTAPI_OUT mtapi_status_t* status
-);
-
-typedef void(*mtapi_ext_control_plugin_finalize_function_t)(
-  MTAPI_OUT mtapi_status_t* status
-);
-
-void mtapi_ext_register_control_plugin(
-  MTAPI_IN mtapi_ext_control_plugin_initialize_function_t initialize_function,
-  MTAPI_IN mtapi_ext_control_plugin_finalize_function_t finalize_function,
-  MTAPI_OUT mtapi_status_t* status
-);
-
-
 #ifdef __cplusplus
 }
 #endif
