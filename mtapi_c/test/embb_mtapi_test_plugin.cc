@@ -164,13 +164,6 @@ void PluginTest::TestBasic() {
   mtapi_task_hndl_t task;
 
   status = MTAPI_ERR_UNKNOWN;
-  mtapi_ext_register_control_plugin(
-    plugin_initialize,
-    plugin_finalize,
-    &status);
-  MTAPI_CHECK_STATUS(status);
-
-  status = MTAPI_ERR_UNKNOWN;
   mtapi_nodeattr_init(&node_attr, &status);
   MTAPI_CHECK_STATUS(status);
 
