@@ -35,22 +35,108 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup C_MTAPI_EXT MTAPI Extensions
+ *
+ * \ingroup C_MTAPI
+ *
+ *
+ */
 
+/**
+ * Represents a callback function that is called when a plugin action is about
+ * to start a plugin task.
+ * This function should return MTAPI_SUCCESS if the task could be started and
+ * the appropriate MTAPI_ERR_* if not.
+ */
 typedef void(*mtapi_ext_plugin_task_start_function_t)(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status
 );
 
+/**
+ * Represents a callback function that is called when a plugin task is about
+ * to be canceled.
+ * This function should return MTAPI_SUCCESS if the task could be canceled and
+ * the appropriate MTAPI_ERR_* if not.
+ */
 typedef void(*mtapi_ext_plugin_task_cancel_function_t)(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status
 );
 
+/**
+ * Represents a callback function that is called when a plugin action is about
+ * to be finalized.
+ * This function should return MTAPI_SUCCESS if the action could be deleted and
+ * the appropriate MTAPI_ERR_* if not.
+ */
 typedef void(*mtapi_ext_plugin_action_finalize_function_t)(
   MTAPI_IN mtapi_action_hndl_t action,
   MTAPI_OUT mtapi_status_t* status
 );
 
+/**
+ * This function creates a plugin action.
+ *
+ * It is called on the node where the plugin action is implemented. A plugin
+ * action is an abstract encapsulation of a user defined action that is needed
+ * to implement a job that does not represent a software action. A plugin
+ * action contains a reference to a job, callback functions to start and cancel
+ * tasks and a reference to an callback function to finalize the action.
+ * After a plugin action is created, it is referenced by the application using
+ * a node-local handle of type \c mtapi_action_hndl_t, or indirectly through a
+ * node-local job handle of type \c mtapi_job_hndl_t. A plugin action's
+ * life-cycle begins with mtapi_ext_plugin_action_create(), and ends when
+ * mtapi_action_delete() or mtapi_finalize() is called.
+ *
+ * To create an action, the application must supply the domain-wide job ID of
+ * the job associated with the action. Job IDs must be predefined in the
+ * application and runtime, of type \c mtapi_job_id_t, which is an
+ * implementation-defined type. The job ID is unique in the sense that it is
+ * unique for the job implemented by the action. However several actions may
+ * implement the same job for load balancing purposes.
+ *
+ * If \c node_local_data_size is not zero, \c node_local_data specifies the
+ * start of node local data shared by action functions executed on the same
+ * node. \c node_local_data_size can be used by the runtime for cache coherency
+ * operations.
+ *
+ * On success, an action handle is returned and \c *status is set to
+ * \c MTAPI_SUCCESS. On error, \c *status is set to the appropriate error
+ * defined below. In the case where the action already exists, \c status will
+ * be set to \c MTAPI_ERR_ACTION_EXISTS and the handle returned will not be a
+ * valid handle.
+ * <table>
+ *   <tr>
+ *     <th>Error code</th>
+ *     <th>Description</th>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_ERR_JOB_INVALID</td>
+ *     <td>The \c job_id is not a valid job ID, i.e., no action was created for
+ *         that ID or the action has been deleted.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_ERR_ACTION_EXISTS</td>
+ *     <td>This action is already created.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_ERR_ACTION_LIMIT</td>
+ *     <td>Exceeded maximum number of actions allowed.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_ERR_NODE_NOTINIT</td>
+ *     <td>The calling node is not initialized.</td>
+ *   </tr>
+ * </table>
+ *
+ * \see mtapi_action_delete(), mtapi_finalize()
+ *
+ * \returns Handle to newly created plugin action, invalid handle on error
+ * \threadsafe
+ * \ingroup C_MTAPI_EXT
+ */
 mtapi_action_hndl_t mtapi_ext_plugin_action_create(
   MTAPI_IN mtapi_job_id_t job_id,
   MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
