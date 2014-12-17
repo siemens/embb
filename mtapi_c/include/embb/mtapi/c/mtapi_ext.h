@@ -40,7 +40,12 @@ extern "C" {
  *
  * \ingroup C_MTAPI
  *
+ * Provides extensions to the standard MTAPI API.
  *
+ * There is a single extension function defined here to support user defined
+ * behavior of an action to allow for actions that are not implemented locally
+ * in software but e.g. on a remote node in a network or on an accelerator
+ * device like a GPU or FPGA.
  */
 
 /**
@@ -48,6 +53,8 @@ extern "C" {
  * to start a plugin task.
  * This function should return MTAPI_SUCCESS if the task could be started and
  * the appropriate MTAPI_ERR_* if not.
+ *
+ * \ingroup C_MTAPI_EXT
  */
 typedef void(*mtapi_ext_plugin_task_start_function_t)(
   MTAPI_IN mtapi_task_hndl_t task,
@@ -59,6 +66,8 @@ typedef void(*mtapi_ext_plugin_task_start_function_t)(
  * to be canceled.
  * This function should return MTAPI_SUCCESS if the task could be canceled and
  * the appropriate MTAPI_ERR_* if not.
+ *
+ * \ingroup C_MTAPI_EXT
  */
 typedef void(*mtapi_ext_plugin_task_cancel_function_t)(
   MTAPI_IN mtapi_task_hndl_t task,
@@ -70,6 +79,8 @@ typedef void(*mtapi_ext_plugin_task_cancel_function_t)(
  * to be finalized.
  * This function should return MTAPI_SUCCESS if the action could be deleted and
  * the appropriate MTAPI_ERR_* if not.
+ *
+ * \ingroup C_MTAPI_EXT
  */
 typedef void(*mtapi_ext_plugin_action_finalize_function_t)(
   MTAPI_IN mtapi_action_hndl_t action,
