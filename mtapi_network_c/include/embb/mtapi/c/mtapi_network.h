@@ -41,7 +41,7 @@ extern "C" {
  *
  * \ingroup C_MTAPI_EXT
  *
- *
+ * Provides functionality to distribute tasks across nodes in a TCP/IP network.
  */
 
 
