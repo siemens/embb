@@ -47,16 +47,19 @@ int plugin_thread_function(void * args) {
   EMBB_UNUSED(args);
   while (embb_atomic_load_int(&plugin_running)) {
     /* wait for incoming task */
-    while (embb_atomic_load_int(&plugin_running) && !embb_atomic_load_int(&plugin_task_available))
+    while (embb_atomic_load_int(&plugin_running) &&
+      !embb_atomic_load_int(&plugin_task_available))
       embb_thread_yield();
 
     if (embb_atomic_load_int(&plugin_running)) {
       if (embb_mtapi_node_is_initialized()) {
         embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
 
-        if (embb_mtapi_task_pool_is_handle_valid(node->task_pool, plugin_task)) {
+        if (embb_mtapi_task_pool_is_handle_valid(
+          node->task_pool, plugin_task)) {
           embb_mtapi_task_t * local_task =
-            embb_mtapi_task_pool_get_storage_for_handle(node->task_pool, plugin_task);
+            embb_mtapi_task_pool_get_storage_for_handle(
+            node->task_pool, plugin_task);
           embb_mtapi_task_set_state(local_task, MTAPI_TASK_COMPLETED);
         }
       }

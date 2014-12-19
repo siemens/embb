@@ -35,7 +35,8 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
   MTAPI_IN mtapi_job_id_t job_id,
   MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
   MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
-  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
+  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t
+    action_finalize_function,
   MTAPI_IN void* plugin_data,
   MTAPI_IN void* node_local_data,
   MTAPI_IN mtapi_size_t node_local_data_size,
@@ -72,8 +73,7 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
         if (MTAPI_NULL != attributes) {
           new_action->attributes = *attributes;
           local_status = MTAPI_SUCCESS;
-        }
-        else {
+        } else {
           /* use the default */
           mtapi_actionattr_init(&new_action->attributes, &local_status);
         }
@@ -86,21 +86,17 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
         if (MTAPI_SUCCESS == local_status) {
           action_handle = new_action->handle;
           embb_mtapi_job_add_action(job, new_action);
-        }
-        else {
+        } else {
           embb_mtapi_action_pool_deallocate(node->action_pool, new_action);
         }
-      }
-      else {
+      } else {
         /* no more space left in action pool */
         local_status = MTAPI_ERR_ACTION_LIMIT;
       }
-    }
-    else {
+    } else {
       local_status = MTAPI_ERR_JOB_INVALID;
     }
-  }
-  else {
+  } else {
     embb_mtapi_log_error("mtapi not initialized\n");
     local_status = MTAPI_ERR_NODE_NOTINIT;
   }

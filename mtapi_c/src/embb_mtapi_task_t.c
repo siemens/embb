@@ -239,8 +239,10 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
           if (local_action->is_plugin_action) {
             /* schedule plugin task */
             mtapi_status_t plugin_status = MTAPI_ERR_UNKNOWN;
-            local_action->plugin_task_start_function(task_hndl, &plugin_status);
-            was_scheduled = (MTAPI_SUCCESS == plugin_status) ? MTAPI_TRUE : MTAPI_FALSE;
+            local_action->plugin_task_start_function(
+              task_hndl, &plugin_status);
+            was_scheduled = (MTAPI_SUCCESS == plugin_status) ?
+              MTAPI_TRUE : MTAPI_FALSE;
           } else {
             /* schedule local task */
             was_scheduled =
@@ -465,9 +467,11 @@ void mtapi_task_cancel(
       embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
 
       /* call plugin action cancel function */
-      if (embb_mtapi_action_pool_is_handle_valid(node->action_pool, local_task->action)) {
+      if (embb_mtapi_action_pool_is_handle_valid(
+        node->action_pool, local_task->action)) {
         embb_mtapi_action_t* local_action =
-          embb_mtapi_action_pool_get_storage_for_handle(node->action_pool, local_task->action);
+          embb_mtapi_action_pool_get_storage_for_handle(
+          node->action_pool, local_task->action);
         if (local_action->is_plugin_action) {
           local_action->plugin_task_cancel_function(task, &local_status);
         }
