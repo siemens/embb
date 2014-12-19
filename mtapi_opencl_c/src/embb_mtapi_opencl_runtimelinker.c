@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////
 // function pointer wrappers to hide runtime linking
 
-#define DECLARECLFUNC( rettype, name, params ) typedef CL_API_ENTRY rettype\
+#define DECLARECLFUNC(rettype, name, params) typedef CL_API_ENTRY rettype\
     (CL_API_CALL *name##Proc)params;\
     name##Proc name##_Dynamic = 0;\
     \
@@ -189,8 +189,7 @@ DECLARECLFUNC(cl_sampler, clCreateSampler, (cl_context context,
     filter_mode, errcode_ret);
 }
 
-DECLARECLFUNC(cl_int, clReleaseSampler, (cl_sampler sampler))
-{
+DECLARECLFUNC(cl_int, clReleaseSampler, (cl_sampler sampler)) {
   return clReleaseSampler_Dynamic(sampler);
 }
 
@@ -240,16 +239,16 @@ DECLARECLFUNC(cl_mem, clCreateFromGLBuffer, (cl_context context,
 #include <Windows.h>
 
 #define CHECKEDIMPORT(name) name##_Dynamic = \
-  (name##Proc)GetProcAddress( opencl_dll_handle, #name ); \
-  if ( name##_Dynamic == 0 ) return 0;
+  (name##Proc)GetProcAddress(opencl_dll_handle, #name); \
+  if (name##_Dynamic == 0) return 0;
 
 #else
 
 #include <dlfcn.h>
 
 #define CHECKEDIMPORT(name) name##_Dynamic = \
-  (name##Proc)dlsym( opencl_dll_handle, #name ); \
-  if ( name##_Dynamic == 0 ) return 0;
+  (name##Proc)dlsym(opencl_dll_handle, #name); \
+  if (name##_Dynamic == 0) return 0;
 
 #endif
 

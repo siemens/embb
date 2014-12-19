@@ -30,7 +30,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+
 int embb_mtapi_opencl_link_at_runtime();
 
 #ifdef __cplusplus
