@@ -62,7 +62,7 @@ void embb_mtapi_action_initialize(embb_mtapi_action_t* that) {
 
 void embb_mtapi_action_finalize(embb_mtapi_action_t* that) {
   if (that->is_plugin_action) {
-    // TODO: check status
+    // TODO(mw): check status
     that->plugin_action_finalize_function(that->handle, NULL);
   }
   embb_mtapi_action_initialize(that);

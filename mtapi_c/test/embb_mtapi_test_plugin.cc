@@ -114,7 +114,7 @@ void plugin_task_start(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status) {
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
-  
+
   if (embb_mtapi_node_is_initialized()) {
     embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
 
