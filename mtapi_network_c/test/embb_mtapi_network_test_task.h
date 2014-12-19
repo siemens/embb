@@ -31,7 +31,7 @@
 
 class NetworkTaskTest : public partest::TestCase {
  public:
-   NetworkTaskTest();
+  NetworkTaskTest();
 
  private:
   void TestBasic();

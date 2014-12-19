@@ -31,7 +31,7 @@
 
 class NetworkSocketTest : public partest::TestCase {
  public:
-   NetworkSocketTest();
+  NetworkSocketTest();
 
  private:
   void TestBasic();
