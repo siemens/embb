@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_C_SRC_EMBB_MTAPI_NETWORK_H_
-#define MTAPI_C_SRC_EMBB_MTAPI_NETWORK_H_
+#ifndef MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
+#define MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
 
 #include <stdint.h>
 
@@ -43,4 +43,4 @@ void embb_mtapi_network_finalize();
 }
 #endif
 
-#endif // MTAPI_C_SRC_EMBB_MTAPI_NETWORK_H_
+#endif // MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_

@@ -31,8 +31,7 @@
 #include <embb/base/c/internal/unused.h>
 
 
-#define MTAPI_CHECK_STATUS(status) \
-PT_ASSERT(MTAPI_SUCCESS == status)
+#define MTAPI_CHECK_STATUS(status) PT_ASSERT(MTAPI_SUCCESS == status)
 
 #define NETWORK_DOMAIN 1
 #define NETWORK_LOCAL_NODE 3

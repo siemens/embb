@@ -269,8 +269,7 @@ static int embb_mtapi_network_thread(void * args) {
         //  socket, &buffer);
 
         embb_mtapi_network_buffer_clear(&buffer);
-      }
-      else if (operation == EMBB_MTAPI_NETWORK_RETURN_RESULT) {
+      } else if (operation == EMBB_MTAPI_NETWORK_RETURN_RESULT) {
         int task_status;
         int task_id;
         int task_tag;
@@ -357,7 +356,8 @@ void mtapi_network_plugin_initialize(
     &plugin->sockets[0], host, port, max_connections);
   plugin->buffer_size = buffer_size;
 
-  err = embb_thread_create(&plugin->thread, NULL, embb_mtapi_network_thread, NULL);
+  err = embb_thread_create(
+    &plugin->thread, NULL, embb_mtapi_network_thread, NULL);
   if (EMBB_SUCCESS == err) {
     local_status = MTAPI_SUCCESS;
   }
@@ -503,7 +503,8 @@ mtapi_action_hndl_t mtapi_network_action_create(
   action->domain_id = domain_id;
   action->job_id = remote_job_id;
 
-  embb_mtapi_network_buffer_initialize(&action->send_buffer, plugin->buffer_size);
+  embb_mtapi_network_buffer_initialize(
+    &action->send_buffer, plugin->buffer_size);
   embb_mutex_init(&action->send_mutex, 0);
 
   action->host = host;

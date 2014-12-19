@@ -216,5 +216,6 @@ int embb_mtapi_network_socket_recvbuffer_sized(
 int embb_mtapi_network_socket_recvbuffer(
   embb_mtapi_network_socket_t * that,
   embb_mtapi_network_buffer_t * buffer) {
-  return embb_mtapi_network_socket_recvbuffer_sized(that, buffer, buffer->capacity);
+  return
+    embb_mtapi_network_socket_recvbuffer_sized(that, buffer, buffer->capacity);
 }

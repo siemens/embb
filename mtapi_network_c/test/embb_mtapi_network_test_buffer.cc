@@ -32,7 +32,8 @@
 
 
 NetworkBufferTest::NetworkBufferTest() {
-  CreateUnit("mtapi network buffer test").Add(&NetworkBufferTest::TestBasic, this);
+  CreateUnit("mtapi network buffer test").Add(
+    &NetworkBufferTest::TestBasic, this);
 }
 
 void NetworkBufferTest::TestBasic() {
