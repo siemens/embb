@@ -97,4 +97,4 @@ int embb_mtapi_network_socket_recvbuffer_sized(
 }
 #endif
 
-#endif // MTAPI_C_SRC_EMBB_MTAPI_NETWORK_SOCKET_H_
+#endif // MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_SOCKET_H_

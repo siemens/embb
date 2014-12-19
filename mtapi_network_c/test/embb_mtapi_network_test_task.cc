@@ -51,11 +51,11 @@ static void test(
   EMBB_UNUSED(context);
   EMBB_UNUSED(result_buffer_size);
   EMBB_UNUSED(node_local_data_size);
-  int elements = (int)(arguments_size / sizeof(float) / 2);
-  float* a = (float*)arguments;
-  float* b = ((float*)arguments) + elements;
-  float* c = (float*)result_buffer;
-  float* d = (float*)node_local_data;
+  int elements = static_cast<int>(arguments_size / sizeof(float) / 2);
+  float const * a = reinterpret_cast<float const *>(arguments);
+  float const * b = reinterpret_cast<float const *>(arguments)+elements;
+  float * c = reinterpret_cast<float*>(result_buffer);
+  float const * d = reinterpret_cast<float const *>(node_local_data);
   for (int ii = 0; ii < elements; ii++) {
     c[ii] = a[ii] + b[ii] + d[0];
   }
@@ -72,13 +72,13 @@ void NetworkTaskTest::TestBasic() {
   mtapi_task_hndl_t task;
   mtapi_action_hndl_t network_action, local_action;
 
-  const int elements = 64;
-  float arguments[elements * 2];
-  float results[elements];
+  const int kElements = 64;
+  float arguments[kElements * 2];
+  float results[kElements];
 
-  for (int ii = 0; ii < elements; ii++) {
-    arguments[ii] = (float)ii;
-    arguments[ii + elements] = (float)ii;
+  for (int ii = 0; ii < kElements; ii++) {
+    arguments[ii] = static_cast<float>(ii);
+    arguments[ii + kElements] = static_cast<float>(ii);
   }
 
   mtapi_initialize(
@@ -90,7 +90,7 @@ void NetworkTaskTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   mtapi_network_plugin_initialize("127.0.0.1", 12345, 5,
-    elements * 4 * 3 + 32, &status);
+    kElements * 4 * 3 + 32, &status);
   MTAPI_CHECK_STATUS(status);
 
   float node_remote = 1.0f;
@@ -117,8 +117,8 @@ void NetworkTaskTest::TestBasic() {
   task = mtapi_task_start(
     MTAPI_TASK_ID_NONE,
     job,
-    arguments, elements * 2 * sizeof(float),
-    results, elements*sizeof(float),
+    arguments, kElements * 2 * sizeof(float),
+    results, kElements*sizeof(float),
     MTAPI_DEFAULT_TASK_ATTRIBUTES,
     MTAPI_GROUP_NONE,
     &status);
@@ -127,7 +127,7 @@ void NetworkTaskTest::TestBasic() {
   mtapi_task_wait(task, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
-  for (int ii = 0; ii < elements; ii++) {
+  for (int ii = 0; ii < kElements; ii++) {
     PT_EXPECT_EQ(results[ii], ii * 2 + 1);
   }
 

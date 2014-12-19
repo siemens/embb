@@ -322,7 +322,6 @@ static int embb_mtapi_network_thread(void * args) {
             }
           }
         }
-
       }
     }
   }
@@ -350,7 +349,7 @@ void mtapi_network_plugin_initialize(
   // (2 sockets each if local)
   plugin->sockets = (embb_mtapi_network_socket_t*)embb_alloc(
     sizeof(embb_mtapi_network_socket_t) * (1 + max_connections * 2));
-    
+
   err = embb_mtapi_network_socket_initialize(&plugin->sockets[0]);
   err = embb_mtapi_network_socket_bind_and_listen(
     &plugin->sockets[0], host, port, max_connections);
