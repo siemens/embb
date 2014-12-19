@@ -65,13 +65,13 @@ void TaskTest::TestBasic() {
   mtapi_task_hndl_t task;
   mtapi_action_hndl_t action;
 
-  const int elements = 64;
-  float arguments[elements*2];
-  float results[elements];
+  const int kElements = 64;
+  float arguments[kElements * 2];
+  float results[kElements];
 
-  for (int ii = 0; ii < elements; ii++) {
-    arguments[ii] = (float)ii;
-    arguments[ii+elements] = (float)ii;
+  for (int ii = 0; ii < kElements; ii++) {
+    arguments[ii] = static_cast<float>(ii);
+    arguments[ii + kElements] = static_cast<float>(ii);
   }
 
   mtapi_opencl_plugin_initialize(&status);
@@ -100,8 +100,8 @@ void TaskTest::TestBasic() {
   task = mtapi_task_start(
     MTAPI_TASK_ID_NONE,
     job,
-    arguments, elements * 2 * sizeof(float),
-    results, elements*sizeof(float),
+    arguments, kElements * 2 * sizeof(float),
+    results, kElements*sizeof(float),
     MTAPI_DEFAULT_TASK_ATTRIBUTES,
     MTAPI_GROUP_NONE,
     &status);
@@ -110,7 +110,7 @@ void TaskTest::TestBasic() {
   mtapi_task_wait(task, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
-  for (int ii = 0; ii < elements; ii++) {
+  for (int ii = 0; ii < kElements; ii++) {
     PT_EXPECT_EQ(results[ii], ii * 2 + 1);
   }
 
