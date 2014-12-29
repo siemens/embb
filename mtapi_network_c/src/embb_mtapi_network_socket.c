@@ -206,7 +206,11 @@ int embb_mtapi_network_socket_recvbuffer_sized(
   if (size > (int)bytes_available)
     return 0;
   */
-  err = recv(that->handle, buffer->data, size, 0);
+  if (0 < size) {
+    err = recv(that->handle, buffer->data, size, 0);
+  } else {
+    err = 0;
+  }
   if (err != size)
     return 0;
   buffer->size = size;

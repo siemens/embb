@@ -40,6 +40,7 @@
 #include <embb_mtapi_task_t.h>
 #include <embb_mtapi_action_t.h>
 #include <embb_mtapi_node_t.h>
+#include <embb_mtapi_group_t.h>
 #include <mtapi_status_t.h>
 
 int embb_mtapi_network_initialize() {
@@ -319,6 +320,15 @@ static int embb_mtapi_network_thread(void * args) {
               local_task->error_code = task_status;
               local_task->state = MTAPI_TASK_COMPLETED;
               embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
+
+              /* is task associated with a group? */
+              if (embb_mtapi_group_pool_is_handle_valid(
+                node->group_pool, local_task->group)) {
+                embb_mtapi_group_t* local_group =
+                  embb_mtapi_group_pool_get_storage_for_handle(
+                  node->group_pool, local_task->group);
+                embb_mtapi_task_queue_push(&local_group->queue, local_task);
+              }
             }
           }
         }
