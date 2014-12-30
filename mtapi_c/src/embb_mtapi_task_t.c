@@ -209,9 +209,23 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
           task->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
         }
 
-        /* load balancing is unsupported right now,
-           so always choose action 0 */
+        /* load balancing: choose action with minimum tasks */
         action_index = 0;
+        for (mtapi_uint_t ii = 0; ii < local_job->num_actions; ii++) {
+          if (embb_mtapi_action_pool_is_handle_valid(
+            node->action_pool, local_job->actions[ii])) {
+            embb_mtapi_action_t * act_m =
+              embb_mtapi_action_pool_get_storage_for_handle(
+              node->action_pool, local_job->actions[action_index]);
+            embb_mtapi_action_t * act_i =
+              embb_mtapi_action_pool_get_storage_for_handle(
+              node->action_pool, local_job->actions[ii]);
+            if (embb_atomic_load_int(&act_m->num_tasks) >
+              embb_atomic_load_int(&act_i->num_tasks)) {
+              action_index = ii;
+            }
+          }
+        }
         if (embb_mtapi_action_pool_is_handle_valid(
           node->action_pool, local_job->actions[action_index])) {
           task->action = local_job->actions[action_index];
