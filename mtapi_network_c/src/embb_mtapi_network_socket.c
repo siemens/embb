@@ -215,7 +215,7 @@ int embb_mtapi_network_socket_recvbuffer_sized(
       if (cnt == size)
         break;
       buf += err;
-      err = recv(that->handle, buf + cnt, size - cnt, 0);
+      err = recv(that->handle, buf, size - cnt, 0);
     }
     if (err > 0)
       err = cnt;
