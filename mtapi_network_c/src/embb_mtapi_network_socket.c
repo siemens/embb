@@ -177,8 +177,17 @@ int embb_mtapi_network_socket_select(
 int embb_mtapi_network_socket_sendbuffer(
   embb_mtapi_network_socket_t * that,
   embb_mtapi_network_buffer_t * buffer) {
-  int result = send(that->handle, buffer->data, buffer->size, 0);
-  if (result == buffer->size) {
+  char * buf = (char*)(buffer->data);
+  int cnt = 0;
+  int result = send(that->handle, buf, buffer->size, 0);
+  while (result > 0) {
+    buf += result;
+    cnt += result;
+    if (cnt == buffer->size)
+      break;
+    result = send(that->handle, buf, buffer->size - cnt, 0);
+  }
+  if (cnt == buffer->size) {
     return buffer->size;
   } else {
     return 0;
