@@ -222,6 +222,7 @@ static int embb_mtapi_network_thread(void * args) {
 
       if (operation == EMBB_MTAPI_NETWORK_START_TASK) {
         int32_t arguments_size;
+        int32_t priority;
         mtapi_job_hndl_t job_hndl;
         mtapi_task_hndl_t task_hndl;
         mtapi_task_attributes_t task_attr;
@@ -234,13 +235,16 @@ static int embb_mtapi_network_thread(void * args) {
         mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
 
         err = embb_mtapi_network_socket_recvbuffer_sized(
-          socket, &buffer, 24);
-        assert(err == 24);
+          socket, &buffer, 28);
+        assert(err == 28);
         // domain id
         err = embb_mtapi_network_buffer_pop_front_int32(&buffer, &domain_id);
         assert(err == 4);
         // job id
         err = embb_mtapi_network_buffer_pop_front_int32(&buffer, &job_id);
+        assert(err == 4);
+        // priority
+        err = embb_mtapi_network_buffer_pop_front_int32(&buffer, &priority);
         assert(err == 4);
         // remote task handle
         err = embb_mtapi_network_buffer_pop_front_int32(
@@ -277,6 +281,8 @@ static int embb_mtapi_network_thread(void * args) {
         mtapi_taskattr_init(&task_attr, &local_status);
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_USER_DATA,
           (void*)network_task, 0, &local_status);
+        mtapi_taskattr_set(&task_attr, MTAPI_TASK_PRIORITY,
+          (void*)priority, 0, &local_status);
         assert(local_status == MTAPI_SUCCESS);
         memcpy(&func_void, &func, sizeof(void*));
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_COMPLETE_FUNCTION,
@@ -472,6 +478,10 @@ static void network_task_start(
 
         err = embb_mtapi_network_buffer_push_back_int32(
           send_buf, network_action->job_id);
+        assert(err == 4);
+
+        err = embb_mtapi_network_buffer_push_back_int32(
+          send_buf, local_task->attributes.priority);
         assert(err == 4);
 
         err = embb_mtapi_network_buffer_push_back_int32(
