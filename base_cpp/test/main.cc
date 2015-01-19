@@ -35,6 +35,8 @@
 #include <atomic_test.h>
 #include <memory_allocation_test.h>
 
+#include <embb/base/c/memory_allocation.h>
+
 PT_MAIN("Base C++") {
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
@@ -47,4 +49,6 @@ PT_MAIN("Base C++") {
   PT_RUN(embb::base::test::AtomicTest);
   PT_RUN(embb::base::test::MemoryAllocationTest);
   PT_RUN(embb::base::test::ThreadTest);
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }
