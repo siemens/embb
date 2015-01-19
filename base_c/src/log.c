@@ -65,8 +65,6 @@ static void embb_log_write_internal(
   char const * message,
   va_list argp) {
   if (log_level <= embb_log_global_log_level) {
-    char msg_buffer[400];
-    char buffer[500];
     char * log_level_str = "     ";
     char const * channel_str = channel;
     void * log_context = embb_log_global_log_context;
@@ -94,11 +92,15 @@ static void embb_log_write_internal(
       break;
     }
 #if defined(EMBB_COMPILER_MSVC)
+    char msg_buffer[400];
+    char buffer[500];
     vsprintf_s(msg_buffer, sizeof(msg_buffer), message, argp);
     sprintf_s(buffer, sizeof(buffer), "[%s] - [%s] %s",
       channel_str, log_level_str, msg_buffer);
     embb_log_global_log_function(log_context, buffer);
 #elif defined(EMBB_COMPILER_GNUC)
+    char msg_buffer[400];
+    char buffer[500];
     vsnprintf(msg_buffer, sizeof(msg_buffer), message, argp);
     snprintf(buffer, sizeof(buffer), "[%s] - [%s] %s",
       channel_str, log_level_str, msg_buffer);
