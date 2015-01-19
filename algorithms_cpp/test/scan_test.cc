@@ -35,7 +35,7 @@
  */
 struct Square {
   template<typename Type>
-  Type operator()(Type& l) {
+  Type operator()(Type& l) const {
     return l * l;
   }
 };
