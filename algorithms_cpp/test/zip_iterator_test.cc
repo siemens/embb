@@ -40,16 +40,16 @@ typedef std::vector<int>::const_iterator constVectorIterator;
 
 struct DotProductFunctor {
   template<typename TypeA, typename TypeB>
-  int operator()(embb::algorithms::ZipPair<TypeA, TypeB> pair) {
+  int operator()(embb::algorithms::ZipPair<TypeA, TypeB> pair) const {
     return pair.First() * pair.Second();
   }
 
   template<typename TypeA, typename TypeB>
-  int operator()(int lhs, embb::algorithms::ZipPair<TypeA, TypeB> rhs) {
+  int operator()(int lhs, embb::algorithms::ZipPair<TypeA, TypeB> rhs) const {
     return lhs + rhs.First() * rhs.Second();
   }
 
-  int operator()(int lhs, int rhs) {
+  int operator()(int lhs, int rhs) const {
     return lhs + rhs;
   }
 };
@@ -59,7 +59,7 @@ struct DotProductFunctor {
  * The result overwrites the original number.
  */
 struct Square {
-  void operator()(embb::algorithms::ZipPair<int &, int &> pair) {
+  void operator()(embb::algorithms::ZipPair<int &, int &> pair) const {
     pair.First() = pair.First() * pair.First();
     pair.Second() = pair.Second() * pair.Second();
   }
@@ -189,7 +189,7 @@ void ZipIteratorTest::TestIteratorTypes() {
 struct MultiDotProductFunctor{
   mtapi_int64_t operator()(
       embb::algorithms::ZipPair<embb::algorithms::ZipPair<int&, int&>,
-      embb::algorithms::ZipPair<int&, int&> > rhs ) {
+      embb::algorithms::ZipPair<int&, int&> > rhs) const {
     return rhs.First().First() * rhs.First().Second() *
            rhs.Second().First() * rhs.Second().Second();
   }
