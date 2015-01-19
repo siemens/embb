@@ -32,6 +32,7 @@
 #include <embb/mtapi/mtapi.h>
 
 #include <embb/base/function.h>
+#include <embb/base/c/memory_allocation.h>
 
 #include <embb/dataflow/dataflow.h>
 
@@ -203,4 +204,6 @@ void SimpleTest::TestBasic() {
   }
 
   embb::mtapi::Node::Finalize();
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }
