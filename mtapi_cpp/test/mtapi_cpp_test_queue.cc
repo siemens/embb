@@ -29,6 +29,8 @@
 #include <mtapi_cpp_test_config.h>
 #include <mtapi_cpp_test_queue.h>
 
+#include <embb/base/c/memory_allocation.h>
+
 #define JOB_TEST_TASK 42
 #define TASK_TEST_ID 23
 #define QUEUE_TEST_ID 17
@@ -63,5 +65,6 @@ void QueueTest::TestBasic() {
 
   embb::mtapi::Node::Finalize();
 
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
   //std::cout << "...done" << std::endl << std::endl;
 }
