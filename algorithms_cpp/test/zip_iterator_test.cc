@@ -110,14 +110,14 @@ void ZipIteratorTest::TestZipReduce() {
     sum += static_cast<long>((i + 2) * (i + 2));
   }
 
-  std::vector<int>::const_iterator iterA;
-  std::vector<int>::const_iterator iterB;
   embb::algorithms::ZipIterator<constVectorIterator, constVectorIterator>
-  start_iterator = embb::algorithms::Zip(iterA = vectorA.begin(),
-     iterB = vectorB.begin());
+  start_iterator = embb::algorithms::Zip(
+    std::vector<int>::const_iterator(vectorA.begin()),
+    std::vector<int>::const_iterator(vectorB.begin()));
   embb::algorithms::ZipIterator<constVectorIterator, constVectorIterator>
-  end_iterator = embb::algorithms::Zip(iterA = vectorA.end(),
-     iterB = vectorB.end());
+  end_iterator = embb::algorithms::Zip(
+    std::vector<int>::const_iterator(vectorA.end()),
+    std::vector<int>::const_iterator(vectorB.end()));
 
   PT_EXPECT_EQ(embb::algorithms::Reduce(start_iterator, end_iterator, 0,
       std::plus<int>(), DotProductFunctor()), sum);
