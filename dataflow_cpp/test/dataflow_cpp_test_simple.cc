@@ -104,7 +104,7 @@ class ArraySink {
     Init();
   }
 
-  void Print() {
+  void Print() const {
     std::cout << values_[0];
     for (int ii = 1; ii < SIZE; ii++) {
       std::cout << ", " << values_[ii];
@@ -119,7 +119,7 @@ class ArraySink {
     pos_ = 0;
   }
 
-  bool Check() {
+  bool Check() const {
     for (int ii = 0; ii < SIZE; ii++) {
       int expected;
       if (0 == (ii % 2))
