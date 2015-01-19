@@ -76,6 +76,7 @@ code) to be usable on a wide range of target systems. It has been tested on
 the following OS/compiler/architecture combinations:
 
   - Linux (Ubuntu 12.10) / GCC 4.8.1 / x86, x86_64
+  - Linux (Ubuntu 12.04) / Clang 3.0.0 / x86_64
   - Linux (Ubuntu 14.04) / GCC 4.8.2 / ARMv7
   - Windows
     * MSVC 12.0.21005.1 REL / x86, x86_64
@@ -135,7 +136,7 @@ assumed that the project's root directory is now the parent directory.
 
 Choose an appropriate build file generator for your system.
 
-  - For Linux, GCC, x86/x86_64/ARM:       "Unix Makefiles"
+  - For Linux, GCC/Clang, x86/x86_64/ARM: "Unix Makefiles"
   - For Windows, MSVC of VS 2013, x86:    "Visual Studio 12"
   - For Windows, MSVC of VS 2013, x86_64: "Visual Studio 12 Win64"
   - For Windows, MSVC of VS 2012, x86:    "Visual Studio 11"
@@ -151,6 +152,11 @@ generator. However, the build mode (Release/Debug) can be specified using the
 option -DCMAKE_BUILD_TYPE=[Release|Debug]. If no build mode is given on Linux,
 the default (Release) is used. The Visual Studio generators create build files
 for both modes (the selection is done at build time).
+
+You may choose a custom compiler instead the default one by defining
+CMAKE_CXX_COMPILER and/or CMAKE_C_COMPILER. E.g. to use clang on Linux use:
+
+    cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
 
 EMB² can be built with and without C++ exception handling, which has to be
 specified on build file generation. When exceptions are turned off, an error
