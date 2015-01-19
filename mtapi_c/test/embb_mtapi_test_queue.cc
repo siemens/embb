@@ -29,6 +29,7 @@
 #include <embb_mtapi_test_config.h>
 #include <embb_mtapi_test_queue.h>
 
+#include <embb/base/c/memory_allocation.h>
 #include <embb/base/c/internal/unused.h>
 
 #define JOB_TEST_TASK 42
@@ -128,6 +129,8 @@ void QueueTest::TestBasic() {
   status = MTAPI_ERR_UNKNOWN;
   mtapi_finalize(&status);
   MTAPI_CHECK_STATUS(status);
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 
   embb_mtapi_log_info("...done\n\n");
 }

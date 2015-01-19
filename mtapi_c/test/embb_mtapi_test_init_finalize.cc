@@ -24,6 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <embb/base/c/memory_allocation.h>
+
 #include <embb_mtapi_test_config.h>
 #include <embb_mtapi_test_init_finalize.h>
 
@@ -65,6 +67,8 @@ void InitFinalizeTest::TestBasic() {
     mtapi_finalize(&status);
     MTAPI_CHECK_STATUS(status);
   }
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 
   embb_mtapi_log_info("...done\n\n");
 }
