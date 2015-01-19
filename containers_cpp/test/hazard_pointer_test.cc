@@ -38,6 +38,9 @@ HazardPointerTest::HazardPointerTest() :
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+  object_pool(NULL),
+  stack(NULL),
+  hp(NULL),
 n_threads(static_cast<int>
   (partest::TestSuite::GetDefaultNumThreads())) {
   n_elements_per_thread = 100;
