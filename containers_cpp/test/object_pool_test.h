@@ -39,7 +39,7 @@ class ObjectPoolTestStruct {
   int thread_id;
  public:
   explicit ObjectPoolTestStruct(int thread_id);
-  int GetThreadId();
+  int GetThreadId() const;
 };
 
 template<typename ValuePool>
