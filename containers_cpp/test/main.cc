@@ -39,6 +39,8 @@
 #include <embb/containers/lock_free_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
 
+#include <embb/base/c/memory_allocation.h>
+
 #define COMMA ,
 
 PT_MAIN("Data Structures C++") {
@@ -67,4 +69,6 @@ PT_MAIN("Data Structures C++") {
 
   PT_RUN(embb::containers::test::ObjectPoolTest
     <embb::containers::WaitFreeArrayValuePool<bool COMMA false> >);
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

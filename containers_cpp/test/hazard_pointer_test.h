@@ -59,6 +59,7 @@ class HazardPointerTest : public partest::TestCase {
   */
   HazardPointerTest();
   void HazardPointerTest1_Pre();
+  void HazardPointerTest1_Post();
   void HazardPointerTest1_ThreadMethod();
   void DeletePointerCallback(embb::base::Atomic<int>* to_delete);
 };

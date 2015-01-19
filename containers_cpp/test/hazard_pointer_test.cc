@@ -60,7 +60,8 @@ n_threads(static_cast<int>
     Pre(&HazardPointerTest::HazardPointerTest1_Pre, this).
     Add(
     &HazardPointerTest::HazardPointerTest1_ThreadMethod,
-    this, static_cast<size_t>(n_threads));
+    this, static_cast<size_t>(n_threads)).
+    Post(&HazardPointerTest::HazardPointerTest1_Post, this);
 }
 
 void HazardPointerTest::HazardPointerTest1_Pre() {
@@ -73,6 +74,12 @@ void HazardPointerTest::HazardPointerTest1_Pre() {
     (delete_pointer_callback,
     NULL,
     1);
+}
+
+void HazardPointerTest::HazardPointerTest1_Post() {
+  delete object_pool;
+  delete stack;
+  delete hp;
 }
 
 void HazardPointerTest::HazardPointerTest1_ThreadMethod() {
