@@ -170,9 +170,6 @@ void MergeSort(
   difference_type distance = last - first;
   assert(distance >= 0);
 
-  assert(block_size == 0); // TODO(Georgios Christodoulou):
-                           // Take block size into account
-
   if (block_size == 0) {
     block_size= (static_cast<size_t>(distance) / node.GetCoreCount());
     if (block_size == 0)
