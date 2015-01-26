@@ -48,11 +48,11 @@ namespace containers {
  *
  * \par Requirements
  * - Let \c Pool be the pool class
- * - Let \c T be the element type of the pool. Atomic operations must be
- *   possible on \c T.
- * - Let \c b, d be objects of type \c T
+ * - Let \c Type be the element type of the pool. Atomic operations must be
+ *   possible on \c Type.
+ * - Let \c b, d be objects of type \c Type
  * - Let \c i, j be forward iterators supporting \c std::distance.
- * - Let \c c be an object of type \c T&
+ * - Let \c c be an object of type \c Type&
  * - Let \c e be a value of type \c int
  *
  * \par Valid Expressions
@@ -64,13 +64,13 @@ namespace containers {
  *     <th>Description</th>
  *   </tr>
  *   <tr>
- *     <td>\code{.cpp} Pool<T, b>(i, j) \endcode
+ *     <td>\code{.cpp} Pool<Type, b>(i, j) \endcode
  *     </td>
  *     <td>Nothing</td>
  *     <td>
- *     Constructs a value pool holding elements of type \c T, where \c b is the
- *     bottom element. The bottom element cannot be stored in the pool, it is
- *     exclusively used to mark empty cells. The pool initially contains
+ *     Constructs a value pool holding elements of type \c Type, where \c b is
+ *     the bottom element. The bottom element cannot be stored in the pool, it
+ *     is exclusively used to mark empty cells. The pool initially contains
  *     \c std::distance(i, j) elements which are copied during construction from
  *     the range \c [i, j). A concrete class satisfying the value pool concept
  *     might provide additional template parameters for specifying allocators.
@@ -107,17 +107,17 @@ namespace containers {
  *
  * \see LockFreeTreeValuePool
  *
- * \tparam T Element type (must support atomic operations such as \c int).
+ * \tparam Type Element type (must support atomic operations such as \c int).
  * \tparam Undefined Bottom element (cannot be stored in the pool)
  * \tparam Allocator Allocator used to allocate the pool array
  */
-template<typename T,
-  T Undefined,
-  class Allocator = embb::base::Allocator< embb::base::Atomic<T> > >
+template<typename Type,
+  Type Undefined,
+  class Allocator = embb::base::Allocator< embb::base::Atomic<Type> > >
 class WaitFreeArrayValuePool {
  private:
   int size;
-  embb::base::Atomic<T>* pool;
+  embb::base::Atomic<Type>* pool;
   WaitFreeArrayValuePool();
   Allocator allocator;
 
@@ -131,7 +131,7 @@ class WaitFreeArrayValuePool {
   /**
    * Constructs a pool and fills it with the elements in the specified range.
    *
-   * \memory Dynamically allocates <tt>n*sizeof(embb::base::Atomic<T>)</tt>
+   * \memory Dynamically allocates <tt>n*sizeof(embb::base::Atomic<Type>)</tt>
    *         bytes, where <tt>n = std::distance(first, last)</tt> is the number
    *         of pool elements.
    *
@@ -166,7 +166,7 @@ class WaitFreeArrayValuePool {
    * \see CPP_CONCEPTS_VALUE_POOL
    */
   int Allocate(
-    T & element
+    Type & element
     /**< [IN,OUT] Reference to the allocated element. Unchanged, if the
                   operation was not successful. */
   );
@@ -181,7 +181,7 @@ class WaitFreeArrayValuePool {
    * \see CPP_CONCEPTS_VALUE_POOL
    */
   void Free(
-    T element,
+    Type element,
     /**< [IN] Element to be returned to the pool */
     int index
     /**< [IN] Index of the element as obtained by Allocate() */

@@ -46,20 +46,20 @@ namespace internal {
  * Single linked lists, contains the element (\c element) and a pointer to the
  * next node (\c next).
  *
- * \tparam T Element type
+ * \tparam Type Element type
  */
-template< typename T >
+  template< typename Type >
 class LockFreeMPMCQueueNode {
  private:
   /**
    * Pointer to the next node
    */
-  embb::base::Atomic< LockFreeMPMCQueueNode< T >* > next;
+  embb::base::Atomic< LockFreeMPMCQueueNode< Type >* > next;
 
   /**
    * The stored element
    */
-  T element;
+  Type element;
 
  public:
   /**
@@ -73,7 +73,7 @@ class LockFreeMPMCQueueNode {
    * Creates a queue node
    */
   LockFreeMPMCQueueNode(
-    T const& element
+    Type const& element
     /**< [IN] The element of this queue node */);
 
   /**
@@ -81,12 +81,12 @@ class LockFreeMPMCQueueNode {
    *
    * \return The next pointer
    */
-  embb::base::Atomic< LockFreeMPMCQueueNode< T >* > & GetNext();
+  embb::base::Atomic< LockFreeMPMCQueueNode< Type >* > & GetNext();
 
   /**
    * Returns the element held by this node
    */
-  T GetElement();
+  Type GetElement();
 };
 } // namespace internal
 
@@ -99,11 +99,11 @@ class LockFreeMPMCQueueNode {
  *
  * \see WaitFreeSPSCQueue
  *
- * \tparam T Type of the queue elements
+ * \tparam Type Type of the queue elements
  * \tparam ValuePool Type of the value pool used as basis for the ObjectPool
  *         which stores the elements.
  */
-template< typename T,
+template< typename Type,
   typename ValuePool = embb::containers::LockFreeTreeValuePool < bool, false >
 >
 class LockFreeMPMCQueue {
@@ -120,35 +120,35 @@ class LockFreeMPMCQueue {
    * Callback to the method that is called by hazard pointers if a pointer is
    * not hazardous anymore, i.e., can safely be reused.
    */
-  embb::base::Function < void, internal::LockFreeMPMCQueueNode<T>* >
+  embb::base::Function < void, internal::LockFreeMPMCQueueNode<Type>* >
     delete_pointer_callback;
 
   /**
    * The hazard pointer object, used for memory management.
    */
   embb::containers::internal::HazardPointer
-    < internal::LockFreeMPMCQueueNode<T>* > hazardPointer;
+    < internal::LockFreeMPMCQueueNode<Type>* > hazardPointer;
 
   /**
    * The object pool, used for lock-free memory allocation.
    */
-  ObjectPool< internal::LockFreeMPMCQueueNode<T>, ValuePool > objectPool;
+  ObjectPool< internal::LockFreeMPMCQueueNode<Type>, ValuePool > objectPool;
 
   /**
    * Atomic pointer to the head node of the queue
    */
-  embb::base::Atomic< internal::LockFreeMPMCQueueNode<T>* > head;
+  embb::base::Atomic< internal::LockFreeMPMCQueueNode<Type>* > head;
 
   /**
    * Atomic pointer to the tail node of the queue
    */
-  embb::base::Atomic< internal::LockFreeMPMCQueueNode<T>* > tail;
+  embb::base::Atomic< internal::LockFreeMPMCQueueNode<Type>* > tail;
 
   /**
    * The callback function, used to cleanup non-hazardous pointers.
    * \see delete_pointer_callback
    */
-  void DeletePointerCallback(internal::LockFreeMPMCQueueNode<T>* to_delete);
+  void DeletePointerCallback(internal::LockFreeMPMCQueueNode<Type>* to_delete);
 
  public:
   /**
@@ -157,8 +157,8 @@ class LockFreeMPMCQueue {
    * \memory
    * Let \c t be the maximum number of threads and \c x be <tt>2.5*t+1</tt>.
    * Then, <tt>x*(3*t+1)</tt> elements of size <tt>sizeof(void*)</tt>, \c x
-   * elements of size <tt>sizeof(T)</tt>, and \c capacity+1 elements of size
-   * <tt>sizeof(T)</tt> are allocated.
+   * elements of size <tt>sizeof(Type)</tt>, and \c capacity+1 elements of size
+   * <tt>sizeof(Type)</tt> are allocated.
    *
    * \notthreadsafe
    *
@@ -198,7 +198,7 @@ class LockFreeMPMCQueue {
    * \see CPP_CONCEPTS_QUEUE
    */
   bool TryEnqueue(
-    T const& element
+    Type const& element
     /**< [IN] Const reference to the element that shall be enqueued */);
 
   /**
@@ -212,7 +212,7 @@ class LockFreeMPMCQueue {
    * \see CPP_CONCEPTS_QUEUE
    */
   bool TryDequeue(
-    T & element
+    Type & element
     /**< [IN, OUT] Reference to the dequeued element.
                    Unchanged, if the operation
                    was not successful. */);

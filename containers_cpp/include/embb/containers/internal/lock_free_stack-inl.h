@@ -59,14 +59,14 @@ namespace internal {
   }
 } // namespace internal
 
-template< typename T, typename ValuePool >
-void LockFreeStack< T, ValuePool >::
-DeletePointerCallback(internal::LockFreeStackNode<T>* to_delete) {
+template< typename Type, typename ValuePool >
+void LockFreeStack< Type, ValuePool >::
+DeletePointerCallback(internal::LockFreeStackNode<Type>* to_delete) {
   objectPool.Free(to_delete);
 }
 
-template< typename T, typename ValuePool >
-LockFreeStack< T, ValuePool >::LockFreeStack(size_t capacity) :
+template< typename Type, typename ValuePool >
+LockFreeStack< Type, ValuePool >::LockFreeStack(size_t capacity) :
 capacity(capacity),
 // Disable "this is used in base member initializer" warning.
 // We explicitly want this.
@@ -75,7 +75,7 @@ capacity(capacity),
 #pragma warning(disable:4355)
 #endif
   delete_pointer_callback(*this,
-  &LockFreeStack<T>::DeletePointerCallback),
+    &LockFreeStack<Type>::DeletePointerCallback),
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -88,19 +88,19 @@ capacity(capacity),
   capacity) {
 }
 
-template< typename T, typename ValuePool >
-size_t LockFreeStack< T, ValuePool >::GetCapacity() {
+template< typename Type, typename ValuePool >
+size_t LockFreeStack< Type, ValuePool >::GetCapacity() {
   return capacity;
 }
 
-template< typename T, typename ValuePool >
-LockFreeStack< T, ValuePool >::~LockFreeStack() {
+template< typename Type, typename ValuePool >
+LockFreeStack< Type, ValuePool >::~LockFreeStack() {
   // Nothing to do here, did not allocate anything.
 }
 
-template< typename T, typename ValuePool >
-bool LockFreeStack< T, ValuePool >::TryPush(T const& element) {
-  internal::LockFreeStackNode<T>* newNode =
+template< typename Type, typename ValuePool >
+bool LockFreeStack< Type, ValuePool >::TryPush(Type const& element) {
+  internal::LockFreeStackNode<Type>* newNode =
     objectPool.Allocate(element);
 
   // Stack full, cannot push
@@ -108,16 +108,16 @@ bool LockFreeStack< T, ValuePool >::TryPush(T const& element) {
     return false;
 
   for (;;) {
-    internal::LockFreeStackNode<T>* top_cached = top;
+    internal::LockFreeStackNode<Type>* top_cached = top;
     newNode->SetNext(top_cached);
     if (top.CompareAndSwap(top_cached, newNode))
       return true;
   }
 }
 
-template< typename T, typename ValuePool >
-bool LockFreeStack< T, ValuePool >::TryPop(T & element) {
-  internal::LockFreeStackNode<T>* top_cached = top;
+template< typename Type, typename ValuePool >
+bool LockFreeStack< Type, ValuePool >::TryPop(Type & element) {
+  internal::LockFreeStackNode<Type>* top_cached = top;
   for (;;) {
     top_cached = top;
 
@@ -146,7 +146,7 @@ bool LockFreeStack< T, ValuePool >::TryPop(T & element) {
     }
   }
 
-  T data = top_cached->GetElement();
+  Type data = top_cached->GetElement();
 
   // We don't need to read from this reference anymore, unguard it
   hazardPointer.GuardPointer(0, NULL);

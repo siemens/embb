@@ -29,20 +29,20 @@
 
 namespace embb {
 namespace containers {
-template<typename T, T Undefined, class Allocator >
-void WaitFreeArrayValuePool<T, Undefined, Allocator>::
-Free(T element, int index) {
+template<typename Type, Type Undefined, class Allocator >
+void WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Free(Type element, int index) {
   assert(element != Undefined);
 
   // Just put back the element
   pool[index].Store(element);
 }
 
-template<typename T, T Undefined, class Allocator >
-int WaitFreeArrayValuePool<T, Undefined, Allocator>::
-Allocate(T & element) {
+template<typename Type, Type Undefined, class Allocator >
+int WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Allocate(Type & element) {
   for (int i = 0; i != size; ++i) {
-    T expected;
+    Type expected;
 
     // If the memory cell is not available, go ahead
     if (Undefined == (expected = pool[i].Load()))
@@ -58,9 +58,9 @@ Allocate(T & element) {
   return -1;
 }
 
-template<typename T, T Undefined, class Allocator >
+template<typename Type, Type Undefined, class Allocator >
 template<typename ForwardIterator>
-WaitFreeArrayValuePool<T, Undefined, Allocator>::
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
 WaitFreeArrayValuePool(ForwardIterator first, ForwardIterator last) {
   size_t dist = static_cast<size_t>(std::distance(first, last));
 
@@ -77,8 +77,8 @@ WaitFreeArrayValuePool(ForwardIterator first, ForwardIterator last) {
   }
 }
 
-template<typename T, T Undefined, class Allocator >
-WaitFreeArrayValuePool<T, Undefined, Allocator>::~WaitFreeArrayValuePool() {
+template<typename Type, Type Undefined, class Allocator >
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::~WaitFreeArrayValuePool() {
   allocator.deallocate(pool, (size_t)size);
 }
 } // namespace containers

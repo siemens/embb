@@ -48,15 +48,15 @@ namespace containers {
  *
  * \ingroup CPP_CONTAINERS_POOLS
  *
- * \tparam T Element type
+ * \tparam Type Element type
  * \tparam ValuePool Type of the underlying value pool, determines whether
  *         the object pool is wait-free or lock-free
  * \tparam ObjectAllocator Type of allocator used to allocate objects
  */
-template<class T,
+template<class Type,
   typename ValuePool    =
     embb::containers::WaitFreeArrayValuePool< bool, false >,
-  class ObjectAllocator = embb::base::Allocator<T> >
+  class ObjectAllocator = embb::base::Allocator<Type> >
 class ObjectPool {
  private:
   /**
@@ -67,7 +67,7 @@ class ObjectPool {
   /**
    * Array holding the allocated object
    */
-  T* objects;
+  Type* objects;
 
   /**
    * Capacity of the object pool
@@ -105,15 +105,15 @@ class ObjectPool {
     bool ret_value;
   };
 
-  bool IsContained(const T &obj) const;
-  int GetIndexOfObject(const T &obj) const;
-  T* AllocateRaw();
+  bool IsContained(const Type &obj) const;
+  int GetIndexOfObject(const Type &obj) const;
+  Type* AllocateRaw();
 
  public:
   /**
    * Constructs an object pool with capacity \c capacity.
    *
-   * \memory Allocates \c capacity elements of type \c T.
+   * \memory Allocates \c capacity elements of type \c Type.
    *
    * \notthreadsafe
    */
@@ -147,7 +147,7 @@ class ObjectPool {
   * \note The element must have been allocated with Allocate().
   */
   void Free(
-    T* obj
+    Type* obj
     /**< [IN] Pointer to the object to be freed */
   );
 
@@ -162,22 +162,22 @@ class ObjectPool {
    *
    * \param ... Arguments of arbitrary type, passed to the object's constructor
    */
-  T* Allocate(...);
+  Type* Allocate(...);
 #else
-  T* Allocate();
+  Type* Allocate();
 
   template<typename Param1>
-  T* Allocate(Param1 const& param1);
+  Type* Allocate(Param1 const& param1);
 
   template<typename Param1, typename Param2>
-  T* Allocate(Param1 const& param1, Param2 const& param2);
+  Type* Allocate(Param1 const& param1, Param2 const& param2);
 
   template<typename Param1, typename Param2, typename Param3>
-  T* Allocate(Param1 const& param1, Param2 const& param2,
+  Type* Allocate(Param1 const& param1, Param2 const& param2,
     Param3 const& param3);
 
   template<typename Param1, typename Param2, typename Param3, typename Param4>
-  T* Allocate(Param1 const& param1, Param2 const& param2,
+  Type* Allocate(Param1 const& param1, Param2 const& param2,
     Param3 const& param3, Param4 const& param4);
 
 #endif

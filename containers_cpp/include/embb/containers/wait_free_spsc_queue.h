@@ -53,9 +53,9 @@
  *
  * \par Requirements
  * - Let \c Queue be the queue class
- * - Let \c T be the element type of the queue
+ * - Let \c Type be the element type of the queue
  * - Let \c capacity be a value of type \c size_t
- * - Let \c element be a reference to an element of type \c T
+ * - Let \c element be a reference to an element of type \c Type
  *
  * \par Valid Expressions
  * <table>
@@ -65,7 +65,7 @@
  *     <th>Description</th>
  *   </tr>
  *   <tr>
- *     <td>\code{.cpp} Queue<T>(capacity) \endcode</td>
+ *     <td>\code{.cpp} Queue<Type>(capacity) \endcode</td>
  *     <td>Nothing</td>
  *     <td>
  *      Constructs a queue with capacity \c capacity that holds elements of
@@ -114,10 +114,10 @@ namespace containers {
  *
  * \see LockFreeMPMCQueue
  *
- * \tparam T Type of the queue elements
+ * \tparam Type Type of the queue elements
  * \tparam Allocator Allocator type for allocating queue elements.
  */
-template<typename T, class Allocator = embb::base::Allocator< T > >
+template<typename Type, class Allocator = embb::base::Allocator< Type > >
 class WaitFreeSPSCQueue {
  private:
   /**
@@ -133,7 +133,7 @@ class WaitFreeSPSCQueue {
   /**
    * Array holding the queue elements
    */
-  T* queue_array;
+  Type* queue_array;
 
   /**
    * Index of the head in the \c queue_array
@@ -149,7 +149,7 @@ class WaitFreeSPSCQueue {
   /**
    * Creates a queue with the specified capacity.
    *
-   * \memory Allocates \c capacity elements of type \c T.
+   * \memory Allocates \c capacity elements of type \c Type.
    *
    * \notthreadsafe
    *
@@ -190,7 +190,7 @@ class WaitFreeSPSCQueue {
    * \see CPP_CONCEPTS_QUEUE
    */
   bool TryEnqueue(
-    T const & element
+    Type const & element
     /**< [IN] Const reference to the element that shall be enqueued */
   );
 
@@ -208,9 +208,9 @@ class WaitFreeSPSCQueue {
    * \see CPP_CONCEPTS_QUEUE
    */
   bool TryDequeue(
-    T & element
-    /**< [IN,OUT] Reference to the dequeued element. Unchanged, if the operation
-                  was not successful. */
+    Type & element
+    /**< [IN,OUT] Reference to the dequeued element. Unchanged, if the
+                  operation was not successful. */
   );
 };
 } // namespace containers

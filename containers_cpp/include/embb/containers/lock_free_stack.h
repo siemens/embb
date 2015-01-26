@@ -53,9 +53,9 @@
  *
  * \par Requirements
  * - Let \c Stack be the stack class
- * - Let \c T be the element type of the stack
+ * - Let \c Type be the element type of the stack
  * - Let \c capacity be a value of type \c size_t
- * - Let \c element be a reference to an element of type \c T
+ * - Let \c element be a reference to an element of type \c Type
  *
  * \par Valid Expressions
  * <table>
@@ -65,11 +65,11 @@
  *     <th>Description</th>
  *   </tr>
  *   <tr>
- *     <td>\code{.cpp} Stack<T>(capacity) \endcode</td>
+ *     <td>\code{.cpp} Stack<Type>(capacity) \endcode</td>
  *     <td>Nothing</td>
  *     <td>
  *      Constructs a stack with capacity \c capacity that holds elements of
- *      type \c T.
+ *      type \c Type.
  *     </td>
  *   </tr>
  *   <tr>
@@ -165,11 +165,11 @@ class LockFreeStackNode {
  *
  * \ingroup CPP_CONTAINERS_STACKS
  *
- * \tparam T Type of the stack elements
+ * \tparam Type Type of the stack elements
  * \tparam ValuePool Type of the value pool used as basis for the ObjectPool
  *         which stores the elements.
  */
-template< typename T,
+template< typename Type,
 typename ValuePool = embb::containers::LockFreeTreeValuePool < bool, false > >
 class LockFreeStack {
  private:
@@ -183,29 +183,29 @@ class LockFreeStack {
    * Callback to the method that is called by hazard pointers if a pointer is
    * not hazardous anymore, i.e., can safely be reused.
    */
-  embb::base::Function<void, internal::LockFreeStackNode<T>*>
+  embb::base::Function<void, internal::LockFreeStackNode<Type>*>
     delete_pointer_callback;
 
   /**
    * The hazard pointer object, used for memory management.
    */
-  internal::HazardPointer<internal::LockFreeStackNode<T>*> hazardPointer;
+  internal::HazardPointer<internal::LockFreeStackNode<Type>*> hazardPointer;
 
   /**
    * The callback function, used to cleanup non-hazardous pointers.
    * \see delete_pointer_callback
    */
-  void DeletePointerCallback(internal::LockFreeStackNode<T>* to_delete);
+  void DeletePointerCallback(internal::LockFreeStackNode<Type>* to_delete);
 
   /**
    * The object pool, used for lock-free memory allocation.
    */
-  ObjectPool< internal::LockFreeStackNode<T>, ValuePool > objectPool;
+  ObjectPool< internal::LockFreeStackNode<Type>, ValuePool > objectPool;
 
   /**
    * Atomic pointer to the top node of the stack (element that is popped next)
    */
-  embb::base::Atomic<internal::LockFreeStackNode<T>*> top;
+  embb::base::Atomic<internal::LockFreeStackNode<Type>*> top;
 
  public:
   /**
@@ -214,8 +214,8 @@ class LockFreeStack {
    * \memory
    * Let \c t be the maximum number of threads and \c x be <tt>1.25*t+1</tt>.
    * Then, <tt>x*(3*t+1)</tt> elements of size <tt>sizeof(void*)</tt>, \c x
-   * elements of size <tt>sizeof(T)</tt>, and \c capacity elements of size
-   * <tt>sizeof(T)</tt> are allocated.
+   * elements of size <tt>sizeof(Type)</tt>, and \c capacity elements of size
+   * <tt>sizeof(Type)</tt> are allocated.
    *
    * \notthreadsafe
    *
@@ -256,7 +256,7 @@ class LockFreeStack {
    * \see CPP_CONCEPTS_STACK
    */
   bool TryPush(
-    T const& element
+    Type const& element
     /**< [IN] Const reference to the element that shall be pushed */
   );
 
@@ -271,7 +271,7 @@ class LockFreeStack {
    * \see CPP_CONCEPTS_STACK
    */
   bool TryPop(
-    T & element
+    Type & element
     /**< [IN,OUT] Reference to the popped element. Unchanged, if the operation
                   was not successful. */
   );
