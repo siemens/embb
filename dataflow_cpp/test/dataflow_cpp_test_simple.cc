@@ -36,7 +36,7 @@
 
 #include <embb/dataflow/dataflow.h>
 
-typedef embb::dataflow::Network<4> MyNetwork;
+typedef embb::dataflow::Network<8> MyNetwork;
 typedef MyNetwork::ConstantSource< int > MyConstantSource;
 typedef MyNetwork::Source< int > MySource;
 typedef MyNetwork::SerialProcess< MyNetwork::Inputs<int>::Type,

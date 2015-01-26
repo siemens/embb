@@ -51,7 +51,7 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
 
   explicit Sink(FunctionType function)
     : executor_(function) {
-    input_clock_expected_ = 0;
+    next_clock_ = 0;
     inputs_.SetListener(this);
   }
 
@@ -64,17 +64,10 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
   }
 
   virtual void Run(int clock) {
-    //const int idx = clock % Slices;
-
-    // force ordering
-    while (input_clock_expected_ != clock) embb::base::Thread::CurrentYield();
-
     if (inputs_.AreNoneBlank(clock)) {
       executor_.Execute(clock, inputs_);
     }
     listener_->OnClock(clock);
-
-    input_clock_expected_ = clock + 1;
   }
 
   InputsType & GetInputs() {
@@ -87,26 +80,31 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
   }
 
   virtual void OnClock(int clock) {
-    lock_.Lock();
     TrySpawn(clock);
-    lock_.Unlock();
   }
 
  private:
   InputsType inputs_;
   ExecutorType executor_;
-  embb::base::Atomic<int> input_clock_expected_;
+  int next_clock_;
   Action action_[Slices];
   ClockListener * listener_;
   SpinLock lock_;
 
   void TrySpawn(int clock) {
-    const int idx = clock % Slices;
     if (!inputs_.AreAtClock(clock))
       EMBB_THROW(embb::base::ErrorException,
         "Some inputs are not at expected clock.")
-    action_[idx] = Action(this, clock);
-    sched_->Spawn(action_[idx]);
+
+    lock_.Lock();
+    for (int ii = next_clock_; ii < next_clock_ + Slices; ii++) {
+      if (!inputs_.AreAtClock(ii)) {
+        break;
+      }
+      next_clock_ = ii + 1;
+      Run(ii);
+    }
+    lock_.Unlock();
   }
 };
 
