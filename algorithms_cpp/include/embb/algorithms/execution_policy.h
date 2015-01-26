@@ -38,11 +38,7 @@ namespace algorithms {
  *  - the affinity of tasks to MTAPI worker threads (not CPU cores) and
  *  - the priority of the spawned tasks.
  *
- * \ingroup CPP_ALGORITHMS_SCAN
- * \ingroup CPP_ALGORITHMS_REDUCTION
- * \ingroup CPP_ALGORITHMS_FOREACH
- * \ingroup CPP_ALGORITHMS_COUNT
- * \ingroup CPP_ALGORITHMS_SORTING
+ * \ingroup CPP_ALGORITHMS
  */
 class ExecutionPolicy{
  public:

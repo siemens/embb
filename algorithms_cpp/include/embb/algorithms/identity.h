@@ -33,11 +33,7 @@ namespace algorithms {
 /**
  * Unary identity functor.
  *
- * \ingroup CPP_ALGORITHMS_SCAN
- * \ingroup CPP_ALGORITHMS_REDUCTION
- * \ingroup CPP_ALGORITHMS_FOREACH
- * \ingroup CPP_ALGORITHMS_COUNT
- * \ingroup CPP_ALGORITHMS_SORTING
+ * \ingroup CPP_ALGORITHMS
  */
 struct Identity {
   /**
