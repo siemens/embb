@@ -521,7 +521,7 @@ class CacheAlignedAllocatable {
 /*
  * Forward declaration
  */
-template <typename T>
+template <typename Type>
 class Allocator;
 
 /*
@@ -534,8 +534,8 @@ class Allocator < void > {
   typedef const void* const_pointer;
   typedef void        value_type;
 
-  template <typename U> struct rebind {
-    typedef Allocator<U> other;
+  template <typename OtherType> struct rebind {
+    typedef Allocator<OtherType> other;
   };
 };
 
@@ -552,36 +552,36 @@ class Allocator < void > {
  *
  * \ingroup CPP_BASE_MEMORY_ALLOCATION
  */
-template <typename T>
+template <typename Type>
 class Allocator {
  public:
   /** Quantity of elements type */
-  typedef size_t    size_type;
+  typedef size_t      size_type;
 
   /** Difference between two pointers type */
-  typedef ptrdiff_t difference_type;
+  typedef ptrdiff_t   difference_type;
 
   /** Pointer to element type */
-  typedef T*        pointer;
+  typedef Type*       pointer;
 
   /** Pointer to constant element type */
-  typedef const T*  const_pointer;
+  typedef const Type* const_pointer;
 
   /** Reference to element type */
-  typedef T&        reference;
+  typedef Type&       reference;
 
   /** Reference to constant element type */
-  typedef const T&  const_reference;
+  typedef const Type& const_reference;
 
   /** Element type */
-  typedef T         value_type;
+  typedef Type        value_type;
 
   /**
-   * Rebind allocator to type U
+   * Rebind allocator to type OtherType
    */
-  template <typename U> struct rebind {
+  template <typename OtherType> struct rebind {
     /** Type to rebind to */
-    typedef Allocator<U> other;
+    typedef Allocator<OtherType> other;
   };
 
   /**
@@ -602,8 +602,8 @@ class Allocator {
    *
    * Allows construction from allocators for different types (rebind)
    */
-  template <typename U> Allocator(
-    const Allocator<U>&
+  template <typename OtherType> Allocator(
+    const Allocator<OtherType>&
     /**< [IN] Other allocator object*/
     )
     throw() {}
@@ -642,7 +642,7 @@ class Allocator {
   }
 
   /**
-   * Allocates but doesn't initialize storage for elements of type T
+   * Allocates but doesn't initialize storage for elements of type Type
    *
    * \threadsafe
    *
@@ -724,7 +724,7 @@ class Allocator {
 /*
  * Forward declaration
  */
-template <typename T>
+template <typename Type>
 class AllocatorCacheAligned;
 
 /*
@@ -737,8 +737,8 @@ class AllocatorCacheAligned < void > {
   typedef const void* const_pointer;
   typedef void        value_type;
 
-  template <typename U> struct rebind {
-    typedef AllocatorCacheAligned<U> other;
+  template <typename OtherType> struct rebind {
+    typedef AllocatorCacheAligned<OtherType> other;
   };
 };
 
@@ -755,36 +755,36 @@ class AllocatorCacheAligned < void > {
  *
  * \ingroup CPP_BASE_MEMORY_ALLOCATION
  */
-template< typename T >
-class AllocatorCacheAligned : public Allocator < T > {
+template< typename Type >
+class AllocatorCacheAligned : public Allocator < Type > {
  public:
   /** Quantity of elements type */
-  typedef size_t    size_type;
+  typedef size_t      size_type;
 
   /** Difference between two pointers type */
-  typedef ptrdiff_t difference_type;
+  typedef ptrdiff_t   difference_type;
 
   /** Pointer to element type */
-  typedef T*        pointer;
+  typedef Type*       pointer;
 
   /** Pointer to constant element type */
-  typedef const T*  const_pointer;
+  typedef const Type* const_pointer;
 
   /** Reference to element type */
-  typedef T&        reference;
+  typedef Type&       reference;
 
   /** Reference to constant element type */
-  typedef const T&  const_reference;
+  typedef const Type& const_reference;
 
   /** Element type */
-  typedef T         value_type;
+  typedef Type        value_type;
 
   /**
-   * Rebind allocator to type U
+   * Rebind allocator to type OtherType
    */
-  template <typename U> struct rebind {
+  template <typename OtherType> struct rebind {
     /** Type to rebind to */
-    typedef Allocator<U> other;
+    typedef Allocator<OtherType> other;
   };
 
   /**
@@ -799,16 +799,16 @@ class AllocatorCacheAligned : public Allocator < T > {
     const AllocatorCacheAligned& a
     /**< [IN] Other allocator object */
     ) throw()
-    : Allocator < T >(a) { }
+    : Allocator < Type >(a) { }
 
   /**
    * Constructs allocator object
    *
    * Allows construction from allocators for different types (rebind)
    */
-  template<typename U>
+  template<typename OtherType>
   AllocatorCacheAligned(
-    const AllocatorCacheAligned<U>&
+    const AllocatorCacheAligned<OtherType>&
     /**< [IN] Other allocator object*/
     ) throw() { }
 
@@ -818,7 +818,7 @@ class AllocatorCacheAligned : public Allocator < T > {
   ~AllocatorCacheAligned() throw() { }
 
   /**
-   * Allocates but doesn't initialize storage for elements of type T
+   * Allocates but doesn't initialize storage for elements of type Type
    *
    * \threadsafe
    *
