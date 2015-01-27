@@ -26,16 +26,18 @@
 
 #include "./hazard_pointer_test.h"
 
+#include <embb/base/internal/config.h>
+
 namespace embb {
 namespace containers {
 namespace test {
 HazardPointerTest::HazardPointerTest() :
-#ifdef _MSC_VER
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
   delete_pointer_callback(*this, &HazardPointerTest::DeletePointerCallback),
-#ifdef _MSC_VER
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(pop)
 #endif
   object_pool(NULL),

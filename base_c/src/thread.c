@@ -157,6 +157,10 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
 
 #ifdef EMBB_HAS_GLIB_CPU
 #include <sched.h>
+#elif defined EMBB_HAS_HEADER_CPUSET
+#include <pthread_np.h>
+#include <sys/param.h>
+#include <sys/cpuset.h>
 #endif
 
 #ifdef EMBB_HAS_HEADER_SYSINFO
@@ -203,23 +207,26 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   int status = pthread_attr_init(&attr);
   if (status != 0) return EMBB_ERROR;
   if (core_set != NULL) {
-#ifdef EMBB_HAS_GLIB_CPU
+#if defined(EMBB_HAS_GLIB_CPU) || defined(EMBB_HAS_HEADER_CPUSET)
     assert(embb_core_count_available() < CPU_SETSIZE &&
-      "Core sets on Linux systems are only supported up to CPU_SETSIZE "
-      "processors!");
+      "Core sets are only supported up to CPU_SETSIZE processors!");
+#ifdef EMBB_HAS_GLIB_CPU
     cpu_set_t cpuset;
+#else
+    cpuset_t cpuset;
+#endif
     CPU_ZERO(&cpuset); /* Disable all processors */
     for (unsigned int i = 0; i < embb_core_count_available(); i++) {
       if (embb_core_set_contains(core_set, i)) {
         CPU_SET(i, &cpuset);
       }
     }
-    status = pthread_attr_setaffinity_np(&attr, sizeof(cpu_set_t), &cpuset);
+    status = pthread_attr_setaffinity_np(&attr, sizeof(cpuset), &cpuset);
     if (status != 0) return EMBB_ERROR;
-#else /* EMBB_HAS_GLIB_CPU */
+#else
     embb_log_write("base_c", EMBB_LOG_LEVEL_WARNING, "Could not set thread "
                    "affinity, since no implementation available!\n");
-#endif /* else EMBB_HAS_GLIB_CPU */
+#endif
   }
 
   /* Dynamic allocation of thread arguments. Freed on call of join. */

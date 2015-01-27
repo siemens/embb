@@ -27,6 +27,8 @@
 #ifndef EMBB_CONTAINERS_INTERNAL_LOCK_FREE_STACK_INL_H_
 #define EMBB_CONTAINERS_INTERNAL_LOCK_FREE_STACK_INL_H_
 
+#include <embb/base/internal/config.h>
+
 /*
  * The following algorithm uses hazard pointers and a lock-free value pool for
  * memory management. For a description of the algorithm, see
@@ -70,13 +72,13 @@ LockFreeStack< Type, ValuePool >::LockFreeStack(size_t capacity) :
 capacity(capacity),
 // Disable "this is used in base member initializer" warning.
 // We explicitly want this.
-#ifdef _MSC_VER
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
   delete_pointer_callback(*this,
     &LockFreeStack<Type>::DeletePointerCallback),
-#ifdef _MSC_VER
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(pop)
 #endif
   hazardPointer(delete_pointer_callback, NULL, 1),
