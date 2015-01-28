@@ -75,7 +75,7 @@ This project is based on the standards C99 (for C code) and C++03 (for C++
 code) to be usable on a wide range of target systems. It has been tested on
 the following OS/compiler/architecture combinations:
 
-  - Linux (Ubuntu 12.10) / GCC 4.8.1 / x86, x86_64
+  - Linux (Ubuntu 12.04) / GCC 4.8.1 / x86, x86_64
   - Linux (Ubuntu 12.04) / Clang 3.0.0 / x86_64
   - Linux (Ubuntu 14.04) / GCC 4.8.2 / ARMv7
   - Windows
@@ -154,7 +154,8 @@ the default (Release) is used. The Visual Studio generators create build files
 for both modes (the selection is done at build time).
 
 You may choose a custom compiler instead the default one by defining
-CMAKE_CXX_COMPILER and/or CMAKE_C_COMPILER. E.g. to use clang on Linux use:
+CMAKE_CXX_COMPILER and/or CMAKE_C_COMPILER. For example, to use Clang on Linux
+use:
 
     cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
 
