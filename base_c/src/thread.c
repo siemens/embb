@@ -243,7 +243,7 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
       (void*)(thread->embb_internal_arg)); /* arguments to thread start func. */
   if (status != 0) return EMBB_ERROR;
 
-  pthread_attr_destroy(&attr);
+  status = pthread_attr_destroy(&attr);
   if (status != 0) return EMBB_ERROR;
   return EMBB_SUCCESS;
 }
