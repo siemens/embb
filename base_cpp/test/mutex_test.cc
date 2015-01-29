@@ -93,10 +93,10 @@ void MutexTest::PostLockGuardCount() {
 }
 
 void MutexTest::TestUniqueLock() {
-#ifdef EMBB_USE_EXCEPTIONS
-  bool exception_thrown = false;
-#endif
   { // Test standard usage and releasing
+#ifdef EMBB_USE_EXCEPTIONS
+    bool exception_thrown = false;
+#endif
     UniqueLock<Mutex> lock(mutex_);
     PT_EXPECT_EQ(lock.OwnsLock(), true);
 

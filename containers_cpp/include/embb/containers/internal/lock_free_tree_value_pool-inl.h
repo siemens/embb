@@ -29,39 +29,44 @@
 
 namespace embb {
 namespace containers {
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 GetSmallestPowerByTwoValue(int value) {
   int result = 1;
   while (result < value) result <<= 1;
   return result;
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-bool LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::IsLeaf(
-  int node ) {
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+bool LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+IsLeaf(int node) {
   if (node >= size - 1 && node <= 2 * size - 1) {
     return true;
   }
   return false;
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-bool LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+bool LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 IsValid(int node) {
   return (node >= 0 && node <= 2 * size - 1);
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 GetLeftChildIndex(int node) {
   int index = 2 * node + 1;
   assert(IsValid(index));
   return index;
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 GetRightChildIndex(int node) {
   int index = 2 * node + 2;
   assert(IsValid(index));
@@ -75,16 +80,18 @@ NodeIndexToPoolIndex(int node) {
   return(node - (size - 1));
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 PoolIndexToNodeIndex(int index) {
   int node = index + (size - 1);
   assert(IsLeaf(node));
   return node;
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-bool LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+bool LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 IsRoot(int node) {
   return(0 == node);
 }
@@ -97,14 +104,15 @@ GetParentNode(int node) {
   return parent;
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
-allocate_rec(int node, T& element) {
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+allocate_rec(int node, Type& element) {
   // If we are a leaf, we try to allocate a cell using CAS.
   if (IsLeaf(node)) {
     int pool_index = NodeIndexToPoolIndex(node);
 
-    T expected = pool[pool_index];
+    Type expected = pool[pool_index];
     if (expected == Undefined)
       return -1;
 
@@ -120,7 +128,7 @@ allocate_rec(int node, T& element) {
   int desired;
   // Try to decrement node value.
   // This is the point, where the algorithm becomes not wait-free. We have to
-  // atomically decrement the value in the node iff the result is greater than
+  // atomically decrement the value in the node if the result is greater than
   // or equal to zero. This cannot be done atomically.
   do {
     current = tree[node];
@@ -141,8 +149,9 @@ allocate_rec(int node, T& element) {
   return rightResult;
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-void LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+void LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 Fill(int node, int elementsToStore, int power2Value) {
   if (IsLeaf(node))
     return;
@@ -165,15 +174,17 @@ Fill(int node, int elementsToStore, int power2Value) {
   }
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
-Allocate(T & element) {
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Allocate(Type & element) {
   return allocate_rec(0, element);
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-void LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
-Free(T element, int index) {
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+void LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Free(Type element, int index) {
   assert(element != Undefined);
 
   // Put the element back
@@ -188,9 +199,10 @@ Free(T element, int index) {
   }
 }
 
-template< typename T, T Undefined, class PoolAllocator, class TreeAllocator >
+template< typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
 template< typename ForwardIterator >
-LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 LockFreeTreeValuePool(ForwardIterator first, ForwardIterator last) {
   // Number of elements to store
   real_size = static_cast<int>(::std::distance(first, last));
@@ -218,12 +230,14 @@ LockFreeTreeValuePool(ForwardIterator first, ForwardIterator last) {
   Fill(0, static_cast<int>(::std::distance(first, last)), size);
 }
 
-template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
-LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 ~LockFreeTreeValuePool() {
   poolAllocator.deallocate(pool, static_cast<size_t>(real_size));
   treeAllocator.deallocate(tree, static_cast<size_t>(tree_size));
 }
+
 } // namespace containers
 } // namespace embb
 

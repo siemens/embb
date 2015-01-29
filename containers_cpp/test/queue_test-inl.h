@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <embb/base/internal/config.h>
+
 namespace embb {
 namespace containers {
 namespace test {
@@ -54,13 +56,13 @@ n_threads(static_cast<int>
   TOTAL_PRODUCE_CONSUME_COUNT).
   Post(&QueueTest::QueueTestSingleProducedSingleConsumer_Post, this);
 
-#ifdef _MSC_VER
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4127)
 #endif
   if (MultipleProducers == true &&
     MultipleConsumers == true) {
-#ifdef _MSC_VER
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(pop)
 #endif
     CreateUnit("QueueTestMultipleThreadsMultipleProducerMultipleConsumer").

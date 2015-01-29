@@ -32,7 +32,7 @@ ObjectPoolTestStruct::ObjectPoolTestStruct(int thread_id)
   : thread_id(thread_id) {
 }
 
-int ObjectPoolTestStruct::GetThreadId() {
+int ObjectPoolTestStruct::GetThreadId() const {
   return thread_id;
 }
 } // namespace test

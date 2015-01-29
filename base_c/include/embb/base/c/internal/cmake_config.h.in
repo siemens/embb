@@ -39,6 +39,16 @@
 #cmakedefine EMBB_HAS_HEADER_SYSINFO
 
 /**
+ * Is used to get the number of cores on certain systems.
+ */
+#cmakedefine EMBB_HAS_HEADER_SYSCTL
+
+/**
+ * Is used to set thread affinities on certain systems.
+ */
+#cmakedefine EMBB_HAS_HEADER_CPUSET
+
+/**
  * Is used for Linux thread affinities.
  */
 #cmakedefine EMBB_HAS_GLIB_CPU

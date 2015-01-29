@@ -29,6 +29,8 @@
 #include <mtapi_cpp_test_config.h>
 #include <mtapi_cpp_test_group.h>
 
+#include <embb/base/c/memory_allocation.h>
+
 struct result_example_struct {
   mtapi_uint_t value1;
   mtapi_uint_t value2;
@@ -81,5 +83,6 @@ void GroupTest::TestBasic() {
 
   embb::mtapi::Node::Finalize();
 
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
   //std::cout << "...done" << std::endl << std::endl;
 }

@@ -41,15 +41,15 @@ namespace containers {
  *
  * \see WaitFreeArrayValuePool
  *
- * \tparam T Element type (must support atomic operations such as \c int).
+ * \tparam Type Element type (must support atomic operations such as \c int).
  * \tparam Undefined Bottom element (cannot be stored in the pool)
  * \tparam PoolAllocator Allocator used to allocate the pool array
  * \tparam TreeAllocator Allocator used to allocate the array representing the
  *         binary tree.
  */
-template<typename T,
-  T Undefined,
-class PoolAllocator = embb::base::Allocator< embb::base::Atomic<T> >,
+template<typename Type,
+  Type Undefined,
+class PoolAllocator = embb::base::Allocator< embb::base::Atomic<Type> >,
 class TreeAllocator = embb::base::Allocator < embb::base::Atomic<int> >
 >
 class LockFreeTreeValuePool {
@@ -95,7 +95,7 @@ class LockFreeTreeValuePool {
    *
    * The algorithm for allocating an element starts at the root node and
    * recursively traverses the tree. It tries to decrement a node (a decrement
-   * is actually a conditional decrement, i.e., a node is decremented iff the
+   * is actually a conditional decrement, i.e., a node is decremented if the
    * result is not less than 0. This is the place, where the algorithm is not
    * wait-free anymore, as this cannot be implemented atomically.) and if
    * successful, calls itself on the left child, if not successful, on the right
@@ -135,7 +135,7 @@ class LockFreeTreeValuePool {
   embb::base::Atomic<int>* tree;
 
   // The actual pool
-  embb::base::Atomic<T>* pool;
+  embb::base::Atomic<Type>* pool;
 
   PoolAllocator poolAllocator;
   TreeAllocator treeAllocator;
@@ -235,7 +235,7 @@ class LockFreeTreeValuePool {
   int allocate_rec(
     int node,
     /**< [IN] Node index */
-    T& element
+    Type& element
     /**< [IN,OUT] Allocated element, if there is any */
   );
 
@@ -260,8 +260,8 @@ class LockFreeTreeValuePool {
    *
    * \memory Let <tt>n = \c std::distance(first, last))</tt> and \c k be the
    * minimum number such that <tt>n <= 2^k holds</tt>. Then,
-   * <tt>((2^k)-1) * sizeof(embb::Atomic<int>) + n*sizeof(embb::Atomic<T>)</tt>
-   * bytes of memory are allocated.
+   * <tt>((2^k)-1) * sizeof(embb::Atomic<int>) +
+   * n*sizeof(embb::Atomic<Type>)</tt> bytes of memory are allocated.
    *
    * \notthreadsafe
    *
@@ -294,7 +294,7 @@ class LockFreeTreeValuePool {
    * \see CPP_CONCEPTS_VALUE_POOL
    */
   int Allocate(
-    T & element
+    Type & element
     /**< [IN,OUT] Reference to the allocated element. Unchanged, if the
                   operation was not successful. */
   );
@@ -309,7 +309,7 @@ class LockFreeTreeValuePool {
    * \see CPP_CONCEPTS_VALUE_POOL
    */
   void Free(
-    T element,
+    Type element,
     /**< [IN] Element to be returned to the pool */
     int index
     /**< [IN] Index of the element as obtained by Allocate() */

@@ -29,60 +29,60 @@
 
 namespace embb {
 namespace containers {
-template<class T, typename ValuePool, class ObjectAllocator>
-ObjectPool<T, ValuePool, ObjectAllocator>::
+template<class Type, typename ValuePool, class ObjectAllocator>
+ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::ReturningTrueIterator(size_t count_value) :
 count_value(count_value),
   ret_value(true)
 {}
 
-template<class T, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<T, ValuePool, ObjectAllocator>::
+template<class Type, typename ValuePool, class ObjectAllocator>
+typename ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::self_type
-ObjectPool<T, ValuePool, ObjectAllocator>::
+ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::operator++() {
   self_type i = *this;
   count_value++;
   return i;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<T, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::self_type ObjectPool<T, ValuePool, ObjectAllocator>::
+template<class Type, typename ValuePool, class ObjectAllocator>
+typename ObjectPool<Type, ValuePool, ObjectAllocator>::
+ReturningTrueIterator::self_type ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::operator++(int) {
   count_value++;
   return *this;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<T, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::reference ObjectPool<T, ValuePool, ObjectAllocator>::
+template<class Type, typename ValuePool, class ObjectAllocator>
+typename ObjectPool<Type, ValuePool, ObjectAllocator>::
+ReturningTrueIterator::reference ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::operator*() {
   return ret_value;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<T, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::pointer ObjectPool<T, ValuePool, ObjectAllocator>::
+template<class Type, typename ValuePool, class ObjectAllocator>
+typename ObjectPool<Type, ValuePool, ObjectAllocator>::
+ReturningTrueIterator::pointer ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::operator->() {
   return &ret_value;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-bool ObjectPool<T, ValuePool, ObjectAllocator>::
+template<class Type, typename ValuePool, class ObjectAllocator>
+bool ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::operator==(const self_type& rhs) {
   return count_value == rhs.count_value;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-bool ObjectPool<T, ValuePool, ObjectAllocator>::
+template<class Type, typename ValuePool, class ObjectAllocator>
+bool ObjectPool<Type, ValuePool, ObjectAllocator>::
 ReturningTrueIterator::operator!=(const self_type& rhs) {
   return count_value != rhs.count_value;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-bool ObjectPool<T, ValuePool, ObjectAllocator>::
-IsContained(const T &obj) const {
+template<class Type, typename ValuePool, class ObjectAllocator>
+bool ObjectPool<Type, ValuePool, ObjectAllocator>::
+IsContained(const Type &obj) const {
   if ((&obj < &objects[0]) || (&obj > &objects[capacity - 1])) {
     return false;
   } else {
@@ -90,104 +90,104 @@ IsContained(const T &obj) const {
   }
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-int ObjectPool<T, ValuePool, ObjectAllocator>::
-GetIndexOfObject(const T &obj) const {
+template<class Type, typename ValuePool, class ObjectAllocator>
+int ObjectPool<Type, ValuePool, ObjectAllocator>::
+GetIndexOfObject(const Type &obj) const {
   assert(IsContained(obj));
   return(static_cast<int>(&obj - &objects[0]));
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-T* ObjectPool<T, ValuePool, ObjectAllocator>::AllocateRaw() {
+template<class Type, typename ValuePool, class ObjectAllocator>
+Type* ObjectPool<Type, ValuePool, ObjectAllocator>::AllocateRaw() {
   bool val;
   int allocated_index = p.Allocate(val);
   if (allocated_index == -1) {
     return NULL;
   } else {
-    T* ret_pointer = &(objects[allocated_index]);
+    Type* ret_pointer = &(objects[allocated_index]);
 
     return ret_pointer;
   }
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-size_t ObjectPool<T, ValuePool, ObjectAllocator>::GetCapacity() {
+template<class Type, typename ValuePool, class ObjectAllocator>
+size_t ObjectPool<Type, ValuePool, ObjectAllocator>::GetCapacity() {
   return capacity;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-ObjectPool<T, ValuePool, ObjectAllocator>::ObjectPool(size_t capacity) :
+template<class Type, typename ValuePool, class ObjectAllocator>
+ObjectPool<Type, ValuePool, ObjectAllocator>::ObjectPool(size_t capacity) :
 capacity(capacity),
   p(ReturningTrueIterator(0), ReturningTrueIterator(capacity)) {
   // Allocate the objects (without construction, just get the memory)
   objects = objectAllocator.allocate(capacity);
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-void ObjectPool<T, ValuePool, ObjectAllocator>::Free(T* obj) {
+template<class Type, typename ValuePool, class ObjectAllocator>
+void ObjectPool<Type, ValuePool, ObjectAllocator>::Free(Type* obj) {
   int index = GetIndexOfObject(*obj);
-  obj->~T();
+  obj->~Type();
 
   p.Free(true, index);
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-T* ObjectPool<T, ValuePool, ObjectAllocator>::Allocate() {
-  T* rawObject = AllocateRaw();
+template<class Type, typename ValuePool, class ObjectAllocator>
+Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate() {
+  Type* rawObject = AllocateRaw();
   if (rawObject != NULL)
-    new (rawObject)T();
+    new (rawObject)Type();
 
   return rawObject;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
+template<class Type, typename ValuePool, class ObjectAllocator>
 template<typename Param1>
-T* ObjectPool<T, ValuePool, ObjectAllocator>::Allocate(
+Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
   Param1 const& param1) {
-  T* rawObject = AllocateRaw();
+  Type* rawObject = AllocateRaw();
   if (rawObject != NULL)
-    new (rawObject)T(param1);
+    new (rawObject)Type(param1);
 
   return rawObject;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
+template<class Type, typename ValuePool, class ObjectAllocator>
 template<typename Param1, typename Param2>
-T* ObjectPool<T, ValuePool, ObjectAllocator>::Allocate(
+Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
   Param1 const& param1, Param2 const& param2) {
-  T* rawObject = AllocateRaw();
+  Type* rawObject = AllocateRaw();
   if (rawObject != NULL)
-    new (rawObject)T(param1, param2);
+    new (rawObject)Type(param1, param2);
 
   return rawObject;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
+template<class Type, typename ValuePool, class ObjectAllocator>
 template<typename Param1, typename Param2, typename Param3>
-T* ObjectPool<T, ValuePool, ObjectAllocator>::Allocate(
+Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
   Param1 const& param1, Param2 const& param2,
   Param3 const& param3) {
-  T* rawObject = AllocateRaw();
+  Type* rawObject = AllocateRaw();
   if (rawObject != NULL)
-    new (rawObject)T(param1, param2, param3);
+    new (rawObject)Type(param1, param2, param3);
 
   return rawObject;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
+template<class Type, typename ValuePool, class ObjectAllocator>
 template<typename Param1, typename Param2, typename Param3, typename Param4>
-T* ObjectPool<T, ValuePool, ObjectAllocator>::Allocate(
+Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
   Param1 const& param1, Param2 const& param2,
   Param3 const& param3, Param4 const& param4) {
-  T* rawObject = AllocateRaw();
+  Type* rawObject = AllocateRaw();
   if (rawObject != NULL)
-    new (rawObject)T(param1, param2, param3, param4);
+    new (rawObject)Type(param1, param2, param3, param4);
 
   return rawObject;
 }
 
-template<class T, typename ValuePool, class ObjectAllocator>
-ObjectPool<T, ValuePool, ObjectAllocator>::~ObjectPool() {
+template<class Type, typename ValuePool, class ObjectAllocator>
+ObjectPool<Type, ValuePool, ObjectAllocator>::~ObjectPool() {
   // Deallocate the objects
   objectAllocator.deallocate(objects, capacity);
 }

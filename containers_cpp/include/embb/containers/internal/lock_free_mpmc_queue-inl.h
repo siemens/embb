@@ -27,6 +27,8 @@
 #ifndef EMBB_CONTAINERS_INTERNAL_LOCK_FREE_MPMC_QUEUE_INL_H_
 #define EMBB_CONTAINERS_INTERNAL_LOCK_FREE_MPMC_QUEUE_INL_H_
 
+#include <embb/base/internal/config.h>
+
 /*
  * The following algorithm uses hazard pointers and a lock-free value pool for
  * memory management. For a description of the algorithm, see
@@ -62,28 +64,29 @@ T LockFreeMPMCQueueNode<T>::GetElement() {
 }
 } // namespace internal
 
-template< typename T, typename ValuePool >
-void LockFreeMPMCQueue<T, ValuePool>::
-DeletePointerCallback(internal::LockFreeMPMCQueueNode<T>* to_delete) {
+template< typename Type, typename ValuePool >
+void LockFreeMPMCQueue<Type, ValuePool>::
+DeletePointerCallback(internal::LockFreeMPMCQueueNode<Type>* to_delete) {
   objectPool.Free(to_delete);
 }
 
-template< typename T, typename ValuePool >
-LockFreeMPMCQueue<T, ValuePool>::~LockFreeMPMCQueue() {
+template< typename Type, typename ValuePool >
+LockFreeMPMCQueue<Type, ValuePool>::~LockFreeMPMCQueue() {
   // Nothing to do here, did not allocate anything.
 }
 
-template< typename T, typename ValuePool >
-LockFreeMPMCQueue<T, ValuePool>::LockFreeMPMCQueue(size_t capacity) :
+template< typename Type, typename ValuePool >
+LockFreeMPMCQueue<Type, ValuePool>::LockFreeMPMCQueue(size_t capacity) :
 capacity(capacity),
 // Disable "this is used in base member initializer" warning.
 // We explicitly want this.
-#ifdef _MSC_VER
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
-  delete_pointer_callback(*this, &LockFreeMPMCQueue<T>::DeletePointerCallback),
-#ifdef _MSC_VER
+delete_pointer_callback(*this,
+  &LockFreeMPMCQueue<Type>::DeletePointerCallback),
+#ifdef EMBB_COMPILER_MSVC
 #pragma warning(pop)
 #endif
   hazardPointer(delete_pointer_callback, NULL, 2),
@@ -94,26 +97,26 @@ capacity(capacity),
   embb::base::Thread::GetThreadsMaxCount() +
   capacity + 1) {
   // Allocate dummy node to reduce the number of special cases to consider.
-  internal::LockFreeMPMCQueueNode<T>* dummyNode = objectPool.Allocate();
+  internal::LockFreeMPMCQueueNode<Type>* dummyNode = objectPool.Allocate();
   // Initially, head and tail point to the dummy node.
   head = dummyNode;
   tail = dummyNode;
 }
 
-template< typename T, typename ValuePool >
-size_t LockFreeMPMCQueue<T, ValuePool>::GetCapacity() {
+template< typename Type, typename ValuePool >
+size_t LockFreeMPMCQueue<Type, ValuePool>::GetCapacity() {
   return capacity;
 }
 
-template< typename T, typename ValuePool >
-bool LockFreeMPMCQueue<T, ValuePool>::TryEnqueue(T const& element) {
+template< typename Type, typename ValuePool >
+bool LockFreeMPMCQueue<Type, ValuePool>::TryEnqueue(Type const& element) {
   // Get node from the pool containing element to enqueue.
-  internal::LockFreeMPMCQueueNode<T>* node = objectPool.Allocate(element);
+  internal::LockFreeMPMCQueueNode<Type>* node = objectPool.Allocate(element);
 
   // Queue full, cannot enqueue
   if (node == NULL)
     return false;
-  internal::LockFreeMPMCQueueNode<T>* my_tail;
+  internal::LockFreeMPMCQueueNode<Type>* my_tail;
   for (;;) {
     my_tail = tail;
 
@@ -124,14 +127,14 @@ bool LockFreeMPMCQueue<T, ValuePool>::TryEnqueue(T const& element) {
       continue; // Hazard pointer outdated, retry
     }
 
-    internal::LockFreeMPMCQueueNode<T>* my_tail_next = my_tail->GetNext();
+    internal::LockFreeMPMCQueueNode<Type>* my_tail_next = my_tail->GetNext();
 
     if (my_tail == tail) {
       // If the next pointer of the tail node is null, the tail pointer
       // points to the last object. We try to set the next pointer of the
       // tail node to our new node.
       if (my_tail_next == NULL) {
-        internal::LockFreeMPMCQueueNode<T>* expected = NULL;
+        internal::LockFreeMPMCQueueNode<Type>* expected = NULL;
         // This fails if the next pointer of the "cached" tail is not null
         // anymore, i.e., another thread added a node before we could complete.
         if (my_tail->GetNext().CompareAndSwap(expected, node))
@@ -151,13 +154,13 @@ bool LockFreeMPMCQueue<T, ValuePool>::TryEnqueue(T const& element) {
   return true;
 }
 
-template< typename T, typename ValuePool >
-bool LockFreeMPMCQueue<T, ValuePool>::TryDequeue(T & element) {
-  internal::LockFreeMPMCQueueNode<T>* my_head;
-  internal::LockFreeMPMCQueueNode<T>* my_tail;
-  internal::LockFreeMPMCQueueNode<T>* my_next;
-  internal::LockFreeMPMCQueueNode<T>* expected;
-  T data;
+template< typename Type, typename ValuePool >
+bool LockFreeMPMCQueue<Type, ValuePool>::TryDequeue(Type & element) {
+  internal::LockFreeMPMCQueueNode<Type>* my_head;
+  internal::LockFreeMPMCQueueNode<Type>* my_tail;
+  internal::LockFreeMPMCQueueNode<Type>* my_next;
+  internal::LockFreeMPMCQueueNode<Type>* expected;
+  Type data;
   for (;;) {
     my_head = head;
     hazardPointer.GuardPointer(0, my_head);

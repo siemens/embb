@@ -55,7 +55,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
 
   explicit Process(FunctionType function)
     : executor_(function) {
-    input_clock_expected_ = 0;
+    next_clock_ = 0;
     inputs_.SetListener(this);
   }
 
@@ -68,16 +68,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
   }
 
   virtual void Run(int clock) {
-    bool ordered = Serial;
-    if (ordered) {
-      // force ordering
-      while (input_clock_expected_ != clock) embb::base::Thread::CurrentYield();
-    }
-
     executor_.Execute(clock, inputs_, outputs_);
-    //inputs_.Clear(clock);
-
-    input_clock_expected_ = clock + 1;
   }
 
   InputsType & GetInputs() {
@@ -104,20 +95,35 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
   }
 
   virtual void OnClock(int clock) {
-    const int idx = clock % Slices;
     if (!inputs_.AreAtClock(clock))
       EMBB_THROW(embb::base::ErrorException,
         "Some inputs are not at expected clock.")
-    action_[idx] = Action(this, clock);
-    sched_->Spawn(action_[idx]);
+
+    bool ordered = Serial;
+    if (ordered) {
+      lock_.Lock();
+      for (int ii = next_clock_; ii < next_clock_ + Slices; ii++) {
+        if (!inputs_.AreAtClock(ii)) {
+          break;
+        }
+        next_clock_ = ii + 1;
+        Run(ii);
+      }
+      lock_.Unlock();
+    } else {
+      const int idx = clock % Slices;
+      action_[idx] = Action(this, clock);
+      sched_->Spawn(action_[idx]);
+    }
   }
 
  private:
   InputsType inputs_;
   OutputsType outputs_;
   ExecutorType executor_;
-  embb::base::Atomic<int> input_clock_expected_;
+  int next_clock_;
   Action action_[Slices];
+  SpinLock lock_;
 };
 
 } // namespace internal

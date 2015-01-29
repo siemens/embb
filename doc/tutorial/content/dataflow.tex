@@ -102,7 +102,7 @@ This pipeline can be easily implemented using the Dataflow building block. As th
 %
 Then, we have to construct a \emph{network}. A network consists of a set of processes that are connected by communication channels.
 %\footnote{Pipelines belong to the most simple networks, where the processes are connected in string-like (linear) fashion.}
-%\embb provides a class template \lstinline|Network| that can be customized to your needs. For the moment, we are satisfied with the default configuration and omit the template arguments:
+\embb provides a class template \lstinline|Network| that can be customized to your needs. For the moment, we are using 2 as a template argument:
 %
 \\\inputlisting{../examples/dataflow/dataflow_network-snippet.h}
 %
@@ -153,7 +153,7 @@ Once all connections have been established, we can start the network:
 %
 \\\inputlisting{../examples/dataflow/dataflow_run-snippet.h}
 %
-The integer passed to the network's function operator specifies the maximum number of elements that can be in the network at a time. The number of elements is limited to avoid that the network is flooded with new elements before the previous elements have been processed. In a linear pipeline, for example, this may happen if the source is faster than the sink. In our example, at most four elements may be processed simultaneously: one in the source, one in the sink, and two in the middle stage (see above). Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput.
+The integer given as a template parameter to the network specifies the maximum number of elements that can be in the network at a time. The number of elements is limited to avoid that the network is flooded with new elements before the previous elements have been processed. In a linear pipeline, for example, this may happen if the source is faster than the sink. In our example, at most four elements may be processed simultaneously: one in the source, one in the sink, and two in the middle stage (see above). Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput.
 
 Note that you will probably not observe a speedup when you run this program on a multicore processor. One reason for this is that input$/$output operations like reading a file from the hard disk and writing the output to the screen are typically a bottleneck. Moreover, the amount of work done in the middle stage of the pipeline (\textbf{replace}) is rather low. To outweigh the overhead for parallel execution, the amount of work must be much higher. In image processing, for example, a single pipeline stage may process a complete image. To sum up, we haven chosen this example for its simplicity, not for its efficiency.
 

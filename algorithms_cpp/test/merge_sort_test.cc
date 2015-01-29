@@ -64,7 +64,7 @@ void MergeSortTest::TestDataStructures() {
   MergeSortAllocate(array, array + kCountSize);
   MergeSortAllocate(vector.begin(), vector.end());
   MergeSortAllocate(array, array + kCountSize, std::less<int>(),
-    ExecutionPolicy(), 0);
+    ExecutionPolicy(), 2);
   MergeSortAllocate(deque.begin(), deque.end());
   for (size_t i = 0; i < kCountSize; i++) {
     PT_EXPECT_EQ(vector_copy[i], array[i]);

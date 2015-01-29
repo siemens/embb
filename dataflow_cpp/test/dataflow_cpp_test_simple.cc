@@ -32,10 +32,11 @@
 #include <embb/mtapi/mtapi.h>
 
 #include <embb/base/function.h>
+#include <embb/base/c/memory_allocation.h>
 
 #include <embb/dataflow/dataflow.h>
 
-typedef embb::dataflow::Network<4> MyNetwork;
+typedef embb::dataflow::Network<8> MyNetwork;
 typedef MyNetwork::ConstantSource< int > MyConstantSource;
 typedef MyNetwork::Source< int > MySource;
 typedef MyNetwork::SerialProcess< MyNetwork::Inputs<int>::Type,
@@ -103,7 +104,7 @@ class ArraySink {
     Init();
   }
 
-  void Print() {
+  void Print() const {
     std::cout << values_[0];
     for (int ii = 1; ii < SIZE; ii++) {
       std::cout << ", " << values_[ii];
@@ -118,7 +119,7 @@ class ArraySink {
     pos_ = 0;
   }
 
-  bool Check() {
+  bool Check() const {
     for (int ii = 0; ii < SIZE; ii++) {
       int expected;
       if (0 == (ii % 2))
@@ -203,4 +204,6 @@ void SimpleTest::TestBasic() {
   }
 
   embb::mtapi::Node::Finalize();
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

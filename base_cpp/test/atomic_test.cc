@@ -346,8 +346,6 @@ void AtomicTest::BasicTests() {
   //Boolean operations...
   // And
   i = 0;
-  i &= 0;
-  PT_EXPECT(i == 0);
   i &= 1;
   PT_EXPECT(i == 0);
   i = 1;

@@ -66,11 +66,8 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
   }
 
   virtual bool Start(int clock) {
-    while (clock != next_clock_) embb::base::Thread::CurrentYield();
     if (not_done_) {
-      const int idx = clock % Slices;
-      action_[idx] = Action(this, clock);
-      sched_->Spawn(action_[idx]);
+      Run(clock);
     }
     return not_done_;
   }

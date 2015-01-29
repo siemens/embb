@@ -93,8 +93,7 @@ void embb_core_set_init(embb_core_set_t* core_set, int initializer) {
 
 #ifdef EMBB_HAS_HEADER_SYSINFO
 #include <sys/sysinfo.h>
-#endif
-#ifdef __FreeBSD__
+#elif defined EMBB_HAS_HEADER_SYSCTL
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
@@ -102,7 +101,7 @@ void embb_core_set_init(embb_core_set_t* core_set, int initializer) {
 unsigned int embb_core_count_available() {
 #ifdef EMBB_HAS_HEADER_SYSINFO
   return get_nprocs();
-#elif defined __FreeBSD__
+#elif defined EMBB_HAS_HEADER_SYSCTL
   const size_t kBufferSize = sizeof(unsigned int);
   char buf[kBufferSize];
   size_t len = kBufferSize;

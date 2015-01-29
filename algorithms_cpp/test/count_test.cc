@@ -32,7 +32,7 @@
 #include <functional>
 
 struct IsEven{
-  bool operator()(int val) {
+  bool operator()(int val) const {
     if (val % 2 == 0)
       return true;
     else

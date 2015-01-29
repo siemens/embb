@@ -35,7 +35,7 @@
  */
 struct Square {
   template<typename Type>
-  Type operator()(Type& l) {
+  Type operator()(Type& l) const {
     return l * l;
   }
 };
@@ -115,13 +115,9 @@ void ScanTest::TestFunctionPointers() {
   std::vector<int> vector(kCountSize);
   std::vector<int> init(kCountSize);
   std::vector<int> outputVector(kCountSize);
-  int sum = 0;
-  int sqr_sum = 0;
   for (size_t i = 0; i < kCountSize; i++) {
     vector[i] = static_cast<int>(i+2);
     init[i] = 0;
-    sum += static_cast<int>(i + 2);
-    sqr_sum += static_cast<int>((i + 2) * (i + 2));
   }
 
   Scan(vector.begin(), vector.end(), outputVector.begin(), 0, &AddFunction);
