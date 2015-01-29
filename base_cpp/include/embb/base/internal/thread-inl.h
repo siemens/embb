@@ -88,7 +88,7 @@ template<typename ThreadClosure>
 void Thread::CheckThreadCreationErrors(int result, ThreadClosure* closure) {
   if (result != EMBB_SUCCESS) {
     if (closure != NULL) {
-      delete closure;
+      Allocation::Delete(closure);
     }
     const char* message = "Could not create thread.";
     if (result == EMBB_NOMEM) {
