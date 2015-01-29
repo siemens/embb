@@ -39,6 +39,8 @@
 #include <embb/base/c/log.h>
 #include <iostream>
 
+#include <embb/base/c/memory_allocation.h>
+
 PT_MAIN("Base C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_WARNING);
   unsigned int max_threads =
@@ -55,4 +57,6 @@ PT_MAIN("Base C") {
   PT_RUN(embb::base::test::ConditionVarTest);
   PT_RUN(embb::base::test::ThreadTest);
   PT_RUN(embb::base::test::ThreadSpecificStorageTest);
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

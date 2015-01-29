@@ -177,6 +177,12 @@ void AllocTest::TestMixedAllocs() {
   expected += (1 + 1) * EMBB_CACHE_LINE_SIZE + 3 * sizeof(size_t) - 1;
 #endif // else EMBB_DEBUG
   PT_EXPECT_EQ(allocated, expected);
+
+  embb_free(plain);
+  embb_free_aligned(aligned);
+  embb_free_aligned(cache_aligned);
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }
 
 } // namespace test
