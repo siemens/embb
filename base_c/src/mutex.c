@@ -71,9 +71,13 @@ int embb_mutex_init(embb_mutex_t* mutex, int type) {
     pthread_mutexattr_t attributes;
     if (pthread_mutexattr_init(&attributes) != 0) return EMBB_ERROR;
     if (pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) != 0) {
+      pthread_mutexattr_destroy(&attributes);
       return EMBB_ERROR;
     }
-    if (pthread_mutex_init(mutex, &attributes) != 0) return EMBB_ERROR;
+    if (pthread_mutex_init(mutex, &attributes) != 0) {
+      pthread_mutexattr_destroy(&attributes);
+      return EMBB_ERROR;
+    }
     if (pthread_mutexattr_destroy(&attributes) != 0) return EMBB_ERROR;
   }
   return EMBB_SUCCESS;
