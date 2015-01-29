@@ -57,6 +57,7 @@ int embb_tss_set(embb_tss_t* tss, void* value) {
 
 void* embb_tss_get(const embb_tss_t* tss) {
   assert(tss != NULL);
+  assert(tss->values != NULL);
   unsigned int index = 0;
   int status = embb_internal_thread_index(&index);
   if ((status != EMBB_SUCCESS) || (index >= tss->size)) {
