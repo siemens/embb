@@ -27,10 +27,10 @@
 #ifndef CONTAINERS_CPP_TEST_QUEUE_TEST_H_
 #define CONTAINERS_CPP_TEST_QUEUE_TEST_H_
 
-#include <vector>
-#include <utility>
 #include <partest/partest.h>
 #include <embb/base/duration.h>
+#include <vector>
+#include <utility>
 
 namespace embb {
 namespace containers {
@@ -113,9 +113,9 @@ class QueueTest : public partest::TestCase {
  public:
   QueueTest();
 };
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #include "./queue_test-inl.h"
 
