@@ -37,18 +37,27 @@
 
 #include <embb/base/c/memory_allocation.h>
 
+using embb::base::test::CoreSetTest;
+using embb::base::test::DurationTest;
+using embb::base::test::ConditionVarTest;
+using embb::base::test::MutexTest;
+using embb::base::test::ThreadSpecificStorageTest;
+using embb::base::test::AtomicTest;
+using embb::base::test::MemoryAllocationTest;
+using embb::base::test::ThreadTest;
+
 PT_MAIN("Base C++") {
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
-  PT_RUN(embb::base::test::CoreSetTest);
-  PT_RUN(embb::base::test::DurationTest);
-  PT_RUN(embb::base::test::ConditionVarTest);
-  PT_RUN(embb::base::test::MutexTest);
-  PT_RUN(embb::base::test::ThreadSpecificStorageTest);
-  PT_RUN(embb::base::test::AtomicTest);
-  PT_RUN(embb::base::test::MemoryAllocationTest);
-  PT_RUN(embb::base::test::ThreadTest);
+  PT_RUN(CoreSetTest);
+  PT_RUN(DurationTest);
+  PT_RUN(ConditionVarTest);
+  PT_RUN(MutexTest);
+  PT_RUN(ThreadSpecificStorageTest);
+  PT_RUN(AtomicTest);
+  PT_RUN(MemoryAllocationTest);
+  PT_RUN(ThreadTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }
