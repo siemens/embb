@@ -41,7 +41,7 @@ void Thread::SetThreadsMaxCount(unsigned int max_count) {
 }
 
 Thread::ID Thread::CurrentGetID() {
-#if defined EMBB_THREADING_WINTHREADS
+#if defined EMBB_PLATFORM_THREADING_WINTHREADS
   return Thread::ID(GetCurrentThreadId());
 #else
   return Thread::ID(embb_thread_current().embb_internal_handle);
@@ -59,15 +59,15 @@ void Thread::Join() {
 }
 
 Thread::ID Thread::GetID() {
-#if defined EMBB_THREADING_WINTHREADS
+#if defined EMBB_PLATFORM_THREADING_WINTHREADS
   return Thread::ID(GetCurrentThreadId());
-#elif defined EMBB_THREADING_POSIXTHREADS
+#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS
   return Thread::ID(rep_.embb_internal_handle);
 #endif
 }
 
 bool operator==(Thread::ID lhs, Thread::ID rhs) {
-#if defined EMBB_THREADING_WINTHREADS
+#if defined EMBB_PLATFORM_THREADING_WINTHREADS
   return lhs.id_ == rhs.id_;
 #else
   return pthread_equal(lhs.id_, rhs.id_) != 0;
@@ -75,7 +75,7 @@ bool operator==(Thread::ID lhs, Thread::ID rhs) {
 }
 
 bool operator!=(Thread::ID lhs, Thread::ID rhs) {
-#if defined EMBB_THREADING_WINTHREADS
+#if defined EMBB_PLATFORM_THREADING_WINTHREADS
   return lhs.id_ != rhs.id_;
 #else
   return pthread_equal(lhs.id_, rhs.id_) == 0;

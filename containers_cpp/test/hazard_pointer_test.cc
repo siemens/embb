@@ -32,12 +32,12 @@ namespace embb {
 namespace containers {
 namespace test {
 HazardPointerTest::HazardPointerTest() :
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
   delete_pointer_callback(*this, &HazardPointerTest::DeletePointerCallback),
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
   object_pool(NULL),

@@ -34,7 +34,7 @@
 #include <embb/base/function.h>
 #include <algorithm>
 
-#if defined(EMBB_COMPILER_MSVC)
+#if defined(EMBB_PLATFORM_COMPILER_MSVC)
 #define EMBB_CONTAINERS_CPP_DEPENDANT_TYPENAME
 #else
 #define EMBB_CONTAINERS_CPP_DEPENDANT_TYPENAME typename

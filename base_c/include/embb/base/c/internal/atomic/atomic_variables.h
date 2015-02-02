@@ -30,7 +30,7 @@
 #include <stddef.h>
 #include <embb/base/c/internal/macro_helper.h>
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #include <intrin.h>
 #endif
 

@@ -30,7 +30,7 @@
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/base/c/internal/config.h>
 
-EMBB_INLINE void mtapi_status_set(
+EMBB_PLATFORM_INLINE void mtapi_status_set(
   mtapi_status_t* status,
   mtapi_status_t value) {
   if (MTAPI_NULL != status) {

@@ -91,14 +91,14 @@ static void embb_log_write_internal(
       log_level_str = "     ";
       break;
     }
-#if defined(EMBB_COMPILER_MSVC)
+#if defined(EMBB_PLATFORM_COMPILER_MSVC)
     char msg_buffer[400];
     char buffer[500];
     vsprintf_s(msg_buffer, sizeof(msg_buffer), message, argp);
     sprintf_s(buffer, sizeof(buffer), "[%s] - [%s] %s",
       channel_str, log_level_str, msg_buffer);
     embb_log_global_log_function(log_context, buffer);
-#elif defined(EMBB_COMPILER_GNUC)
+#elif defined(EMBB_PLATFORM_COMPILER_GNUC)
     char msg_buffer[400];
     char buffer[500];
     vsnprintf(msg_buffer, sizeof(msg_buffer), message, argp);

@@ -72,13 +72,13 @@ LockFreeStack< Type, ValuePool >::LockFreeStack(size_t capacity) :
 capacity(capacity),
 // Disable "this is used in base member initializer" warning.
 // We explicitly want this.
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
   delete_pointer_callback(*this,
     &LockFreeStack<Type>::DeletePointerCallback),
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
   hazardPointer(delete_pointer_callback, NULL, 1),

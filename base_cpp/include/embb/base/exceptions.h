@@ -27,16 +27,16 @@
 #ifndef EMBB_BASE_EXCEPTIONS_H_
 #define EMBB_BASE_EXCEPTIONS_H_
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)
 // Disable warning that exceptions are disabled but try/catch is used.
 #pragma warning(disable : 4530)
-#endif // EMBB_COMPILER_MSVC
+#endif // EMBB_PLATFORM_COMPILER_MSVC
 
 #include <string>
 #include <exception>
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
 

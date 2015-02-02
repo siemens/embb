@@ -31,7 +31,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 /**
  * For handling of more than 64 logical processors on Windows.
@@ -87,21 +87,21 @@ void embb_core_set_init(embb_core_set_t* core_set, int initializer) {
   }
 }
 
-#endif /* EMBB_THREADING_WINTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
-#ifdef EMBB_THREADING_POSIXTHREADS
+#ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
-#ifdef EMBB_HAS_HEADER_SYSINFO
+#ifdef EMBB_PLATFORM_HAS_HEADER_SYSINFO
 #include <sys/sysinfo.h>
-#elif defined EMBB_HAS_HEADER_SYSCTL
+#elif defined EMBB_PLATFORM_HAS_HEADER_SYSCTL
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
 
 unsigned int embb_core_count_available() {
-#ifdef EMBB_HAS_HEADER_SYSINFO
+#ifdef EMBB_PLATFORM_HAS_HEADER_SYSINFO
   return get_nprocs();
-#elif defined EMBB_HAS_HEADER_SYSCTL
+#elif defined EMBB_PLATFORM_HAS_HEADER_SYSCTL
   const size_t kBufferSize = sizeof(unsigned int);
   char buf[kBufferSize];
   size_t len = kBufferSize;
@@ -123,7 +123,7 @@ void embb_core_set_init(embb_core_set_t* core_set, int initializer) {
   }
 }
 
-#endif /* EMBB_THREADING_POSIXTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */
 
 void embb_core_set_add(embb_core_set_t* core_set, unsigned int core_number) {
   assert(core_set != NULL);

@@ -84,12 +84,12 @@ void MemoryAllocationTest::ClassAllocationTest() {
     aligned_allocs[i]->b = 0xF000 | i;
 #ifdef EMBB_DEBUG
     size_t n = (sizeof(DummyClassForAlignedAllocation)
-      + (EMBB_CACHE_LINE_SIZE - 1)) / EMBB_CACHE_LINE_SIZE;
-    expected += (n + 1)*EMBB_CACHE_LINE_SIZE + (sizeof(size_t) * 3 - 1);
+      + (EMBB_PLATFORM_CACHE_LINE_SIZE - 1)) / EMBB_PLATFORM_CACHE_LINE_SIZE;
+    expected += (n + 1)*EMBB_PLATFORM_CACHE_LINE_SIZE + (sizeof(size_t) * 3 - 1);
 #endif // else EMBB_DEBUG
 
     //check that the memory is aligned!
-    PT_ASSERT_EQ((uintptr_t)aligned_allocs[i] % EMBB_CACHE_LINE_SIZE,
+    PT_ASSERT_EQ((uintptr_t)aligned_allocs[i] % EMBB_PLATFORM_CACHE_LINE_SIZE,
       (uintptr_t)0);
   }
 
@@ -135,15 +135,15 @@ void MemoryAllocationTest::ClassAllocationTest() {
     new DummyClassForAlignedAllocation[alloc_iterations];
 #ifdef EMBB_DEBUG
     size_t n = (sizeof(DummyClassForAlignedAllocation)*alloc_iterations
-      + (EMBB_CACHE_LINE_SIZE - 1)) / EMBB_CACHE_LINE_SIZE;
-    expected += (n + 1)*EMBB_CACHE_LINE_SIZE + (sizeof(size_t) * 3 - 1);
+      + (EMBB_PLATFORM_CACHE_LINE_SIZE - 1)) / EMBB_PLATFORM_CACHE_LINE_SIZE;
+    expected += (n + 1)*EMBB_PLATFORM_CACHE_LINE_SIZE + (sizeof(size_t) * 3 - 1);
 #endif // else EMBB_DEBUG
 
     // This assert does _not_ hold, but is left for documentation.
     // It is not guaranteed that the pointer to the array is aligned.
     // See the documentation of the overloaded new[] operator in
     // class MemoryAllocation.
-    // PT_ASSERT_EQ((uintptr_t)aligned_allocated % EMBB_CACHE_LINE_SIZE, 0);
+    // PT_ASSERT_EQ((uintptr_t)aligned_allocated % EMBB_PLATFORM_CACHE_LINE_SIZE, 0);
 
     //delete!
     expected = 0;

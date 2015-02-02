@@ -29,7 +29,7 @@
 
 #include <embb/base/c/internal/unused.h>
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 int embb_mutex_init(embb_mutex_t* mutex, int type) {
   /* Critical sections in Windows are always recursive */
@@ -59,9 +59,9 @@ void embb_mutex_destroy(embb_mutex_t* mutex) {
   DeleteCriticalSection(mutex);
 }
 
-#endif /* EMBB_THREADING_WINTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
-#ifdef EMBB_THREADING_POSIXTHREADS
+#ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 int embb_mutex_init(embb_mutex_t* mutex, int type) {
   if (type == EMBB_MUTEX_PLAIN) {
@@ -114,4 +114,4 @@ void embb_mutex_destroy(embb_mutex_t* mutex) {
   pthread_mutex_destroy(mutex);
 }
 
-#endif /* EMBB_THREADING_POSIXTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */

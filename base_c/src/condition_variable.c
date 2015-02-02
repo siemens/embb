@@ -43,7 +43,7 @@ int embb_condition_wait_for(embb_condition_t* condition_var,
   return embb_condition_wait_until(condition_var, mutex, &time);
 }
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 int embb_condition_init(embb_condition_t* condition_var) {
   assert(condition_var != NULL);
@@ -108,9 +108,9 @@ int embb_condition_destroy(embb_condition_t* condition_var) {
   return EMBB_SUCCESS;
 }
 
-#endif /* EMBB_THREADING_WINTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
-#ifdef EMBB_THREADING_POSIXTHREADS
+#ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 int embb_condition_init(embb_condition_t* condition_var) {
   assert(condition_var != NULL);
@@ -165,4 +165,4 @@ int embb_condition_destroy(embb_condition_t* condition_var) {
   return EMBB_SUCCESS;
 }
 
-#endif /* EMBB_THREADING_POSIXTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */

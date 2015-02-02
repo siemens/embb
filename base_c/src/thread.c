@@ -40,7 +40,7 @@ void embb_thread_set_max_count(unsigned int max) {
   embb_internal_thread_index_set_max(max);
 }
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 /**
  * Used to wrap client thread start function and argument when calling internal
@@ -151,21 +151,21 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
   return 0;
 }
 
-#endif /* EMBB_THREADING_WINTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
-#ifdef EMBB_THREADING_POSIXTHREADS
+#ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
-#ifdef EMBB_HAS_GLIB_CPU
+#ifdef EMBB_PLATFORM_HAS_GLIB_CPU
 #include <sched.h>
-#elif defined EMBB_HAS_HEADER_CPUSET
+#elif defined EMBB_PLATFORM_HAS_HEADER_CPUSET
 #include <pthread_np.h>
 #include <sys/param.h>
 #include <sys/cpuset.h>
 #endif
 
-#ifdef EMBB_HAS_HEADER_SYSINFO
+#ifdef EMBB_PLATFORM_HAS_HEADER_SYSINFO
 #include <sys/sysinfo.h> /* Used to get number of processors */
-#endif /* EMBB_HAS_HEADER_SYSINFO */
+#endif /* EMBB_PLATFORM_HAS_HEADER_SYSINFO */
 
 /**
  * Used to wrap client thread start function and argument when calling internal
@@ -207,10 +207,10 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   int status = pthread_attr_init(&attr);
   if (status != 0) return EMBB_ERROR;
   if (core_set != NULL) {
-#if defined(EMBB_HAS_GLIB_CPU) || defined(EMBB_HAS_HEADER_CPUSET)
+#if defined(EMBB_PLATFORM_HAS_GLIB_CPU) || defined(EMBB_PLATFORM_HAS_HEADER_CPUSET)
     assert(embb_core_count_available() < CPU_SETSIZE &&
       "Core sets are only supported up to CPU_SETSIZE processors!");
-#ifdef EMBB_HAS_GLIB_CPU
+#ifdef EMBB_PLATFORM_HAS_GLIB_CPU
     cpu_set_t cpuset;
 #else
     cpuset_t cpuset;
@@ -265,4 +265,4 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
   return pthread_equal(lhs->embb_internal_handle, rhs->embb_internal_handle);
 }
 
-#endif /* EMBB_THREADING_POSIXTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */
