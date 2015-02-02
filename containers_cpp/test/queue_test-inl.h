@@ -45,7 +45,7 @@ QueueTest<Queue_t, MultipleProducers, MultipleConsumers>::QueueTest() :
   next_producer_id(0),
   next_consumer_id(0),
   n_producer_elements(
-    static_cast<int>(partest::TestSuite::GetDefaultNumIterations() * 
+    static_cast<int>(partest::TestSuite::GetDefaultNumIterations() *
     MIN_ENQ_ELEMENTS)) {
   CreateUnit("QueueTestSingleThreadEnqueueDequeue").
   Pre(&QueueTest::QueueTestSingleThreadEnqueueDequeue_Pre, this).
@@ -105,10 +105,11 @@ template<typename Queue_t, bool MultipleProducers, bool MultipleConsumers>
 void QueueTest<Queue_t, MultipleProducers, MultipleConsumers>::
 QueueTestOrderMPMC_Post() {
   delete queue;
-  // Tally for all elements enqueued by all producers, 
-  // initialized with all 0: 
+  // Tally for all elements enqueued by all producers,
+  // initialized with all 0:
   ::std::vector<unsigned char> total_tally;
-  size_t n_elements_total = static_cast<size_t>(n_producers * n_producer_elements);
+  size_t n_elements_total = static_cast<size_t>(
+    n_producers * n_producer_elements);
   for (size_t i = 0; i < n_elements_total / 8; ++i) {
     total_tally.push_back(0);
   }
@@ -118,10 +119,10 @@ QueueTestOrderMPMC_Post() {
       total_tally[e] |= consumers[c].Tally()[e];
     }
   }
-  // Test if all elements have been dequeued by any 
-  // consumer. 
+  // Test if all elements have been dequeued by any
+  // consumer.
   // To avoid static cast warning:
-  for (size_t t = 0; 
+  for (size_t t = 0;
        t < static_cast<size_t>(n_producers * n_producer_elements / 8);
        ++t) {
     PT_ASSERT_EQ_MSG(total_tally[t], 0xff,
@@ -146,13 +147,13 @@ QueueTestOrderMPMC_ConsumerThreadMethod() {
 template<typename Queue_t, bool MultipleProducers, bool MultipleConsumers>
 void QueueTest<Queue_t, MultipleProducers, MultipleConsumers>::Producer::
 Run() {
-  // Enqueue pairs of (producer id, counter): 
+  // Enqueue pairs of (producer id, counter):
   for (int i = 0; i < n_producer_elements; ++i) {
     while (!q->TryEnqueue(element_t(producer_id, i))) {
       embb::base::Thread::CurrentYield();
     }
   }
-  // Enqueue -1 as terminator element of this producer: 
+  // Enqueue -1 as terminator element of this producer:
   while (!q->TryEnqueue(element_t(producer_id, -1))) {
     embb::base::Thread::CurrentYield();
   }
@@ -161,14 +162,14 @@ Run() {
 template<typename Queue_t, bool MultipleProducers, bool MultipleConsumers>
 QueueTest<Queue_t, MultipleProducers, MultipleConsumers>::Consumer::
 Consumer(Queue_t * const queue, int numProducers, int numProducerElements) :
-  q(queue), 
+  q(queue),
   n_producers(numProducers),
   n_producer_elements(numProducerElements) {
   for (int p_id = 0; p_id < n_producers; ++p_id) {
     // Initialize last value dequeued from producers with
     // below-minimum value:
     sequence_number.push_back(-1);
-    // Initialize element tally for producer with all 0, 
+    // Initialize element tally for producer with all 0,
     // 8 flags / char:
     for (int i = 0; i < n_producer_elements / 8; ++i) {
       consumer_tally.push_back(0);
@@ -193,9 +194,9 @@ Run() {
     producerId = element.first;
     // Assert on dequeued element:
     PT_ASSERT_LT_MSG(producerId, static_cast<size_t>(n_producers),
-      "Invalid producer id in dequeue");    
+      "Invalid producer id in dequeue");
     PT_ASSERT_LT_MSG(sequence_number[producerId], element.second,
-      "Invalid element sequence");    
+      "Invalid element sequence");
     // Store last value received from the element's producer:
     sequence_number[producerId] = element.second;
     const size_t pos((producerId * n_producer_elements) +
@@ -298,8 +299,9 @@ void QueueTest<Queue_t, MultipleProducers, MultipleConsumers>::
 QueueTestSingleThreadEnqueueDequeue_Post() {
   delete queue;
 }
-} // namespace test
-} // namespace containers
-} // namespace embb
+
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #endif  // CONTAINERS_CPP_TEST_QUEUE_TEST_INL_H_

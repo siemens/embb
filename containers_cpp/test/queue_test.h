@@ -27,10 +27,10 @@
 #ifndef CONTAINERS_CPP_TEST_QUEUE_TEST_H_
 #define CONTAINERS_CPP_TEST_QUEUE_TEST_H_
 
-#include <vector>
-#include <utility>
 #include <partest/partest.h>
 #include <embb/base/duration.h>
+#include <vector>
+#include <utility>
 
 namespace embb {
 namespace containers {
@@ -41,6 +41,7 @@ template<typename Queue_t,
 class QueueTest : public partest::TestCase {
  public:
   typedef ::std::pair<size_t, int> element_t;
+
  private:
   /// Minimum number of elements enqueued by every producer
   /// in MP/MC unit test. Must be a multiple of 8.
@@ -69,8 +70,8 @@ class QueueTest : public partest::TestCase {
     int n_producer_elements;
    public:
     Producer(Queue_t * const queue, size_t id, int numProducerElements) :
-      q(queue), 
-      producer_id(id), 
+      q(queue),
+      producer_id(id),
       n_producer_elements(numProducerElements) {}
     void Run();
   };
@@ -108,13 +109,13 @@ class QueueTest : public partest::TestCase {
   void QueueTestSingleThreadEnqueueDequeue_Pre();
   void QueueTestSingleThreadEnqueueDequeue_Post();
   void QueueTestSingleThreadEnqueueDequeue_ThreadMethod();
-  
+
  public:
   QueueTest();
 };
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #include "./queue_test-inl.h"
 

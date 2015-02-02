@@ -24,6 +24,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <embb/containers/lock_free_tree_value_pool.h>
+#include <embb/containers/wait_free_array_value_pool.h>
+#include <embb/containers/wait_free_spsc_queue.h>
+#include <embb/containers/object_pool.h>
+#include <embb/containers/lock_free_stack.h>
+#include <embb/containers/lock_free_mpmc_queue.h>
+#include <embb/base/c/memory_allocation.h>
+
 #include <partest/partest.h>
 #include <embb/base/thread.h>
 
@@ -32,14 +40,6 @@
 #include "./stack_test.h"
 #include "./hazard_pointer_test.h"
 #include "./object_pool_test.h"
-#include <embb/containers/lock_free_tree_value_pool.h>
-#include <embb/containers/wait_free_array_value_pool.h>
-#include <embb/containers/wait_free_spsc_queue.h>
-#include <embb/containers/object_pool.h>
-#include <embb/containers/lock_free_stack.h>
-#include <embb/containers/lock_free_mpmc_queue.h>
-
-#include <embb/base/c/memory_allocation.h>
 
 #define COMMA ,
 
