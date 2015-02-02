@@ -1,6 +1,52 @@
 ﻿Embedded Multicore Building Blocks (EMB²)
 =========================================
 
+Version 0.2.2
+-------------
+
+### Bug fixes:
+- Fixed 64bit problem in atomics
+- Fixed bug in dataflow_cpp causing network to hang
+- Fixed bug in conversion of core_set
+- Fixed fetch-and-add implementation to support armv7-a
+- Fixed missing freeing of mutex attributes in case of error
+- Fixed bug where closure was allocated with Allocation::New but deleted with operator delete
+- Fixed inconsistent naming of unit test cases
+- Fixed memory allocation in hazard pointer implementation by replacing calls to new and delete with EMB²-specific functions
+- Fixed memory leak in tests for containers
+- Fixed affinity implementation for FreeBSD
+
+### Changes and improvements:
+- Added checks for memory leaks in tests
+- Added block size support in MergeSort
+- Renamed all platform specific defines to EMBB_PLATFORM_*
+- Changed all checks for platform specific defines to checks for EMBB_* defines
+- Replaced C++11 initializer lists in examples with C++03 compliant statements
+- Extended unit tests for MPMC queue with checks for relative order
+- Added check for result of pthread_attr_destroy
+- Added assert in embb_tss_get
+- Moved ExecutionPolicy from algorithms to mtapi_cpp, removed Affinity
+
+### Features:
+- None
+
+### Build system:
+- Removed cppcheck warnings
+- Removed cpplint warnings
+
+### Documentation:
+- Improved documentation of default values and priorities
+- Revised template argument names in base_cpp and containers_cpp
+- Moved ExecutionPolicy and Identity to CPP_ALGORITHMS Doxygen group
+- Fixed description of token limit in tutorial
+- Added Clang support to README
+- Mentioned the ability to cross compile in README
+- Added link to release files in README
+- Minor corrections in README
+- Updated copyright notice
+- Changed year in tutorial.tex to 2015
+
+
 Version 0.2.1
 -------------
 
