@@ -54,7 +54,14 @@ namespace mtapi {
 class Node {
  public:
   /**
-    * Initializes the runtime singleton using default values.
+    * Initializes the runtime singleton using default values:
+    *   - all available cores will be used
+    *   - maximum number of tasks is 1024
+    *   - maximum number of groups is 128
+    *   - maximum number of queues is 16
+    *   - maximum queue capacity is 1024
+    *   - maximum number of priorites is 4.
+    *
     * \notthreadsafe
     * \throws ErrorException if the singleton was already initialized or the
     *         Node could not be initialized.

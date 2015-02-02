@@ -37,6 +37,10 @@ namespace mtapi {
  *  - the affinity of tasks to MTAPI worker threads (not CPU cores) and
  *  - the priority of the spawned tasks.
  *
+ * The priority is a number between 0 (denoting the highest priority) to
+ * max_priorities - 1 as given during initialization using Node::Initialize().
+ * The default value of max_priorities is 4.
+ *
  * \ingroup CPP_MTAPI
  */
 class ExecutionPolicy{
