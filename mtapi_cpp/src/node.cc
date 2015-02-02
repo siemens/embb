@@ -152,7 +152,7 @@ void Node::Initialize(
     assert(MTAPI_SUCCESS == status);
     embb_core_set_t cs;
     embb_core_set_init(&cs, 0);
-    for (unsigned int ii = 0; ii < core_set.Count(); ii++) {
+    for (unsigned int ii = 0; embb_core_set_count(&cs) < core_set.Count(); ii++) {
       if (core_set.IsContained(ii)) {
         embb_core_set_add(&cs, ii);
       }
