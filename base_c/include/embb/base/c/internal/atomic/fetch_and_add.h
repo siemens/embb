@@ -92,17 +92,17 @@ EMBB_DEFINE_FETCH_AND_ADD(8, "q")
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
   new_value) { \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
-  tmp, result; \
+  tmp1, tmp2, result; \
   __asm__ __volatile__ ( \
   "dmb\n\t" \
   "loop_%=:\n\t" \
-  "ldrex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %0, [%2]\n\t" \
-  "add %1, %0, %3\n\t" \
-  "strex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %1, %1, [%2]\n\t" \
-  "teq %1, #0\n\t" \
+  "ldrex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %0, [%3]\n\t" \
+  "add %1, %0, %4\n\t" \
+  "strex" EMBB_ATOMIC_ARM_SIZE_SUFFIX " %2, %1, [%3]\n\t" \
+  "teq %2, #0\n\t" \
   "bne loop_%=\n\t" \
   "isb" \
-  : "=&r" (result), "=&r" (tmp) \
+  : "=&r" (result), "=&r" (tmp1), "=&r" (tmp2) \
   : "r" (pointer_to_value), "r" (new_value) \
   : "memory", "cc" ); \
   return result; \
