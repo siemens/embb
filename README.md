@@ -120,9 +120,9 @@ data structures for storing object in an organized and thread-safe way.
 Build and Installation
 ----------------------
 
-Note: It is recommended to build from a packaged release file and not from a
-snapshot of the repository in order to get the documentation and the examples
-out-of-the box.
+Note: It is recommended to build from a release file and not from a repository
+snapshot in order to get the documentation and the examples out-of-the box.
+The release files can be found at https://github.com/siemens/embb/releases.
 
 EMB² is built using CMake (version 2.8.9 or higher). CMake is a build file
 generator which allows to abstract from the concrete build tools. To generate
