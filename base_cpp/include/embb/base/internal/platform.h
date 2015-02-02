@@ -49,7 +49,7 @@ typedef embb_condition_t ConditionVariableType;
 } // namespace base
 } // namespace embb
 
-#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS // EMBB_PLATFORM_THREADING_WINTHREADS
+#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 namespace embb {
 namespace base {

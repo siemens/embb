@@ -207,7 +207,8 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   int status = pthread_attr_init(&attr);
   if (status != 0) return EMBB_ERROR;
   if (core_set != NULL) {
-#if defined(EMBB_PLATFORM_HAS_GLIB_CPU) || defined(EMBB_PLATFORM_HAS_HEADER_CPUSET)
+#if defined(EMBB_PLATFORM_HAS_GLIB_CPU) || \
+  defined(EMBB_PLATFORM_HAS_HEADER_CPUSET)
     assert(embb_core_count_available() < CPU_SETSIZE &&
       "Core sets are only supported up to CPU_SETSIZE processors!");
 #ifdef EMBB_PLATFORM_HAS_GLIB_CPU

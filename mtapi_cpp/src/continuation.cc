@@ -87,9 +87,7 @@ Task Continuation::Spawn(ExecutionPolicy execution_policy) {
   return node.Spawn(
     Action(
       embb::base::MakeFunction(*this, &Continuation::ExecuteContinuation),
-      ExecutionPolicy(execution_policy)
-    )
-  );
+      ExecutionPolicy(execution_policy)));
 }
 
 } // namespace mtapi

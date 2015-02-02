@@ -55,11 +55,11 @@ PT_MAIN("Data Structures C++") {
 
   PT_RUN(embb::containers::test::HazardPointerTest);
 
-  PT_RUN(embb::containers::test::QueueTest< 
+  PT_RUN(embb::containers::test::QueueTest<
     embb::containers::WaitFreeSPSCQueue< ::std::pair<size_t COMMA int> > >);
 
-  PT_RUN(embb::containers::test::QueueTest< 
-    embb::containers::LockFreeMPMCQueue< ::std::pair<size_t COMMA int> > 
+  PT_RUN(embb::containers::test::QueueTest<
+    embb::containers::LockFreeMPMCQueue< ::std::pair<size_t COMMA int> >
     COMMA true COMMA true >);
 
   PT_RUN(embb::containers::test::StackTest<

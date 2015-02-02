@@ -71,7 +71,7 @@ typedef CONDITION_VARIABLE embb_condition_t;
 
 #define EMBB_THREAD_SPECIFIC static __declspec(thread)
 
-#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS /* EMBB_PLATFORM_THREADING_WINTHREADS */
+#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 #include <pthread.h>
 #include <errno.h>

@@ -74,7 +74,8 @@ void Invoke(
   Function1 func1,
   /**< [in] Function to invoke */
   ...,
-  const embb::mtapi::ExecutionPolicy & policy /**< [in] ExecutionPolicy to use */
+  const embb::mtapi::ExecutionPolicy & policy
+  /**< [in] ExecutionPolicy to use */
   );
 
 #else // DOXYGEN
