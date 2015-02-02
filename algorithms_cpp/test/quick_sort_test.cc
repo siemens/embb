@@ -26,7 +26,7 @@
 
 #include <quick_sort_test.h>
 #include <embb/algorithms/quick_sort.h>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <vector>
 #include <deque>
 #include <sstream>
@@ -54,7 +54,7 @@ QuickSortTest::QuickSortTest() {
 
 void QuickSortTest::TestDataStructures() {
   using embb::algorithms::QuickSort;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
 
   int array[kCountSize];
   std::vector<int> vector(kCountSize);
@@ -163,7 +163,7 @@ void QuickSortTest::TestRanges() {
 
 void QuickSortTest::TestBlockSizes() {
   using embb::algorithms::QuickSort;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
 
   size_t count = 4;
   std::vector<int> init(count);
@@ -187,7 +187,7 @@ void QuickSortTest::TestBlockSizes() {
 
 void QuickSortTest::TestPolicy() {
   using embb::algorithms::QuickSort;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = 4;
   std::vector<int> init(count);
   std::vector<int> vector(count);

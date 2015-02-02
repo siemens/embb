@@ -28,7 +28,7 @@
 #define EMBB_ALGORITHMS_MERGE_SORT_H_
 
 #include <functional>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/base/memory_allocation.h>
 
 namespace embb {
@@ -77,7 +77,7 @@ void MergeSortAllocate(
             \c a appears before an element \c b in the sorted range if
             <tt>comparison(a, b) == true</tt>. The default value uses the
             less-than relation. */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
   /**< [IN] ExecutionPolicy for the merge sort algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
@@ -127,7 +127,7 @@ void MergeSort(
               \c a appears before an element \c b in the sorted range if
               <tt>comparison(a, b) == true</tt>. The default value uses the
               less-than relation. */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
   /**< [IN] ExecutionPolicy for the merge sort algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
@@ -141,42 +141,17 @@ void MergeSort(
 #else // DOXYGEN
 
 /**
- * Overload of above described Doxygen dummy with less arguments.
+ * Overload of above described Doxygen dummy.
  */
-template<typename RAI>
-void MergeSortAllocate(
-  RAI first,
-  RAI last
-  ) {
-  MergeSortAllocate(first, last,
-                    std::less<typename std::iterator_traits<RAI>::value_type>(),
-                    ExecutionPolicy(), 0);
-}
-
-/**
- * Overload of above described Doxygen dummy with less arguments.
- */
-template<typename RAI, typename ComparisonFunction>
-void MergeSortAllocate(
+template<typename RAI, typename RAITemp, typename ComparisonFunction>
+void MergeSort(
   RAI first,
   RAI last,
-  ComparisonFunction comparison
-  ) {
-  MergeSortAllocate(first, last, comparison, ExecutionPolicy(), 0);
-}
-
-/**
- * Overload of above described Doxygen dummy with less arguments.
- */
-template<typename RAI, typename ComparisonFunction>
-void MergeSortAllocate(
-  RAI first,
-  RAI last,
+  RAITemp temporary_first,
   ComparisonFunction comparison,
-  const ExecutionPolicy& policy
-  ) {
-  MergeSortAllocate(first, last, comparison, policy, 0);
-}
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.
@@ -186,7 +161,7 @@ void MergeSortAllocate(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   ) {
   typedef base::Allocation Alloc;
@@ -201,6 +176,44 @@ void MergeSortAllocate(
 /**
  * Overload of above described Doxygen dummy with less arguments.
  */
+template<typename RAI>
+void MergeSortAllocate(
+  RAI first,
+  RAI last
+  ) {
+  MergeSortAllocate(first, last,
+                    std::less<typename std::iterator_traits<RAI>::value_type>(),
+                    embb::mtapi::ExecutionPolicy(), 0);
+}
+
+/**
+ * Overload of above described Doxygen dummy with less arguments.
+ */
+template<typename RAI, typename ComparisonFunction>
+void MergeSortAllocate(
+  RAI first,
+  RAI last,
+  ComparisonFunction comparison
+  ) {
+  MergeSortAllocate(first, last, comparison, embb::mtapi::ExecutionPolicy(), 0);
+}
+
+/**
+ * Overload of above described Doxygen dummy with less arguments.
+ */
+template<typename RAI, typename ComparisonFunction>
+void MergeSortAllocate(
+  RAI first,
+  RAI last,
+  ComparisonFunction comparison,
+  const embb::mtapi::ExecutionPolicy& policy
+  ) {
+  MergeSortAllocate(first, last, comparison, policy, 0);
+}
+
+/**
+ * Overload of above described Doxygen dummy with less arguments.
+ */
 template<typename RAI, typename RAITemp>
 void MergeSort(
   RAI first,
@@ -209,7 +222,7 @@ void MergeSort(
   ) {
   MergeSort(first, last, temporary_first,
             std::less<typename std::iterator_traits<RAI>::value_type>(),
-            ExecutionPolicy(), 0);
+            embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -222,7 +235,8 @@ void MergeSort(
   RAITemp temporary_first,
   ComparisonFunction comparison
   ) {
-  MergeSort(first, last, temporary_first, comparison, ExecutionPolicy(), 0);
+  MergeSort(first, last, temporary_first, comparison,
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -234,23 +248,10 @@ void MergeSort(
   RAI last,
   RAITemp temporary_first,
   ComparisonFunction comparison,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   MergeSort(first, last, temporary_first, comparison, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template<typename RAI, typename RAITemp, typename ComparisonFunction>
-void MergeSort(
-  const ExecutionPolicy& policy,
-  RAI first,
-  RAI last,
-  RAITemp temporary_first,
-  ComparisonFunction comparison,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

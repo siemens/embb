@@ -45,18 +45,17 @@ Task::Task(Task const & task)
 }
 
 Task::Task(
-  Action action,
-  mtapi_uint_t priority) {
+  Action action) {
   mtapi_status_t status;
   mtapi_task_attributes_t attr;
-  Affinity affinity = action.GetAffinity();
+  ExecutionPolicy policy = action.GetExecutionPolicy();
   mtapi_taskattr_init(&attr, &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_PRIORITY,
-    &priority, sizeof(priority), &status);
+    &policy.priority_, sizeof(policy.priority_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_AFFINITY,
-    &affinity.affinity_, sizeof(affinity.affinity_), &status);
+    &policy.affinity_, sizeof(policy.affinity_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
   assert(MTAPI_SUCCESS == status);
@@ -73,18 +72,17 @@ Task::Task(
 
 Task::Task(
   Action action,
-  mtapi_group_hndl_t group,
-  mtapi_uint_t priority) {
+  mtapi_group_hndl_t group) {
   mtapi_status_t status;
   mtapi_task_attributes_t attr;
-  Affinity affinity = action.GetAffinity();
+  ExecutionPolicy policy = action.GetExecutionPolicy();
   mtapi_taskattr_init(&attr, &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_PRIORITY,
-    &priority, sizeof(priority), &status);
+    &policy.priority_, sizeof(policy.priority_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_AFFINITY,
-    &affinity.affinity_, sizeof(affinity.affinity_), &status);
+    &policy.affinity_, sizeof(policy.affinity_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
   assert(MTAPI_SUCCESS == status);
@@ -102,18 +100,17 @@ Task::Task(
 Task::Task(
   mtapi_task_id_t id,
   Action action,
-  mtapi_group_hndl_t group,
-  mtapi_uint_t priority) {
+  mtapi_group_hndl_t group) {
   mtapi_status_t status;
   mtapi_task_attributes_t attr;
-  Affinity affinity = action.GetAffinity();
+  ExecutionPolicy policy = action.GetExecutionPolicy();
   mtapi_taskattr_init(&attr, &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_PRIORITY,
-    &priority, sizeof(priority), &status);
+    &policy.priority_, sizeof(policy.priority_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_AFFINITY,
-    &affinity.affinity_, sizeof(affinity.affinity_), &status);
+    &policy.affinity_, sizeof(policy.affinity_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
   assert(MTAPI_SUCCESS == status);
@@ -132,18 +129,17 @@ Task::Task(
 
 Task::Task(
   Action action,
-  mtapi_queue_hndl_t queue,
-  mtapi_uint_t priority) {
+  mtapi_queue_hndl_t queue) {
   mtapi_status_t status;
   mtapi_task_attributes_t attr;
-  Affinity affinity = action.GetAffinity();
+  ExecutionPolicy policy = action.GetExecutionPolicy();
   mtapi_taskattr_init(&attr, &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_PRIORITY,
-    &priority, sizeof(priority), &status);
+    &policy.priority_, sizeof(policy.priority_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_AFFINITY,
-    &affinity.affinity_, sizeof(affinity.affinity_), &status);
+    &policy.affinity_, sizeof(policy.affinity_), &status);
   assert(MTAPI_SUCCESS == status);
   Action* holder = embb::base::Allocation::New<Action>(action);
   handle_ = mtapi_task_enqueue(MTAPI_TASK_ID_NONE, queue,
@@ -157,18 +153,17 @@ Task::Task(
 Task::Task(
   Action action,
   mtapi_queue_hndl_t queue,
-  mtapi_group_hndl_t group,
-  mtapi_uint_t priority) {
+  mtapi_group_hndl_t group) {
   mtapi_status_t status;
   mtapi_task_attributes_t attr;
-  Affinity affinity = action.GetAffinity();
+  ExecutionPolicy policy = action.GetExecutionPolicy();
   mtapi_taskattr_init(&attr, &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_PRIORITY,
-    &priority, sizeof(priority), &status);
+    &policy.priority_, sizeof(policy.priority_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_AFFINITY,
-    &affinity.affinity_, sizeof(affinity.affinity_), &status);
+    &policy.affinity_, sizeof(policy.affinity_), &status);
   assert(MTAPI_SUCCESS == status);
   Action* holder = embb::base::Allocation::New<Action>(action);
   handle_ = mtapi_task_enqueue(MTAPI_TASK_ID_NONE, queue,
@@ -183,18 +178,17 @@ Task::Task(
   mtapi_task_id_t id,
   Action action,
   mtapi_queue_hndl_t queue,
-  mtapi_group_hndl_t group,
-  mtapi_uint_t priority) {
+  mtapi_group_hndl_t group) {
   mtapi_status_t status;
   mtapi_task_attributes_t attr;
-  Affinity affinity = action.GetAffinity();
+  ExecutionPolicy policy = action.GetExecutionPolicy();
   mtapi_taskattr_init(&attr, &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_PRIORITY,
-    &priority, sizeof(priority), &status);
+    &policy.priority_, sizeof(policy.priority_), &status);
   assert(MTAPI_SUCCESS == status);
   mtapi_taskattr_set(&attr, MTAPI_TASK_AFFINITY,
-    &affinity.affinity_, sizeof(affinity.affinity_), &status);
+    &policy.affinity_, sizeof(policy.affinity_), &status);
   assert(MTAPI_SUCCESS == status);
   Action* holder = embb::base::Allocation::New<Action>(action);
   void * idptr = MTAPI_NULL;

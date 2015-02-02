@@ -228,7 +228,7 @@ void ScanTest::TestRanges() {
 
 void ScanTest::TestBlockSizes() {
   using embb::algorithms::Scan;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
   size_t count = 4;
   std::vector<int> init(count);
@@ -253,7 +253,7 @@ void ScanTest::TestBlockSizes() {
 
 void ScanTest::TestPolicy() {
   using embb::algorithms::Scan;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
   size_t count = 4;
   std::vector<int> init(count);
@@ -304,7 +304,7 @@ void ScanTest::TestPolicy() {
 void ScanTest::StressTest() {
   using embb::algorithms::Scan;
   using embb::algorithms::Identity;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() *10;
   std::vector<int> large_vector(count);
   std::vector<int> large_vector_output(count);

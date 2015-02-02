@@ -259,11 +259,7 @@ void Node::DestroyQueue(Queue & queue) {
 }
 
 Task Node::Spawn(Action action) {
-  return Spawn(action, 0);
-}
-
-Task Node::Spawn(Action action, mtapi_uint_t priority) {
-  return Task(action, priority);
+  return Task(action);
 }
 
 Continuation Node::First(Action action) {

@@ -53,7 +53,7 @@ void Continuation::ExecuteContinuation(TaskContext &) {
   mtapi::ContinuationStage * stage = first_;
   mtapi::Node & node = mtapi::Node::GetInstance();
   while (NULL != stage) {
-    mtapi::Task task = node.Spawn(stage->action, priority_);
+    mtapi::Task task = node.Spawn(stage->action);
     task.Wait(MTAPI_INFINITE);
     stage = stage->next;
   }
@@ -79,15 +79,17 @@ Continuation & Continuation::Then(Action action) {
 }
 
 Task Continuation::Spawn() {
-  return Spawn(0);
+  return Spawn(ExecutionPolicy());
 }
 
-Task Continuation::Spawn(mtapi_uint_t priority) {
-  priority_ = priority;
+Task Continuation::Spawn(ExecutionPolicy execution_policy) {
   Node & node = Node::GetInstance();
   return node.Spawn(
-    embb::base::MakeFunction(*this, &Continuation::ExecuteContinuation),
-    priority);
+    Action(
+      embb::base::MakeFunction(*this, &Continuation::ExecuteContinuation),
+      ExecutionPolicy(execution_policy)
+    )
+  );
 }
 
 } // namespace mtapi

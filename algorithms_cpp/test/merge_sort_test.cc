@@ -26,7 +26,7 @@
 
 #include <merge_sort_test.h>
 #include <embb/algorithms/merge_sort.h>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <vector>
 #include <deque>
 #include <sstream>
@@ -50,7 +50,7 @@ MergeSortTest::MergeSortTest() {
 
 void MergeSortTest::TestDataStructures() {
   using embb::algorithms::MergeSortAllocate;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   int array[kCountSize];
   std::vector<int> vector(kCountSize);
   std::deque<int> deque(kCountSize);
@@ -75,7 +75,7 @@ void MergeSortTest::TestDataStructures() {
 
 void MergeSortTest::TestFunctionPointers() {
   using embb::algorithms::MergeSortAllocate;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
 
   std::vector<int> vector(kCountSize);
   for (size_t i = kCountSize - 1; i > 0; i--) {
@@ -181,7 +181,7 @@ void MergeSortTest::TestRanges() {
 
 void MergeSortTest::TestPolicy() {
   using embb::algorithms::MergeSortAllocate;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = 4;
   std::vector<int> init(count);
   std::vector<int> vector(count);

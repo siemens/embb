@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_REDUCE_H_
 #define EMBB_ALGORITHMS_REDUCE_H_
 
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
 namespace embb {
@@ -89,7 +89,7 @@ ReturnType Reduce(
   TransformationFunction transformation = Identity(),
   /**< [IN] Transforms the elements of the range before the reduction operation
             is applied */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
   /**< [IN] ExecutionPolicy for the reduction computation */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
@@ -103,6 +103,21 @@ ReturnType Reduce(
 #else // DOXYGEN
 
 /**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType, typename ReductionFunction,
+         typename TransformationFunction>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  ReductionFunction reduction,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
  * Overload of above described Doxygen dummy with less arguments.
  */
 template<typename RAI, typename ReturnType, typename ReductionFunction>
@@ -112,8 +127,8 @@ ReturnType Reduce(
   ReturnType neutral,
   ReductionFunction reduction
   ) {
-  return Reduce(first, last, neutral, reduction, Identity(), ExecutionPolicy(),
-                0);
+  return Reduce(first, last, neutral, reduction, Identity(),
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -129,7 +144,7 @@ ReturnType Reduce(
   TransformationFunction transformation
   ) {
   return Reduce(first, last, neutral, reduction, transformation,
-                ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -143,25 +158,10 @@ ReturnType Reduce(
   ReturnType neutral,
   ReductionFunction reduction,
   TransformationFunction transformation,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   return Reduce(first, last, neutral, reduction, transformation, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template<typename RAI, typename ReturnType, typename ReductionFunction,
-         typename TransformationFunction>
-ReturnType Reduce(
-  RAI first,
-  RAI last,
-  ReturnType neutral,
-  ReductionFunction reduction,
-  TransformationFunction transformation,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

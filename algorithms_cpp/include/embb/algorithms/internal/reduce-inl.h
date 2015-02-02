@@ -45,7 +45,7 @@ class ReduceFunctor {
   ReduceFunctor(RAI first, RAI last, ReturnType neutral,
                 ReductionFunction reduction,
                 TransformationFunction transformation,
-                const ExecutionPolicy &policy, size_t block_size,
+                const embb::mtapi::ExecutionPolicy &policy, size_t block_size,
                 ReturnType& result)
   :
       first_(first), last_(last), neutral_(neutral), reduction_(reduction),
@@ -78,11 +78,9 @@ class ReduceFunctor {
                               block_size_, result_r);
       mtapi::Node& node = mtapi::Node::GetInstance();
       mtapi::Task task_l = node.Spawn(mtapi::Action(base::MakeFunction(
-          functor_l, &ReduceFunctor::Action), policy_.GetAffinity()),
-          policy_.GetPriority());
+          functor_l, &ReduceFunctor::Action), policy_));
       mtapi::Task task_r = node.Spawn(mtapi::Action(base::MakeFunction(
-          functor_r, &ReduceFunctor::Action), policy_.GetAffinity()),
-          policy_.GetPriority());
+          functor_r, &ReduceFunctor::Action), policy_));
       task_l.Wait(MTAPI_INFINITE);
       task_r.Wait(MTAPI_INFINITE);
       result_ = reduction_(result_l, result_r);
@@ -95,7 +93,7 @@ class ReduceFunctor {
   ReturnType neutral_;
   ReductionFunction reduction_;
   TransformationFunction transformation_;
-  const ExecutionPolicy& policy_;
+  const embb::mtapi::ExecutionPolicy& policy_;
   size_t block_size_;
   ReturnType& result_;
 
@@ -108,7 +106,8 @@ template<typename RAI, typename ReturnType, typename ReductionFunction,
 ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
                            ReductionFunction reduction,
                            TransformationFunction transformation,
-                           const ExecutionPolicy& policy, size_t block_size) {
+                           const embb::mtapi::ExecutionPolicy& policy,
+                           size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
   assert(distance > 0);
@@ -132,7 +131,7 @@ ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
   Functor functor(first, last, neutral, reduction, transformation, policy,
                   used_block_size, result);
   mtapi::Task task = node.Spawn(mtapi::Action(base::MakeFunction(
-      functor, &Functor::Action), policy.GetAffinity()), policy.GetPriority());
+      functor, &Functor::Action), policy));
   task.Wait(MTAPI_INFINITE);
   return result;
 }
@@ -142,7 +141,8 @@ template<typename RAI, typename TransformationFunction,
 ReturnType ReduceIteratorCheck(RAI first, RAI last, ReductionFunction reduction,
                                TransformationFunction transformation,
                                ReturnType neutral,
-                               const ExecutionPolicy& policy, size_t block_size,
+                               const embb::mtapi::ExecutionPolicy& policy,
+                               size_t block_size,
                                std::random_access_iterator_tag) {
     return ReduceRecursive(first, last, neutral, reduction, transformation,
                            policy, block_size);
@@ -155,7 +155,8 @@ template<typename RAI, typename ReturnType, typename ReductionFunction,
 ReturnType Reduce(RAI first, RAI last, ReturnType neutral,
                   ReductionFunction reduction,
                   TransformationFunction transformation,
-                  const ExecutionPolicy& policy, size_t block_size) {
+                  const embb::mtapi::ExecutionPolicy& policy,
+                  size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
   return internal::ReduceIteratorCheck(first, last, reduction, transformation,
                                        neutral, policy, block_size, category);

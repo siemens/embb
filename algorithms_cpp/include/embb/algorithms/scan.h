@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_SCAN_H_
 #define EMBB_ALGORITHMS_SCAN_H_
 
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
 namespace embb {
@@ -96,7 +96,7 @@ void Scan(
   TransformationFunction transformation = Identity(),
   /**< [IN] Transforms the elements of the input range before the scan operation
             is applied */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
   /**< [IN] ExecutionPolicy for the scan computation */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
@@ -108,6 +108,22 @@ void Scan(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename ScanFunction, typename TransformationFunction>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  ScanFunction scan,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy with less arguments.
@@ -122,7 +138,7 @@ void Scan(
   ScanFunction scan
   ) {
   Scan(first, last, output_iterator, neutral, scan, Identity(),
-       ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -139,7 +155,7 @@ void Scan(
   TransformationFunction transformation
   ) {
   Scan(first, last, output_iterator, neutral, scan, transformation,
-       ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -154,26 +170,10 @@ void Scan(
   ReturnType neutral,
   ScanFunction scan,
   TransformationFunction transformation,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   Scan(first, last, output_iterator, neutral, scan, transformation, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template<typename RAIIn, typename RAIOut, typename ReturnType,
-         typename ScanFunction, typename TransformationFunction>
-void Scan(
-  RAIIn first,
-  RAIIn last,
-  RAIOut output_iterator,
-  ReturnType neutral,
-  ScanFunction scan,
-  TransformationFunction transformation,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

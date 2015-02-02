@@ -34,7 +34,6 @@
  */
 
 #include <embb/algorithms/count.h>
-#include <embb/algorithms/execution_policy.h>
 #include <embb/algorithms/for_each.h>
 #include <embb/algorithms/identity.h>
 #include <embb/algorithms/invoke.h>

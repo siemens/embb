@@ -29,7 +29,7 @@
 
 #include <embb/base/function.h>
 #include <embb/mtapi/taskcontext.h>
-#include <embb/mtapi/affinity.h>
+#include <embb/mtapi/execution_policy.h>
 
 namespace embb {
 namespace mtapi {
@@ -46,7 +46,7 @@ class Action {
     */
   Action()
     : function_()
-    , affinity_() {
+    , execution_policy_() {
     // empty
   }
 
@@ -60,7 +60,7 @@ class Action {
                                             operator() (TaskContext &). */
     )
     : function_(func)
-    , affinity_() {
+    , execution_policy_() {
     // empty
   }
 
@@ -72,10 +72,10 @@ class Action {
   Action(
     Function func,                     /**< [in] Anything that provides an
                                             operator() (TaskContext &). */
-    Affinity affinity                  /**< [in] Core affinity */
+    ExecutionPolicy execution_policy   /**< [in] Execution policy */
     )
     : function_(func)
-    , affinity_(affinity) {
+    , execution_policy_(execution_policy) {
     // empty
   }
 
@@ -90,17 +90,17 @@ class Action {
   }
 
   /**
-    * Returns the Affinity specified during creation.
-    * \return The Affinity of the Action
+    * Returns the ExecutionPolicy specified during creation.
+    * \return The ExecutionPolicy of the Action
     * \waitfree
     */
-  Affinity GetAffinity() const {
-    return affinity_;
+  ExecutionPolicy GetExecutionPolicy() const {
+    return execution_policy_;
   }
 
  private:
   embb::base::Function<void, TaskContext &> function_;
-  Affinity affinity_;
+  ExecutionPolicy execution_policy_;
 };
 
 } // namespace mtapi

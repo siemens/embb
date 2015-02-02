@@ -174,17 +174,6 @@ class Node {
     );
 
   /**
-    * Runs an Action with the specified priority.
-    * \return A Task identifying the Action to run
-    * \throws ErrorException if the Task object could not be constructed.
-    * \threadsafe
-    */
-  Task Spawn(
-    Action action,                     /**< [in] The Action to execute */
-    mtapi_uint_t priority              /**< [in] The priority to use */
-    );
-
-  /**
     * Creates a Continuation.
     * \return A Continuation chain
     * \threadsafe

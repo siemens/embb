@@ -48,7 +48,7 @@ class QuickSortFunctor {
    * Constructs a functor.
    */
   QuickSortFunctor(RAI first, RAI last, ComparisonFunction comparison,
-                   const ExecutionPolicy& policy, size_t block_size)
+    const embb::mtapi::ExecutionPolicy& policy, size_t block_size)
     : first_(first), last_(last), comparison_(comparison), policy_(policy),
       block_size_(block_size) {
   }
@@ -87,7 +87,7 @@ class QuickSortFunctor {
   RAI first_;
   RAI last_;
   ComparisonFunction comparison_;
-  const ExecutionPolicy& policy_;
+  const embb::mtapi::ExecutionPolicy& policy_;
   size_t block_size_;
 
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
@@ -190,7 +190,7 @@ class QuickSortFunctor {
 
 template <typename RAI, typename ComparisonFunction>
 void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
-               const ExecutionPolicy& policy, size_t block_size) {
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
   typename std::iterator_traits<RAI>::difference_type distance = last - first;
   assert(distance > 0);

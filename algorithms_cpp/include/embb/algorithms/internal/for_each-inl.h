@@ -46,7 +46,7 @@ class ForEachFunctor {
    * Constructs a for-each functor with arguments.
    */
   ForEachFunctor(RAI first, RAI last, Function unary,
-                 const ExecutionPolicy& policy, size_t block_size)
+    const embb::mtapi::ExecutionPolicy& policy, size_t block_size)
     : first_(first), last_(last), unary_(unary), policy_(policy),
       block_size_(block_size) {
   }
@@ -68,10 +68,10 @@ class ForEachFunctor {
       mtapi::Node& node = mtapi::Node::GetInstance();
       mtapi::Task taskL = node.Spawn(mtapi::Action(base::MakeFunction(
           functorL, &ForEachFunctor<RAI, Function>::Action),
-          policy_.GetAffinity()), policy_.GetPriority());
+          policy_));
       mtapi::Task taskR = node.Spawn(mtapi::Action(base::MakeFunction(
           functorR, &ForEachFunctor<RAI, Function>::Action),
-          policy_.GetAffinity()), policy_.GetPriority());
+          policy_));
       taskL.Wait(MTAPI_INFINITE);
       taskR.Wait(MTAPI_INFINITE);
     }
@@ -81,7 +81,7 @@ class ForEachFunctor {
   RAI first_;
   RAI last_;
   Function unary_;
-  const ExecutionPolicy& policy_;
+  const embb::mtapi::ExecutionPolicy& policy_;
   size_t block_size_;
 
   /**
@@ -92,7 +92,7 @@ class ForEachFunctor {
 
 template<typename RAI, typename Function>
 void ForEachRecursive(RAI first, RAI last, Function unary,
-                      const ExecutionPolicy& policy, size_t block_size) {
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
   assert(distance > 0);
@@ -113,13 +113,13 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   mtapi::Task task = node.Spawn(mtapi::Action(
                      base::MakeFunction(functor,
                        &ForEachFunctor<RAI, Function>::Action),
-                     policy.GetAffinity()), policy.GetPriority());
+                     policy));
   task.Wait(MTAPI_INFINITE);
 }
 
 template<typename RAI, typename Function>
 void ForEachIteratorCheck(RAI first, RAI last, Function unary,
-                          const ExecutionPolicy& policy, size_t block_size,
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size,
                           std::random_access_iterator_tag) {
   return ForEachRecursive(first, last, unary, policy, block_size);
 }
@@ -127,8 +127,8 @@ void ForEachIteratorCheck(RAI first, RAI last, Function unary,
 }  // namespace internal
 
 template<typename RAI, typename Function>
-void ForEach(RAI first, RAI last, Function unary, const ExecutionPolicy& policy,
-             size_t block_size) {
+void ForEach(RAI first, RAI last, Function unary,
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
   internal::ForEachIteratorCheck(first, last, unary, policy, block_size,
                                  category);

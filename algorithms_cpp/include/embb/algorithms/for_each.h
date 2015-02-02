@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_FOR_EACH_H_
 #define EMBB_ALGORITHMS_FOR_EACH_H_
 
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 
 namespace embb {
 namespace algorithms {
@@ -67,7 +67,7 @@ void ForEach(
             range */
   Function unary,
   /**< [IN] Unary function applied to each element in the range */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
   /**< [IN] ExecutionPolicy for the foreach loop execution */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
@@ -81,6 +81,18 @@ void ForEach(
 #else // DOXYGEN
 
 /**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename Function>
+void ForEach(
+  RAI first,
+  RAI last,
+  Function unary,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
  * Overload of above described Doxygen dummy with less arguments.
  */
 template<typename RAI, typename Function>
@@ -89,7 +101,7 @@ void ForEach(
   RAI last,
   Function unary
   ) {
-  ForEach(first, last, unary, ExecutionPolicy(), 0);
+  ForEach(first, last, unary, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -100,22 +112,10 @@ void ForEach(
   RAI first,
   RAI last,
   Function unary,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   ForEach(first, last, unary, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template<typename RAI, typename Function>
-void ForEach(
-  RAI first,
-  RAI last,
-  Function unary,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

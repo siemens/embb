@@ -49,8 +49,8 @@ class MergeSortFunctor {
   typedef typename std::iterator_traits<RAI>::value_type value_type;
 
   MergeSortFunctor(RAI first, RAI last, RAITemp temporary_first,
-                   ComparisonFunction comparison, const ExecutionPolicy& policy,
-                   size_t block_size, const RAI& global_first, int depth)
+    ComparisonFunction comparison, const embb::mtapi::ExecutionPolicy& policy,
+    size_t block_size, const RAI& global_first, int depth)
     : first_(first), last_(last), temp_first_(temporary_first),
       comparison_(comparison), policy_(policy), block_size_(block_size),
       global_first_(global_first), depth_(depth) {
@@ -82,10 +82,10 @@ class MergeSortFunctor {
       mtapi::Node& node = mtapi::Node::GetInstance();
       mtapi::Task taskL = node.Spawn(mtapi::Action(base::MakeFunction(functorL,
           &MergeSortFunctor<RAI, RAITemp, ComparisonFunction>::Action),
-          policy_.GetAffinity()), policy_.GetPriority());
+          policy_));
       mtapi::Task taskR = node.Spawn(mtapi::Action(base::MakeFunction(functorR,
           &MergeSortFunctor<RAI, RAITemp, ComparisonFunction>::Action),
-          policy_.GetAffinity()), policy_.GetPriority());
+          policy_));
       taskL.Wait(MTAPI_INFINITE);
       taskR.Wait(MTAPI_INFINITE);
     }
@@ -118,7 +118,7 @@ class MergeSortFunctor {
   RAI last_;
   RAITemp temp_first_;
   ComparisonFunction comparison_;
-  const ExecutionPolicy &policy_;
+  const embb::mtapi::ExecutionPolicy& policy_;
   size_t block_size_;
   const RAI& global_first_;
   int depth_;
@@ -162,7 +162,7 @@ void MergeSort(
   RAI last,
   RAITemp temporary_first,
   ComparisonFunction comparison,
-  const ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   ) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
@@ -184,7 +184,7 @@ void MergeSort(
       first, last, temporary_first, comparison, policy, block_size, first, 0);
   mtapi::Task task = node.Spawn(mtapi::Action(base::MakeFunction(functor,
     &internal::MergeSortFunctor<RAI, RAITemp, ComparisonFunction>::Action),
-    policy.GetAffinity()), policy.GetPriority());
+    policy));
 
   task.Wait(MTAPI_INFINITE);
 }

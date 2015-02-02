@@ -26,7 +26,7 @@
 
 #include <for_each_test.h>
 #include <embb/algorithms/for_each.h>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <vector>
 #include <deque>
 #include <sstream>
@@ -166,7 +166,7 @@ void ForEachTest::TestRanges() {
 
 void ForEachTest::TestBlockSizes() {
   using embb::algorithms::ForEach;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = 4;
   std::vector<int> init(count);
   std::vector<int> vector(count);
@@ -186,7 +186,7 @@ void ForEachTest::TestBlockSizes() {
 
 void ForEachTest::TestPolicy() {
   using embb::algorithms::ForEach;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = 4;
   std::vector<int> init(count);
   std::vector<int> vector(count);
@@ -221,7 +221,7 @@ void ForEachTest::TestPolicy() {
 
 void ForEachTest::StressTest() {
   using embb::algorithms::ForEach;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() *10;
   std::vector<int> large_vector(count);
   for (size_t i = 0; i < count; i++) {

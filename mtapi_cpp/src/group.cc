@@ -53,19 +53,11 @@ void Group::Create() {
 }
 
 Task Group::Spawn(Action action) {
-  return Spawn(action, 0);
-}
-
-Task Group::Spawn(Action action, mtapi_uint_t priority) {
-  return Task(action, handle_, priority);
+  return Task(action, handle_);
 }
 
 Task Group::Spawn(mtapi_task_id_t id, Action action) {
-  return Spawn(id, action, 0);
-}
-
-Task Group::Spawn(mtapi_task_id_t id, Action action, mtapi_uint_t priority) {
-  return Task(id, action, handle_, priority);
+  return Task(id, action, handle_);
 }
 
 mtapi_status_t Group::WaitAny(mtapi_timeout_t timeout) {

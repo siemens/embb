@@ -79,11 +79,11 @@ void Queue::Disable() {
 }
 
 Task Queue::Spawn(Action action) {
-  return Task(action, handle_, 0);
+  return Task(action, handle_);
 }
 
 Task Queue::Spawn(Group const * group, Action action) {
-  return Task(action, handle_, group->handle_, 0);
+  return Task(action, handle_, group->handle_);
 }
 
 } // namespace mtapi

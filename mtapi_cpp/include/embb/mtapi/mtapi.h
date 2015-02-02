@@ -42,8 +42,8 @@
 #define MTAPI_CPP_AUTOMATIC_NODE_ID 1
 #endif
 
+#include <embb/mtapi/execution_policy.h>
 #include <embb/mtapi/action.h>
-#include <embb/mtapi/affinity.h>
 #include <embb/mtapi/continuation.h>
 #include <embb/mtapi/group.h>
 #include <embb/mtapi/node.h>

@@ -28,7 +28,7 @@
 #define EMBB_ALGORITHMS_QUICK_SORT_H_
 
 #include <functional>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 
 namespace embb {
 namespace algorithms {
@@ -72,7 +72,7 @@ void QuickSort(
             \c a appears before an element \c b in the sorted range if
             <tt>comparison(a, b) == true</tt>. The default value uses the
             less-than relation. */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
   /**< [IN] ExecutionPolicy for the quick sort algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
@@ -88,6 +88,18 @@ void QuickSort(
 #else // DOXYGEN
 
 /**
+ * Overload of above described Doxygen dummy.
+ */
+template <typename RAI, typename ComparisonFunction>
+void QuickSort(
+  RAI first,
+  RAI last,
+  ComparisonFunction comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
  * Overload of above described Doxygen dummy with less arguments.
  */
 template <typename RAI>
@@ -97,7 +109,7 @@ void QuickSort(
   ) {
   QuickSort(first, last,
             std::less<typename std::iterator_traits<RAI>::value_type>(),
-            ExecutionPolicy(), 0);
+            embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -109,7 +121,7 @@ void QuickSort(
   RAI last,
   ComparisonFunction comparison
   ) {
-  QuickSort(first, last, comparison, ExecutionPolicy(), 0);
+  QuickSort(first, last, comparison, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -120,22 +132,10 @@ void QuickSort(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   QuickSort(first, last, comparison, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template <typename RAI, typename ComparisonFunction>
-void QuickSort(
-  RAI first,
-  RAI last,
-  ComparisonFunction comparison,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 
