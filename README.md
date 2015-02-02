@@ -159,6 +159,15 @@ use:
 
     cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
 
+In the same way you may cross compile to another platform. For example, to cross
+compile to ARM Linux using gcc you need to specify the cross compiler itself and
+an argument to the compilers to indicate the target architecture:
+
+    cmake .. -DCMAKE_CXX_COMPILER=arm-linux-gnueabi-gcc++
+             -DCMAKE_CXX_FLAGS=-march=armv7-a
+             -DCMAKE_C_COMPILER=arm-linux-gnueabi-gcc
+             -DCMAKE_C_FLAGS=-march=armv7-a
+
 EMB² can be built with and without C++ exception handling, which has to be
 specified on build file generation. When exceptions are turned off, an error
 message is emitted and the program aborts in case of an exception within EMB².
