@@ -37,7 +37,7 @@ Version 0.2.2
 ### Documentation:
 - Improved documentation of default values and priorities
 - Revised template argument names in base_cpp and containers_cpp
-- Moved ExecutionPolicy and Identity to CPP_ALGORITHMS Doxygen group
+- Moved ExecutionPolicy to CPP_MTAPI and Identity to CPP_ALGORITHMS Doxygen group
 - Fixed description of token limit in tutorial
 - Added Clang support to README
 - Mentioned the ability to cross compile in README
