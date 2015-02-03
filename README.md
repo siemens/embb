@@ -319,6 +319,32 @@ The EMB² team welcomes all kinds of contributions, preferably as pull requests
 or patches via the development mailing lists (see above). If possible, please
 refer to a current snapshot of the development branch.
 
+EMB² is supposed to be easily portable to platforms unsupported so far. Almost
+all platform specific code is located in the base_c and base_cpp modules. All
+existing platform specific code is fenced by EMBB_PLATFORM_* defines.
+
+To distinguish between compilers, EMB² currently uses the following defines:
+
+  - EMBB_PLATFORM_COMPILER_GNUC
+  - EMBB_PLATFORM_COMPILER_MSVC
+  - EMBB_PLATFORM_COMPILER_UNKNOWN
+
+Different architectures are distinguished using:
+
+  - EMBB_PLATFORM_ARCH_X86
+  - EMBB_PLATFORM_ARCH_X86_32
+  - EMBB_PLATFORM_ARCH_X86_64
+  - EMBB_PLATFORM_ARCH_ARM
+  - EMBB_PLATFORM_ARCH_UNKNOWN
+
+Threading APIs are switched by:
+
+  - EMBB_PLATFORM_THREADING_WINTHREADS
+  - EMBB_PLATFORM_THREADING_POSIXTHREADS
+
+Please use these defines for new platform specific code. If additional defines
+are needed, they can be defined in the config.h or cmake_config.h.in files.
+
 
 Links
 -----
