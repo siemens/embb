@@ -66,7 +66,7 @@ namespace algorithms {
  *       associative, i.e., <tt>reduction(x, reduction(y, z)) ==
  *       reduction(reduction(x, y), z))</tt> for all \c x, \c y, \c z of type
  *       \c ReturnType.
- * \see ExecutionPolicy, Identity, ZipIterator
+ * \see embb::mtapi::ExecutionPolicy, Identity, ZipIterator
  * \tparam RAIIn Random access iterator type of input range
  * \tparam RAIOut Random access iterator type of output range
  * \tparam ReturnType Type of output elements of scan operation, deduced from
@@ -97,7 +97,7 @@ void Scan(
   /**< [IN] Transforms the elements of the input range before the scan operation
             is applied */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the scan computation */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the scan computation */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are treated in parallel. Partitioning of a block stops if its size

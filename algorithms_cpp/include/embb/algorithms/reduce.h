@@ -64,7 +64,7 @@ namespace algorithms {
  *       associative, i.e., <tt>reduction(x, reduction(y, z)) ==
  *       reduction(reduction(x, y), z))</tt> for all \c x, \c y, \c z of type
  *       \c ReturnType.
- * \see ExecutionPolicy, ZipIterator, Identity
+ * \see embb::mtapi::ExecutionPolicy, ZipIterator, Identity
  * \tparam RAI Random access iterator
  * \tparam ReturnType Type of result of reduction operation, deduced from
  *         \c neutral
@@ -90,7 +90,7 @@ ReturnType Reduce(
   /**< [IN] Transforms the elements of the range before the reduction operation
             is applied */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the reduction computation */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the reduction computation */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are treated in parallel. Partitioning of a block stops if its size

@@ -53,7 +53,7 @@ namespace algorithms {
  *             while the algorithm is executed.
  * \note No guarantee is given on the order in which the function is applied to
  *       the elements.
- * \see ExecutionPolicy, ZipIterator
+ * \see embb::mtapi::ExecutionPolicy, ZipIterator
  * \tparam RAI Random access iterator
  * \tparam Function Unary function with argument of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt>.
@@ -68,7 +68,7 @@ void ForEach(
   Function unary,
   /**< [IN] Unary function applied to each element in the range */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the foreach loop execution */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the foreach loop execution */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are treated in parallel. Partitioning of a block stops if its size

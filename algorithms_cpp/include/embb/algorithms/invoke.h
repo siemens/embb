@@ -63,7 +63,7 @@ void Invoke(
 
 /**
 * Spawns one to ten function objects at once and runs them in parallel using the
-* given ExecutionPolicy.
+* given embb::mtapi::ExecutionPolicy.
 *
 * Blocks until all of them are done.
 *
@@ -75,7 +75,7 @@ void Invoke(
   /**< [in] Function to invoke */
   ...,
   const embb::mtapi::ExecutionPolicy & policy
-  /**< [in] ExecutionPolicy to use */
+  /**< [in] embb::mtapi::ExecutionPolicy to use */
   );
 
 #else // DOXYGEN

@@ -59,7 +59,7 @@ namespace algorithms {
  *             modified by another thread while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
          operations.
- * \see ExecutionPolicy, MergeSort()
+ * \see embb::mtapi::ExecutionPolicy, MergeSort()
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Binary predicate with both arguments of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt>.
@@ -78,7 +78,7 @@ void MergeSortAllocate(
             <tt>comparison(a, b) == true</tt>. The default value uses the
             less-than relation. */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the merge sort algorithm */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the merge sort algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are sorted in parallel. Partitioning of a block stops if its size
@@ -105,7 +105,7 @@ void MergeSortAllocate(
  *             modified by another thread while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
  *       operations.
- * \see ExecutionPolicy, MergeSortAllocate()
+ * \see embb::mtapi::ExecutionPolicy, MergeSortAllocate()
  * \tparam RAI Random access iterator
  * \tparam RAITemp Random access iterator for temporary memory. Has to have the
  *         same value type as RAI.
@@ -128,7 +128,7 @@ void MergeSort(
               <tt>comparison(a, b) == true</tt>. The default value uses the
               less-than relation. */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the merge sort algorithm */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the merge sort algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are sorted in parallel. Partitioning of a block stops if its size

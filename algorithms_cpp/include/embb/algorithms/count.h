@@ -56,7 +56,7 @@ namespace algorithms {
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
  *       operations.
- * \see CountIf(), ExecutionPolicy
+ * \see CountIf(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ValueType Type of \c value that is compared to the elements in the
  *         range using the \c operator==.
@@ -72,7 +72,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
   /**< [IN] Value that the elements in the range are compared to using
             \c operator== */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the counting algorithm */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the counting algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are sorted in parallel. Partitioning of a block stops if its size
@@ -96,7 +96,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
  *       function.
- * \see Count(), ExecutionPolicy
+ * \see Count(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Unary predicate with argument of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt>.
@@ -112,7 +112,7 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
   /**< [IN] Unary predicate used to test the elements in the range. Elements for
             which \c comparison returns true are counted. */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the counting algorithm */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the counting algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are sorted in parallel. Partitioning of a block stops if its size
