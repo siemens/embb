@@ -25,6 +25,7 @@
  */
 
 #include <embb/mtapi/execution_policy.h>
+#include <embb/mtapi/mtapi.h>
 #include <embb/base/exceptions.h>
 #include <cassert>
 
