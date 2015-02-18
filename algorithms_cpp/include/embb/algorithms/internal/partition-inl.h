@@ -71,8 +71,8 @@ const ChunkDescriptor<ForwardIterator>
 
   ForwardIterator last_new = first_new;
 
-  if (index == elements_count / chunkSize) {
-    std::advance(last_new, elements_count % chunkSize);
+  if (index >= chunks - 1) {
+    last_new = last;
   } else {
     std::advance(last_new, chunkSize);
   }

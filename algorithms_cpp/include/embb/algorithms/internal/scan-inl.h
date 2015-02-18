@@ -54,7 +54,7 @@ class ScanFunctor {
       node_id_(node_id), parent_value_(neutral), is_first_pass_(going_down)  {
   }
 
-  void Action(mtapi::TaskContext&) {
+  void Action(mtapi::TaskContext& context) {
     if (first_ == last_) {
       return;
     }
@@ -67,23 +67,19 @@ class ScanFunctor {
         *iter_out = result;
         ++iter_in;
         ++iter_out;
-        while (iter_in != last_) {
+        for (; iter_in != last_; ++iter_in, ++iter_out) {
           result = scan_(result, transformation_(*iter_in));
           *iter_out = result;
-          ++iter_in;
-          ++iter_out;
         }
         SetTreeValue(result);
       } else { // Second pass
         RAIIn iter_in = first_;
         RAIOut iter_out = output_iterator_;
-        while (iter_in != last_) {
+        for (; iter_in != last_; ++iter_in, ++iter_out) {
           *iter_out = scan_(parent_value_, *iter_out);
-          ++iter_in;
-          ++iter_out;
         }
       }
-    } else {
+    } else {  // recurse further
       internal::ChunkPartitioner<RAIIn> partitioner(first_, last_, 2);
       ScanFunctor functor_l(partitioner[0].GetFirst(), partitioner[0].GetLast(),
                             output_iterator_, neutral_, scan_, transformation_,
@@ -102,13 +98,13 @@ class ScanFunctor {
         functor_r.parent_value_ = functor_l.GetTreeValue() + parent_value_;
       }
       mtapi::Node& node = mtapi::Node::GetInstance();
-      mtapi::Task task_l = node.Spawn(mtapi::Action(base::MakeFunction(
-                                      functor_l, &ScanFunctor::Action),
+      // Spawn tasks for right partition first:
+      mtapi::Task task_r = node.Spawn(mtapi::Action(base::MakeFunction(
+                                      functor_r, &ScanFunctor::Action),
                                       policy_));
-       mtapi::Task task_r = node.Spawn(mtapi::Action(base::MakeFunction(
-                                       functor_r, &ScanFunctor::Action),
-                                       policy_));
-      task_l.Wait(MTAPI_INFINITE);
+      // Recurse on left partition:
+      functor_l.Action(context);
+      // Wait for tasks on right partition to complete:
       task_r.Wait(MTAPI_INFINITE);
       SetTreeValue(scan_(functor_l.GetTreeValue(), functor_r.GetTreeValue()));
     }

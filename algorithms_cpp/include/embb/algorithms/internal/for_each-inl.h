@@ -41,6 +41,8 @@ namespace internal {
 
 template<typename RAI, typename Function>
 class ForEachFunctor {
+ private:
+  typedef ForEachFunctor<RAI, Function> self_t;
  public:
   /**
    * Constructs a for-each functor with arguments.
@@ -51,29 +53,33 @@ class ForEachFunctor {
       block_size_(block_size) {
   }
 
-  void Action(mtapi::TaskContext&) {
+  void Action(mtapi::TaskContext& context) {
     size_t distance = static_cast<size_t>(std::distance(first_, last_));
     if (distance == 0) return;
     if (distance <= block_size_) {  // leaf case -> do work
-      for (RAI curIter(first_); curIter != last_; ++curIter) {
-        unary_(*curIter);
+      for (RAI it = first_; it != last_; ++it) {
+        unary_(*it);
       }
     } else {  // recurse further
       ChunkPartitioner<RAI> partitioner(first_, last_, 2);
-      ForEachFunctor<RAI, Function> functorL(partitioner[0].GetFirst(),
-        partitioner[0].GetLast(), unary_, policy_, block_size_);
-      ForEachFunctor<RAI, Function> functorR(partitioner[1].GetFirst(),
-        partitioner[1].GetLast(), unary_, policy_, block_size_);
-
-      mtapi::Node& node = mtapi::Node::GetInstance();
-      mtapi::Task taskL = node.Spawn(mtapi::Action(base::MakeFunction(
-          functorL, &ForEachFunctor<RAI, Function>::Action),
+      ChunkDescriptor<RAI> chunk_l = partitioner[0];
+      ChunkDescriptor<RAI> chunk_r = partitioner[1];
+      self_t functor_l(chunk_l.GetFirst(),
+                       chunk_l.GetLast(),
+                       unary_, policy_, block_size_);
+      self_t functor_r(chunk_r.GetFirst(),
+                       chunk_r.GetLast(),
+                       unary_, policy_, block_size_);
+      // Spawn tasks for right partition first:
+      mtapi::Task task_r = mtapi::Node::GetInstance().Spawn(
+        mtapi::Action(
+          base::MakeFunction(
+          functor_r, &ForEachFunctor<RAI, Function>::Action), 
           policy_));
-      mtapi::Task taskR = node.Spawn(mtapi::Action(base::MakeFunction(
-          functorR, &ForEachFunctor<RAI, Function>::Action),
-          policy_));
-      taskL.Wait(MTAPI_INFINITE);
-      taskR.Wait(MTAPI_INFINITE);
+      // Recurse on left partition:
+      functor_l.Action(context);
+      // Wait for tasks on right partition to complete:
+      task_r.Wait(MTAPI_INFINITE);
     }
   }
 
@@ -95,7 +101,9 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
-  assert(distance > 0);
+  if (distance == 0) {
+    EMBB_THROW(embb::base::ErrorException, "Distance for ForEach is 0");
+  }
   mtapi::Node& node = mtapi::Node::GetInstance();
   // Determine actually used block size
   if (block_size == 0) {
@@ -127,7 +135,7 @@ void ForEachIteratorCheck(RAI first, RAI last, Function unary,
 }  // namespace internal
 
 template<typename RAI, typename Function>
-void ForEach(RAI first, RAI last, Function unary,
+void ForEach(RAI first, const RAI last, Function unary,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
   internal::ForEachIteratorCheck(first, last, unary, policy, block_size,

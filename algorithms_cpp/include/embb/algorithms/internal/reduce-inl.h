@@ -53,7 +53,7 @@ class ReduceFunctor {
       block_size_(block_size), result_(result) {
   }
 
-  void Action(mtapi::TaskContext&) {
+  void Action(mtapi::TaskContext& context) {
     if (first_ == last_) {
       return;
     }
@@ -66,22 +66,26 @@ class ReduceFunctor {
       result_ = result;
     } else {  // recurse further
       internal::ChunkPartitioner<RAI> partitioner(first_, last_, 2);
+      ChunkDescriptor<RAI> chunk_l = partitioner[0];
+      ChunkDescriptor<RAI> chunk_r = partitioner[1];
       ReturnType result_l(neutral_);
       ReturnType result_r(neutral_);
-      ReduceFunctor functor_l(partitioner[0].GetFirst(),
-                              partitioner[0].GetLast(),
+      ReduceFunctor functor_l(chunk_l.GetFirst(),
+                              chunk_l.GetLast(),
                               neutral_, reduction_, transformation_, policy_,
                               block_size_, result_l);
-      ReduceFunctor functor_r(partitioner[1].GetFirst(),
-                              partitioner[1].GetLast(),
+      ReduceFunctor functor_r(chunk_r.GetFirst(),
+                              chunk_r.GetLast(),
                               neutral_, reduction_, transformation_, policy_,
                               block_size_, result_r);
-      mtapi::Node& node = mtapi::Node::GetInstance();
-      mtapi::Task task_l = node.Spawn(mtapi::Action(base::MakeFunction(
-          functor_l, &ReduceFunctor::Action), policy_));
-      mtapi::Task task_r = node.Spawn(mtapi::Action(base::MakeFunction(
-          functor_r, &ReduceFunctor::Action), policy_));
-      task_l.Wait(MTAPI_INFINITE);
+      // Spawn tasks for right partition first:
+      mtapi::Task task_r = mtapi::Node::GetInstance().Spawn(
+        mtapi::Action(base::MakeFunction(
+          functor_r, &ReduceFunctor::Action), 
+          policy_));
+      // Recurse on left partition:
+      functor_l.Action(context);
+      // Wait for tasks on right partition to complete:
       task_r.Wait(MTAPI_INFINITE);
       result_ = reduction_(result_l, result_r);
     }
@@ -97,6 +101,9 @@ class ReduceFunctor {
   size_t block_size_;
   ReturnType& result_;
 
+  /**
+   * Disables assignment and copy-construction.
+   */
   ReduceFunctor& operator=(const ReduceFunctor&);
   ReduceFunctor(const ReduceFunctor&);
 };
@@ -110,21 +117,22 @@ ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
                            size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
-  assert(distance > 0);
-
+  if (distance == 0) {
+    EMBB_THROW(embb::base::ErrorException, "Distance for Reduce is 0");
+  }
+  // Determine actually used block size
   mtapi::Node& node = mtapi::Node::GetInstance();
   size_t used_block_size = block_size;
   if (used_block_size == 0) {
       used_block_size = static_cast<size_t>(distance) / node.GetCoreCount();
       if (used_block_size == 0) used_block_size = 1;
   }
-
+  // Perform check of task number sufficiency
   if (((distance / used_block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
     EMBB_THROW(embb::base::ErrorException,
                "Number of computation tasks required in reduction would "
                "exceed MTAPI maximum number of tasks");
   }
-
   ReturnType result = neutral;
   typedef ReduceFunctor<RAI, ReturnType, ReductionFunction,
                         TransformationFunction> Functor;
