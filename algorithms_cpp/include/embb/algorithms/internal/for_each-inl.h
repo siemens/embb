@@ -77,15 +77,15 @@ class ForEachFunctor {
       mtapi::Task task_l = mtapi::Node::GetInstance().Spawn(
         mtapi::Action(
           base::MakeFunction(
-          functor_l, &ForEachFunctor<RAI, Function>::Action), 
+          functor_l, &self_t::Action),
           policy_));
       mtapi::Task task_r = mtapi::Node::GetInstance().Spawn(
         mtapi::Action(
           base::MakeFunction(
-          functor_r, &ForEachFunctor<RAI, Function>::Action), 
+          functor_r, &self_t::Action),
           policy_));
-      task_r.Wait(MTAPI_INFINITE);
       task_l.Wait(MTAPI_INFINITE);
+      task_r.Wait(MTAPI_INFINITE);
     }
   }
 
@@ -118,7 +118,6 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
       block_size = 1;
     }
   }
-
   // Perform check of task number sufficiency
   if (((distance / block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
     EMBB_THROW(embb::base::ErrorException, "Not enough MTAPI tasks available "

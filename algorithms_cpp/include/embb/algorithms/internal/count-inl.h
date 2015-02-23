@@ -37,42 +37,47 @@ namespace internal {
 template<typename ValueType>
 class ValueComparisonFunction{
  public:
-  explicit ValueComparisonFunction(const ValueType &value)
-  :value_(value) {}
-  ValueComparisonFunction(const ValueComparisonFunction &other)
-  :value_(other.value_) {}
+  explicit ValueComparisonFunction(const ValueType& value)
+  : value_(value) {}
+  ValueComparisonFunction(const ValueComparisonFunction& other)
+  : value_(other.value_) {}
 
   template<typename ElementType>
   int operator()(ElementType element) {
-    if(element == value_)
+    if (element == value_) {
       return 1;
-    else
+    }
+    else {
       return 0;
+    }
   }
  private:
   const ValueType &value_;
-  ValueComparisonFunction &operator=(const ValueComparisonFunction &other);
+  ValueComparisonFunction &operator=(
+    const ValueComparisonFunction& other);
 };
 
 template<typename Function>
 class FunctionComparisonFunction{
  public:
   explicit FunctionComparisonFunction(Function function)
-  :function_(function) {}
+  : function_(function) {}
   FunctionComparisonFunction(const FunctionComparisonFunction &other)
-  :function_(other.function_) {}
+  : function_(other.function_) {}
 
   template<typename ElementType>
   int operator()(ElementType element) {
-    if(function_(element))
+    if (function_(element)) {
       return 1;
-    else
+    }
+    else {
       return 0;
+    }
   }
  private:
   Function function_;
-  FunctionComparisonFunction &operator=(const FunctionComparisonFunction &
-      other);
+  FunctionComparisonFunction &operator=(
+    const FunctionComparisonFunction& other);
 };
 
 }  // namespace internal
