@@ -50,7 +50,7 @@ class ForEachFunctor {
   ForEachFunctor(size_t chunk_first, size_t chunk_last, Function unary,
                  const embb::mtapi::ExecutionPolicy& policy, 
                  const BlockSizePartitioner<RAI>& partitioner)
-  : chunk_first_(chunk_first), chunk_last_(chunk_last), 
+  : chunk_first_(chunk_first), chunk_last_(chunk_last),
     unary_(unary), policy_(policy), partitioner_(partitioner) {
   }
 
@@ -76,13 +76,11 @@ class ForEachFunctor {
                        unary_, policy_, partitioner_);
       mtapi::Task task_l = mtapi::Node::GetInstance().Spawn(
         mtapi::Action(
-          base::MakeFunction(
-          functor_l, &self_t::Action),
+          base::MakeFunction(functor_l, &self_t::Action),
           policy_));
       mtapi::Task task_r = mtapi::Node::GetInstance().Spawn(
         mtapi::Action(
-          base::MakeFunction(
-          functor_r, &self_t::Action),
+          base::MakeFunction(functor_r, &self_t::Action),
           policy_));
       task_l.Wait(MTAPI_INFINITE);
       task_r.Wait(MTAPI_INFINITE);
@@ -120,8 +118,8 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   }
   // Perform check of task number sufficiency
   if (((distance / block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
-    EMBB_THROW(embb::base::ErrorException, "Not enough MTAPI tasks available "
-               "to perform the parallel foreach loop");
+    EMBB_THROW(embb::base::ErrorException,
+               "Not enough MTAPI tasks available for parallel foreach");
   }
 
   BlockSizePartitioner<RAI> partitioner(first, last, block_size);

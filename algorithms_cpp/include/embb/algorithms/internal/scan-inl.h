@@ -41,70 +41,86 @@ template<typename RAIIn, typename RAIOut, typename ReturnType,
 typename ScanFunction, typename TransformationFunction>
 class ScanFunctor {
  public:
-  ScanFunctor(RAIIn first, RAIIn last, RAIOut output_iterator,
+  ScanFunctor(size_t chunk_first, size_t chunk_last, RAIOut output_iterator,
               ReturnType neutral, ScanFunction scan,
               TransformationFunction transformation,
               const embb::mtapi::ExecutionPolicy& policy,
-              size_t block_size, ReturnType* tree_values, size_t node_id,
+              const BlockSizePartitioner<RAIIn>& partitioner, 
+              ReturnType* tree_values, size_t node_id,
               bool going_down)
-    : policy_(policy), first_(first), last_(last),
+    : policy_(policy), chunk_first_(chunk_first), chunk_last_(chunk_last),
       output_iterator_(output_iterator), scan_(scan),
       transformation_(transformation),
-      neutral_(neutral), block_size_(block_size), tree_values_(tree_values),
+      neutral_(neutral), partitioner_(partitioner), tree_values_(tree_values),
       node_id_(node_id), parent_value_(neutral), is_first_pass_(going_down)  {
   }
 
-  void Action(mtapi::TaskContext& context) {
-    if (first_ == last_) {
-      return;
-    }
-    size_t distance = static_cast<size_t>(std::distance(first_, last_));
-    if (distance <= block_size_) {  // leaf case -> do work
+  void Action(mtapi::TaskContext&) {
+    if (chunk_first_ == chunk_last_) {
+      // leaf case -> do work      
       if (is_first_pass_) {
-        RAIIn iter_in = first_;
+        ChunkDescriptor<RAIIn> chunk = partitioner_[chunk_first_];
+        RAIIn iter_in = chunk.GetFirst();
+        RAIIn last_in = chunk.GetLast();
         RAIOut iter_out = output_iterator_;
-        ReturnType result = transformation_(*first_);
+        ReturnType result = transformation_(*iter_in);
         *iter_out = result;
         ++iter_in;
         ++iter_out;
-        for (; iter_in != last_; ++iter_in, ++iter_out) {
+        for (; iter_in != last_in; ++iter_in, ++iter_out) {
           result = scan_(result, transformation_(*iter_in));
           *iter_out = result;
         }
         SetTreeValue(result);
-      } else { // Second pass
-        RAIIn iter_in = first_;
+      }
+      else {
+        // Second pass
+        ChunkDescriptor<RAIIn> chunk = partitioner_[chunk_first_];
+        RAIIn iter_in = chunk.GetFirst();
+        RAIIn last_in = chunk.GetLast();
         RAIOut iter_out = output_iterator_;
-        for (; iter_in != last_; ++iter_in, ++iter_out) {
+        for (; iter_in != last_in; ++iter_in, ++iter_out) {
           *iter_out = scan_(parent_value_, *iter_out);
         }
       }
-    } else {  // recurse further
-      internal::ChunkPartitioner<RAIIn> partitioner(first_, last_, 2);
-      ScanFunctor functor_l(partitioner[0].GetFirst(), partitioner[0].GetLast(),
-                            output_iterator_, neutral_, scan_, transformation_,
-                            policy_, block_size_, tree_values_, node_id_,
-                            is_first_pass_);
-      ScanFunctor functor_r(partitioner[1].GetFirst(), partitioner[1].GetLast(),
-                            output_iterator_, neutral_, scan_, transformation_,
-                            policy_, block_size_, tree_values_, node_id_,
-                            is_first_pass_);
-      functor_l.SetID(1);
-      functor_r.SetID(2);
-      std::advance(functor_r.output_iterator_,
-                   std::distance(functor_l.first_, functor_r.first_));
+    }
+    else {
+      // recurse further
+      size_t chunk_split_index = (chunk_first_ + chunk_last_) / 2;
+      // Split chunks into left / right branches:
+      ScanFunctor functor_l(
+        chunk_first_, chunk_split_index,
+        output_iterator_, neutral_, scan_, transformation_,
+        policy_, partitioner_, tree_values_, node_id_,
+        is_first_pass_);
+      ScanFunctor functor_r(
+        chunk_split_index + 1, chunk_last_,
+        output_iterator_, neutral_, scan_, transformation_,
+        policy_, partitioner_, tree_values_, node_id_,
+        is_first_pass_);
+      functor_l.SetID(LEFT);
+      functor_r.SetID(RIGHT);
+      // Advance output iterator of right branch:
+      ChunkDescriptor<RAIIn> chunk_left  = partitioner_[chunk_first_];
+      ChunkDescriptor<RAIIn> chunk_right = partitioner_[chunk_split_index + 1];
+      long long dist = std::distance(chunk_left.GetFirst(), chunk_right.GetFirst());
+      std::advance(functor_r.output_iterator_, dist);
       if (!is_first_pass_) {
         functor_l.parent_value_ = parent_value_;
         functor_r.parent_value_ = functor_l.GetTreeValue() + parent_value_;
       }
-      mtapi::Node& node = mtapi::Node::GetInstance();
-      // Spawn tasks for right partition first:
-      mtapi::Task task_r = node.Spawn(mtapi::Action(base::MakeFunction(
-                                      functor_r, &ScanFunctor::Action),
-                                      policy_));
-      // Recurse on left partition:
-      functor_l.Action(context);
-      // Wait for tasks on right partition to complete:
+      // Spawn tasks to recurse:
+      mtapi::Node& node = mtapi::Node::GetInstance();      
+      mtapi::Task task_l = node.Spawn(
+        mtapi::Action(
+          base::MakeFunction(functor_l, &ScanFunctor::Action),
+          policy_));
+      mtapi::Task task_r = node.Spawn(
+        mtapi::Action(
+          base::MakeFunction(functor_r, &ScanFunctor::Action),
+          policy_));
+      // Wait for tasks to complete:
+      task_l.Wait(MTAPI_INFINITE);
       task_r.Wait(MTAPI_INFINITE);
       SetTreeValue(scan_(functor_l.GetTreeValue(), functor_r.GetTreeValue()));
     }
@@ -119,23 +135,26 @@ class ScanFunctor {
   }
 
  private:
+  static const int LEFT  = 1;
+  static const int RIGHT = 2;
   const embb::mtapi::ExecutionPolicy& policy_;
-  RAIIn first_;
-  RAIIn last_;
+  size_t chunk_first_;
+  size_t chunk_last_;
   RAIOut output_iterator_;
   ScanFunction scan_;
   TransformationFunction transformation_;
   ReturnType neutral_;
-  size_t block_size_;
+  const BlockSizePartitioner<RAIIn>& partitioner_;
   ReturnType* tree_values_;
   size_t node_id_;
   ReturnType parent_value_;
   bool is_first_pass_;
 
-  void SetID(int is_left) {
-    if (is_left == 1) {
+  void SetID(int branch) {
+    if (branch == LEFT) {
       node_id_ = 2 * node_id_ + 1;
-    } else if (is_left == 2) {
+    } 
+    else if (branch == RIGHT) {
       node_id_ = 2 * node_id_ + 2;
     }
   }
@@ -166,23 +185,25 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
   }
   mtapi::Node& node = mtapi::Node::GetInstance();
   ReturnType values[MTAPI_NODE_MAX_TASKS_DEFAULT];
-  size_t used_block_size = block_size;
   if (block_size == 0) {
-    used_block_size = static_cast<size_t>(distance) / node.GetCoreCount();
-    if (used_block_size == 0) used_block_size = 1;
+    block_size = static_cast<size_t>(distance) / node.GetCoreCount();
+    if (block_size == 0) {
+      block_size = 1;
+    }
   }
-  if (((distance / used_block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
+  if (((distance / block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
     EMBB_THROW(embb::base::ErrorException,
-               "Number of computation tasks required in scan "
-               "exceeds MTAPI maximum number of tasks");
+               "Not enough MTAPI tasks available for parallel scan");
   }
 
   // first pass. Calculates prefix sums for leaves and when recursion returns
   // it creates the tree.
   typedef ScanFunctor<RAIIn, RAIOut, ReturnType, ScanFunction,
                       TransformationFunction> Functor;
-  Functor functor_down(first, last, output_iterator, neutral, scan,
-                       transformation, policy, used_block_size, values, 0,
+
+  BlockSizePartitioner<RAIIn> partitioner_down(first, last, block_size);
+  Functor functor_down(0, partitioner_down.Size() - 1, output_iterator, neutral, 
+                       scan, transformation, policy, partitioner_down, values, 0,
                        true);
   mtapi::Task task_down = node.Spawn(mtapi::Action(base::MakeFunction(
                           functor_down, &Functor::Action),
@@ -190,8 +211,10 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
   task_down.Wait(MTAPI_INFINITE);
 
   // Second pass. Gives to each leaf the part of the prefix missing
-  Functor functor_up(first, last, output_iterator, neutral, scan,
-                     transformation, policy, used_block_size, values, 0, false);
+  BlockSizePartitioner<RAIIn> partitioner_up(first, last, block_size);
+  Functor functor_up(0, partitioner_up.Size() - 1, output_iterator, neutral,
+                     scan, transformation, policy, partitioner_up, values, 0, 
+                     false);
   mtapi::Task task_up = node.Spawn(mtapi::Action(base::MakeFunction(
                         functor_up, &Functor::Action),
                         policy));
