@@ -57,12 +57,12 @@ class ScanFunctor {
 
   void Action(mtapi::TaskContext&) {
     if (chunk_first_ == chunk_last_) {
-      // leaf case -> do work      
+      ChunkDescriptor<RAIIn> chunk = partitioner_[chunk_first_];
+      RAIIn iter_in = chunk.GetFirst();
+      RAIIn last_in = chunk.GetLast();
+      RAIOut iter_out = output_iterator_;
+      // leaf case -> do work
       if (is_first_pass_) {
-        ChunkDescriptor<RAIIn> chunk = partitioner_[chunk_first_];
-        RAIIn iter_in = chunk.GetFirst();
-        RAIIn last_in = chunk.GetLast();
-        RAIOut iter_out = output_iterator_;
         ReturnType result = transformation_(*iter_in);
         *iter_out = result;
         ++iter_in;
@@ -75,10 +75,6 @@ class ScanFunctor {
       }
       else {
         // Second pass
-        ChunkDescriptor<RAIIn> chunk = partitioner_[chunk_first_];
-        RAIIn iter_in = chunk.GetFirst();
-        RAIIn last_in = chunk.GetLast();
-        RAIOut iter_out = output_iterator_;
         for (; iter_in != last_in; ++iter_in, ++iter_out) {
           *iter_out = scan_(parent_value_, *iter_out);
         }
