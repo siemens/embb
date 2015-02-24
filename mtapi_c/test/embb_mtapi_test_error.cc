@@ -129,12 +129,6 @@ static void TestNodeNotInit() {
     MTAPI_DEFAULT_QUEUE_ATTRIBUTES, &status);
   PT_EXPECT_EQ(status, MTAPI_ERR_NODE_NOTINIT);
 
-
-  status = MTAPI_ERR_UNKNOWN;
-  queue_hndl = mtapi_queue_create(1, job_hndl,
-    MTAPI_DEFAULT_QUEUE_ATTRIBUTES, &status);
-  PT_EXPECT_EQ(status, MTAPI_ERR_NODE_NOTINIT);
-
   status = MTAPI_ERR_UNKNOWN;
   mtapi_queue_enable(queue_hndl, &status);
   PT_EXPECT_EQ(status, MTAPI_ERR_NODE_NOTINIT);
@@ -353,7 +347,7 @@ static void TestLimits() {
 
   /* start a task with the invalid job, this will fail */
   status = MTAPI_ERR_UNKNOWN;
-  task_hndl_invalid = mtapi_task_start(MTAPI_TASK_ID_NONE, job_hndl_invalid,
+  mtapi_task_start(MTAPI_TASK_ID_NONE, job_hndl_invalid,
     MTAPI_NULL, 0, MTAPI_NULL, 0,
     MTAPI_DEFAULT_TASK_ATTRIBUTES, MTAPI_GROUP_NONE, &status);
   PT_EXPECT_EQ(status, MTAPI_ERR_JOB_INVALID);
@@ -439,7 +433,7 @@ static void TestLimits() {
 
   /* create a queue with invalid job */
   status = MTAPI_ERR_UNKNOWN;
-  queue_hndl = mtapi_queue_create(MTAPI_QUEUE_ID_NONE, job_hndl_invalid,
+  mtapi_queue_create(MTAPI_QUEUE_ID_NONE, job_hndl_invalid,
     MTAPI_DEFAULT_QUEUE_ATTRIBUTES, &status);
   PT_EXPECT_EQ(status, MTAPI_ERR_JOB_INVALID);
 
@@ -502,7 +496,7 @@ static void TestLimits() {
 
   /* enqueue another one, this will fail since the limit is one */
   status = MTAPI_ERR_UNKNOWN;
-  task_hndl_invalid = mtapi_task_enqueue(MTAPI_TASK_ID_NONE, queue_hndl,
+  mtapi_task_enqueue(MTAPI_TASK_ID_NONE, queue_hndl,
     MTAPI_NULL, 0, MTAPI_NULL, 0,
     MTAPI_DEFAULT_TASK_ATTRIBUTES, MTAPI_GROUP_NONE, &status);
   PT_EXPECT_EQ(status, MTAPI_ERR_TASK_LIMIT);
@@ -546,7 +540,7 @@ static void TestLimits() {
 
   /* try to enqueue another task, this will fail since the queue is disabled */
   status = MTAPI_ERR_UNKNOWN;
-  task_hndl_invalid = mtapi_task_enqueue(MTAPI_TASK_ID_NONE, queue_hndl,
+  mtapi_task_enqueue(MTAPI_TASK_ID_NONE, queue_hndl,
     MTAPI_NULL, 0, MTAPI_NULL, 0,
     MTAPI_DEFAULT_TASK_ATTRIBUTES, MTAPI_GROUP_NONE, &status);
   PT_EXPECT_EQ(status, MTAPI_ERR_QUEUE_DISABLED);
