@@ -24,24 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MTAPI_C_TEST_EMBB_MTAPI_TEST_ERROR_H_
+#define MTAPI_C_TEST_EMBB_MTAPI_TEST_ERROR_H_
+
 #include <partest/partest.h>
 
-#include <stdio.h>
+class ErrorTest : public partest::TestCase {
+ public:
+  ErrorTest();
 
-#include <embb_mtapi_log.h>
+ private:
+  void TestBasic();
+};
 
-#include <embb_mtapi_test_init_finalize.h>
-#include <embb_mtapi_test_task.h>
-#include <embb_mtapi_test_group.h>
-#include <embb_mtapi_test_queue.h>
-#include <embb_mtapi_test_error.h>
-
-PT_MAIN("MTAPI C") {
-  embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
-
-  PT_RUN(ErrorTest);
-  PT_RUN(InitFinalizeTest);
-  PT_RUN(TaskTest);
-  PT_RUN(GroupTest);
-  PT_RUN(QueueTest);
-}
+#endif // MTAPI_C_TEST_EMBB_MTAPI_TEST_ERROR_H_
