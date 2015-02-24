@@ -60,7 +60,7 @@ class Node {
     *   - maximum number of groups is 128
     *   - maximum number of queues is 16
     *   - maximum queue capacity is 1024
-    *   - maximum number of priorites is 4.
+    *   - maximum number of priorities is 4.
     *
     * \notthreadsafe
     * \throws ErrorException if the singleton was already initialized or the
