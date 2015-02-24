@@ -412,6 +412,7 @@ void mtapi_action_enable(
         embb_mtapi_action_pool_get_storage_for_handle(
           node->action_pool, action);
       local_action->enabled = MTAPI_TRUE;
+      local_status = MTAPI_SUCCESS;
     } else {
       local_status = MTAPI_ERR_ACTION_INVALID;
     }
