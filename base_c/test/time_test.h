@@ -53,4 +53,4 @@ class TimeTest : public partest::TestCase {
 
 
 
-#endif /* BASE_C_TEST_TIME_TEST_H_ */
+#endif  // BASE_C_TEST_TIME_TEST_H_

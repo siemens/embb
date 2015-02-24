@@ -78,4 +78,4 @@ class Time {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_TIME_H_ */
+#endif  // EMBB_BASE_TIME_H_

@@ -41,14 +41,12 @@ namespace internal {
 
 template<typename RAI, typename Function>
 class ForEachFunctor {
- private:
-  typedef ForEachFunctor<RAI, Function> self_t;
  public:
   /**
    * Constructs a for-each functor with arguments.
    */
   ForEachFunctor(size_t chunk_first, size_t chunk_last, Function unary,
-                 const embb::mtapi::ExecutionPolicy& policy, 
+                 const embb::mtapi::ExecutionPolicy& policy,
                  const BlockSizePartitioner<RAI>& partitioner)
   : chunk_first_(chunk_first), chunk_last_(chunk_last),
     unary_(unary), policy_(policy), partitioner_(partitioner) {
@@ -63,15 +61,14 @@ class ForEachFunctor {
       for (RAI it = first; it != last; ++it) {
         unary_(*it);
       }
-    }
-    else {
+    } else {
       // Recurse further:
       size_t chunk_split_index = (chunk_first_ + chunk_last_) / 2;
       // Split chunks into left / right branches:
-      self_t functor_l(chunk_first_, 
+      self_t functor_l(chunk_first_,
                        chunk_split_index,
                        unary_, policy_, partitioner_);
-      self_t functor_r(chunk_split_index + 1, 
+      self_t functor_r(chunk_split_index + 1,
                        chunk_last_,
                        unary_, policy_, partitioner_);
       mtapi::Task task_l = mtapi::Node::GetInstance().Spawn(
@@ -86,6 +83,9 @@ class ForEachFunctor {
       task_r.Wait(MTAPI_INFINITE);
     }
   }
+
+ private:
+  typedef ForEachFunctor<RAI, Function> self_t;
 
  private:
   size_t chunk_first_;
@@ -123,8 +123,8 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   }
 
   BlockSizePartitioner<RAI> partitioner(first, last, block_size);
-  ForEachFunctor<RAI, Function> functor(0, 
-                                        partitioner.Size() - 1, 
+  ForEachFunctor<RAI, Function> functor(0,
+                                        partitioner.Size() - 1,
                                         unary, policy, partitioner);
   mtapi::Task task = node.Spawn(mtapi::Action(
                      base::MakeFunction(functor,

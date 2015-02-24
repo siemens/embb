@@ -46,8 +46,7 @@ class ValueComparisonFunction{
   int operator()(ElementType element) {
     if (element == value_) {
       return 1;
-    }
-    else {
+    } else {
       return 0;
     }
   }
@@ -69,8 +68,7 @@ class FunctionComparisonFunction{
   int operator()(ElementType element) {
     if (function_(element)) {
       return 1;
-    }
-    else {
+    } else {
       return 0;
     }
   }

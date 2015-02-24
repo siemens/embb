@@ -103,4 +103,4 @@ struct ThreadClosureArg2 {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_INTERNAL_THREAD_CLOSURES_H_ */
+#endif  // EMBB_BASE_INTERNAL_THREAD_CLOSURES_H_

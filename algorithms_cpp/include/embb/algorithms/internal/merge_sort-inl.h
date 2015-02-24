@@ -171,7 +171,7 @@ void MergeSort(
   assert(distance >= 0);
 
   if (block_size == 0) {
-    block_size= (static_cast<size_t>(distance) / node.GetCoreCount());
+    block_size = (static_cast<size_t>(distance) / node.GetCoreCount());
     if (block_size == 0)
       block_size = 1;
   }

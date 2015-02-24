@@ -107,4 +107,4 @@ std::basic_ostream<CharT, Traits>&
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_INTERNAL_THREAD_INL_H_ */
+#endif  // EMBB_BASE_INTERNAL_THREAD_INL_H_

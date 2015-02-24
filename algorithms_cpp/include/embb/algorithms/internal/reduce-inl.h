@@ -41,10 +41,6 @@ namespace internal {
 template<typename RAI, typename ReturnType, typename ReductionFunction,
          typename TransformationFunction>
 class ReduceFunctor {
- private:
-  typedef ReduceFunctor<RAI, ReturnType, 
-                        ReductionFunction, 
-                        TransformationFunction> self_t;
  public:
   ReduceFunctor(size_t chunk_first, size_t chunk_last,
                 ReturnType neutral,
@@ -53,7 +49,7 @@ class ReduceFunctor {
                 const embb::mtapi::ExecutionPolicy& policy,
                 const BlockSizePartitioner<RAI>& partitioner,
                 ReturnType& result)
-  : chunk_first_(chunk_first), chunk_last_(chunk_last), neutral_(neutral), 
+  : chunk_first_(chunk_first), chunk_last_(chunk_last), neutral_(neutral),
     reduction_(reduction), transformation_(transformation), policy_(policy),
     partitioner_(partitioner), result_(result) {
   }
@@ -69,8 +65,7 @@ class ReduceFunctor {
         result = reduction_(result, transformation_(*it));
       }
       result_ = result;
-    }
-    else {
+    } else {
       // Recurse further:
       size_t chunk_split_index = (chunk_first_ + chunk_last_) / 2;
       // Split chunks into left / right branches:
@@ -94,13 +89,18 @@ class ReduceFunctor {
       mtapi::Task task_r = mtapi::Node::GetInstance().Spawn(
         mtapi::Action(
           base::MakeFunction(
-          functor_r, &self_t::Action), 
+          functor_r, &self_t::Action),
           policy_));
       task_l.Wait(MTAPI_INFINITE);
       task_r.Wait(MTAPI_INFINITE);
       result_ = reduction_(result_l, result_r);
     }
   }
+
+ private:
+  typedef ReduceFunctor<RAI, ReturnType,
+                        ReductionFunction,
+                        TransformationFunction> self_t;
 
  private:
   size_t chunk_first_;
@@ -145,17 +145,16 @@ ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
                "Number of computation tasks required in reduction would "
                "exceed MTAPI maximum number of tasks");
   }
-  
   typedef ReduceFunctor<RAI, ReturnType, ReductionFunction,
                         TransformationFunction> Functor;
   BlockSizePartitioner<RAI> partitioner(first, last, block_size);
   ReturnType result = neutral;
   Functor functor(0,
                   partitioner.Size() - 1,
-                  neutral, 
-                  reduction, transformation, 
+                  neutral,
+                  reduction, transformation,
                   policy,
-                  partitioner, 
+                  partitioner,
                   result);
   mtapi::Task task = node.Spawn(
     mtapi::Action(base::MakeFunction(

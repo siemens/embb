@@ -61,4 +61,4 @@ class ThreadSpecificStorageTest : public partest::TestCase {
 
 
 
-#endif /* BASE_C_TEST_THREAD_SPECIFIC_STORAGE_TEST_H_ */
+#endif  // BASE_C_TEST_THREAD_SPECIFIC_STORAGE_TEST_H_
