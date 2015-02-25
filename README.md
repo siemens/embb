@@ -362,7 +362,7 @@ Important Notes
 ---------------
 
 - The MTAPI C++ interface supports automatic initialization, which allows for
-  easy usage of the MTAPI C++, Algorithms and Dataflow components. For
+  easy usage of the MTAPI C++, Algorithms, and Dataflow components. For
   performance measurements, explicit initialization is strongly recommended
   since the measurements will otherwise include the initialization time of
   MTAPI.
