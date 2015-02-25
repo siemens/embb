@@ -54,6 +54,7 @@ option(BUILD_EXAMPLES "Specify whether examples should be built" OFF)
 option(USE_EXCEPTIONS "Specify whether exceptions should be activated in C++" ON)
 option(INSTALL_DOCS "Specify whether Doxygen docs should be installed" ON)
 option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors" OFF)
+option(USE_AUTOMATIC_INITIALIZATION "Specify whether the MTAPI C++ interface, algorithms and dataflow should automatically intialize the MTAPI node if no explicit initialization is present" ON)
 
 ## LOCAL INSTALLATION OF SUBPROJECT BINARIES
 #
