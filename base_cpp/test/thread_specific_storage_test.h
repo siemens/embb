@@ -42,7 +42,7 @@ class ThreadSpecificStorageTest : public partest::TestCase {
   /**
    * Adds test units.
    */
-  explicit ThreadSpecificStorageTest();
+  ThreadSpecificStorageTest();
 
  private:
   /**

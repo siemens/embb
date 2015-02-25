@@ -78,4 +78,4 @@ int ThreadStart(void* arg);
 
 
 
-#endif /* BASE_C_TEST_THREAD_INDEX_TEST_H_ */
+#endif // BASE_C_TEST_THREAD_INDEX_TEST_H_

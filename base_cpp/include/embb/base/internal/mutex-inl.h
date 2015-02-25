@@ -116,4 +116,4 @@ bool UniqueLock<Mutex>::OwnsLock() const {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_INTERNAL_MUTEX_INL_H_ */
+#endif // EMBB_BASE_INTERNAL_MUTEX_INL_H_

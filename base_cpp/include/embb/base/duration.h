@@ -522,4 +522,4 @@ class Nanoseconds : public Tick {
 
 #include <embb/base/internal/duration-inl.h>
 
-#endif /* EMBB_BASE_DURATION_H_ */
+#endif // EMBB_BASE_DURATION_H_

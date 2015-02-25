@@ -286,4 +286,4 @@ class ErrorException : public Exception {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_EXCEPTIONS_H_ */
+#endif // EMBB_BASE_EXCEPTIONS_H_

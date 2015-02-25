@@ -43,7 +43,7 @@ class ThreadTest : public partest::TestCase {
   /**
    * Adds test methods.
    */
-  explicit ThreadTest(); /**<
+  ThreadTest(); /**<
       number of threads concurrently running test methods */
 
  private:
