@@ -172,6 +172,7 @@ EMB² can be built with and without C++ exception handling, which has to be
 specified on build file generation. When exceptions are turned off, an error
 message is emitted and the program aborts in case of an exception within EMB².
 To disable exceptions, add the option -DUSE_EXCEPTIONS=OFF.
+
 Similarly, automatic initialization of the task scheduler by the MTAPI C++
 interface can be disabled with -DUSE_AUTOMATIC_INITIALIZATION=OFF. This way,
 unexpected delays after startup can be avoided, e.g. for timing measurements.
@@ -355,6 +356,16 @@ Threading APIs are switched by:
 
 Please use these defines for new platform specific code. If additional defines
 are needed, they can be defined in the config.h or cmake_config.h.in files.
+
+
+Important Notes
+---------------
+
+- The MTAPI C++ interface supports automatic initialization, which allows for
+  easy usage of the MTAPI C++, Algorithms and Dataflow components. For
+  performance measurements, explicit initialization is strongly recommended
+  since the measurements will otherwise include the initialization time of
+  MTAPI.
 
 
 Links
