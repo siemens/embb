@@ -168,7 +168,7 @@ void MergeSortAllocate(
   typename std::iterator_traits<RAI>::difference_type distance = last - first;
   typedef typename std::iterator_traits<RAI>::value_type value_type;
   value_type* temporary = static_cast<value_type*>(
-                          Alloc::Allocate(distance * sizeof(value_type)));
+                            Alloc::Allocate(distance * sizeof(value_type)));
   MergeSort(first, last, temporary, comparison, policy, block_size);
   Alloc::Free(temporary);
 }

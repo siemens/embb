@@ -53,65 +53,108 @@ class MergeSortFunctor {
                    const embb::mtapi::ExecutionPolicy& policy,
                    const BlockSizePartitioner<RAI>& partitioner,
                    const RAI& global_first, int depth)
-    : chunk_first_(chunk_first), chunk_last_(chunk_last),
-      temp_first_(temporary_first),
-      comparison_(comparison), policy_(policy), partitioner_(partitioner),
-      global_first_(global_first), depth_(depth) {
+  : chunk_first_(chunk_first), chunk_last_(chunk_last),
+    temp_first_(temporary_first),
+    comparison_(comparison), policy_(policy), partitioner_(partitioner),
+    global_first_(global_first), depth_(depth) {
   }
 
   void Action(mtapi::TaskContext&) {
-    typedef typename std::iterator_traits<RAI>::difference_type
-      difference_type;
     size_t chunk_split_index = (chunk_first_ + chunk_last_) / 2;
     if (chunk_first_ == chunk_last_) {
       // Leaf case: recurse into a single chunk's elements:
       ChunkDescriptor<RAI> chunk = partitioner_[chunk_first_];
-      MergeSortChunkFunctor functor(chunk.GetFirst(),
-                                    chunk.GetLast(),
-                                    temp_first_,
-                                    global_first_,
-                                    depth_);
-      functor.Action();
-      return;
-    } 
-    // Recurse further:
-    // Split chunks into left / right branches:
-    self_t functor_l(chunk_first_,
-                     chunk_split_index,
-                     temp_first_,
-                     comparison_, policy_, partitioner_,
-                     global_first_, depth_ + 1);
-    self_t functor_r(chunk_split_index + 1,
-                     chunk_last_,
-                     temp_first_,
-                     comparison_, policy_, partitioner_,
-                     global_first_, depth_ + 1);
-    mtapi::Node& node = mtapi::Node::GetInstance();
-    mtapi::Task task_l = node.Spawn(
-      mtapi::Action(
-        base::MakeFunction(functor_l, &self_t::Action),
-        policy_));
-    mtapi::Task task_r = node.Spawn(
-      mtapi::Action(
-        base::MakeFunction(functor_r, &self_t::Action),
-        policy_));
-    task_l.Wait(MTAPI_INFINITE);
-    task_r.Wait(MTAPI_INFINITE);
-
-    ChunkDescriptor<RAI> chunk_f = partitioner_[chunk_first_];
-    ChunkDescriptor<RAI> chunk_m = partitioner_[chunk_split_index + 1];
-    ChunkDescriptor<RAI> chunk_l = partitioner_[chunk_last_];
-    if(CloneBackToInput()) {
-      difference_type first = std::distance(global_first_, chunk_f.GetFirst());
-      difference_type mid   = std::distance(global_first_, chunk_m.GetFirst());
-      difference_type last  = std::distance(global_first_, chunk_l.GetLast());
-      SerialMerge(temp_first_ + first, temp_first_ + mid, temp_first_ + last,
-                  chunk_f.GetFirst(),
-                  comparison_);
+      MergeSortChunk(chunk.GetFirst(), chunk.GetLast(), depth_);
     } else {
-      SerialMerge(chunk_f.GetFirst(), chunk_m.GetFirst(), chunk_l.GetLast(),
-                  temp_first_ + std::distance(global_first_, chunk_f.GetFirst()),
-                  comparison_);
+      // Recurse further, split chunks:
+      self_t functor_l(chunk_first_,
+                       chunk_split_index,
+                       temp_first_,
+                       comparison_, policy_, partitioner_,
+                       global_first_, depth_ + 1);
+      self_t functor_r(chunk_split_index + 1,
+                       chunk_last_,
+                       temp_first_,
+                       comparison_, policy_, partitioner_,
+                       global_first_, depth_ + 1);
+      mtapi::Node& node = mtapi::Node::GetInstance();
+      mtapi::Task task_l = node.Spawn(
+        mtapi::Action(
+          base::MakeFunction(functor_l, &self_t::Action),
+          policy_));
+      mtapi::Task task_r = node.Spawn(
+        mtapi::Action(
+          base::MakeFunction(functor_r, &self_t::Action),
+          policy_));
+      task_l.Wait(MTAPI_INFINITE);
+      task_r.Wait(MTAPI_INFINITE);
+
+      ChunkDescriptor<RAI> chunk_f = partitioner_[chunk_first_];
+      ChunkDescriptor<RAI> chunk_m = partitioner_[chunk_split_index + 1];
+      ChunkDescriptor<RAI> chunk_l = partitioner_[chunk_last_];
+      if(CloneBackToInput(depth_)) {
+        // Merge from temp into input:
+        difference_type first = std::distance(global_first_, chunk_f.GetFirst());
+        difference_type mid   = std::distance(global_first_, chunk_m.GetFirst());
+        difference_type last  = std::distance(global_first_, chunk_l.GetLast());
+        SerialMerge(temp_first_ + first, temp_first_ + mid, temp_first_ + last,
+                    chunk_f.GetFirst(),
+                    comparison_);
+      } else {
+        // Merge from input into temp:
+        SerialMerge(chunk_f.GetFirst(), chunk_m.GetFirst(), chunk_l.GetLast(),
+                    temp_first_ + std::distance(global_first_, chunk_f.GetFirst()),
+                    comparison_);
+      }
+    }
+  }
+
+  /**
+   * Serial merge sort of elements within a single chunk.
+   */
+  void MergeSortChunk(RAI first,
+                      RAI last,
+                      int depth) {
+    size_t distance = static_cast<size_t>(
+      std::distance(first, last));
+    if (distance <= 1) {
+      // Leaf case:
+      if (!CloneBackToInput(depth) && distance != 0) {
+        RAITemp temp_first = temp_first_;
+        std::advance(temp_first, std::distance(global_first_, first));
+        *temp_first = *first;
+      }
+      return;
+    }
+    // Recurse further. Use binary split, ignoring chunk size as this
+    // recursion is serial and has leaf size 1:
+    ChunkPartitioner<RAI> partitioner(first, last, 2);
+    ChunkDescriptor<RAI> chunk_l = partitioner[0];
+    ChunkDescriptor<RAI> chunk_r = partitioner[1];
+    MergeSortChunk(
+      chunk_l.GetFirst(),
+      chunk_l.GetLast(),
+      depth + 1);
+    MergeSortChunk(
+      chunk_r.GetFirst(),
+      chunk_r.GetLast(),
+      depth + 1);
+    if (CloneBackToInput(depth)) {
+      // Merge from temp into input:
+      difference_type d_first = std::distance(global_first_, chunk_l.GetFirst());
+      difference_type d_mid   = std::distance(global_first_, chunk_r.GetFirst());
+      difference_type d_last  = std::distance(global_first_, chunk_r.GetLast());
+      SerialMerge(
+        temp_first_ + d_first, temp_first_ + d_mid, temp_first_ + d_last,
+        chunk_l.GetFirst(),
+        comparison_);
+    }
+    else {
+      // Merge from input into temp:
+      SerialMerge(
+        chunk_l.GetFirst(), chunk_r.GetFirst(), chunk_r.GetLast(),
+        temp_first_ + std::distance(global_first_, chunk_l.GetFirst()),
+        comparison_);
     }
   }
 
@@ -121,74 +164,14 @@ class MergeSortFunctor {
    * \return \c true if the temporary data range is input and the array to be
    *         sorted is output. \c false, if the other way around.
    */
-  bool CloneBackToInput() {
-    return depth_ % 2 == 0 ? true : false;
+  bool CloneBackToInput(int depth) {
+    return depth % 2 == 0 ? true : false;
   }
 
  private:
   typedef MergeSortFunctor<RAI, RAITemp, ComparisonFunction> self_t;
-
- private:
-  /**
-   * Non-parallelized part of merge sort on elements within a single chunk.
-   */
-  class MergeSortChunkFunctor {
-   public:
-    MergeSortChunkFunctor(RAI first, RAI last, 
-                          RAITemp temp_first, 
-                          const RAI & global_first,
-                          int depth)
-    : first_(first), last_(last),
-      temp_first_(temp_first), global_first_(global_first),
-      depth_(depth) {
-    }
-
-    void Action() {
-      size_t distance = static_cast<size_t>(
-        std::distance(first_, last_));
-      if (distance <= 1) {
-        // Leaf case:
-        if(!CloneBackToInput() && distance != 0) {
-          RAITemp temp_first = temp_first_;
-          std::advance(temp_first, std::distance(global_first_, first_));
-          *temp_first = *first_;
-        }
-        return;
-      }
-      // Recurse further. Use binary split, ignoring chunk size as this
-      // recursion is serial:
-      ChunkPartitioner<RAI> partitioner(first_, last_, 2);
-      ChunkDescriptor<RAI> chunk_l = partitioner[0];
-      ChunkDescriptor<RAI> chunk_r = partitioner[1];
-      MergeSortChunkFunctor functor_l(
-        chunk_l.GetFirst(),
-        chunk_l.GetLast(),
-        temp_first_, global_first_, depth_ + 1);
-      MergeSortChunkFunctor functor_r(
-        chunk_r.GetFirst(),
-        chunk_r.GetLast(),
-        temp_first_, global_first_, depth_ + 1);
-      functor_l.Action();
-      functor_r.Action();
-    }
-
-   private:
-    /**
-     * Determines the input and output arrays for one level in merge sort.
-     *
-     * \return \c true if the temporary data range is input and the array to be
-     *         sorted is output. \c false, if the other way around.
-     */
-    bool CloneBackToInput() {
-      return depth_ % 2 == 0 ? true : false;
-    }
-
-    RAI first_;
-    RAI last_;
-    RAITemp temp_first_;
-    RAI global_first_;
-    int depth_;
-  };
+  typedef typename std::iterator_traits<RAI>::difference_type
+    difference_type;
 
  private:
   size_t chunk_first_;
@@ -243,36 +226,41 @@ void MergeSort(
   size_t block_size
   ) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
+  typedef internal::MergeSortFunctor<RAI, RAITemp, ComparisonFunction> functor_t;
+  difference_type distance = std::distance(first, last);
+  if (distance == 0) {
+    EMBB_THROW(embb::base::ErrorException, "Distance for ForEach is 0");
+  }
   embb::mtapi::Node &node = embb::mtapi::Node::GetInstance();
-  difference_type distance = last - first;
-  assert(distance >= 0);
-
+  // Determine actually used block size
   if (block_size == 0) {
     block_size = (static_cast<size_t>(distance) / node.GetCoreCount());
     if (block_size == 0)
       block_size = 1;
   }
-  if (((distance/block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
+  // Check task number sufficiency
+  if (((distance / block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
     EMBB_THROW(embb::base::ErrorException,
-               "Not enough MTAPI tasks available to perform the merge sort");
+               "Not enough MTAPI tasks available to perform merge sort");
   }
 
   internal::BlockSizePartitioner<RAI> partitioner(first, last, block_size);
-
-  internal::MergeSortFunctor<RAI, RAITemp, ComparisonFunction> functor(
-      0, partitioner.Size() - 1,
-      temporary_first,
-      comparison,
-      policy,
-      partitioner,
-      first,
-      0);
+  functor_t functor(0,
+                    partitioner.Size() - 1,
+                    temporary_first,
+                    comparison,
+                    policy,
+                    partitioner,
+                    first,
+                    0);
   mtapi::Task task = node.Spawn(mtapi::Action(base::MakeFunction(functor,
-    &internal::MergeSortFunctor<RAI, RAITemp, ComparisonFunction>::Action),
+    &functor_t::Action),
     policy));
 
   task.Wait(MTAPI_INFINITE);
 }
+
+// @NOTE: Why is there no type guard for RAI?
 
 }  // namespace algorithms
 }  // namespace embb
