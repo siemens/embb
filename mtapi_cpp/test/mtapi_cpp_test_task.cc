@@ -77,6 +77,18 @@ void TaskTest::TestBasic() {
 
   embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
 
+  embb::mtapi::ExecutionPolicy policy(false);
+  PT_EXPECT_EQ(policy.GetAffinity(), 0u);
+  PT_EXPECT_EQ(policy.GetPriority(), 0u);
+  policy.AddWorker(0u);
+  PT_EXPECT_EQ(policy.GetAffinity(), 1u);
+  policy.AddWorker(1u);
+  PT_EXPECT_EQ(policy.GetAffinity(), 3u);
+  policy.RemoveWorker(0u);
+  PT_EXPECT_EQ(policy.GetAffinity(), 2u);
+  PT_EXPECT_EQ(policy.IsSetWorker(0), false);
+  PT_EXPECT_EQ(policy.IsSetWorker(1), true);
+
   std::string test;
   embb::mtapi::Task task = node.Spawn(
     embb::base::Bind(

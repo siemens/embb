@@ -24,64 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MTAPI_C_TEST_EMBB_MTAPI_TEST_ERROR_H_
+#define MTAPI_C_TEST_EMBB_MTAPI_TEST_ERROR_H_
+
 #include <partest/partest.h>
-#include <embb/mtapi/mtapi.h>
 
-#include <iostream>
-#include <sstream>
+class ErrorTest : public partest::TestCase {
+ public:
+  ErrorTest();
 
-#include <for_each_test.h>
-#include <reduce_test.h>
-#include <scan_test.h>
-#include <count_test.h>
-#include <partitioner_test.h>
-#include <zip_iterator_test.h>
-#include <quick_sort_test.h>
-#include <merge_sort_test.h>
-#include <invoke_test.h>
+ private:
+  void TestBasic();
+};
 
-#include<embb/algorithms/merge_sort.h>
-#include <vector>
-#include <time.h>
-#include <functional>
-
-#include <embb/base/c/memory_allocation.h>
-
-#define THIS_DOMAIN_ID 1
-#define THIS_NODE_ID 1
-
-int compute2_(int a) {
-  return a * 2;
-}
-
-int compute1_() {
-  return 5;
-}
-
-::std::string float_to_string(float val) {
-  std::stringstream s;
-  s << "Float: " << val;
-
-  return std::string(s.str());
-}
-
-PT_MAIN("Algorithms") {
-  embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
-
-  PT_RUN(PartitionerTest);
-  PT_RUN(ForEachTest);
-  PT_RUN(ReduceTest);
-  PT_RUN(ScanTest);
-  PT_RUN(CountTest);
-  PT_RUN(ZipIteratorTest);
-  PT_RUN(QuickSortTest);
-  PT_RUN(MergeSortTest);
-  PT_RUN(InvokeTest);
-
-  embb::mtapi::Node::Finalize();
-
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
-
-  //  std::cout << "please press return to continue..." << std::endl;
-  //  std::cin.get();
-}
+#endif // MTAPI_C_TEST_EMBB_MTAPI_TEST_ERROR_H_

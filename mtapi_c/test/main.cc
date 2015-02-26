@@ -34,10 +34,12 @@
 #include <embb_mtapi_test_task.h>
 #include <embb_mtapi_test_group.h>
 #include <embb_mtapi_test_queue.h>
+#include <embb_mtapi_test_error.h>
 
 PT_MAIN("MTAPI C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
 
+  PT_RUN(ErrorTest);
   PT_RUN(InitFinalizeTest);
   PT_RUN(TaskTest);
   PT_RUN(GroupTest);

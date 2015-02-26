@@ -52,7 +52,7 @@ static void testQueueAction(
   }
   embb_mtapi_log_info("testQueueAction %d called from worker %d...\n",
     workload_id, core_num);
-  EMBB_UNUSED_IN_RELEASE(workload_id);
+  EMBB_UNUSED(workload_id);
 }
 
 static void testDoSomethingElse() {

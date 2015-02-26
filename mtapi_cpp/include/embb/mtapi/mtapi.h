@@ -35,8 +35,9 @@
  * \ingroup CPP
  */
 
+#include <embb/mtapi/internal/cmake_config.h>
+
 #define MTAPI_CPP_TASK_JOB 1
-#define MTAPI_CPP_AUTOMATIC_INITIALIZE 1
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
 #define MTAPI_CPP_AUTOMATIC_DOMAIN_ID 1
 #define MTAPI_CPP_AUTOMATIC_NODE_ID 1

@@ -50,7 +50,7 @@ static void testTaskAction(
   }
   embb_mtapi_log_info("testTaskAction %d called from worker %d...\n",
     *reinterpret_cast<const int*>(args), core_num);
-  EMBB_UNUSED_IN_RELEASE(args);
+  EMBB_UNUSED(args);
 }
 
 static void testDoSomethingElse() {

@@ -39,7 +39,9 @@
 namespace {
 
 static embb::mtapi::Node * node_instance = NULL;
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
 static embb::base::Mutex init_mutex;
+#endif
 
 }
 

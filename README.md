@@ -173,6 +173,10 @@ specified on build file generation. When exceptions are turned off, an error
 message is emitted and the program aborts in case of an exception within EMB².
 To disable exceptions, add the option -DUSE_EXCEPTIONS=OFF.
 
+Similarly, automatic initialization of the task scheduler by the MTAPI C++
+interface can be disabled with -DUSE_AUTOMATIC_INITIALIZATION=OFF. This way,
+unexpected delays after startup can be avoided, e.g. for timing measurements.
+
 The tutorial of EMB² comes with example source files in doc/examples/. These
 can be built with the other source files using CMake option -DBUILD_EXAMPLES=ON
 in the generation step. Note, however, that the examples use C++11 features and
@@ -183,6 +187,10 @@ Now you can generate the build files as shown by the following examples.
 For a Linux Debug build with exception handling, type
 
     cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug
+
+For a default Linux build without automatic MTAPI C++ initialization, type
+
+    cmake .. -DUSE_AUTOMATIC_INITIALIZATION=OFF
 
 For a Windows build (VS 2013, x86) without exception handling, type
 
@@ -348,6 +356,16 @@ Threading APIs are switched by:
 
 Please use these defines for new platform specific code. If additional defines
 are needed, they can be defined in the config.h or cmake_config.h.in files.
+
+
+Important Notes
+---------------
+
+- The MTAPI C++ interface supports automatic initialization, which allows for
+  easy usage of the MTAPI C++, Algorithms, and Dataflow components. For
+  performance measurements, explicit initialization is strongly recommended
+  since the measurements will otherwise include the initialization time of
+  MTAPI.
 
 
 Links

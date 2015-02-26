@@ -160,6 +160,8 @@ First, the node instance needs to be obtained. If the node is not initialized ye
 %
 \\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
 %
+\emph{\textbf{Note:} Automatic initialization allows for easy usage of the \emph{Algorithms} and \emph{Dataflow} building blocks. For performance measurements however, explicit initialization by calling \lstinline|embb::mtapi::Node::Initialize| is imperative since the measurements will otherwise include the initialization time of MTAPI.}
+
 Checking the arguments and the result buffer is not necessary, since everything is safely typed. However, the terminating condition of the recursion still needs to be checked:
 %
 \\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
@@ -190,3 +192,5 @@ The root task can be started using \lstinline|embb::mtapi::Node::Spawn()| direct
 \\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
 %
 Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task::Wait()|) before the result can be returned. The runtime is shut down automatically in an \lstinline|atexit()| handler.
+
+\emph{\textbf{Note:} If the node was initialized explicitly by calling \lstinline|embb::mtapi::Node::Initialize|, the runtime must also be shut down explicitly by calling \lstinline|embb::mtapi::Node::Finalize|.}
