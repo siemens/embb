@@ -218,6 +218,32 @@ void QuickSortTest::TestPolicy() {
   for (size_t i = 0; i < count; i++) {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }
+
+  // MergeSort on empty list should not throw:
+  QuickSort(vector.begin(), vector.begin(), std::less<int>());
+
+#ifdef EMBB_USE_EXCEPTIONS
+  bool empty_core_set_thrown = false;
+  try {
+    QuickSort(vector.begin(), vector.end(), std::less<int>(),
+      ExecutionPolicy(false));
+  }
+  catch (embb::base::ErrorException &) {
+    empty_core_set_thrown = true;
+  }
+  PT_EXPECT_MSG(empty_core_set_thrown,
+    "Empty core set should throw ErrorException");
+  bool negative_range_thrown = false;
+  try {
+    std::vector<int>::iterator second = vector.begin() + 1;
+    QuickSort(second, vector.begin(), std::less<int>());
+  }
+  catch (embb::base::ErrorException &) {
+    negative_range_thrown = true;
+  }
+  PT_EXPECT_MSG(negative_range_thrown,
+    "Negative range should throw ErrorException");
+#endif
 }
 
 void QuickSortTest::StressTest() {

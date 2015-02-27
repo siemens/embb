@@ -58,7 +58,7 @@ class MergeSortTest : public partest::TestCase {
   /**
    * Tests various block sizes for the workers.
    */
-  //void TestBlockSizes();
+  void TestBlockSizes();
 
   /**
    * Tests setting policies (without checking their actual execution).

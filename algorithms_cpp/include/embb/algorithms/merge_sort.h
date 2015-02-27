@@ -167,6 +167,11 @@ void MergeSortAllocate(
   typedef base::Allocation Alloc;
   typename std::iterator_traits<RAI>::difference_type distance = last - first;
   typedef typename std::iterator_traits<RAI>::value_type value_type;
+  if (distance == 0) {
+    return;
+  } else if (distance < 0) {
+    EMBB_THROW(embb::base::ErrorException, "Negative range for MergeSort");
+  }
   value_type* temporary = static_cast<value_type*>(
                             Alloc::Allocate(distance * sizeof(value_type)));
   EMBB_TRY {

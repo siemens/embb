@@ -156,28 +156,28 @@ void MergeSortTest::TestRanges() {
   }
 }
 
-//void MergeSortTest::TestBlockSizes() {
-//  using embb::algorithms::MergeSortAllocate;
-//  using embb::algorithms::ExecutionPolicy;
-//  size_t count = 4;
-//  std::vector<int> init(count);
-//  std::vector<int> vector(count);
-//  std::vector<int> vector_copy(count);
-//  for (size_t i = count - 1; i > 0; i--) {
-//    init[i] = static_cast<int>(i+2);
-//  }
-//  vector_copy = init;
-//  std::sort(vector_copy.begin(), vector_copy.end());
-//
-//  for (size_t block_size = 1; block_size < count + 2; block_size++) {
-//    vector = init;
-//    MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
-//      ExecutionPolicy(), block_size);
-//    for (size_t i = 0; i < count; i++) {
-//      PT_EXPECT_EQ(vector[i], vector_copy[i]);
-//    }
-//  }
-//}
+void MergeSortTest::TestBlockSizes() {
+  using embb::algorithms::MergeSortAllocate;
+  using embb::mtapi::ExecutionPolicy;
+  size_t count = 4;
+  std::vector<int> init(count);
+  std::vector<int> vector(count);
+  std::vector<int> vector_copy(count);
+  for (size_t i = count - 1; i > 0; i--) {
+    init[i] = static_cast<int>(i+2);
+  }
+  vector_copy = init;
+  std::sort(vector_copy.begin(), vector_copy.end());
+
+  for (size_t block_size = 1; block_size < count + 2; block_size++) {
+    vector = init;
+    MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
+      ExecutionPolicy(), block_size);
+    for (size_t i = 0; i < count; i++) {
+      PT_EXPECT_EQ(vector[i], vector_copy[i]);
+    }
+  }
+}
 
 void MergeSortTest::TestPolicy() {
   using embb::algorithms::MergeSortAllocate;
@@ -201,17 +201,43 @@ void MergeSortTest::TestPolicy() {
 
   vector = init;
   MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
-            ExecutionPolicy(true));
+                    ExecutionPolicy(true));
   for (size_t i = 0; i < count; i++) {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }
 
   vector = init;
   MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
-            ExecutionPolicy(true, 1));
+                    ExecutionPolicy(true, 1));
   for (size_t i = 0; i < count; i++) {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }
+
+  // MergeSort on empty list should not throw:
+  MergeSortAllocate(vector.begin(), vector.begin(), std::less<int>());
+
+#ifdef EMBB_USE_EXCEPTIONS
+  bool empty_core_set_thrown = false;
+  try {
+    MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
+                      ExecutionPolicy(false));
+  }
+  catch (embb::base::ErrorException &) {
+    empty_core_set_thrown = true;
+  }
+  PT_EXPECT_MSG(empty_core_set_thrown,
+    "Empty core set should throw ErrorException");
+  bool negative_range_thrown = false;
+  try {
+    std::vector<int>::iterator second = vector.begin() + 1;
+    MergeSortAllocate(second, vector.begin(), std::less<int>());
+  }
+  catch (embb::base::ErrorException &) {
+    negative_range_thrown = true;
+  }
+  PT_EXPECT_MSG(negative_range_thrown,
+    "Negative range should throw ErrorException");
+#endif
 }
 
 void MergeSortTest::StressTest() {

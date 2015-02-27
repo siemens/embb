@@ -229,7 +229,9 @@ void MergeSort(
     functor_t;
   difference_type distance = std::distance(first, last);
   if (distance == 0) {
-    EMBB_THROW(embb::base::ErrorException, "Distance for ForEach is 0");
+    return;
+  } else if (distance < 0) {
+    EMBB_THROW(embb::base::ErrorException, "Negative range for MergeSort");
   }
   unsigned int num_cores = policy.GetCoreCount();
   if (num_cores == 0) {
@@ -263,8 +265,6 @@ void MergeSort(
 
   task.Wait(MTAPI_INFINITE);
 }
-
-// @NOTE: Why is there no type guard for RAI?
 
 }  // namespace algorithms
 }  // namespace embb

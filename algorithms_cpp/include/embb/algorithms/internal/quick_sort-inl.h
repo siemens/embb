@@ -194,8 +194,10 @@ void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
   embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
-  if (distance <= 0) {
+  if (distance == 0) {
     return;
+  } else if (distance < 0) {
+    EMBB_THROW(embb::base::ErrorException, "Negative range for QuickSort");
   }
   unsigned int num_cores = policy.GetCoreCount();
   if (num_cores == 0) {
