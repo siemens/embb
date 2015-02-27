@@ -94,7 +94,7 @@ ChunkPartitioner<ForwardIterator>::ChunkPartitioner(ForwardIterator first,
   } else {
     // if no concrete chunk size was given, use number of cores...
     mtapi::Node& node = mtapi::Node::GetInstance();
-    size = node.GetCoreCount();
+    size = node.GetWorkerThreadCount();
   }
 
   elements_count = static_cast<size_t>(std::distance(first, last));

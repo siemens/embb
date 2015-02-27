@@ -176,10 +176,14 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
   if (distance <= 0) {
     return;
   }
-  mtapi::Node& node = mtapi::Node::GetInstance();
+  unsigned int num_cores = policy.GetCoreCount();
+  if (num_cores == 0) {
+    EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
+  }
+  
   ReturnType values[MTAPI_NODE_MAX_TASKS_DEFAULT];
   if (block_size == 0) {
-    block_size = static_cast<size_t>(distance) / node.GetCoreCount();
+    block_size = static_cast<size_t>(distance) / num_cores;
     if (block_size == 0) {
       block_size = 1;
     }
@@ -193,6 +197,7 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
   // it creates the tree.
   typedef ScanFunctor<RAIIn, RAIOut, ReturnType, ScanFunction,
                       TransformationFunction> Functor;
+  mtapi::Node& node = mtapi::Node::GetInstance();
 
   BlockSizePartitioner<RAIIn> partitioner_down(first, last, block_size);
   Functor functor_down(0, partitioner_down.Size() - 1, output_iterator,

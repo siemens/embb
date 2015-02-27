@@ -131,10 +131,14 @@ ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
   if (distance == 0) {
     EMBB_THROW(embb::base::ErrorException, "Distance for Reduce is 0");
   }
+  unsigned int num_cores = policy.GetCoreCount();
+  if (num_cores == 0) {
+    EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
+  }
   mtapi::Node& node = mtapi::Node::GetInstance();
   // Determine actually used block size
   if (block_size == 0) {
-    block_size = (static_cast<size_t>(distance) / node.GetCoreCount());
+    block_size = (static_cast<size_t>(distance) / num_cores);
     if (block_size == 0) {
       block_size = 1;
     }

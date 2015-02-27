@@ -128,8 +128,6 @@ void CountTest::TestPolicy() {
   PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10, ExecutionPolicy()), 3);
   PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10, ExecutionPolicy(true)),
                3);
-  PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10, ExecutionPolicy(false)),
-               3);
   PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10,
                ExecutionPolicy(true, 1)), 3);
 }
