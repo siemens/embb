@@ -68,10 +68,10 @@ namespace algorithms {
  * \tparam RAI Random access iterator
  * \tparam ReturnType Type of result of reduction operation, deduced from
  *         \c neutral
- * \tparam ReductionFunction Binary reduction function with signature
+ * \tparam ReductionFunction Binary reduction function object with signature
  *         <tt>ReturnType ReductionFunction(ReturnType, ReturnType)</tt>.
- * \tparam TransformationFunction Unary transformation function with signature
- *         <tt>ReturnType TransformationFunction(typename
+ * \tparam TransformationFunction Unary transformation function object with
+ *         signature <tt>ReturnType TransformationFunction(typename
  *         std::iterator_traits<RAI>::value_type)</tt>
  */
 template<typename RAI, typename ReturnType, typename ReductionFunction,

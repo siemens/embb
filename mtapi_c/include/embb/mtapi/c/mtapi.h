@@ -68,7 +68,7 @@
  *   </tr>
  *   <tr>
  *     <td>Action Function</td>
- *     <td>The callable, an executable function of an action, invoked by the
+ *     <td>The executable function of an action, invoked by the
  *         MTAPI runtime when a task is started.</td>
  *   </tr>
  *   <tr>

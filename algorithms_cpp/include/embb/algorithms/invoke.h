@@ -58,7 +58,7 @@ typedef embb::base::Function<void> InvokeFunctionType;
 template<typename Function1, ...>
 void Invoke(
   Function1 func1,
-  /**< [in] First function to invoke */
+  /**< [in] First function object to invoke */
   ...);
 
 /**
@@ -72,7 +72,7 @@ void Invoke(
 template<typename Function1, ...>
 void Invoke(
   Function1 func1,
-  /**< [in] Function to invoke */
+  /**< [in] Function object to invoke */
   ...,
   const embb::mtapi::ExecutionPolicy & policy
   /**< [in] embb::mtapi::ExecutionPolicy to use */
