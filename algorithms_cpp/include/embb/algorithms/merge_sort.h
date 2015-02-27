@@ -169,7 +169,13 @@ void MergeSortAllocate(
   typedef typename std::iterator_traits<RAI>::value_type value_type;
   value_type* temporary = static_cast<value_type*>(
                             Alloc::Allocate(distance * sizeof(value_type)));
-  MergeSort(first, last, temporary, comparison, policy, block_size);
+  EMBB_TRY {
+    MergeSort(first, last, temporary, comparison, policy, block_size);
+  } EMBB_CATCH (embb::base::ErrorException & e) {
+    // embb exception handling does not support catch(...) and rethrow yet.
+    Alloc::Free(temporary);
+    EMBB_THROW(embb::base::ErrorException, e.what());
+  }
   Alloc::Free(temporary);
 }
 
