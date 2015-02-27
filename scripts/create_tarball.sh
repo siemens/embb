@@ -154,9 +154,13 @@ MYTMPDIR=`mktemp -d`
 
 echo "--> Creating temporary directories $MYTMPDIR $MYTMPDIR_BUILD $MYTMPDIR_DOXY_BUILD"
 #install traps, deleting the temporary directories when exiting
-trap "rm -rf $MYTMPDIR" EXIT
-trap "rm -rf $MYTMPDIR_DOXY_BUILD" EXIT
-trap "rm -rf $MYTMPDIR_BUILD" EXIT
+function finish {
+rm -rf $MYTMPDIR
+rm -rf $MYTMPDIR_DOXY_BUILD
+rm -rf $MYTMPDIR_BUILD
+}
+
+trap finish EXIT
 
 PROJECT_DIR_FULLPATH=`realpath ${d}`
 
