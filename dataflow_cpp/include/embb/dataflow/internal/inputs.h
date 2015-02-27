@@ -89,7 +89,7 @@ class Inputs<Slices, T1, embb::base::internal::Nil, embb::base::internal::Nil,
     const int idx = clock % Slices;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.")
+        "All inputs already fired for this clock.");
     }
     if (--count_[idx] == 0) {
       count_[idx] = 1;
@@ -135,7 +135,7 @@ class Inputs<Slices, T1, T2, embb::base::internal::Nil,
     const int idx = clock % Slices;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.")
+        "All inputs already fired for this clock.");
     }
     if (--count_[idx] == 0) {
       count_[idx] = 2;
@@ -185,7 +185,7 @@ class Inputs<Slices, T1, T2, T3, embb::base::internal::Nil,
     const int idx = clock % Slices;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.")
+        "All inputs already fired for this clock.");
     }
     if (--count_[idx] == 0) {
       count_[idx] = 3;
@@ -238,7 +238,7 @@ class Inputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
     const int idx = clock % Slices;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.")
+        "All inputs already fired for this clock.");
     }
     if (--count_[idx] == 0) {
       count_[idx] = 4;
@@ -296,7 +296,7 @@ class Inputs
     const int idx = clock % Slices;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.")
+        "All inputs already fired for this clock.");
     }
     if (--count_[idx] == 0) {
       count_[idx] = 5;

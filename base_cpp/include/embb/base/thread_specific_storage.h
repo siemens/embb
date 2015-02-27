@@ -35,12 +35,10 @@ namespace embb {
 namespace base {
 
 namespace test {
-
 /**
-  * Forward declaration for friending.
-  */
+ * Forward declaration for friending.
+ */
 class ThreadSpecificStorageTest;
-
 }
 
 /**
@@ -178,4 +176,4 @@ class ThreadSpecificStorage {
 
 #include <embb/base/internal/thread_specific_storage-inl.h>
 
-#endif // EMBB_BASE_THREAD_SPECIFIC_STORAGE_H_
+#endif  // EMBB_BASE_THREAD_SPECIFIC_STORAGE_H_

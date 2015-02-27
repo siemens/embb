@@ -205,13 +205,7 @@ void ForEachTest::TestPolicy() {
   for (size_t i = 0; i < count; i++) {
     PT_EXPECT_EQ(vector[i], init[i]*init[i]);
   }
-
-  vector = init;
-  ForEach(vector.begin(), vector.end(), Square(), ExecutionPolicy(false));
-  for (size_t i = 0; i < count; i++) {
-    PT_EXPECT_EQ(vector[i], init[i]*init[i]);
-  }
-
+  
   vector = init;
   ForEach(vector.begin(), vector.end(), Square(), ExecutionPolicy(true, 1));
   for (size_t i = 0; i < count; i++) {

@@ -65,4 +65,4 @@ class ConditionVarTest : public partest::TestCase {
 } // namespace base
 } // namespace embb
 
-#endif // BASE_C_TEST_CONDITION_VAR_TEST_H_
+#endif  // BASE_C_TEST_CONDITION_VAR_TEST_H_

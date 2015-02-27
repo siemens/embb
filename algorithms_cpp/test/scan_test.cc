@@ -284,15 +284,6 @@ void ScanTest::TestPolicy() {
 
   outputVector = init;
   Scan(vector.begin(), vector.end(), outputVector.begin(), 0, std::plus<int>(),
-       Identity(), ExecutionPolicy(false));
-  expected = 0;
-  for (size_t i = 0; i < count; i++) {
-    expected += vector[i];
-    PT_EXPECT_EQ(expected, outputVector[i]);
-  }
-
-  outputVector = init;
-  Scan(vector.begin(), vector.end(), outputVector.begin(), 0, std::plus<int>(),
     Identity(), ExecutionPolicy(true, 1));
   expected = 0;
   for (size_t i = 0; i < count; i++) {

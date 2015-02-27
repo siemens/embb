@@ -106,6 +106,13 @@ class ExecutionPolicy{
     );
 
   /**
+   * Returns the number of cores the policy is affine to.
+   *
+   * \return the number of cores
+   */
+  unsigned int GetCoreCount() const;
+
+  /**
    * Returns the affinity
    *
    * \return the affinity

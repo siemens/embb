@@ -201,4 +201,4 @@ class CoreSet {
 
 
 
-#endif // EMBB_BASE_CORE_SET_H_
+#endif  // EMBB_BASE_CORE_SET_H_

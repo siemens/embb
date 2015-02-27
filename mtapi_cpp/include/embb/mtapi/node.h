@@ -129,6 +129,15 @@ class Node {
   }
 
   /**
+    * Returns the number of worker threads.
+    * \return The number of worker threads.
+    * \waitfree
+    */
+  mtapi_uint_t GetWorkerThreadCount() const {
+    return worker_thread_count_;
+  }
+
+  /**
     * Creates a Group to launch \link Task Tasks \endlink in.
     * \return A reference to the created Group
     * \throws ErrorException if the Group object could not be constructed.
@@ -210,6 +219,7 @@ class Node {
     mtapi_task_context_t * context);
 
   mtapi_uint_t core_count_;
+  mtapi_uint_t worker_thread_count_;
   mtapi_action_hndl_t action_handle_;
   std::list<Queue*> queues_;
   std::list<Group*> groups_;
