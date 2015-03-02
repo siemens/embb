@@ -226,7 +226,7 @@ template <typename RAI, typename ComparisonFunction>
 void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::iterator_category category;
-  internal::QuickSortIteratorCheck(first, last, comparison, 
+  internal::QuickSortIteratorCheck(first, last, comparison,
                                    policy, block_size, category());
 }
 
