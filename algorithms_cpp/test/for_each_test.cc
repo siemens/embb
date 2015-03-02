@@ -207,16 +207,35 @@ void ForEachTest::TestPolicy() {
   }
 
   vector = init;
-  ForEach(vector.begin(), vector.end(), Square(), ExecutionPolicy(false));
-  for (size_t i = 0; i < count; i++) {
-    PT_EXPECT_EQ(vector[i], init[i]*init[i]);
-  }
-
-  vector = init;
   ForEach(vector.begin(), vector.end(), Square(), ExecutionPolicy(true, 1));
   for (size_t i = 0; i < count; i++) {
     PT_EXPECT_EQ(vector[i], init[i]*init[i]);
   }
+
+  // ForEach on empty list should not throw:
+  ForEach(vector.begin(), vector.begin(), Square());
+
+#ifdef EMBB_USE_EXCEPTIONS
+  bool empty_core_set_thrown = false;
+  try {
+    ForEach(vector.begin(), vector.end(), Square(), ExecutionPolicy(false));
+  }
+  catch (embb::base::ErrorException &) {
+    empty_core_set_thrown = true;
+  }
+  PT_EXPECT_MSG(empty_core_set_thrown,
+    "Empty core set should throw ErrorException");
+  bool negative_range_thrown = false;
+  try {
+    std::vector<int>::iterator second = vector.begin() + 1;
+    ForEach(second, vector.begin(), Square());
+  }
+  catch (embb::base::ErrorException &) {
+    negative_range_thrown = true;
+  }
+  PT_EXPECT_MSG(negative_range_thrown,
+    "Negative range should throw ErrorException");
+#endif
 }
 
 void ForEachTest::StressTest() {

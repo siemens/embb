@@ -51,13 +51,13 @@ class Action {
   }
 
   /**
-    * Constructs an Action from any entity that provides an
-    * operator() (TaskContext &).
+    * Constructs an Action from a function object.
+    *
+    * \tparam Function Function object
     */
   template <typename Function>
   Action(
-    Function func                      /**< [in] Anything that provides an
-                                            operator() (TaskContext &). */
+    Function func                      /**< [in] Function object */
     )
     : function_(func)
     , execution_policy_() {
@@ -65,13 +65,13 @@ class Action {
   }
 
   /**
-    * Constructs an Action from any entity that provides an
-    * operator() (TaskContext &) and an Affinity.
+    * Constructs an Action from a function object and an Affinity.
+    *
+    * \tparam Function Function object
     */
   template <typename Function>
   Action(
-    Function func,                     /**< [in] Anything that provides an
-                                            operator() (TaskContext &). */
+    Function func,                     /**< [in] Function object */
     ExecutionPolicy execution_policy   /**< [in] Execution policy */
     )
     : function_(func)

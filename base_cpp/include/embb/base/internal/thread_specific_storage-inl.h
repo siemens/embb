@@ -149,4 +149,4 @@ void ThreadSpecificStorage<Type>::Prepare() {
 } // namespace base
 } // namespace embb
 
-#endif // EMBB_BASE_INTERNAL_THREAD_SPECIFIC_STORAGE_INL_H_
+#endif  // EMBB_BASE_INTERNAL_THREAD_SPECIFIC_STORAGE_INL_H_

@@ -60,7 +60,7 @@ CountTest::CountTest() {
 void CountTest::TestDataStructures() {
   using embb::algorithms::Count;
   const int size = 10;
-  int array[] = {10, 20, 30, 30, 20, 10, 10, 20, 20, 20};
+  int array[] = { 10, 20, 30, 30, 20, 10, 10, 20, 20, 20 };
   std::vector<int> vector(array, array + size);
   std::deque<int> deque(array, array + size);
   const std::vector<int> const_vector(array, array + size);
@@ -74,7 +74,7 @@ void CountTest::TestDataStructures() {
 void CountTest::TestCountIf() {
   using embb::algorithms::CountIf;
   const int size = 10;
-  int array[] = {10, 21, 30, 31, 20, 11, 10, 21, 20, 20};
+  int array[] = { 10, 21, 30, 31, 20, 11, 10, 21, 20, 20 };
   PT_EXPECT_EQ(CountIf(array, array + size, IsEven()), 6);
   PT_EXPECT_EQ(CountIf(array, array + size, &IsEvenFunction), 6);
 }
@@ -127,8 +127,6 @@ void CountTest::TestPolicy() {
   std::vector<int> vector(a, a + (sizeof a / sizeof a[0]));
   PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10, ExecutionPolicy()), 3);
   PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10, ExecutionPolicy(true)),
-               3);
-  PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10, ExecutionPolicy(false)),
                3);
   PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10,
                ExecutionPolicy(true, 1)), 3);

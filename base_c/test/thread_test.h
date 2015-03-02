@@ -66,4 +66,4 @@ int ThreadStartFunction(void* arg);
 } // namespace base
 } // namespace embb
 
-#endif // BASE_C_TEST_THREAD_TEST_H_
+#endif  // BASE_C_TEST_THREAD_TEST_H_
