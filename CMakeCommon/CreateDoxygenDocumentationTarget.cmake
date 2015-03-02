@@ -40,9 +40,6 @@ function (CreateDoxygenDocumentationTarget)
     if (TARGET doxygen)
       # Do nothing, since the repeated adding causes an error
     else()
-
-      file(COPY ${DOXYGEN_TEMPLATE_FILES} DESTINATION ${PROJECT_BINARY_DIR})
-
       add_custom_target (
         doxygen 
         #ALL
