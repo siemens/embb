@@ -125,7 +125,7 @@ SHOW_USED_FILES        = NO
 SHOW_FILES             = YES
 SHOW_NAMESPACES        = YES
 FILE_VERSION_FILTER    = 
-LAYOUT_FILE            = @CMAKE_SOURCE_DIR@/doc/reference/DoxygenLayout.xml
+LAYOUT_FILE            = "@CMAKE_SOURCE_DIR@/doc/reference/DoxygenLayout.xml"
 CITE_BIB_FILES         = 
 
 # ==============================================================================
@@ -207,7 +207,7 @@ HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
 HTML_FOOTER            = 
 HTML_STYLESHEET        = 
-HTML_EXTRA_STYLESHEET  = @CMAKE_SOURCE_DIR@/doc/reference/DoxygenHTMLStyle.css
+HTML_EXTRA_STYLESHEET  = "@CMAKE_SOURCE_DIR@/doc/reference/DoxygenHTMLStyle.css"
 HTML_EXTRA_FILES       = 
 HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
