@@ -158,7 +158,7 @@ static void embb_mtapi_network_task_complete(
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_rawdata(
           &send_buf, local_task->result_size, local_task->result_buffer);
-        assert(err == local_task->result_size);
+        assert(err == (int)local_task->result_size);
 
         err = embb_mtapi_network_socket_sendbuffer(
           &network_task->socket, &send_buf);
@@ -213,6 +213,10 @@ static int embb_mtapi_network_thread(void * args) {
 
       err = embb_mtapi_network_socket_recvbuffer_sized(
         socket, &buffer, 1);
+      if (err == 0) {
+        // there was some socket error, ignore
+        continue;
+      }
       assert(err == 1);
       err = embb_mtapi_network_buffer_pop_front_int8(
         &buffer, &operation);
@@ -500,7 +504,7 @@ static void network_task_start(
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_rawdata(
           send_buf, local_task->arguments_size, local_task->arguments);
-        assert(err == local_task->arguments_size);
+        assert(err == (int)local_task->arguments_size);
 
         err = embb_mtapi_network_socket_sendbuffer(
           &network_action->socket, send_buf);
