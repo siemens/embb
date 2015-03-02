@@ -48,10 +48,10 @@ const char * kernel =
 "  int elements = arguments_size / sizeof(float) / 2;\n"
 "  if (ii >= elements)"
 "    return;"
-"  float* a = (float*)arguments;\n"
-"  float* b = ((float*)arguments) + elements;\n"
-"  float* c = (float*)result_buffer;\n"
-"  float* d = (float*)node_local_data;\n"
+"  __global float* a = (__global float*)arguments;\n"
+"  __global float* b = ((__global float*)arguments) + elements;\n"
+"  __global float* c = (__global float*)result_buffer;\n"
+"  __global float* d = (__global float*)node_local_data;\n"
 "  c[ii] = a[ii] + b[ii] + d[0];\n"
 "}\n";
 
