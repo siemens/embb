@@ -208,13 +208,6 @@ void MergeSortTest::TestPolicy() {
 
   vector = init;
   MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
-            ExecutionPolicy(false));
-  for (size_t i = 0; i < count; i++) {
-     PT_EXPECT_EQ(vector_copy[i], vector[i]);
-  }
-
-  vector = init;
-  MergeSortAllocate(vector.begin(), vector.end(), std::less<int>(),
             ExecutionPolicy(true, 1));
   for (size_t i = 0; i < count; i++) {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);

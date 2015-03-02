@@ -179,8 +179,6 @@ void ReduceTest::TestPolicy() {
                Identity(), ExecutionPolicy()), sum);
   PT_EXPECT_EQ(Reduce(vector.begin(), vector.end(), 0, std::plus<int>(),
                Identity(), ExecutionPolicy(true)), sum);
-  PT_EXPECT_EQ(Reduce(vector.begin(), vector.end(), 0,
-               std::plus<int>(), Identity(), ExecutionPolicy(false)), sum);
   PT_EXPECT_EQ(Reduce(vector.begin(), vector.end(), 0, std::plus<int>(),
                Identity(), ExecutionPolicy(true, 1)), sum);
 }

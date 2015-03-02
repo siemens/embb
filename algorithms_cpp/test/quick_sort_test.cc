@@ -214,13 +214,6 @@ void QuickSortTest::TestPolicy() {
 
   vector = init;
   QuickSort(vector.begin(), vector.end(), std::greater<int>(),
-            ExecutionPolicy(false));
-  for (size_t i = 0; i < count; i++) {
-     PT_EXPECT_EQ(vector_copy[i], vector[i]);
-  }
-
-  vector = init;
-  QuickSort(vector.begin(), vector.end(), std::greater<int>(),
             ExecutionPolicy(true, 1));
   for (size_t i = 0; i < count; i++) {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);

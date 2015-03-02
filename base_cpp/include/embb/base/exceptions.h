@@ -175,16 +175,6 @@ class Exception : public std::exception {
   }
 
   /**
-   * Returns the error message.
-   * This is here for compatibility with std::exception.
-   *
-   * \return Pointer to error message
-   */
-  virtual const char* what() const throw() {
-    return What();
-  }
-
-  /**
    * Returns an integer code representing the exception.
    *
    * \return %Exception code
@@ -286,4 +276,4 @@ class ErrorException : public Exception {
 } // namespace base
 } // namespace embb
 
-#endif // EMBB_BASE_EXCEPTIONS_H_
+#endif  // EMBB_BASE_EXCEPTIONS_H_

@@ -192,10 +192,17 @@ template <typename RAI, typename ComparisonFunction>
 void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
-  typename std::iterator_traits<RAI>::difference_type distance = last - first;
-  assert(distance > 0);
+  typedef typename std::iterator_traits<RAI>::difference_type difference_type;
+  difference_type distance = std::distance(first, last);
+  if (distance <= 0) {
+    return;
+  }
+  unsigned int num_cores = policy.GetCoreCount();
+  if (num_cores == 0) {
+    EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
+  }
   if (block_size == 0) {
-    block_size = (static_cast<size_t>(distance) / node.GetCoreCount());
+    block_size = (static_cast<size_t>(distance) / num_cores);
     if (block_size == 0)
       block_size = 1;
   }

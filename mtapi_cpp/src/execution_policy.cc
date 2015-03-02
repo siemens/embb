@@ -27,6 +27,7 @@
 #include <embb/mtapi/execution_policy.h>
 #include <embb/mtapi/mtapi.h>
 #include <embb/base/exceptions.h>
+#include <embb/base/c/internal/bitset.h>
 #include <cassert>
 
 namespace embb {
@@ -103,6 +104,10 @@ bool ExecutionPolicy::IsSetWorker(mtapi_uint_t worker) {
   mtapi_boolean_t aff = mtapi_affinity_get(&affinity_, worker, &status);
   assert(MTAPI_SUCCESS == status);
   return MTAPI_TRUE == aff;
+}
+
+unsigned int ExecutionPolicy::GetCoreCount() const {
+  return embb_bitset_count(&affinity_);
 }
 
 const mtapi_affinity_t &ExecutionPolicy::GetAffinity() const {

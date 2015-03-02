@@ -75,6 +75,7 @@ Node::Node(
       "mtapi::Node could not initialize mtapi");
   }
   core_count_ = info.hardware_concurrency;
+  worker_thread_count_ = embb_core_set_count(&attr->core_affinity);
   action_handle_ = mtapi_action_create(MTAPI_CPP_TASK_JOB, action_func,
     MTAPI_NULL, 0, MTAPI_NULL, &status);
   if (MTAPI_SUCCESS != status) {

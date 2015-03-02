@@ -45,44 +45,54 @@ class ForEachFunctor {
   /**
    * Constructs a for-each functor with arguments.
    */
-  ForEachFunctor(RAI first, RAI last, Function unary,
-    const embb::mtapi::ExecutionPolicy& policy, size_t block_size)
-    : first_(first), last_(last), unary_(unary), policy_(policy),
-      block_size_(block_size) {
+  ForEachFunctor(size_t chunk_first, size_t chunk_last, Function unary,
+                 const embb::mtapi::ExecutionPolicy& policy,
+                 const BlockSizePartitioner<RAI>& partitioner)
+  : chunk_first_(chunk_first), chunk_last_(chunk_last),
+    unary_(unary), policy_(policy), partitioner_(partitioner) {
   }
 
   void Action(mtapi::TaskContext&) {
-    size_t distance = static_cast<size_t>(std::distance(first_, last_));
-    if (distance == 0) return;
-    if (distance <= block_size_) {  // leaf case -> do work
-      for (RAI curIter(first_); curIter != last_; ++curIter) {
-        unary_(*curIter);
+    if (chunk_first_ == chunk_last_) {
+      // Leaf case, recursed to single chunk. Do work on chunk:
+      ChunkDescriptor<RAI> chunk = partitioner_[chunk_first_];
+      RAI first = chunk.GetFirst();
+      RAI last  = chunk.GetLast();
+      for (RAI it = first; it != last; ++it) {
+        unary_(*it);
       }
-    } else {  // recurse further
-      ChunkPartitioner<RAI> partitioner(first_, last_, 2);
-      ForEachFunctor<RAI, Function> functorL(partitioner[0].GetFirst(),
-        partitioner[0].GetLast(), unary_, policy_, block_size_);
-      ForEachFunctor<RAI, Function> functorR(partitioner[1].GetFirst(),
-        partitioner[1].GetLast(), unary_, policy_, block_size_);
-
-      mtapi::Node& node = mtapi::Node::GetInstance();
-      mtapi::Task taskL = node.Spawn(mtapi::Action(base::MakeFunction(
-          functorL, &ForEachFunctor<RAI, Function>::Action),
+    } else {
+      // Recurse further:
+      size_t chunk_split_index = (chunk_first_ + chunk_last_) / 2;
+      // Split chunks into left / right branches:
+      self_t functor_l(chunk_first_,
+                       chunk_split_index,
+                       unary_, policy_, partitioner_);
+      self_t functor_r(chunk_split_index + 1,
+                       chunk_last_,
+                       unary_, policy_, partitioner_);
+      mtapi::Task task_l = mtapi::Node::GetInstance().Spawn(
+        mtapi::Action(
+          base::MakeFunction(functor_l, &self_t::Action),
           policy_));
-      mtapi::Task taskR = node.Spawn(mtapi::Action(base::MakeFunction(
-          functorR, &ForEachFunctor<RAI, Function>::Action),
+      mtapi::Task task_r = mtapi::Node::GetInstance().Spawn(
+        mtapi::Action(
+          base::MakeFunction(functor_r, &self_t::Action),
           policy_));
-      taskL.Wait(MTAPI_INFINITE);
-      taskR.Wait(MTAPI_INFINITE);
+      task_l.Wait(MTAPI_INFINITE);
+      task_r.Wait(MTAPI_INFINITE);
     }
   }
 
  private:
-  RAI first_;
-  RAI last_;
+  typedef ForEachFunctor<RAI, Function> self_t;
+
+ private:
+  size_t chunk_first_;
+  size_t chunk_last_;
   Function unary_;
   const embb::mtapi::ExecutionPolicy& policy_;
-  size_t block_size_;
+  const BlockSizePartitioner<RAI>& partitioner_;
 
   /**
    * Disables assignment.
@@ -95,21 +105,31 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
-  assert(distance > 0);
+  if (distance == 0) {
+    return;
+  }
+  unsigned int num_cores = policy.GetCoreCount();
+  if (num_cores == 0) {
+    EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
+  }
   mtapi::Node& node = mtapi::Node::GetInstance();
   // Determine actually used block size
   if (block_size == 0) {
-    block_size = (static_cast<size_t>(distance) / node.GetCoreCount());
+    block_size = (static_cast<size_t>(distance) / num_cores);
     if (block_size == 0) {
       block_size = 1;
     }
   }
-  // Perform check of task number sufficiency
+  // Check task number sufficiency
   if (((distance / block_size) * 2) + 1 > MTAPI_NODE_MAX_TASKS_DEFAULT) {
-    EMBB_THROW(embb::base::ErrorException, "Not enough MTAPI tasks available "
-               "to perform the parallel foreach loop");
+    EMBB_THROW(embb::base::ErrorException,
+               "Not enough MTAPI tasks available for parallel foreach");
   }
-  ForEachFunctor<RAI, Function> functor(first, last, unary, policy, block_size);
+
+  BlockSizePartitioner<RAI> partitioner(first, last, block_size);
+  ForEachFunctor<RAI, Function> functor(0,
+                                        partitioner.Size() - 1,
+                                        unary, policy, partitioner);
   mtapi::Task task = node.Spawn(mtapi::Action(
                      base::MakeFunction(functor,
                        &ForEachFunctor<RAI, Function>::Action),
@@ -127,7 +147,7 @@ void ForEachIteratorCheck(RAI first, RAI last, Function unary,
 }  // namespace internal
 
 template<typename RAI, typename Function>
-void ForEach(RAI first, RAI last, Function unary,
+void ForEach(RAI first, const RAI last, Function unary,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
   internal::ForEachIteratorCheck(first, last, unary, policy, block_size,

@@ -112,4 +112,4 @@ Duration<Tick>::Duration(const embb_duration_t& duration) : rep_() {
 } // namespace base
 } // namespace embb
 
-#endif // EMBB_BASE_INTERNAL_DURATION_INL_H_
+#endif  // EMBB_BASE_INTERNAL_DURATION_INL_H_

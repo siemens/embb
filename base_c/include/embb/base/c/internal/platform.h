@@ -105,4 +105,4 @@ typedef pthread_cond_t embb_condition_t;
 } /* Close extern "C" { */
 #endif
 
-#endif // EMBB_BASE_C_INTERNAL_PLATFORM_H_
+#endif  // EMBB_BASE_C_INTERNAL_PLATFORM_H_
