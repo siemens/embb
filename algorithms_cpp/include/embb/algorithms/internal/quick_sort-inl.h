@@ -186,11 +186,12 @@ class QuickSortFunctor {
   QuickSortFunctor(const QuickSortFunctor&);
 };
 
-}  // namespace internal
-
 template <typename RAI, typename ComparisonFunction>
-void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
-  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+void QuickSortIteratorCheck(RAI first, RAI last,
+  ComparisonFunction comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size,
+  std::random_access_iterator_tag) {
   embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
@@ -212,11 +213,21 @@ void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
     EMBB_THROW(embb::base::ErrorException,
                "Not enough MTAPI tasks available for performing quick sort");
   }
-  internal::QuickSortFunctor<RAI, ComparisonFunction> functor(
+  QuickSortFunctor<RAI, ComparisonFunction> functor(
       first, last, comparison, policy, block_size);
   mtapi::Task task = node.Spawn(mtapi::Action(base::MakeFunction(
-      functor, &internal::QuickSortFunctor<RAI, ComparisonFunction>::Action)));
+      functor, &QuickSortFunctor<RAI, ComparisonFunction>::Action)));
   task.Wait(MTAPI_INFINITE);
+}
+
+}  // namespace internal
+
+template <typename RAI, typename ComparisonFunction>
+void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+  typedef typename std::iterator_traits<RAI>::iterator_category category;
+  internal::QuickSortIteratorCheck(first, last, comparison, 
+                                   policy, block_size, category());
 }
 
 }  // namespace algorithms

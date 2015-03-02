@@ -213,19 +213,18 @@ class MergeSortFunctor {
   }
 };
 
-}  // namespace internal
-
 template<typename RAI, typename RAITemp, typename ComparisonFunction>
-void MergeSort(
+void MergeSortIteratorCheck(
   RAI first,
   RAI last,
   RAITemp temporary_first,
   ComparisonFunction comparison,
   const embb::mtapi::ExecutionPolicy& policy,
-  size_t block_size
+  size_t block_size,
+  std::random_access_iterator_tag
   ) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
-  typedef internal::MergeSortFunctor<RAI, RAITemp, ComparisonFunction>
+  typedef MergeSortFunctor<RAI, RAITemp, ComparisonFunction>
     functor_t;
   difference_type distance = std::distance(first, last);
   if (distance == 0) {
@@ -249,7 +248,7 @@ void MergeSort(
                "Not enough MTAPI tasks available to perform merge sort");
   }
 
-  internal::BlockSizePartitioner<RAI> partitioner(first, last, block_size);
+  BlockSizePartitioner<RAI> partitioner(first, last, block_size);
   functor_t functor(0,
                     partitioner.Size() - 1,
                     temporary_first,
@@ -264,6 +263,17 @@ void MergeSort(
       policy));
 
   task.Wait(MTAPI_INFINITE);
+}
+
+}  // namespace internal
+
+template<typename RAI, typename RAITemp, typename ComparisonFunction>
+void MergeSort(RAI first, RAI last, RAITemp temporary_first,
+  ComparisonFunction comparison, const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size) {
+  typedef typename std::iterator_traits<RAI>::iterator_category category;
+  internal::MergeSortIteratorCheck(first, last, temporary_first, comparison,
+    policy, block_size, category());
 }
 
 }  // namespace algorithms
