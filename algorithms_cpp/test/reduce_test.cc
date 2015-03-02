@@ -181,6 +181,31 @@ void ReduceTest::TestPolicy() {
                Identity(), ExecutionPolicy(true)), sum);
   PT_EXPECT_EQ(Reduce(vector.begin(), vector.end(), 0, std::plus<int>(),
                Identity(), ExecutionPolicy(true, 1)), sum);
+  // Empty list should return neutral element:
+  PT_EXPECT_EQ(Reduce(vector.begin(), vector.begin(), 41, std::plus<int>(),
+               Identity(), ExecutionPolicy(true, 1)), 41);
+#ifdef EMBB_USE_EXCEPTIONS
+  bool empty_core_set_thrown = false;
+  try {
+    Reduce(vector.begin(), vector.end(), 0,
+           std::plus<int>(), Identity(),
+           ExecutionPolicy(false));
+  } catch (embb::base::ErrorException &) {
+    empty_core_set_thrown = true;
+  }
+  PT_EXPECT_MSG(empty_core_set_thrown,
+    "Empty core set should throw ErrorException");
+  bool negative_range_thrown = false;
+  try {
+    std::vector<int>::iterator second = vector.begin() + 1;
+    Reduce(second, vector.begin(), 0, std::plus<int>());
+  }
+  catch (embb::base::ErrorException &) {
+    negative_range_thrown = true;
+  }
+  PT_EXPECT_MSG(negative_range_thrown,
+    "Negative range should throw ErrorException");
+#endif
 }
 
 void ReduceTest::StressTest() {

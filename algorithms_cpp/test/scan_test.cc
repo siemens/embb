@@ -290,6 +290,35 @@ void ScanTest::TestPolicy() {
     expected += vector[i];
     PT_EXPECT_EQ(expected, outputVector[i]);
   }
+  // Empty list should not throw and not change output:
+  outputVector = init;
+  std::vector<int>::iterator out_it = outputVector.begin();
+  Scan(vector.begin(), vector.begin(), out_it, 0, std::plus<int>());
+  PT_EXPECT(out_it == outputVector.begin());
+
+#ifdef EMBB_USE_EXCEPTIONS
+  bool empty_core_set_thrown = false;
+  try {
+    Scan(vector.begin(), vector.end(), outputVector.begin(),
+         0, std::plus<int>(), Identity(),
+         ExecutionPolicy(false));
+  }
+  catch (embb::base::ErrorException &) {
+    empty_core_set_thrown = true;
+  }
+  PT_EXPECT_MSG(empty_core_set_thrown,
+    "Empty core set should throw ErrorException");
+  bool negative_range_thrown = false;
+  try {
+    std::vector<int>::iterator second = vector.begin() + 1;
+    Scan(second, vector.begin(), outputVector.begin(), 0, std::plus<int>());
+  }
+  catch (embb::base::ErrorException &) {
+    negative_range_thrown = true;
+  }
+  PT_EXPECT_MSG(negative_range_thrown,
+    "Negative range should throw ErrorException");
+#endif
 }
 
 void ScanTest::StressTest() {

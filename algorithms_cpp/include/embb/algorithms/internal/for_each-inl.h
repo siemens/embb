@@ -107,6 +107,8 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   difference_type distance = std::distance(first, last);
   if (distance == 0) {
     return;
+  } else if (distance < 0) {
+    EMBB_THROW(embb::base::ErrorException, "Negative range for ForEach");
   }
   unsigned int num_cores = policy.GetCoreCount();
   if (num_cores == 0) {
