@@ -32,6 +32,7 @@
 
 #include <mtapi_status_t.h>
 
+#include <embb/base/c/memory_allocation.h>
 #include <embb/base/c/thread.h>
 #include <embb/base/c/atomic.h>
 #include <embb/base/c/internal/unused.h>
@@ -188,6 +189,10 @@ void PluginTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
+  plugin_initialize(THIS_DOMAIN_ID, THIS_NODE_ID, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
   action = mtapi_ext_plugin_action_create(
     PLUGIN_JOB_ID,
     plugin_task_start,
@@ -223,8 +228,14 @@ void PluginTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
+  plugin_finalize(&status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
   mtapi_finalize(&status);
   MTAPI_CHECK_STATUS(status);
+
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
 
   embb_mtapi_log_info("...done\n\n");
 }
