@@ -182,7 +182,7 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
   if (num_cores == 0) {
     EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
   }
-  
+
   ReturnType values[MTAPI_NODE_MAX_TASKS_DEFAULT];
   if (block_size == 0) {
     block_size = static_cast<size_t>(distance) / num_cores;

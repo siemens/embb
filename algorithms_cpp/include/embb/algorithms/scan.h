@@ -71,10 +71,10 @@ namespace algorithms {
  * \tparam RAIOut Random access iterator type of output range
  * \tparam ReturnType Type of output elements of scan operation, deduced from
  *         \c neutral
- * \tparam ScanFunction Binary scan function with signature
+ * \tparam ScanFunction Binary scan function object with signature
  *         <tt>ReturnType ScanFunction(ReturnType, ReturnType)</tt>
- * \tparam TransformationFunction Unary transformation function with signature
- *         <tt>ReturnType TransformationFunction(typename
+ * \tparam TransformationFunction Unary transformation function object with
+ *         signature <tt>ReturnType TransformationFunction(typename
  *         std::iterator_traits<RAIIn>::value_type)</tt>.
  */
 template<typename RAIIn, typename RAIOut, typename ReturnType,
