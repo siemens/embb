@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -57,6 +57,7 @@ int embb_tss_set(embb_tss_t* tss, void* value) {
 
 void* embb_tss_get(const embb_tss_t* tss) {
   assert(tss != NULL);
+  assert(tss->values != NULL);
   unsigned int index = 0;
   int status = embb_internal_thread_index(&index);
   if ((status != EMBB_SUCCESS) || (index >= tss->size)) {

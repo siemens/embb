@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -43,8 +43,7 @@ class ThreadTest : public partest::TestCase {
   /**
    * Adds test methods.
    */
-  explicit ThreadTest(); /**<
-      number of threads concurrently running test methods */
+  ThreadTest();
 
  private:
   /**

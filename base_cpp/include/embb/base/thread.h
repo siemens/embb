@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -154,12 +154,12 @@ class Thread {
    * \memory A small constant amount of memory to store the function. This
    *         memory is freed the thread is joined.
    * \notthreadsafe
-   * \tparam Function Type of callable
+   * \tparam Function Function object type
    */
   template<typename Function>
   explicit Thread(
     Function function
-    /**< [IN] Callable (without arguments, must be copyable) */
+    /**< [IN] Copyable function object, callable without arguments */
     );
 
   /**
@@ -174,14 +174,14 @@ class Thread {
    * \memory A small constant amount of memory to store the function. This
    *         memory is freed the thread is joined.
    * \notthreadsafe
-   * \tparam Function Type of callable
+   * \tparam Function Function object type
    */
   template<typename Function>
   explicit Thread(
     CoreSet& core_set,
     /**< [IN] Set of cores on which the thread shall be executed. */
     Function function
-    /**< [IN] Callable (without arguments, must be copyable) */
+    /**< [IN] Copyable function object, callable without arguments */
     );
 
   /**
@@ -196,13 +196,13 @@ class Thread {
    * \memory A small constant amount of memory to store the function. This
    *         memory is freed the thread is joined.
    * \notthreadsafe
-   * \tparam Function Type of callable
+   * \tparam Function Function object type
    * \tparam Argument Type of argument
    */
   template<typename Function, typename Arg>
   Thread(
     Function function,
-    /**< [IN] Callable (with one argument, must be copyable) */
+    /**< [IN] Copyable function object, callable with one argument */
     Arg arg
     /**< [IN] Argument for function (must be copyable) */
     );
@@ -219,14 +219,14 @@ class Thread {
    * \memory A small constant amount of memory to store the function. This
    *         memory is freed the thread is joined.
    * \notthreadsafe
-   * \tparam Function Type of callable
+   * \tparam Function Function object type
    * \tparam Arg1 Type of first argument
    * \tparam Arg2 Type of second argument
    */
   template<typename Function, typename Arg1, typename Arg2>
   Thread(
     Function function,
-    /**< [IN] Callable (with two arguments, must be copyable) */
+    /**< [IN] Copyable function object, callable with two arguments */
     Arg1 arg1,
     /**< [IN] First argument for function (must be copyable) */
     Arg2 arg2

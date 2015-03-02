@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,11 @@
  */
 void RunSorting() {
   #include "algorithms/sorting/range_define-snippet.h"
-  range = {4, 2, 3, 5, 1};
+  range.push_back(4);
+  range.push_back(2);
+  range.push_back(3);
+  range.push_back(5);
+  range.push_back(1);
 
   #include "algorithms/sorting/quick_sort-snippet.h"
   for (size_t i = 0; i < range.size(); i++) {

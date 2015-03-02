@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,12 +37,12 @@ void embb_mtapi_id_pool_initialize(
 
   that->capacity = capacity;
   that->id_buffer = (mtapi_uint_t*)
-    embb_mtapi_alloc_allocate(sizeof(mtapi_uint_t)*(capacity));
+    embb_mtapi_alloc_allocate(sizeof(mtapi_uint_t)*(capacity + 1));
   that->id_buffer[0] = EMBB_MTAPI_IDPOOL_INVALID_ID;
-  for (ii = 1; ii < capacity; ii++) {
+  for (ii = 1; ii <= capacity; ii++) {
     that->id_buffer[ii] = ii;
   }
-  that->ids_available = capacity - 1;
+  that->ids_available = capacity;
   that->put_id_position = 0;
   that->get_id_position = 1;
   embb_mtapi_spinlock_initialize(&that->lock);

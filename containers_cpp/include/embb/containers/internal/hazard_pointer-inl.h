@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,8 +34,9 @@ template< typename ElementT >
 FixedSizeList<ElementT>::FixedSizeList(size_t max_size) :
   max_size(max_size),
   size(0) {
-  elementsArray =
-    new ElementT[max_size];
+  elementsArray = static_cast<ElementT*>(
+    embb::base::Allocation::Allocate(sizeof(ElementT) *
+    max_size));
 }
 
 template< typename ElementT >
@@ -92,7 +93,7 @@ bool FixedSizeList<ElementT>::PushBack(ElementT const el) {
 
 template< typename ElementT >
 FixedSizeList<ElementT>::~FixedSizeList() {
-  delete[] elementsArray;
+  embb::base::Allocation::Free(elementsArray);
 }
 
 template< typename GuardType >

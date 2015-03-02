@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -200,6 +200,7 @@ mtapi_queue_hndl_t mtapi_queue_create(
           queue->queue_id = queue_id;
           queue_hndl = queue->handle;
         } else {
+          embb_mtapi_queue_pool_deallocate(node->queue_pool, queue);
           local_status = MTAPI_ERR_JOB_INVALID;
         }
       } else {

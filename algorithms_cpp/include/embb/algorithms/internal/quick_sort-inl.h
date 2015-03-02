@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -48,7 +48,7 @@ class QuickSortFunctor {
    * Constructs a functor.
    */
   QuickSortFunctor(RAI first, RAI last, ComparisonFunction comparison,
-                   const ExecutionPolicy& policy, size_t block_size)
+    const embb::mtapi::ExecutionPolicy& policy, size_t block_size)
     : first_(first), last_(last), comparison_(comparison), policy_(policy),
       block_size_(block_size) {
   }
@@ -87,7 +87,7 @@ class QuickSortFunctor {
   RAI first_;
   RAI last_;
   ComparisonFunction comparison_;
-  const ExecutionPolicy& policy_;
+  const embb::mtapi::ExecutionPolicy& policy_;
   size_t block_size_;
 
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
@@ -190,12 +190,19 @@ class QuickSortFunctor {
 
 template <typename RAI, typename ComparisonFunction>
 void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
-               const ExecutionPolicy& policy, size_t block_size) {
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
-  typename std::iterator_traits<RAI>::difference_type distance = last - first;
-  assert(distance > 0);
+  typedef typename std::iterator_traits<RAI>::difference_type difference_type;
+  difference_type distance = std::distance(first, last);
+  if (distance <= 0) {
+    return;
+  }
+  unsigned int num_cores = policy.GetCoreCount();
+  if (num_cores == 0) {
+    EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
+  }
   if (block_size == 0) {
-    block_size= (static_cast<size_t>(distance) / node.GetCoreCount());
+    block_size = (static_cast<size_t>(distance) / num_cores);
     if (block_size == 0)
       block_size = 1;
   }

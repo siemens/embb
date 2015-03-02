@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,8 @@
 #ifndef EMBB_ALGORITHMS_COUNT_H_
 #define EMBB_ALGORITHMS_COUNT_H_
 
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
+#include <iterator>
 
 namespace embb {
 namespace algorithms {
@@ -55,7 +56,7 @@ namespace algorithms {
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
  *       operations.
- * \see CountIf(), ExecutionPolicy
+ * \see CountIf(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ValueType Type of \c value that is compared to the elements in the
  *         range using the \c operator==.
@@ -70,8 +71,8 @@ typename std::iterator_traits<RAI>::difference_type Count(
   const ValueType& value,
   /**< [IN] Value that the elements in the range are compared to using
             \c operator== */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the counting algorithm */
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
+  /**< [IN] embb::mtapi::ExecutionPolicy for the counting algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are sorted in parallel. Partitioning of a block stops if its size
@@ -95,7 +96,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
  *       function.
- * \see Count(), ExecutionPolicy
+ * \see Count(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Unary predicate with argument of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt>.
@@ -110,8 +111,8 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
   ComparisonFunction comparison,
   /**< [IN] Unary predicate used to test the elements in the range. Elements for
             which \c comparison returns true are counted. */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the counting algorithm */
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
+  /**< [IN] embb::mtapi::ExecutionPolicy for the counting algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are sorted in parallel. Partitioning of a block stops if its size
@@ -124,6 +125,18 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
 #else // DOXYGEN
 
 /**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ValueType>
+typename std::iterator_traits<RAI>::difference_type Count(
+  RAI first,
+  RAI last,
+  const ValueType& value,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
  * Overload of above described Doxygen dummy with less arguments.
  */
 template<typename RAI, typename ValueType>
@@ -132,7 +145,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
   RAI last,
   const ValueType& value
   ) {
-  return Count(first, last, value, ExecutionPolicy(), 0);
+  return Count(first, last, value, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -143,7 +156,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
   RAI first,
   RAI last,
   const ValueType& value,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   return Count(first, last, value, policy, 0);
 }
@@ -151,12 +164,12 @@ typename std::iterator_traits<RAI>::difference_type Count(
 /**
  * Overload of above described Doxygen dummy.
  */
-template<typename RAI, typename ValueType>
-typename std::iterator_traits<RAI>::difference_type Count(
+template<typename RAI, typename ComparisonFunction>
+typename std::iterator_traits<RAI>::difference_type CountIf(
   RAI first,
   RAI last,
-  const ValueType& value,
-  const ExecutionPolicy& policy,
+  ComparisonFunction comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -169,7 +182,7 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
   RAI last,
   ComparisonFunction comparison
   ) {
-  return CountIf(first, last, comparison, ExecutionPolicy(), 0);
+  return CountIf(first, last, comparison, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -180,22 +193,10 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   return CountIf(first, last, comparison, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template<typename RAI, typename ComparisonFunction>
-typename std::iterator_traits<RAI>::difference_type CountIf(
-  RAI first,
-  RAI last,
-  ComparisonFunction comparison,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

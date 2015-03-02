@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,21 +24,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_ALGORITHMS_EXECUTION_POLICY_H_
-#define EMBB_ALGORITHMS_EXECUTION_POLICY_H_
+#ifndef EMBB_MTAPI_EXECUTION_POLICY_H_
+#define EMBB_MTAPI_EXECUTION_POLICY_H_
 
-#include <embb/mtapi/mtapi.h>
-#include <embb/mtapi/affinity.h>
+#include <embb/mtapi/c/mtapi.h>
 
 namespace embb {
-namespace algorithms {
+namespace mtapi {
 /**
  * Describes the execution policy of a parallel algorithm.
  * The execution policy comprises
  *  - the affinity of tasks to MTAPI worker threads (not CPU cores) and
  *  - the priority of the spawned tasks.
  *
- * \ingroup CPP_ALGORITHMS
+ * The priority is a number between 0 (denoting the highest priority) to
+ * max_priorities - 1 as given during initialization using Node::Initialize().
+ * The default value of max_priorities is 4.
+ *
+ * \ingroup CPP_MTAPI
  */
 class ExecutionPolicy{
  public:
@@ -53,11 +56,11 @@ class ExecutionPolicy{
    * Constructs an execution policy with the specified affinity and priority.
    */
   ExecutionPolicy(
-      bool initial_affinity, /**<
-        [IN] \c true sets the affinity to all worker threads, \c false to no
-        worker threads. */
-      mtapi_uint_t priority /**<
-        [IN] Priority for the execution policy. */
+      bool initial_affinity,           /**< [in] \c true sets the affinity to
+                                            all worker threads, \c false to no
+                                            worker threads. */
+      mtapi_uint_t priority            /**< [in] Priority for the execution
+                                            policy. */
   );
 
   /**
@@ -65,8 +68,8 @@ class ExecutionPolicy{
    * Sets the affinity to all worker threads.
    */
   explicit ExecutionPolicy(
-      mtapi_uint_t priority /**<
-        [IN] Priority for the execution policy. */
+      mtapi_uint_t priority            /**< [in] Priority for the execution
+                                            policy. */
   );
 
   /**
@@ -74,25 +77,23 @@ class ExecutionPolicy{
    * Sets the priority to the default value.
    */
   explicit ExecutionPolicy(
-      bool initial_affinity /**<
-        [IN] \c true sets the affinity to all worker threads, \c false to no
-        worker threads. */
+      bool initial_affinity            /**< [in] \c true sets the affinity to
+                                            all worker threads, \c false to no
+                                            worker threads. */
   );
 
   /**
    *  Sets affinity to a specific worker thread.
    */
   void AddWorker(
-    mtapi_uint_t worker
-    /**< [IN] Worker thread index */
+    mtapi_uint_t worker                /**< [in] Worker thread index */
     );
 
   /**
    * Removes affinity to a specific worker thread.
    */
   void RemoveWorker(
-    mtapi_uint_t worker
-    /**< [IN] Worker thread index */
+    mtapi_uint_t worker                /**< [in] Worker thread index */
     );
 
   /**
@@ -101,22 +102,30 @@ class ExecutionPolicy{
    * \return \c true if affinity is set, otherwise \c false
    */
   bool IsSetWorker(
-    mtapi_uint_t worker
-    /**< [IN] Worker thread index */
+    mtapi_uint_t worker                /**< [in] Worker thread index */
     );
+
+  /**
+   * Returns the number of cores the policy is affine to.
+   *
+   * \return the number of cores
+   */
+  unsigned int GetCoreCount() const;
 
   /**
    * Returns the affinity
    *
    * \return the affinity
    */
-  const mtapi::Affinity &GetAffinity() const;
+  const mtapi_affinity_t &GetAffinity() const;
 
   /** Returns the priority
    *
    * \return the priority
    */
   mtapi_uint_t GetPriority() const;
+
+  friend class Task;
 
  private:
   /**
@@ -129,14 +138,14 @@ class ExecutionPolicy{
    * Task Affinity.
    * Maps the affinity of tasks to MTAPI worker threads (not CPU cores).
    */
-  mtapi::Affinity affinity_;
+  mtapi_affinity_t affinity_;
 
   /**
    * Task Priority.
    */
   mtapi_uint_t priority_;
 };
-}  // namespace algorithms
+}  // namespace mtapi
 }  // namespace embb
 
-#endif  // EMBB_ALGORITHMS_EXECUTION_POLICY_H_
+#endif  // EMBB_MTAPI_EXECUTION_POLICY_H_

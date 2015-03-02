@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,7 @@
 #define EMBB_ALGORITHMS_QUICK_SORT_H_
 
 #include <functional>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 
 namespace embb {
 namespace algorithms {
@@ -54,7 +54,7 @@ namespace algorithms {
  *             modified by another thread while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
  *       operations.
- * \see ExecutionPolicy, MergeSort()
+ * \see embb::mtapi::ExecutionPolicy, MergeSort()
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Binary predicate with both arguments of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt>.
@@ -72,8 +72,8 @@ void QuickSort(
             \c a appears before an element \c b in the sorted range if
             <tt>comparison(a, b) == true</tt>. The default value uses the
             less-than relation. */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the quick sort algorithm */
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
+  /**< [IN] embb::mtapi::ExecutionPolicy for the quick sort algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are sorted in parallel. Partitioning of a block stops if its size
@@ -88,6 +88,18 @@ void QuickSort(
 #else // DOXYGEN
 
 /**
+ * Overload of above described Doxygen dummy.
+ */
+template <typename RAI, typename ComparisonFunction>
+void QuickSort(
+  RAI first,
+  RAI last,
+  ComparisonFunction comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
  * Overload of above described Doxygen dummy with less arguments.
  */
 template <typename RAI>
@@ -97,7 +109,7 @@ void QuickSort(
   ) {
   QuickSort(first, last,
             std::less<typename std::iterator_traits<RAI>::value_type>(),
-            ExecutionPolicy(), 0);
+            embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -109,7 +121,7 @@ void QuickSort(
   RAI last,
   ComparisonFunction comparison
   ) {
-  QuickSort(first, last, comparison, ExecutionPolicy(), 0);
+  QuickSort(first, last, comparison, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -120,22 +132,10 @@ void QuickSort(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   QuickSort(first, last, comparison, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template <typename RAI, typename ComparisonFunction>
-void QuickSort(
-  RAI first,
-  RAI last,
-  ComparisonFunction comparison,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_REDUCE_H_
 #define EMBB_ALGORITHMS_REDUCE_H_
 
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
 namespace embb {
@@ -64,14 +64,14 @@ namespace algorithms {
  *       associative, i.e., <tt>reduction(x, reduction(y, z)) ==
  *       reduction(reduction(x, y), z))</tt> for all \c x, \c y, \c z of type
  *       \c ReturnType.
- * \see ExecutionPolicy, ZipIterator, Identity
+ * \see embb::mtapi::ExecutionPolicy, ZipIterator, Identity
  * \tparam RAI Random access iterator
  * \tparam ReturnType Type of result of reduction operation, deduced from
  *         \c neutral
- * \tparam ReductionFunction Binary reduction function with signature
+ * \tparam ReductionFunction Binary reduction function object with signature
  *         <tt>ReturnType ReductionFunction(ReturnType, ReturnType)</tt>.
- * \tparam TransformationFunction Unary transformation function with signature
- *         <tt>ReturnType TransformationFunction(typename
+ * \tparam TransformationFunction Unary transformation function object with
+ *         signature <tt>ReturnType TransformationFunction(typename
  *         std::iterator_traits<RAI>::value_type)</tt>
  */
 template<typename RAI, typename ReturnType, typename ReductionFunction,
@@ -89,8 +89,8 @@ ReturnType Reduce(
   TransformationFunction transformation = Identity(),
   /**< [IN] Transforms the elements of the range before the reduction operation
             is applied */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the reduction computation */
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
+  /**< [IN] embb::mtapi::ExecutionPolicy for the reduction computation */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are treated in parallel. Partitioning of a block stops if its size
@@ -103,6 +103,21 @@ ReturnType Reduce(
 #else // DOXYGEN
 
 /**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType, typename ReductionFunction,
+         typename TransformationFunction>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  ReductionFunction reduction,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
  * Overload of above described Doxygen dummy with less arguments.
  */
 template<typename RAI, typename ReturnType, typename ReductionFunction>
@@ -112,8 +127,8 @@ ReturnType Reduce(
   ReturnType neutral,
   ReductionFunction reduction
   ) {
-  return Reduce(first, last, neutral, reduction, Identity(), ExecutionPolicy(),
-                0);
+  return Reduce(first, last, neutral, reduction, Identity(),
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -129,7 +144,7 @@ ReturnType Reduce(
   TransformationFunction transformation
   ) {
   return Reduce(first, last, neutral, reduction, transformation,
-                ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -143,25 +158,10 @@ ReturnType Reduce(
   ReturnType neutral,
   ReductionFunction reduction,
   TransformationFunction transformation,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   return Reduce(first, last, neutral, reduction, transformation, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template<typename RAI, typename ReturnType, typename ReductionFunction,
-         typename TransformationFunction>
-ReturnType Reduce(
-  RAI first,
-  RAI last,
-  ReturnType neutral,
-  ReductionFunction reduction,
-  TransformationFunction transformation,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

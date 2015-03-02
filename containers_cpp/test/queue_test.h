@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,10 +27,10 @@
 #ifndef CONTAINERS_CPP_TEST_QUEUE_TEST_H_
 #define CONTAINERS_CPP_TEST_QUEUE_TEST_H_
 
-#include <vector>
 #include <partest/partest.h>
 #include <embb/base/duration.h>
-#include <embb/containers/wait_free_spsc_queue.h>
+#include <vector>
+#include <utility>
 
 namespace embb {
 namespace containers {
@@ -39,42 +39,83 @@ template<typename Queue_t,
   bool MultipleProducers = false,
   bool MultipleConsumers = false>
 class QueueTest : public partest::TestCase {
+ public:
+  typedef ::std::pair<size_t, int> element_t;
+
  private:
-  static const int QUEUE_SIZE = 100;
-  static const int TOTAL_PRODUCE_CONSUME_COUNT = 10000;
+  /// Minimum number of elements enqueued by every producer
+  /// in MP/MC unit test. Must be a multiple of 8.
+  static const int MIN_ENQ_ELEMENTS = 120;
+  static const int MIN_TOTAL_PRODUCE_CONSUME_COUNT = 1000;
+
+ private:
+  class Consumer {
+   private:
+    Queue_t * q;
+    int n_producers;
+    int n_producer_elements;
+    ::std::vector<unsigned char> consumer_tally;
+    ::std::vector<int> sequence_number;
+   public:
+    Consumer(Queue_t * const queue, int numProducers, int numProducerElements);
+    void Run();
+    const ::std::vector<unsigned char> & Tally() const {
+      return consumer_tally;
+    }
+  };
+  class Producer {
+   private:
+    Queue_t * q;
+    size_t producer_id;
+    int n_producer_elements;
+   public:
+    Producer(Queue_t * const queue, size_t id, int numProducerElements) :
+      q(queue),
+      producer_id(id),
+      n_producer_elements(numProducerElements) {}
+    void Run();
+  };
+
+ private:
   int n_threads;
+  int n_queue_size;
+  int n_total_produce_consume_count;
   embb::base::Atomic<int> thread_selector_producer;
   embb::base::Atomic<int> produce_count;
-  std::vector<int> consumed_elements;
-  std::vector<int> produced_elements;
+  ::std::vector<element_t> consumed_elements;
+  ::std::vector<element_t> produced_elements;
+  ::std::vector<Consumer> consumers;
+  ::std::vector<Producer> producers;
 
-  //for multiple p/c
-  int n_iterations;
-  int n_queue_elements_per_thread;
-  int n_queue_elements;
-  std::vector<int> expected_queue_elements;
-  std::vector<int>* thread_local_vectors;
-  embb::base::Atomic<int> queueSize;
+  // for multiple p/c
+  int n_producers;
+  int n_consumers;
+  embb::base::Atomic<size_t> next_producer_id;
+  embb::base::Atomic<size_t> next_consumer_id;
+  /// Number of elements enqueued by every producer, depending
+  /// on number of iterations for regression tests.
+  int n_producer_elements;
 
   int consume_count;
   Queue_t* queue;
 
-  void QueueTestMultipleProducerMultipleConsumer_Pre();
-  void QueueTestMultipleProducerMultipleConsumer_Post();
-  void QueueTestMultipleProducerMultipleConsumer_ThreadMethod();
-  void QueueTestSingleProducedSingleConsumer_Pre();
-  void QueueTestSingleProducedSingleConsumer_Post();
-  void QueueTestSingleProducedSingleConsumer_ThreadMethod();
-  void QueueTestSingleThreadEnqueueDequeue_ThreadMethod();
+  void QueueTestOrderMPMC_Pre();
+  void QueueTestOrderMPMC_Post();
+  void QueueTestOrderMPMC_ProducerThreadMethod();
+  void QueueTestOrderMPMC_ConsumerThreadMethod();
+  void QueueTestSingleProducerSingleConsumer_Pre();
+  void QueueTestSingleProducerSingleConsumer_Post();
+  void QueueTestSingleProducerSingleConsumer_ThreadMethod();
   void QueueTestSingleThreadEnqueueDequeue_Pre();
   void QueueTestSingleThreadEnqueueDequeue_Post();
+  void QueueTestSingleThreadEnqueueDequeue_ThreadMethod();
 
  public:
   QueueTest();
 };
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #include "./queue_test-inl.h"
 

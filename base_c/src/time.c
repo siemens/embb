@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -53,7 +53,7 @@ int embb_time_compare(const embb_time_t* lhs, const embb_time_t* rhs) {
 }
 
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
   assert(time != NULL);
@@ -81,10 +81,10 @@ int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
   return EMBB_SUCCESS;
 }
 
-#endif /* EMBB_THREADING_WINTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
 
-#ifdef EMBB_THREADING_POSIXTHREADS
+#ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
   assert(time != NULL);
@@ -102,5 +102,5 @@ int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
   return EMBB_SUCCESS;
 }
 
-#endif /* EMBB_THREADING_POSIXTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,7 +26,7 @@
 
 #include <quick_sort_test.h>
 #include <embb/algorithms/quick_sort.h>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <vector>
 #include <deque>
 #include <sstream>
@@ -54,7 +54,7 @@ QuickSortTest::QuickSortTest() {
 
 void QuickSortTest::TestDataStructures() {
   using embb::algorithms::QuickSort;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
 
   int array[kCountSize];
   std::vector<int> vector(kCountSize);
@@ -163,7 +163,7 @@ void QuickSortTest::TestRanges() {
 
 void QuickSortTest::TestBlockSizes() {
   using embb::algorithms::QuickSort;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
 
   size_t count = 4;
   std::vector<int> init(count);
@@ -187,7 +187,7 @@ void QuickSortTest::TestBlockSizes() {
 
 void QuickSortTest::TestPolicy() {
   using embb::algorithms::QuickSort;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = 4;
   std::vector<int> init(count);
   std::vector<int> vector(count);
@@ -208,13 +208,6 @@ void QuickSortTest::TestPolicy() {
   vector = init;
   QuickSort(vector.begin(), vector.end(), std::greater<int>(),
             ExecutionPolicy(true));
-  for (size_t i = 0; i < count; i++) {
-     PT_EXPECT_EQ(vector_copy[i], vector[i]);
-  }
-
-  vector = init;
-  QuickSort(vector.begin(), vector.end(), std::greater<int>(),
-            ExecutionPolicy(false));
   for (size_t i = 0; i < count; i++) {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }

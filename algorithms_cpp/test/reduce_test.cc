@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,7 +26,7 @@
 
 #include <reduce_test.h>
 #include <embb/algorithms/reduce.h>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <deque>
 #include <vector>
 #include <functional>
@@ -163,7 +163,7 @@ void ReduceTest::TestBlockSizes() {
 
 void ReduceTest::TestPolicy() {
   using embb::algorithms::Reduce;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
   size_t count = 4;
   int sum = 0;
@@ -179,15 +179,13 @@ void ReduceTest::TestPolicy() {
                Identity(), ExecutionPolicy()), sum);
   PT_EXPECT_EQ(Reduce(vector.begin(), vector.end(), 0, std::plus<int>(),
                Identity(), ExecutionPolicy(true)), sum);
-  PT_EXPECT_EQ(Reduce(vector.begin(), vector.end(), 0,
-               std::plus<int>(), Identity(), ExecutionPolicy(false)), sum);
   PT_EXPECT_EQ(Reduce(vector.begin(), vector.end(), 0, std::plus<int>(),
                Identity(), ExecutionPolicy(true, 1)), sum);
 }
 
 void ReduceTest::StressTest() {
   using embb::algorithms::Reduce;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
   size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() *10;
   std::vector<int> large_vector(count);

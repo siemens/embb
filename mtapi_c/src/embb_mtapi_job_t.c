@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -40,9 +40,9 @@
 
 mtapi_boolean_t embb_mtapi_job_initialize_list(embb_mtapi_node_t * node) {
   node->job_list = (embb_mtapi_job_t*)embb_mtapi_alloc_allocate(
-    sizeof(embb_mtapi_job_t)*node->attributes.max_jobs);
+    sizeof(embb_mtapi_job_t)*(node->attributes.max_jobs + 1));
   mtapi_uint_t ii;
-  for (ii = 0; ii < node->attributes.max_jobs; ii++) {
+  for (ii = 0; ii <= node->attributes.max_jobs; ii++) {
     embb_mtapi_job_initialize(
       &node->job_list[ii], node->attributes.max_actions_per_job);
     node->job_list[ii].handle.id = ii;
@@ -53,7 +53,7 @@ mtapi_boolean_t embb_mtapi_job_initialize_list(embb_mtapi_node_t * node) {
 
 void embb_mtapi_job_finalize_list(embb_mtapi_node_t * node) {
   mtapi_uint_t ii;
-  for (ii = 0; ii < node->attributes.max_jobs; ii++) {
+  for (ii = 0; ii <= node->attributes.max_jobs; ii++) {
     embb_mtapi_job_finalize(&node->job_list[ii]);
     node->job_list[ii].handle.id = 0;
   }
@@ -69,7 +69,7 @@ mtapi_boolean_t embb_mtapi_job_is_handle_valid(
   mtapi_job_hndl_t handle) {
   assert(MTAPI_NULL != node);
   return ((0 < handle.id) &&
-    (handle.id < node->attributes.max_jobs) &&
+    (handle.id <= node->attributes.max_jobs) &&
     (node->job_list[handle.id].handle.tag == handle.tag)) ?
       MTAPI_TRUE : MTAPI_FALSE;
 }
@@ -87,7 +87,7 @@ mtapi_boolean_t embb_mtapi_job_is_id_valid(
   embb_mtapi_node_t * node,
   mtapi_job_id_t id) {
   assert(MTAPI_NULL != node);
-  return ((0 < id) && (id < node->attributes.max_jobs)) ?
+  return ((0 < id) && (id <= node->attributes.max_jobs)) ?
     MTAPI_TRUE : MTAPI_FALSE;
 }
 

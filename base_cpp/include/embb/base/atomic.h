@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -531,7 +531,7 @@ __EMBB_ATOMIC_INTEGER_SPECIALIZATION(unsigned short);
 __EMBB_ATOMIC_INTEGER_SPECIALIZATION(signed int);
 __EMBB_ATOMIC_INTEGER_SPECIALIZATION(unsigned int);
 
-#ifdef EMBB_ARCH_X86_64
+#ifdef EMBB_PLATFORM_ARCH_X86_64
 __EMBB_ATOMIC_INTEGER_SPECIALIZATION(size_t);
 #endif
 

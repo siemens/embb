@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -166,7 +166,7 @@ void embb_free(void * ptr) {
 
 void *embb_alloc_aligned(size_t alignment, size_t size) {
   void* malloc_addr = NULL;
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
   /*
    * From the Documentation:
    * Allocates memory on a specified alignment boundary.
@@ -176,7 +176,7 @@ void *embb_alloc_aligned(size_t alignment, size_t size) {
    * failed. The pointer is a multiple of alignment.
    */
   malloc_addr = _aligned_malloc(size, alignment);
-#elif defined EMBB_COMPILER_GNUC
+#elif defined EMBB_PLATFORM_COMPILER_GNUC
   /*
    * From the Documentation:
    * The posix_memalign() function shall allocate size bytes aligned on a
@@ -193,10 +193,10 @@ void *embb_alloc_aligned(size_t alignment, size_t size) {
 }
 
 void embb_free_aligned(void* ptr) {
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
   _aligned_free(ptr);
 #else
-#ifdef EMBB_COMPILER_GNUC
+#ifdef EMBB_PLATFORM_COMPILER_GNUC
   free(ptr);
 #else
 #error Unsupported compiler
@@ -211,5 +211,5 @@ size_t embb_get_bytes_allocated() {
 #endif
 
 void *embb_alloc_cache_aligned(size_t size) {
-  return embb_alloc_aligned(EMBB_CACHE_LINE_SIZE, size);
+  return embb_alloc_aligned(EMBB_PLATFORM_CACHE_LINE_SIZE, size);
 }

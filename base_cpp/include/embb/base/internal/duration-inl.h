@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,7 +38,7 @@ const Duration<Tick>& Duration<Tick>::Zero() {
   return zero;
 }
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 // Suppress non-thread-safe static initialization warning
 // in Max() and Min()
 #pragma warning(push)
@@ -57,7 +57,7 @@ const Duration<Tick>& Duration<Tick>::Min() {
   return minimum;
 }
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop) // Reset warning 4640
 #endif
 
@@ -112,4 +112,4 @@ Duration<Tick>::Duration(const embb_duration_t& duration) : rep_() {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_INTERNAL_DURATION_INL_H_ */
+#endif  // EMBB_BASE_INTERNAL_DURATION_INL_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -61,6 +61,9 @@ void ThreadTest::TestStartingAndJoining() {
   embb::base::Thread thread2(ThreadTest::StaticThreadStartArg1, arg1);
   double arg2 = 3.0;
   embb::base::Thread thread3(ThreadTest::StaticThreadStartArg2, arg1, arg2);
+  embb::base::Thread::ID thread3id;
+  thread3id = thread3.GetID();
+  PT_EXPECT_EQ(thread3id, thread3.GetID());
 
   // Non-static member start methods with functor
   MemberStart<void(ThreadTest::*)()> start4(&ThreadTest::ThreadStart, this);

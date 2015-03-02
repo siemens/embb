@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -71,8 +71,8 @@ const ChunkDescriptor<ForwardIterator>
 
   ForwardIterator last_new = first_new;
 
-  if (index == elements_count / chunkSize) {
-    std::advance(last_new, elements_count % chunkSize);
+  if (index >= chunks - 1) {
+    last_new = last;
   } else {
     std::advance(last_new, chunkSize);
   }
@@ -94,7 +94,7 @@ ChunkPartitioner<ForwardIterator>::ChunkPartitioner(ForwardIterator first,
   } else {
     // if no concrete chunk size was given, use number of cores...
     mtapi::Node& node = mtapi::Node::GetInstance();
-    size = node.GetCoreCount();
+    size = node.GetWorkerThreadCount();
   }
 
   elements_count = static_cast<size_t>(std::distance(first, last));

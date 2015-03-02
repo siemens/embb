@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,7 +26,7 @@
 
 #include <for_each_test.h>
 #include <embb/algorithms/for_each.h>
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <vector>
 #include <deque>
 #include <sstream>
@@ -166,7 +166,7 @@ void ForEachTest::TestRanges() {
 
 void ForEachTest::TestBlockSizes() {
   using embb::algorithms::ForEach;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = 4;
   std::vector<int> init(count);
   std::vector<int> vector(count);
@@ -186,7 +186,7 @@ void ForEachTest::TestBlockSizes() {
 
 void ForEachTest::TestPolicy() {
   using embb::algorithms::ForEach;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = 4;
   std::vector<int> init(count);
   std::vector<int> vector(count);
@@ -207,12 +207,6 @@ void ForEachTest::TestPolicy() {
   }
 
   vector = init;
-  ForEach(vector.begin(), vector.end(), Square(), ExecutionPolicy(false));
-  for (size_t i = 0; i < count; i++) {
-    PT_EXPECT_EQ(vector[i], init[i]*init[i]);
-  }
-
-  vector = init;
   ForEach(vector.begin(), vector.end(), Square(), ExecutionPolicy(true, 1));
   for (size_t i = 0; i < count; i++) {
     PT_EXPECT_EQ(vector[i], init[i]*init[i]);
@@ -221,7 +215,7 @@ void ForEachTest::TestPolicy() {
 
 void ForEachTest::StressTest() {
   using embb::algorithms::ForEach;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() *10;
   std::vector<int> large_vector(count);
   for (size_t i = 0; i < count; i++) {

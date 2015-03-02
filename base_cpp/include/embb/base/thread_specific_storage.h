@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,10 +35,10 @@ namespace embb {
 namespace base {
 
 namespace test {
-  /**
-   * Forward declaration for friending.
-   */
-  class ThreadSpecificStorageTest;
+/**
+ * Forward declaration for friending.
+ */
+class ThreadSpecificStorageTest;
 }
 
 /**
@@ -176,4 +176,4 @@ class ThreadSpecificStorage {
 
 #include <embb/base/internal/thread_specific_storage-inl.h>
 
-#endif /* EMBB_BASE_THREAD_SPECIFIC_STORAGE_H_ */
+#endif  // EMBB_BASE_THREAD_SPECIFIC_STORAGE_H_

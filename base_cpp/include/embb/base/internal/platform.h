@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,7 @@
 #include <embb/base/internal/config.h>
 #include <embb/base/c/internal/platform.h>
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 namespace embb {
 namespace base {
@@ -49,7 +49,7 @@ typedef embb_condition_t ConditionVariableType;
 } // namespace base
 } // namespace embb
 
-#elif defined EMBB_THREADING_POSIXTHREADS // EMBB_THREADING_WINTHREADS
+#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 namespace embb {
 namespace base {
@@ -64,7 +64,7 @@ typedef embb_condition_t ConditionVariableType;
 } // namespace base
 } // namespace embb
 
-#else // EMBB_THREADING_POSIXTHREADS
+#else // EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 #error "No threading platform defined!"
 

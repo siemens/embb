@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,22 +39,22 @@
 * See file and_assign.h for a detailed (and operation independent) description
 * of the following macro.
 */
-#ifdef EMBB_ARCH_X86
+#ifdef EMBB_PLATFORM_ARCH_X86
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #define EMBB_DEFINE_XOR_ASSIGN(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX) \
   extern void __fastcall EMBB_CAT2(embb_internal__atomic_xor_assign_, EMBB_PARAMETER_SIZE_BYTE)_asm(\
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value); \
-  EMBB_INLINE void __fastcall EMBB_CAT2(embb_internal__atomic_xor_assign_, EMBB_PARAMETER_SIZE_BYTE)(\
+  EMBB_PLATFORM_INLINE void __fastcall EMBB_CAT2(embb_internal__atomic_xor_assign_, EMBB_PARAMETER_SIZE_BYTE)(\
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value) { \
   _ReadWriteBarrier(); \
   EMBB_CAT2(embb_internal__atomic_xor_assign_, \
   EMBB_PARAMETER_SIZE_BYTE)_asm(pointer_to_value, value); \
   _ReadWriteBarrier(); \
   }
-#elif defined(EMBB_COMPILER_GNUC)
+#elif defined(EMBB_PLATFORM_COMPILER_GNUC)
 #define EMBB_DEFINE_XOR_ASSIGN(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX) \
-  EMBB_INLINE void EMBB_CAT2(embb_internal__atomic_xor_assign_, EMBB_PARAMETER_SIZE_BYTE)(\
+  EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_internal__atomic_xor_assign_, EMBB_PARAMETER_SIZE_BYTE)(\
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value) { \
   __asm__ __volatile__("lock xor" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
@@ -78,12 +78,12 @@ EMBB_DEFINE_XOR_ASSIGN(4, "l")
 EMBB_DEFINE_XOR_ASSIGN(8, "q")
 #endif
 
-#elif defined(EMBB_ARCH_ARM)
+#elif defined(EMBB_PLATFORM_ARCH_ARM)
 
-#if defined(EMBB_COMPILER_GNUC)
+#if defined(EMBB_PLATFORM_COMPILER_GNUC)
 #define EMBB_DEFINE_XOR_ASSIGN(EMBB_PARAMETER_SIZE_BYTE, \
   EMBB_ATOMIC_ARM_SIZE_SUFFIX) \
-  EMBB_INLINE \
+  EMBB_PLATFORM_INLINE \
   void EMBB_CAT2(embb_internal__atomic_xor_assign_, \
   EMBB_PARAMETER_SIZE_BYTE)(\
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
@@ -121,7 +121,7 @@ EMBB_DEFINE_XOR_ASSIGN(4, "")
 * of the following macro.
 */
 #define EMBB_ATOMIC_INTERNAL_DEFINE_XOR_ASSIGN_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
-  EMBB_INLINE void EMBB_CAT2(embb_atomic_xor_assign_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
+  EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_atomic_xor_assign_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
   EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE value) { \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) value_pun;\
   memcpy(&value_pun, &value, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE));\

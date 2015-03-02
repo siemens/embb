@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -67,6 +67,7 @@ int compute1_() {
 
 PT_MAIN("Algorithms") {
   embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+
   PT_RUN(PartitionerTest);
   PT_RUN(ForEachTest);
   PT_RUN(ReduceTest);

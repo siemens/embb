@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -95,7 +95,7 @@
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE void embb_atomic_and_assign_TYPE(
+EMBB_PLATFORM_INLINE void embb_atomic_and_assign_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable which serves as left-hand side for
                 the "and" operation and is used to store the result. */
@@ -120,7 +120,7 @@ EMBB_INLINE void embb_atomic_and_assign_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE int embb_atomic_compare_and_swap_TYPE(
+EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable */
   TYPE* expected,
@@ -140,7 +140,7 @@ EMBB_INLINE int embb_atomic_compare_and_swap_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE TYPE embb_atomic_fetch_and_add_TYPE(
+EMBB_PLATFORM_INLINE TYPE embb_atomic_fetch_and_add_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable*/
   TYPE value
@@ -158,7 +158,7 @@ EMBB_INLINE TYPE embb_atomic_fetch_and_add_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE TYPE embb_atomic_load_TYPE(
+EMBB_PLATFORM_INLINE TYPE embb_atomic_load_TYPE(
   const embb_atomic_TYPE* variable
   /**< [IN] Pointer to atomic variable */
   );
@@ -169,7 +169,7 @@ EMBB_INLINE TYPE embb_atomic_load_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE void embb_atomic_memory_barrier();
+EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier();
 
 /**
  * Computes the logical "or" of the value stored in \p variable and \c value.
@@ -182,7 +182,7 @@ EMBB_INLINE void embb_atomic_memory_barrier();
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE void embb_atomic_or_assign_TYPE(
+EMBB_PLATFORM_INLINE void embb_atomic_or_assign_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable which serves as left-hand side for
                 the "or" operation and is used to store the result. */
@@ -199,7 +199,7 @@ EMBB_INLINE void embb_atomic_or_assign_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE void embb_atomic_store_TYPE(
+EMBB_PLATFORM_INLINE void embb_atomic_store_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable */
   int value
@@ -217,7 +217,7 @@ EMBB_INLINE void embb_atomic_store_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_INLINE TYPE embb_atomic_swap_TYPE(
+EMBB_PLATFORM_INLINE TYPE embb_atomic_swap_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable whose value is swapped */
   TYPE value
@@ -235,7 +235,7 @@ EMBB_INLINE TYPE embb_atomic_swap_TYPE(
 * \ingroup C_BASE_ATOMIC
 * \waitfree
 */
-EMBB_INLINE void embb_atomic_xor_assign_TYPE(
+EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable which serves as left-hand side for
                 the "xor" operation and is used to store the result. */

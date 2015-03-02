@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,22 +41,33 @@
 
 #include <embb/base/c/memory_allocation.h>
 
+using embb::base::test::AllocTest;
+using embb::base::test::DurationTest;
+using embb::base::test::TimeTest;
+using embb::base::test::CounterTest;
+using embb::base::test::MutexTest;
+using embb::base::test::ThreadIndexTest;
+using embb::base::test::CoreSetTest;
+using embb::base::test::ConditionVarTest;
+using embb::base::test::ThreadTest;
+using embb::base::test::ThreadSpecificStorageTest;
+
 PT_MAIN("Base C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_WARNING);
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
 
-  PT_RUN(embb::base::test::AllocTest);
-  PT_RUN(embb::base::test::DurationTest);
-  PT_RUN(embb::base::test::TimeTest);
-  PT_RUN(embb::base::test::CounterTest);
-  PT_RUN(embb::base::test::MutexTest);
-  PT_RUN(embb::base::test::ThreadIndexTest);
-  PT_RUN(embb::base::test::CoreSetTest);
-  PT_RUN(embb::base::test::ConditionVarTest);
-  PT_RUN(embb::base::test::ThreadTest);
-  PT_RUN(embb::base::test::ThreadSpecificStorageTest);
+  PT_RUN(AllocTest);
+  PT_RUN(DurationTest);
+  PT_RUN(TimeTest);
+  PT_RUN(CounterTest);
+  PT_RUN(MutexTest);
+  PT_RUN(ThreadIndexTest);
+  PT_RUN(CoreSetTest);
+  PT_RUN(ConditionVarTest);
+  PT_RUN(ThreadTest);
+  PT_RUN(ThreadSpecificStorageTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

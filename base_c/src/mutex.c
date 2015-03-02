@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #include <embb/base/c/internal/unused.h>
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 int embb_mutex_init(embb_mutex_t* mutex, int type) {
   /* Critical sections in Windows are always recursive */
@@ -59,9 +59,9 @@ void embb_mutex_destroy(embb_mutex_t* mutex) {
   DeleteCriticalSection(mutex);
 }
 
-#endif /* EMBB_THREADING_WINTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
-#ifdef EMBB_THREADING_POSIXTHREADS
+#ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 int embb_mutex_init(embb_mutex_t* mutex, int type) {
   if (type == EMBB_MUTEX_PLAIN) {
@@ -71,9 +71,13 @@ int embb_mutex_init(embb_mutex_t* mutex, int type) {
     pthread_mutexattr_t attributes;
     if (pthread_mutexattr_init(&attributes) != 0) return EMBB_ERROR;
     if (pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) != 0) {
+      pthread_mutexattr_destroy(&attributes);
       return EMBB_ERROR;
     }
-    if (pthread_mutex_init(mutex, &attributes) != 0) return EMBB_ERROR;
+    if (pthread_mutex_init(mutex, &attributes) != 0) {
+      pthread_mutexattr_destroy(&attributes);
+      return EMBB_ERROR;
+    }
     if (pthread_mutexattr_destroy(&attributes) != 0) return EMBB_ERROR;
   }
   return EMBB_SUCCESS;
@@ -110,4 +114,4 @@ void embb_mutex_destroy(embb_mutex_t* mutex) {
   pthread_mutex_destroy(mutex);
 }
 
-#endif /* EMBB_THREADING_POSIXTHREADS */
+#endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */

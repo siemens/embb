@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -80,38 +80,31 @@ class Task {
 
  private:
   Task(
-    Action action,
-    mtapi_uint_t priority
-    );
+    Action action);
 
   Task(
     Action action,
-    mtapi_group_hndl_t group,
-    mtapi_uint_t priority);
+    mtapi_group_hndl_t group);
 
   Task(
     mtapi_task_id_t id,
     Action action,
-    mtapi_group_hndl_t group,
-    mtapi_uint_t priority);
+    mtapi_group_hndl_t group);
+
+  Task(
+    Action action,
+    mtapi_queue_hndl_t queue);
 
   Task(
     Action action,
     mtapi_queue_hndl_t queue,
-    mtapi_uint_t priority);
-
-  Task(
-    Action action,
-    mtapi_queue_hndl_t queue,
-    mtapi_group_hndl_t group,
-    mtapi_uint_t priority);
+    mtapi_group_hndl_t group);
 
   Task(
     mtapi_task_id_t id,
     Action action,
     mtapi_queue_hndl_t queue,
-    mtapi_group_hndl_t group,
-    mtapi_uint_t priority);
+    mtapi_group_hndl_t group);
 
   mtapi_task_hndl_t handle_;
 };

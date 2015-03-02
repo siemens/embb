@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -54,7 +54,14 @@ namespace mtapi {
 class Node {
  public:
   /**
-    * Initializes the runtime singleton using default values.
+    * Initializes the runtime singleton using default values:
+    *   - all available cores will be used
+    *   - maximum number of tasks is 1024
+    *   - maximum number of groups is 128
+    *   - maximum number of queues is 16
+    *   - maximum queue capacity is 1024
+    *   - maximum number of priorities is 4.
+    *
     * \notthreadsafe
     * \throws ErrorException if the singleton was already initialized or the
     *         Node could not be initialized.
@@ -122,6 +129,15 @@ class Node {
   }
 
   /**
+    * Returns the number of worker threads.
+    * \return The number of worker threads.
+    * \waitfree
+    */
+  mtapi_uint_t GetWorkerThreadCount() const {
+    return worker_thread_count_;
+  }
+
+  /**
     * Creates a Group to launch \link Task Tasks \endlink in.
     * \return A reference to the created Group
     * \throws ErrorException if the Group object could not be constructed.
@@ -174,17 +190,6 @@ class Node {
     );
 
   /**
-    * Runs an Action with the specified priority.
-    * \return A Task identifying the Action to run
-    * \throws ErrorException if the Task object could not be constructed.
-    * \threadsafe
-    */
-  Task Spawn(
-    Action action,                     /**< [in] The Action to execute */
-    mtapi_uint_t priority              /**< [in] The priority to use */
-    );
-
-  /**
     * Creates a Continuation.
     * \return A Continuation chain
     * \threadsafe
@@ -214,6 +219,7 @@ class Node {
     mtapi_task_context_t * context);
 
   mtapi_uint_t core_count_;
+  mtapi_uint_t worker_thread_count_;
   mtapi_action_hndl_t action_handle_;
   std::list<Queue*> queues_;
   std::list<Group*> groups_;

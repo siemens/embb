@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,9 +37,9 @@ extern "C" {
 #define EMBB_TIME_MAX_SECONDS ULLONG_MAX
 #define EMBB_DURATION_MAX_SECONDS 60 * 60 * 24 * 7
 
-#ifdef EMBB_THREADING_WINTHREADS
+#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 // Suppress virtual functions but non-virtual constructor warning
 // in windows headers
 #pragma warning(push)
@@ -49,7 +49,7 @@ extern "C" {
 #define NOMINMAX
 #include <windows.h>
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop) // Reset warning 4640
 #endif
 
@@ -71,7 +71,7 @@ typedef CONDITION_VARIABLE embb_condition_t;
 
 #define EMBB_THREAD_SPECIFIC static __declspec(thread)
 
-#elif defined EMBB_THREADING_POSIXTHREADS /* EMBB_THREADING_WINTHREADS */
+#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 #include <pthread.h>
 #include <errno.h>
@@ -95,7 +95,7 @@ typedef pthread_cond_t embb_condition_t;
 
 #define EMBB_THREAD_SPECIFIC __thread
 
-#else /* EMBB_THREADING_POSIXTHREADS */
+#else /* EMBB_PLATFORM_THREADING_POSIXTHREADS */
 
 #error "No threading platform defined!"
 
@@ -105,4 +105,4 @@ typedef pthread_cond_t embb_condition_t;
 } /* Close extern "C" { */
 #endif
 
-#endif /* EMBB_BASE_C_INTERNAL_PLATFORM_H_ */
+#endif  // EMBB_BASE_C_INTERNAL_PLATFORM_H_

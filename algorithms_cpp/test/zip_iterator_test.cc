@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -136,7 +136,7 @@ void ZipIteratorTest::TestZipScan() {
   Scan(embb::algorithms::Zip(vectorA.begin(), vectorB.begin()),
        embb::algorithms::Zip(vectorA.end(), vectorB.end()),
        vectorOut.begin(), 0, std::plus<int>(), DotProductFunctor(),
-       embb::algorithms::ExecutionPolicy(), 0);
+       embb::mtapi::ExecutionPolicy(), 0);
 
   long sum = 0;
   for (size_t i = 0; i < kCountSize; i++) {

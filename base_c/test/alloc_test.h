@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -81,4 +81,4 @@ class AllocTest : public partest::TestCase {
 } // namespace base
 } // namespace embb
 
-#endif /* BASE_C_TEST_ALLOC_TEST_H_ */
+#endif  // BASE_C_TEST_ALLOC_TEST_H_

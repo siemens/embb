@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -420,6 +420,7 @@ void mtapi_action_enable(
         embb_mtapi_action_pool_get_storage_for_handle(
           node->action_pool, action);
       local_action->enabled = MTAPI_TRUE;
+      local_status = MTAPI_SUCCESS;
     } else {
       local_status = MTAPI_ERR_ACTION_INVALID;
     }

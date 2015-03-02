@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,16 +27,16 @@
 #ifndef EMBB_BASE_EXCEPTIONS_H_
 #define EMBB_BASE_EXCEPTIONS_H_
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)
 // Disable warning that exceptions are disabled but try/catch is used.
 #pragma warning(disable : 4530)
-#endif // EMBB_COMPILER_MSVC
+#endif // EMBB_PLATFORM_COMPILER_MSVC
 
 #include <string>
 #include <exception>
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
 
@@ -276,4 +276,4 @@ class ErrorException : public Exception {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_EXCEPTIONS_H_ */
+#endif  // EMBB_BASE_EXCEPTIONS_H_

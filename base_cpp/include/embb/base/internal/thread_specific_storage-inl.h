@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -149,4 +149,4 @@ void ThreadSpecificStorage<Type>::Prepare() {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_INTERNAL_THREAD_SPECIFIC_STORAGE_INL_H_ */
+#endif  // EMBB_BASE_INTERNAL_THREAD_SPECIFIC_STORAGE_INL_H_

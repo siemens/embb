@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -45,9 +45,9 @@
  * which has 128 bytes.
  */
 #if defined(_M_IA64) || defined(_IA64)
-#define EMBB_CACHE_LINE_SIZE 128
+#define EMBB_PLATFORM_CACHE_LINE_SIZE 128
 #else
-#define EMBB_CACHE_LINE_SIZE 64
+#define EMBB_PLATFORM_CACHE_LINE_SIZE 64
 #endif
 
 /* For MSVC, if _DEBUG is set, set also EMBB_DEBUG.
@@ -59,41 +59,41 @@
 #endif
 
 #ifdef __GNUC__
-#define EMBB_ALIGN(size) __attribute__ ((aligned(size)))
+#define EMBB_PLATFORM_ALIGN(size) __attribute__ ((aligned(size)))
 #elif defined _MSC_VER || defined __INTEL_COMPILER
-#define EMBB_ALIGN(size) __declspec(align(size))
+#define EMBB_PLATFORM_ALIGN(size) __declspec(align(size))
 #else
 #error "Unsupported compiler"
 #endif
 
 #if __GNUC__
-#define EMBB_INLINE static inline
-#define EMBB_COMPILER_GNUC
+#define EMBB_PLATFORM_INLINE static inline
+#define EMBB_PLATFORM_COMPILER_GNUC
 #elif _MSC_VER
-#define EMBB_INLINE __inline
-#define EMBB_COMPILER_MSVC
+#define EMBB_PLATFORM_INLINE __inline
+#define EMBB_PLATFORM_COMPILER_MSVC
 #else
-#define EMBB_INLINE inline
-#define EMBB_COMPILER_UNKNOWN
+#define EMBB_PLATFORM_INLINE inline
+#define EMBB_PLATFORM_COMPILER_UNKNOWN
 #endif
 
 #if defined(__x86_64__) || defined(_M_X64)
-#define EMBB_ARCH_X86_64
-#define EMBB_ARCH_X86
-#define EMBB_HAS_CAS_64
+#define EMBB_PLATFORM_ARCH_X86_64
+#define EMBB_PLATFORM_ARCH_X86
+#define EMBB_PLATFORM_HAS_CAS_64
 #elif defined(__i386) || defined(_M_IX86)
-#define EMBB_ARCH_X86_32
-#define EMBB_ARCH_X86
+#define EMBB_PLATFORM_ARCH_X86_32
+#define EMBB_PLATFORM_ARCH_X86
 #elif defined(__arm__)
-#define EMBB_ARCH_ARM
+#define EMBB_PLATFORM_ARCH_ARM
 #else
-#define EMBB_ARCH_UNKNOWN
+#define EMBB_PLATFORM_ARCH_UNKNOWN
 #endif
 
-#if defined(EMBB_COMPILER_MSVC)
-#define EMBB_THREADING_WINTHREADS
-#elif defined(EMBB_COMPILER_GNUC)
-#define EMBB_THREADING_POSIXTHREADS
+#if defined(EMBB_PLATFORM_COMPILER_MSVC)
+#define EMBB_PLATFORM_THREADING_WINTHREADS
+#elif defined(EMBB_PLATFORM_COMPILER_GNUC)
+#define EMBB_PLATFORM_THREADING_POSIXTHREADS
 #else
 #error "No thread implementation could be determined"
 #endif

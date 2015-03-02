@@ -68,7 +68,7 @@
  *   </tr>
  *   <tr>
  *     <td>Action Function</td>
- *     <td>The callable, an executable function of an action, invoked by the
+ *     <td>The executable function of an action, invoked by the
  *         MTAPI runtime when a task is started.</td>
  *   </tr>
  *   <tr>
@@ -1064,8 +1064,14 @@ void mtapi_nodeattr_set(
  *
  * \c attributes is a pointer to a node attributes object that was previously
  * prepared with mtapi_nodeattr_init() and mtapi_nodeattr_set(). If
- * \c attributes is \c MTAPI_NULL, then implementation-defined default
- * attributes will be used.
+ * \c attributes is \c MTAPI_NULL, then the following default
+ * attributes will be used:
+ *   - all available cores will be used
+ *   - maximum number of tasks is 1024
+ *   - maximum number of groups is 128
+ *   - maximum number of queues is 16
+ *   - maximum queue capacity is 1024
+ *   - maximum number of priorities is 4.
  *
  * On success, \c *status is set to \c MTAPI_SUCCESS. On error, \c *status is
  * set to the appropriate error defined below.

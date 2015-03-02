@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,11 +35,13 @@
 #include <embb_mtapi_test_task.h>
 #include <embb_mtapi_test_group.h>
 #include <embb_mtapi_test_queue.h>
+#include <embb_mtapi_test_error.h>
 
 PT_MAIN("MTAPI C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
 
   PT_RUN(PluginTest);
+  PT_RUN(ErrorTest);
   PT_RUN(InitFinalizeTest);
   PT_RUN(TaskTest);
   PT_RUN(GroupTest);

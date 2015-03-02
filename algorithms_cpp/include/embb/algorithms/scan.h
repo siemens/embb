@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_SCAN_H_
 #define EMBB_ALGORITHMS_SCAN_H_
 
-#include <embb/algorithms/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
 namespace embb {
@@ -66,15 +66,15 @@ namespace algorithms {
  *       associative, i.e., <tt>reduction(x, reduction(y, z)) ==
  *       reduction(reduction(x, y), z))</tt> for all \c x, \c y, \c z of type
  *       \c ReturnType.
- * \see ExecutionPolicy, Identity, ZipIterator
+ * \see embb::mtapi::ExecutionPolicy, Identity, ZipIterator
  * \tparam RAIIn Random access iterator type of input range
  * \tparam RAIOut Random access iterator type of output range
  * \tparam ReturnType Type of output elements of scan operation, deduced from
  *         \c neutral
- * \tparam ScanFunction Binary scan function with signature
+ * \tparam ScanFunction Binary scan function object with signature
  *         <tt>ReturnType ScanFunction(ReturnType, ReturnType)</tt>
- * \tparam TransformationFunction Unary transformation function with signature
- *         <tt>ReturnType TransformationFunction(typename
+ * \tparam TransformationFunction Unary transformation function object with
+ *         signature <tt>ReturnType TransformationFunction(typename
  *         std::iterator_traits<RAIIn>::value_type)</tt>.
  */
 template<typename RAIIn, typename RAIOut, typename ReturnType,
@@ -96,8 +96,8 @@ void Scan(
   TransformationFunction transformation = Identity(),
   /**< [IN] Transforms the elements of the input range before the scan operation
             is applied */
-  const ExecutionPolicy& policy = ExecutionPolicy(),
-  /**< [IN] ExecutionPolicy for the scan computation */
+  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
+  /**< [IN] embb::mtapi::ExecutionPolicy for the scan computation */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are treated in parallel. Partitioning of a block stops if its size
@@ -108,6 +108,22 @@ void Scan(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename ScanFunction, typename TransformationFunction>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  ScanFunction scan,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy with less arguments.
@@ -122,7 +138,7 @@ void Scan(
   ScanFunction scan
   ) {
   Scan(first, last, output_iterator, neutral, scan, Identity(),
-       ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -139,7 +155,7 @@ void Scan(
   TransformationFunction transformation
   ) {
   Scan(first, last, output_iterator, neutral, scan, transformation,
-       ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -154,26 +170,10 @@ void Scan(
   ReturnType neutral,
   ScanFunction scan,
   TransformationFunction transformation,
-  const ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   Scan(first, last, output_iterator, neutral, scan, transformation, policy, 0);
 }
-
-/**
- * Overload of above described Doxygen dummy.
- */
-template<typename RAIIn, typename RAIOut, typename ReturnType,
-         typename ScanFunction, typename TransformationFunction>
-void Scan(
-  RAIIn first,
-  RAIIn last,
-  RAIOut output_iterator,
-  ReturnType neutral,
-  ScanFunction scan,
-  TransformationFunction transformation,
-  const ExecutionPolicy& policy,
-  size_t block_size
-  );
 
 #endif // else DOXYGEN
 

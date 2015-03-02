@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #include <embb/base/function.h>
 #include <embb/mtapi/taskcontext.h>
-#include <embb/mtapi/affinity.h>
+#include <embb/mtapi/execution_policy.h>
 
 namespace embb {
 namespace mtapi {
@@ -46,36 +46,36 @@ class Action {
     */
   Action()
     : function_()
-    , affinity_() {
+    , execution_policy_() {
     // empty
   }
 
   /**
-    * Constructs an Action from any entity that provides an
-    * operator() (TaskContext &).
+    * Constructs an Action from a function object.
+    *
+    * \tparam Function Function object
     */
   template <typename Function>
   Action(
-    Function func                      /**< [in] Anything that provides an
-                                            operator() (TaskContext &). */
+    Function func                      /**< [in] Function object */
     )
     : function_(func)
-    , affinity_() {
+    , execution_policy_() {
     // empty
   }
 
   /**
-    * Constructs an Action from any entity that provides an
-    * operator() (TaskContext &) and an Affinity.
+    * Constructs an Action from a function object and an Affinity.
+    *
+    * \tparam Function Function object
     */
   template <typename Function>
   Action(
-    Function func,                     /**< [in] Anything that provides an
-                                            operator() (TaskContext &). */
-    Affinity affinity                  /**< [in] Core affinity */
+    Function func,                     /**< [in] Function object */
+    ExecutionPolicy execution_policy   /**< [in] Execution policy */
     )
     : function_(func)
-    , affinity_(affinity) {
+    , execution_policy_(execution_policy) {
     // empty
   }
 
@@ -90,17 +90,17 @@ class Action {
   }
 
   /**
-    * Returns the Affinity specified during creation.
-    * \return The Affinity of the Action
+    * Returns the ExecutionPolicy specified during creation.
+    * \return The ExecutionPolicy of the Action
     * \waitfree
     */
-  Affinity GetAffinity() const {
-    return affinity_;
+  ExecutionPolicy GetExecutionPolicy() const {
+    return execution_policy_;
   }
 
  private:
   embb::base::Function<void, TaskContext &> function_;
-  Affinity affinity_;
+  ExecutionPolicy execution_policy_;
 };
 
 } // namespace mtapi

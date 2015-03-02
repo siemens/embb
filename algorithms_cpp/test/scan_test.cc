@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -228,7 +228,7 @@ void ScanTest::TestRanges() {
 
 void ScanTest::TestBlockSizes() {
   using embb::algorithms::Scan;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
   size_t count = 4;
   std::vector<int> init(count);
@@ -253,7 +253,7 @@ void ScanTest::TestBlockSizes() {
 
 void ScanTest::TestPolicy() {
   using embb::algorithms::Scan;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
   size_t count = 4;
   std::vector<int> init(count);
@@ -284,15 +284,6 @@ void ScanTest::TestPolicy() {
 
   outputVector = init;
   Scan(vector.begin(), vector.end(), outputVector.begin(), 0, std::plus<int>(),
-       Identity(), ExecutionPolicy(false));
-  expected = 0;
-  for (size_t i = 0; i < count; i++) {
-    expected += vector[i];
-    PT_EXPECT_EQ(expected, outputVector[i]);
-  }
-
-  outputVector = init;
-  Scan(vector.begin(), vector.end(), outputVector.begin(), 0, std::plus<int>(),
     Identity(), ExecutionPolicy(true, 1));
   expected = 0;
   for (size_t i = 0; i < count; i++) {
@@ -304,7 +295,7 @@ void ScanTest::TestPolicy() {
 void ScanTest::StressTest() {
   using embb::algorithms::Scan;
   using embb::algorithms::Identity;
-  using embb::algorithms::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() *10;
   std::vector<int> large_vector(count);
   std::vector<int> large_vector_output(count);

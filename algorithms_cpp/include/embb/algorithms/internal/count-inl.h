@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,42 +37,45 @@ namespace internal {
 template<typename ValueType>
 class ValueComparisonFunction{
  public:
-  explicit ValueComparisonFunction(const ValueType &value)
-  :value_(value) {}
-  ValueComparisonFunction(const ValueComparisonFunction &other)
-  :value_(other.value_) {}
+  explicit ValueComparisonFunction(const ValueType& value)
+  : value_(value) {}
+  ValueComparisonFunction(const ValueComparisonFunction& other)
+  : value_(other.value_) {}
 
   template<typename ElementType>
   int operator()(ElementType element) {
-    if(element == value_)
+    if (element == value_) {
       return 1;
-    else
+    } else {
       return 0;
+    }
   }
  private:
   const ValueType &value_;
-  ValueComparisonFunction &operator=(const ValueComparisonFunction &other);
+  ValueComparisonFunction &operator=(
+    const ValueComparisonFunction& other);
 };
 
 template<typename Function>
 class FunctionComparisonFunction{
  public:
   explicit FunctionComparisonFunction(Function function)
-  :function_(function) {}
+  : function_(function) {}
   FunctionComparisonFunction(const FunctionComparisonFunction &other)
-  :function_(other.function_) {}
+  : function_(other.function_) {}
 
   template<typename ElementType>
   int operator()(ElementType element) {
-    if(function_(element))
+    if (function_(element)) {
       return 1;
-    else
+    } else {
       return 0;
+    }
   }
  private:
   Function function_;
-  FunctionComparisonFunction &operator=(const FunctionComparisonFunction &
-      other);
+  FunctionComparisonFunction &operator=(
+    const FunctionComparisonFunction& other);
 };
 
 }  // namespace internal
@@ -80,7 +83,7 @@ class FunctionComparisonFunction{
 template<typename RAI, typename ValueType>
 typename std::iterator_traits<RAI>::difference_type
   Count(RAI first, RAI last, const ValueType& value,
-        const ExecutionPolicy& policy, size_t block_size) {
+        const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
   return Reduce(first, last, Difference(0), std::plus<Difference>(),
                 internal::ValueComparisonFunction<ValueType>(value), policy,
@@ -90,7 +93,7 @@ typename std::iterator_traits<RAI>::difference_type
 template<typename RAI, typename ComparisonFunction>
 typename std::iterator_traits<RAI>::difference_type
   CountIf(RAI first, RAI last, ComparisonFunction comparison,
-          const ExecutionPolicy& policy, size_t block_size) {
+          const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
   return Reduce(first, last, Difference(0), std::plus<Difference>(),
                 internal::FunctionComparisonFunction<ComparisonFunction>

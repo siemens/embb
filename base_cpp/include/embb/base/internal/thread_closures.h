@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,8 +36,8 @@ namespace internal {
 /**
  * Thread closure for thread start function with no arguments.
  *
- * Provides a thread start function calling a callable entity such as a function
- * pointer or functor.
+ * Provides a thread start function from which a priorly stored function object 
+ * is called.
  */
 template<typename Function>
 struct ThreadClosure {
@@ -56,8 +56,8 @@ struct ThreadClosure {
 /**
  * Thread closure for thread start function with one argument.
  *
- * Provides a thread start function calling a callable entity such as a function
- * pointer or functor.
+ * Provides a thread start function from which a priorly stored function object
+ * is called.
  */
 template<typename Function, typename Arg1>
 struct ThreadClosureArg1 {
@@ -78,8 +78,8 @@ struct ThreadClosureArg1 {
 /**
  * Thread closure for thread start function with two arguments.
  *
- * Provides a thread start function calling a callable entity such as a function
- * pointer or functor.
+ * Provides a thread start function from which a priorly stored function object
+ * is called.
  */
 template<typename Function, typename Arg1, typename Arg2>
 struct ThreadClosureArg2 {
@@ -103,4 +103,4 @@ struct ThreadClosureArg2 {
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_INTERNAL_THREAD_CLOSURES_H_ */
+#endif  // EMBB_BASE_INTERNAL_THREAD_CLOSURES_H_

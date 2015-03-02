@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -88,7 +88,7 @@ template<typename ThreadClosure>
 void Thread::CheckThreadCreationErrors(int result, ThreadClosure* closure) {
   if (result != EMBB_SUCCESS) {
     if (closure != NULL) {
-      delete closure;
+      Allocation::Delete(closure);
     }
     const char* message = "Could not create thread.";
     if (result == EMBB_NOMEM) {
@@ -107,4 +107,4 @@ std::basic_ostream<CharT, Traits>&
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_INTERNAL_THREAD_INL_H_ */
+#endif  // EMBB_BASE_INTERNAL_THREAD_INL_H_

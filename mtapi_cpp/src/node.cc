@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,7 +39,9 @@
 namespace {
 
 static embb::mtapi::Node * node_instance = NULL;
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
 static embb::base::Mutex init_mutex;
+#endif
 
 }
 
@@ -73,6 +75,7 @@ Node::Node(
       "mtapi::Node could not initialize mtapi");
   }
   core_count_ = info.hardware_concurrency;
+  worker_thread_count_ = embb_core_set_count(&attr->core_affinity);
   action_handle_ = mtapi_action_create(MTAPI_CPP_TASK_JOB, action_func,
     MTAPI_NULL, 0, MTAPI_NULL, &status);
   if (MTAPI_SUCCESS != status) {
@@ -152,7 +155,8 @@ void Node::Initialize(
     assert(MTAPI_SUCCESS == status);
     embb_core_set_t cs;
     embb_core_set_init(&cs, 0);
-    for (unsigned int ii = 0; ii < core_set.Count(); ii++) {
+    for (unsigned int ii = 0; embb_core_set_count(&cs) < core_set.Count();
+      ii++) {
       if (core_set.IsContained(ii)) {
         embb_core_set_add(&cs, ii);
       }
@@ -259,11 +263,7 @@ void Node::DestroyQueue(Queue & queue) {
 }
 
 Task Node::Spawn(Action action) {
-  return Spawn(action, 0);
-}
-
-Task Node::Spawn(Action action, mtapi_uint_t priority) {
-  return Task(action, priority);
+  return Task(action);
 }
 
 Continuation Node::First(Action action) {

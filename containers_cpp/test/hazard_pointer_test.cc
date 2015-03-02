@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,12 +32,12 @@ namespace embb {
 namespace containers {
 namespace test {
 HazardPointerTest::HazardPointerTest() :
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
   delete_pointer_callback(*this, &HazardPointerTest::DeletePointerCallback),
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
   object_pool(NULL),

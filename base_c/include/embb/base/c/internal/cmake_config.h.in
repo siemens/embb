@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,21 +36,21 @@
 /**
  * Is used to get the number of cores on certain systems.
  */
-#cmakedefine EMBB_HAS_HEADER_SYSINFO
+#cmakedefine EMBB_PLATFORM_HAS_HEADER_SYSINFO
 
 /**
  * Is used to get the number of cores on certain systems.
  */
-#cmakedefine EMBB_HAS_HEADER_SYSCTL
+#cmakedefine EMBB_PLATFORM_HAS_HEADER_SYSCTL
 
 /**
  * Is used to set thread affinities on certain systems.
  */
-#cmakedefine EMBB_HAS_HEADER_CPUSET
+#cmakedefine EMBB_PLATFORM_HAS_HEADER_CPUSET
 
 /**
  * Is used for Linux thread affinities.
  */
-#cmakedefine EMBB_HAS_GLIB_CPU
+#cmakedefine EMBB_PLATFORM_HAS_GLIB_CPU
 
 #endif /* EMBB_BASE_INTERNAL_CMAKE_CONFIG_H_ */

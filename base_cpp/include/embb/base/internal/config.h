@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,7 +31,7 @@
 #include <embb/base/c/internal/config.h>
 
 /* Disable exceptions in STL of MSVC. Leads to errors when used like this!!! */
-/*#if defined(EMBB_COMPILER_MSVC) && !defined(EMBB_USE_EXCEPTIONS)
+/*#if defined(EMBB_PLATFORM_COMPILER_MSVC) && !defined(EMBB_USE_EXCEPTIONS)
 #define _HAS_EXCEPTIONS 0
 #endif*/
 

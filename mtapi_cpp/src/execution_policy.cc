@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,15 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cassert>
-
-#include <embb/base/exceptions.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/mtapi/mtapi.h>
+#include <embb/base/exceptions.h>
+#include <embb/base/c/internal/bitset.h>
+#include <cassert>
 
 namespace embb {
 namespace mtapi {
 
-Affinity::Affinity() {
+ExecutionPolicy::ExecutionPolicy() :
+    priority_(DefaultPriority) {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
@@ -44,37 +46,79 @@ Affinity::Affinity() {
   }
 }
 
-Affinity::Affinity(bool initial_affinity) {
+ExecutionPolicy::ExecutionPolicy(bool initial_affinity, mtapi_uint_t priority)
+:priority_(priority) {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
-  mtapi_boolean_t aff = initial_affinity ? MTAPI_TRUE : MTAPI_FALSE;
-  mtapi_affinity_init(&affinity_, aff, &status);
+  mtapi_affinity_init(&affinity_, initial_affinity ? MTAPI_TRUE : MTAPI_FALSE,
+    &status);
   if (MTAPI_SUCCESS != status) {
     EMBB_THROW(embb::base::ErrorException,
       "Could not default construct Affinity.");
   }
 }
 
-void Affinity::Add(mtapi_uint_t worker) {
+ExecutionPolicy::ExecutionPolicy(mtapi_uint_t priority)
+:priority_(priority) {
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+  Node::GetInstance(); // MTAPI has to be initialized
+#endif
+  mtapi_status_t status;
+  mtapi_affinity_init(&affinity_, MTAPI_TRUE, &status);
+  if (MTAPI_SUCCESS != status) {
+    EMBB_THROW(embb::base::ErrorException,
+      "Could not default construct Affinity.");
+  }
+}
+
+ExecutionPolicy::ExecutionPolicy(bool initial_affinity)
+:priority_(DefaultPriority) {
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+  Node::GetInstance(); // MTAPI has to be initialized
+#endif
+  mtapi_status_t status;
+  mtapi_affinity_init(&affinity_, initial_affinity ? MTAPI_TRUE : MTAPI_FALSE,
+    &status);
+  if (MTAPI_SUCCESS != status) {
+    EMBB_THROW(embb::base::ErrorException,
+      "Could not default construct Affinity.");
+  }
+}
+
+void ExecutionPolicy::AddWorker(mtapi_uint_t worker) {
   mtapi_status_t status;
   mtapi_affinity_set(&affinity_, worker, MTAPI_TRUE, &status);
   assert(MTAPI_SUCCESS == status);
 }
 
-void Affinity::Remove(mtapi_uint_t worker) {
+void ExecutionPolicy::RemoveWorker(mtapi_uint_t worker) {
   mtapi_status_t status;
   mtapi_affinity_set(&affinity_, worker, MTAPI_FALSE, &status);
   assert(MTAPI_SUCCESS == status);
 }
 
-bool Affinity::IsSet(mtapi_uint_t worker) {
+bool ExecutionPolicy::IsSetWorker(mtapi_uint_t worker) {
   mtapi_status_t status;
   mtapi_boolean_t aff = mtapi_affinity_get(&affinity_, worker, &status);
   assert(MTAPI_SUCCESS == status);
   return MTAPI_TRUE == aff;
 }
 
-} // namespace mtapi
-} // namespace embb
+unsigned int ExecutionPolicy::GetCoreCount() const {
+  return embb_bitset_count(&affinity_);
+}
+
+const mtapi_affinity_t &ExecutionPolicy::GetAffinity() const {
+  return affinity_;
+}
+
+mtapi_uint_t ExecutionPolicy::GetPriority() const {
+  return priority_;
+}
+
+const mtapi_uint_t ExecutionPolicy::DefaultPriority = 0;
+
+}  // namespace mtapi
+}  // namespace embb

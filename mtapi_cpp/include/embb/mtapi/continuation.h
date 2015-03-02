@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -80,12 +80,12 @@ class Continuation {
   Task Spawn();
 
   /**
-    * Runs the Continuation chain with the specified priority.
+    * Runs the Continuation chain with the specified execution_policy.
     * \returns The Task representing the Continuation chain.
     * \notthreadsafe
     */
   Task Spawn(
-    mtapi_uint_t priority              /**< [in] The priority to use */
+    ExecutionPolicy execution_policy   /**< [in] The execution policy to use */
     );
 
   friend class Node;
@@ -97,8 +97,6 @@ class Continuation {
 
   ContinuationStage * first_;
   ContinuationStage * last_;
-
-  mtapi_uint_t priority_;
 };
 
 } // namespace mtapi

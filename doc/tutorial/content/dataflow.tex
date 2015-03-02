@@ -18,6 +18,8 @@ With the \emph{Dataflow} building block, \embb provides generic skeletons for th
 % \item dynamic control of data streams (conditional execution)
 %\end{itemize}
 
+\emph{\textbf{Note:} The \emph{Dataflow} building block is implemented using the MTAPI C++ interface. Since MTAPI does not allocate memory after initialization, the number of tasks and other resources are limited. By calling \lstinline|embb::mtapi::Node::Initialize| these limits can be customized. Explicit initialization also eliminates unexpected delays when measuring performance. See Section~\ref{sec:mtapi_cpp_interface} for details.}
+
 \section{Linear Pipelines}
 
 Before we go into detail, we demonstrate the basic concepts of this building block by means of a simple application which finds and replaces strings in a file. Let us start with the sequential implementation. The program shown in Listing~\ref{lst:replace_seq} reads a file line by line and replaces each occurrence of a given string with a new string. The main part consists of the \lstinline|while| loop which performs three steps:
@@ -138,7 +140,7 @@ is used to construct the sink:
 %
 %In order to avoid that the received string is overwritten accidentally, the parameter \lstinline|str| corresponding to the input port of \lstinline|write| must be constant.\\
 
-\emph{Note: If you parallelize your own application using \embb and your compiler emits a lengthy error message containing lots of templates, it is very likely that for at least one process, the ports and their directions do not match the signature of the given function.}
+\emph{\textbf{Note:} If you parallelize your own application using \embb and your compiler emits a lengthy error message containing lots of templates, it is very likely that for at least one process, the ports and their directions do not match the signature of the given function.}
 
 The network needs to know about the processes declared above, so we add them to our network:
 %

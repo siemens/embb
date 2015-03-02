@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -174,7 +174,7 @@ void AllocTest::TestMixedAllocs() {
   PT_EXPECT_NE(cache_aligned, static_cast<void*>(NULL));
   allocated = embb_get_bytes_allocated();
 #ifdef EMBB_DEBUG
-  expected += (1 + 1) * EMBB_CACHE_LINE_SIZE + 3 * sizeof(size_t) - 1;
+  expected += (1 + 1) * EMBB_PLATFORM_CACHE_LINE_SIZE + 3 * sizeof(size_t) - 1;
 #endif // else EMBB_DEBUG
   PT_EXPECT_EQ(allocated, expected);
 

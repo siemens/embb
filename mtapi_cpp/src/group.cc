@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -53,19 +53,11 @@ void Group::Create() {
 }
 
 Task Group::Spawn(Action action) {
-  return Spawn(action, 0);
-}
-
-Task Group::Spawn(Action action, mtapi_uint_t priority) {
-  return Task(action, handle_, priority);
+  return Task(action, handle_);
 }
 
 Task Group::Spawn(mtapi_task_id_t id, Action action) {
-  return Spawn(id, action, 0);
-}
-
-Task Group::Spawn(mtapi_task_id_t id, Action action, mtapi_uint_t priority) {
-  return Task(id, action, handle_, priority);
+  return Task(id, action, handle_);
 }
 
 mtapi_status_t Group::WaitAny(mtapi_timeout_t timeout) {

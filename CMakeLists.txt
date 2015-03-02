@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Siemens AG. All rights reserved.
+# Copyright (c) 2014-2015, Siemens AG. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,7 @@ cmake_minimum_required (VERSION 2.8.9)
 # Version number
 set (EMBB_BASE_VERSION_MAJOR 0)
 set (EMBB_BASE_VERSION_MINOR 2)
-set (EMBB_BASE_VERSION_PATCH 1)
+set (EMBB_BASE_VERSION_PATCH 2)
 
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
@@ -54,6 +54,7 @@ option(BUILD_EXAMPLES "Specify whether examples should be built" OFF)
 option(USE_EXCEPTIONS "Specify whether exceptions should be activated in C++" ON)
 option(INSTALL_DOCS "Specify whether Doxygen docs should be installed" ON)
 option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors" OFF)
+option(USE_AUTOMATIC_INITIALIZATION "Specify whether the MTAPI C++ interface, algorithms and dataflow should automatically intialize the MTAPI node if no explicit initialization is present" ON)
 
 ## LOCAL INSTALLATION OF SUBPROJECT BINARIES
 #

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -60,16 +60,6 @@ class Group {
     );
 
   /**
-    * Runs an Action within the Group with the specified priority.
-    * \return A Task identifying the Action to run
-    * \threadsafe
-    */
-  Task Spawn(
-    Action action,                     /**< [in] The Action to run */
-    mtapi_uint_t priority              /**< [in] The priority to use */
-    );
-
-  /**
     * Runs an Action within the Group. The \c id is returned by WaitAny().
     * \return A Task identifying the Action to run
     * \throws ErrorException if the Task object could not be constructed.
@@ -79,20 +69,6 @@ class Group {
     mtapi_task_id_t id,                /**< [in] The id to return by
                                             WaitAny() */
     Action action                      /**< [in] The Action to run */
-    );
-
-  /**
-    * Runs an Action within the Group with the specified priority. The \c id is
-    * returned by WaitAny().
-    * \return A Task identifying the Action to run
-    * \throws ErrorException if the Task object could not be constructed.
-    * \threadsafe
-    */
-  Task Spawn(
-    mtapi_task_id_t id,                /**< [in] The id to return by
-                                            WaitAny() */
-    Action action,                     /**< [in] The Action to run */
-    mtapi_uint_t priority              /**< [in] The priority to use */
     );
 
   /**

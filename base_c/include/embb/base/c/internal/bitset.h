@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,7 +33,7 @@
 
 #include <embb/base/c/internal/config.h>
 
-EMBB_INLINE void embb_bitset_set(
+EMBB_PLATFORM_INLINE void embb_bitset_set(
   uint64_t * that,
   unsigned int bit
   ) {
@@ -42,7 +42,7 @@ EMBB_INLINE void embb_bitset_set(
   *that |= (1ull << bit);
 }
 
-EMBB_INLINE void embb_bitset_set_n(
+EMBB_PLATFORM_INLINE void embb_bitset_set_n(
   uint64_t * that,
   unsigned int count) {
   assert(NULL != that);
@@ -55,7 +55,7 @@ EMBB_INLINE void embb_bitset_set_n(
   }
 }
 
-EMBB_INLINE void embb_bitset_clear(
+EMBB_PLATFORM_INLINE void embb_bitset_clear(
   uint64_t * that,
   unsigned int bit
   ) {
@@ -64,21 +64,21 @@ EMBB_INLINE void embb_bitset_clear(
   *that &= ~(1ull << bit);
 }
 
-EMBB_INLINE void embb_bitset_clear_all(
+EMBB_PLATFORM_INLINE void embb_bitset_clear_all(
   uint64_t * that
   ) {
   assert(NULL != that);
   *that = 0ull;
 }
 
-EMBB_INLINE unsigned int embb_bitset_is_set(
+EMBB_PLATFORM_INLINE unsigned int embb_bitset_is_set(
   uint64_t const * that,
   unsigned int bit
   ) {
   return (unsigned int)((*that & (1ull << bit)) ? 1 : 0);
 }
 
-EMBB_INLINE void embb_bitset_intersect(
+EMBB_PLATFORM_INLINE void embb_bitset_intersect(
   uint64_t * that,
   uint64_t mask
   ) {
@@ -86,7 +86,7 @@ EMBB_INLINE void embb_bitset_intersect(
   *that &= mask;
 }
 
-EMBB_INLINE void embb_bitset_union(
+EMBB_PLATFORM_INLINE void embb_bitset_union(
   uint64_t * that,
   uint64_t mask
   ) {
@@ -94,7 +94,7 @@ EMBB_INLINE void embb_bitset_union(
   *that |= mask;
 }
 
-EMBB_INLINE unsigned int embb_bitset_count(
+EMBB_PLATFORM_INLINE unsigned int embb_bitset_count(
   uint64_t const * that
   ) {
   unsigned int count = 0;

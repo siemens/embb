@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,32 +31,32 @@
 
 #ifndef DOXYGEN
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 #include <intrin.h>
 #endif
 
-#ifdef EMBB_ARCH_X86
+#ifdef EMBB_PLATFORM_ARCH_X86
 
-#ifdef EMBB_COMPILER_MSVC
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
 extern void __fastcall embb_internal__atomic_memory_barrier_asm();
 // Read/write barrier
-EMBB_INLINE void __fastcall embb_atomic_memory_barrier() {
+EMBB_PLATFORM_INLINE void __fastcall embb_atomic_memory_barrier() {
   _ReadWriteBarrier();
   embb_internal__atomic_memory_barrier_asm();
   _ReadWriteBarrier();
 }
-#elif defined(EMBB_COMPILER_GNUC)
+#elif defined(EMBB_PLATFORM_COMPILER_GNUC)
 // Read/write barrier
-EMBB_INLINE void embb_atomic_memory_barrier() {
+EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier() {
   __asm__ __volatile__ ("mfence" : : : "memory");
 }
 #else
 #error "No atomic fetch and store implementation found"
 #endif
 
-#elif defined(EMBB_ARCH_ARM)
+#elif defined(EMBB_PLATFORM_ARCH_ARM)
 
-EMBB_INLINE void embb_atomic_memory_barrier() {
+EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier() {
   __asm__ __volatile__ ("dmb" : : : "memory");
 }
 
