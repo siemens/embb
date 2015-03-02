@@ -1,6 +1,45 @@
 ﻿Embedded Multicore Building Blocks (EMB²)
 =========================================
 
+Version 0.2.3
+-------------
+
+### Bug fixes:
+- Fixed freeing of temporary buffer in MergeSortAllocate
+- Fixed minor bugs in mtapi_c
+- Fixed paths in Doxyfile.in template
+
+### Changes and improvements:
+- Changed use of partitioners in ForEach, Reduce, Scan, Count, and MergeSort
+- Added guard definition to QuickSort and MergeSort requiring random access iterators as inputs
+- Unified behavior of algorithms on empty input
+- Cleaned up MergeSort and Scan
+- Extended computation of number of cores to take into account affinities
+- Changed MTAPI_CHECK_STATUS in examples to use exit() instead of abort()
+- Added overload for std::exception::what() in embb::base::Exception
+- Added missing include in execution_policy.cc
+- Added tests for Thread::ID (base_cpp), ExecutionPolicy (mtapi_cpp), and error cases in mtapi_c
+- Added tests on empty and negative input ranges in algorithms
+
+### Features:
+- None
+
+### Build system:
+- Added option to CMake to toggle automatic initialization of MTAPI C++ interface
+- Changed run_tests_cygwin script to work with /bin/sh
+- Modified create_tarball.sh script for completely automatic tarball creation
+- Removed cppcheck warnings
+- Removed cpplint warnings
+- Updated partest
+
+### Documentation:
+- Added paragraphs in tutorial and README regarding performance impact of automatic initialization of MTAPI C++ interface
+- Removed automatic collapsing of trees in Doxygen documentation due to incompatibility with latest versions of Doxygen
+- Modified reference manual to consistently use function object concept
+- Added description of default node attributes in mtapi_c and fixed typo in mtapi_cpp documentation
+- Modified paragraph on documentation in README and fixed typo
+
+
 Version 0.2.2
 -------------
 
