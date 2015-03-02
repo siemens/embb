@@ -40,8 +40,6 @@ function (CreateDoxygenDocumentationTarget)
     if (TARGET doxygen)
       # Do nothing, since the repeated adding causes an error
     else()
-      set(DOXYGEN_TEMPLATE_FILES
-      "doc/reference/header.html")
 
       file(COPY ${DOXYGEN_TEMPLATE_FILES} DESTINATION ${PROJECT_BINARY_DIR})
 
