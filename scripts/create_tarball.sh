@@ -168,9 +168,9 @@ PROJECT_DIR_FULLPATH=`realpath ${d}`
 echo "--> Generating Doxygen"
 
 REMEMBER_CUR_DIR=$(pwd)
-cd $MYTMPDIR_DOXY_BUILD
+cd "$MYTMPDIR_DOXY_BUILD"
 echo "---> Initialize CMake"
-redirect_cmd cmake $PROJECT_DIR_FULLPATH 
+redirect_cmd cmake "$PROJECT_DIR_FULLPATH" 
 echo "---> Call CMake with target Doxygen"
 redirect_cmd cmake --build . --target doxygen
 REFMAN_TEXFILE="$MYTMPDIR_DOXY_BUILD/latex/refman.tex"
@@ -197,7 +197,7 @@ if [ "$DO_CREATE_LATEXDOC" = true ] ; then
 fi
 
 
-cd $REMEMBER_CUR_DIR
+cd "$REMEMBER_CUR_DIR"
 
 echo "--> Calling rsync to temporary folder 1/2 ($MYTMPDIR)"
 
@@ -264,7 +264,7 @@ TUTORIAL_PDF_TARGET="$MYTMPDIR/${n}/doc/tutorial/tutorial.pdf"
 
 if [ -f "$TUTORIAL_TEX_DIR/tutorial.tex" ]; then
 
-        cd $TUTORIAL_TEX_DIR	
+        cd "$TUTORIAL_TEX_DIR"	
         for ((i=1; i<=$PDFRUNS; i++)); do
 
                 echo "---> LaTeX Run ($i/$PDFRUNS)"
@@ -275,7 +275,7 @@ if [ -f "$TUTORIAL_TEX_DIR/tutorial.tex" ]; then
                 cp $TUTORIAL_PDF_SOURCE $TUTORIAL_PDF_TARGET
         fi
 fi
-cd $REMEMBER_CUR_DIR
+cd "$REMEMBER_CUR_DIR"
 
 REFMAN_TARGET="$MYTMPDIR/${n}/doc/reference/reference.pdf"
 REFMAN_SOURCE="$MYTMPDIR_DOXY_BUILD/latex/refman.pdf"
@@ -288,7 +288,7 @@ INTEGRATE_SNIPPETS_SCRIPT="insert_snippets.py"
 EXAMPLES_TARGET_DIR="$MYTMPDIR/${n}/doc/"
 
 if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
-        cd $EXAMPLES_DIR
+        cd "$EXAMPLES_DIR"
 
 
         echo "---> Calling integrate script"
@@ -306,7 +306,7 @@ if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
         fi
 fi
 
-cd $REMEMBER_CUR_DIR
+cd "$REMEMBER_CUR_DIR"
 
 echo "--> Copy reference manual"
 if [ -f $REFMAN_SOURCE ]; then
