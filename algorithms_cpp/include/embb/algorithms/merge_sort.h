@@ -177,7 +177,7 @@ void MergeSortAllocate(
 
   EMBB_TRY {
     MergeSort(first, last, temporary, comparison, policy, block_size);
-  } EMBB_CATCH (embb::base::ErrorException & e) {
+  } EMBB_CATCH (embb::base::ErrorException &) {
     // embb exception handling does not support catch(...) and rethrow yet.
     Alloc::Free(temporary);
     EMBB_THROW(embb::base::ErrorException, \
