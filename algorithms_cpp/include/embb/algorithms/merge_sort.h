@@ -174,12 +174,14 @@ void MergeSortAllocate(
   }
   value_type* temporary = static_cast<value_type*>(
                             Alloc::Allocate(distance * sizeof(value_type)));
+
   EMBB_TRY {
     MergeSort(first, last, temporary, comparison, policy, block_size);
   } EMBB_CATCH (embb::base::ErrorException & e) {
     // embb exception handling does not support catch(...) and rethrow yet.
     Alloc::Free(temporary);
-    EMBB_THROW(embb::base::ErrorException, e.what());
+    EMBB_THROW(embb::base::ErrorException, \
+      "Rethrown exception of type ErrorException");
   }
   Alloc::Free(temporary);
 }
