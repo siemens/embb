@@ -151,7 +151,7 @@ void TaskTest::TestBasic() {
 
   for (ii = 0; ii < 100; ii++) {
     status = MTAPI_ERR_UNKNOWN;
-    mtapi_task_wait(task[ii], 100, &status);
+    mtapi_task_wait(task[ii], 100000, &status);
     MTAPI_CHECK_STATUS(status);
   }
 
