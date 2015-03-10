@@ -586,11 +586,9 @@ mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
     }
 
     if (pushed) {
-      /* signal all threads */
-      for (ii = 0; ii < scheduler->worker_count; ii++) {
-        embb_condition_notify_one(
-          &scheduler->worker_contexts[ii].work_available);
-      }
+      /* signal the worker thread a task was pushed to */
+      embb_condition_notify_one(
+        &scheduler->worker_contexts[ii].work_available);
     } else {
       /* task could not be launched */
       embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
