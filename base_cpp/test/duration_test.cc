@@ -32,9 +32,12 @@ namespace test {
 
 DurationTest::DurationTest() {
   CreateUnit("Seconds").Add(&DurationTest::Test<internal::Seconds>, this);
-  CreateUnit("Milliseconds").Add(&DurationTest::Test<internal::Milliseconds>, this);
-  CreateUnit("Microseconds").Add(&DurationTest::Test<internal::Microseconds>, this);
-  CreateUnit("Nanoseconds").Add(&DurationTest::Test<internal::Nanoseconds>, this);
+  CreateUnit("Milliseconds").Add(&DurationTest::Test<internal::Milliseconds>, 
+                                 this);
+  CreateUnit("Microseconds").Add(&DurationTest::Test<internal::Microseconds>, 
+                                 this);
+  CreateUnit("Nanoseconds").Add(&DurationTest::Test<internal::Nanoseconds>, 
+                                this);
 }
 
 } // namespace test
