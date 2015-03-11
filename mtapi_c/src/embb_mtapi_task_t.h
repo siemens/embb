@@ -68,6 +68,7 @@ struct embb_mtapi_task_struct {
   embb_mtapi_spinlock_t state_lock;
   volatile mtapi_task_state_t state;
   embb_atomic_unsigned_int current_instance;
+  embb_atomic_unsigned_int instances_todo;
 
   mtapi_status_t error_code;
 };
@@ -106,7 +107,7 @@ void embb_mtapi_task_finalize(embb_mtapi_task_t* that);
  * detached.
  * \memberof embb_mtapi_task_struct
  */
-void embb_mtapi_task_execute(
+mtapi_boolean_t embb_mtapi_task_execute(
   embb_mtapi_task_t* that,
   embb_mtapi_task_context_t * context);
 

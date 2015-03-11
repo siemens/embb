@@ -95,9 +95,11 @@ void embb_mtapi_task_finalize(embb_mtapi_task_t* that) {
   embb_mtapi_spinlock_finalize(&that->state_lock);
 }
 
-void embb_mtapi_task_execute(
+mtapi_boolean_t embb_mtapi_task_execute(
   embb_mtapi_task_t* that,
   embb_mtapi_task_context_t * context) {
+  unsigned int todo = that->attributes.num_instances;
+
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != context);
 
@@ -110,17 +112,25 @@ void embb_mtapi_task_execute(
     embb_mtapi_action_t* local_action =
       embb_mtapi_action_pool_get_storage_for_handle(
       context->thread_context->node->action_pool, that->action);
-    local_action->action_function(
-      that->arguments,
-      that->arguments_size,
-      that->result_buffer,
-      that->result_size,
-      local_action->node_local_data,
-      local_action->node_local_data_size,
-      context);
+    /* only continue if there was no error so far */
+    if (context->task->error_code == MTAPI_SUCCESS) {
+      local_action->action_function(
+        that->arguments,
+        that->arguments_size,
+        that->result_buffer,
+        that->result_size,
+        local_action->node_local_data,
+        local_action->node_local_data_size,
+        context);
+    }
     embb_atomic_memory_barrier();
-    /* task has completed successfully */
-    embb_mtapi_task_set_state(that, MTAPI_TASK_COMPLETED);
+    todo = embb_atomic_fetch_and_add_unsigned_int(
+      &that->instances_todo, (unsigned int)-1);
+
+    if (todo == 1) {
+      /* task has completed successfully */
+      embb_mtapi_task_set_state(that, MTAPI_TASK_COMPLETED);
+    }
     embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
   } else {
     /* action was deleted, task did not complete */
@@ -128,13 +138,18 @@ void embb_mtapi_task_execute(
     embb_mtapi_task_set_state(that, MTAPI_TASK_ERROR);
   }
 
-  /* is task associated with a group? */
-  if (embb_mtapi_group_pool_is_handle_valid(
-    context->thread_context->node->group_pool, that->group)) {
-    embb_mtapi_group_t* local_group =
-      embb_mtapi_group_pool_get_storage_for_handle(
-      context->thread_context->node->group_pool, that->group);
-    embb_mtapi_task_queue_push(&local_group->queue, that);
+  if (todo == 1) {
+    /* is task associated with a group? */
+    if (embb_mtapi_group_pool_is_handle_valid(
+      context->thread_context->node->group_pool, that->group)) {
+      embb_mtapi_group_t* local_group =
+        embb_mtapi_group_pool_get_storage_for_handle(
+        context->thread_context->node->group_pool, that->group);
+      embb_mtapi_task_queue_push(&local_group->queue, that);
+    }
+    return MTAPI_TRUE;
+  } else {
+    return MTAPI_FALSE;
   }
 }
 
@@ -189,6 +204,9 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
           mtapi_taskattr_init(&task->attributes, &local_status);
         }
 
+        embb_atomic_store_unsigned_int(
+          &task->instances_todo, task->attributes.num_instances);
+
         if (embb_mtapi_group_pool_is_handle_valid(node->group_pool, group)) {
           embb_mtapi_group_t* local_group =
             embb_mtapi_group_pool_get_storage_for_handle(
@@ -233,8 +251,12 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
 
           embb_mtapi_task_set_state(task, MTAPI_TASK_SCHEDULED);
 
-          was_scheduled =
-            embb_mtapi_scheduler_schedule_task(scheduler, task);
+          was_scheduled = MTAPI_TRUE;
+
+          for (mtapi_uint_t kk = 0; kk < task->attributes.num_instances; kk++) {
+            was_scheduled = was_scheduled &
+              embb_mtapi_scheduler_schedule_task(scheduler, task, kk);
+          }
 
           if (was_scheduled) {
             /* if task is detached, do not return a handle, it will be deleted

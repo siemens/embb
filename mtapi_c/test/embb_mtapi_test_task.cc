@@ -33,6 +33,7 @@
 #include <embb/base/c/internal/unused.h>
 
 #define JOB_TEST_TASK 42
+#define JOB_TEST_MULTIINSTANCE_TASK 43
 #define TASK_TEST_ID 23
 
 static void testTaskAction(
@@ -44,7 +45,9 @@ static void testTaskAction(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* task_context) {
   int ii;
-  mtapi_uint_t core_num = mtapi_context_corenum_get(task_context, MTAPI_NULL);
+  mtapi_status_t status;
+  mtapi_uint_t core_num = mtapi_context_corenum_get(task_context, &status);
+  MTAPI_CHECK_STATUS(status);
   srand(core_num);
   for (ii = 1000; ii < rand()%1000000; ii ++) {
   }
@@ -52,6 +55,42 @@ static void testTaskAction(
     *reinterpret_cast<const int*>(args), core_num);
   EMBB_UNUSED(args);
 }
+
+void testMultiInstanceTaskAction(
+  const void* args,
+  mtapi_size_t arg_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* node_local_data,
+  mtapi_size_t node_local_data_size,
+  mtapi_task_context_t* task_context)
+{
+  EMBB_UNUSED(args);
+  EMBB_UNUSED(arg_size);
+
+  EMBB_UNUSED(node_local_data);
+  EMBB_UNUSED(node_local_data_size);
+
+  mtapi_status_t status;
+  mtapi_uint_t this_instance, num_instances;
+  mtapi_uint_t* result;
+  num_instances = mtapi_context_numinst_get(task_context, &status);
+  this_instance = mtapi_context_instnum_get(task_context, &status);
+
+  /* check result buffer size... */
+  if (result_buffer_size == sizeof(int) * num_instances) {
+    /* ... and cast the result buffer */
+    result = (mtapi_uint_t*)result_buffer;
+  } else {
+    mtapi_context_status_set(task_context, MTAPI_ERR_RESULT_SIZE, &status);
+    MTAPI_CHECK_STATUS(status);
+    return;
+  }
+
+  /* dummy for calculating result */
+  result[this_instance] = this_instance;
+}
+
 
 static void testDoSomethingElse() {
 }
@@ -160,10 +199,66 @@ void TaskTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
+  mtapi_action_hndl_t multiinstance_action = mtapi_action_create(
+    JOB_TEST_MULTIINSTANCE_TASK,
+    testMultiInstanceTaskAction,
+    MTAPI_NULL,
+    0,
+    &action_attr,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_job_hndl_t multiinstance_job = mtapi_job_get(
+    JOB_TEST_MULTIINSTANCE_TASK, THIS_DOMAIN_ID, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_task_attributes_t task_attr;
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_taskattr_init(&task_attr, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  const int task_instances = 5;
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_taskattr_set(&task_attr, MTAPI_TASK_INSTANCES,
+    MTAPI_ATTRIBUTE_VALUE(task_instances), MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_uint_t result[task_instances];
+  for (mtapi_uint_t ii = 0; ii < task_instances; ii++) {
+    result[ii] = task_instances + 1;
+  }
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_task_hndl_t multiinstance_task =
+    mtapi_task_start(MTAPI_TASK_ID_NONE, multiinstance_job,
+    MTAPI_NULL, 0,
+    &result[0], sizeof(mtapi_uint_t) * task_instances,
+    &task_attr,
+    MTAPI_GROUP_NONE,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_task_wait(multiinstance_task, MTAPI_INFINITE, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  for (mtapi_uint_t ii = 0; ii < task_instances; ii++) {
+    PT_EXPECT_EQ(result[ii], ii);
+  }
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_action_delete(multiinstance_action, 10, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
   mtapi_finalize(&status);
   MTAPI_CHECK_STATUS(status);
 
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
 
   embb_mtapi_log_info("...done\n\n");
 }
