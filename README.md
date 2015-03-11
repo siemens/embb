@@ -21,10 +21,10 @@ processor cores. It builds on MTAPI, a standardized programming interface for
 leveraging task parallelism in embedded systems containing symmetric or
 asymmetric multicore processors. A core feature of MTAPI is low-overhead
 scheduling of fine-grained tasks among the available cores during runtime.
-Unlike existing libraries, EMB² supports task priorities, which allows the
-creation of soft real-time systems. Additionally, the scheduling strategy can
-be optimized for non-functional requirements such as minimal latency and
-fairness.
+Unlike existing libraries, EMB² supports task priorities and affinities, which
+allows the creation of soft real-time systems. Additionally, the scheduling
+strategy can be optimized for non-functional requirements such as minimal
+latency and fairness.
 
 Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent
 data structures, and skeletons for implementing stream processing applications
