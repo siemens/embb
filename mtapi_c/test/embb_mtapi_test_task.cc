@@ -63,8 +63,7 @@ void testMultiInstanceTaskAction(
   mtapi_size_t result_buffer_size,
   const void* node_local_data,
   mtapi_size_t node_local_data_size,
-  mtapi_task_context_t* task_context)
-{
+  mtapi_task_context_t* task_context) {
   EMBB_UNUSED(args);
   EMBB_UNUSED(arg_size);
 
@@ -80,7 +79,7 @@ void testMultiInstanceTaskAction(
   /* check result buffer size... */
   if (result_buffer_size == sizeof(int) * num_instances) {
     /* ... and cast the result buffer */
-    result = (mtapi_uint_t*)result_buffer;
+    result = reinterpret_cast<mtapi_uint_t*>(result_buffer);
   } else {
     mtapi_context_status_set(task_context, MTAPI_ERR_RESULT_SIZE, &status);
     MTAPI_CHECK_STATUS(status);
@@ -219,24 +218,24 @@ void TaskTest::TestBasic() {
   mtapi_taskattr_init(&task_attr, &status);
   MTAPI_CHECK_STATUS(status);
 
-  const int task_instances = 5;
+  const int kTaskInstances = 5;
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_taskattr_set(&task_attr, MTAPI_TASK_INSTANCES,
-    MTAPI_ATTRIBUTE_VALUE(task_instances), MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
+    MTAPI_ATTRIBUTE_VALUE(kTaskInstances), MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
     &status);
   MTAPI_CHECK_STATUS(status);
 
-  mtapi_uint_t result[task_instances];
-  for (mtapi_uint_t ii = 0; ii < task_instances; ii++) {
-    result[ii] = task_instances + 1;
+  mtapi_uint_t result[kTaskInstances];
+  for (mtapi_uint_t ii = 0; ii < kTaskInstances; ii++) {
+    result[ii] = kTaskInstances + 1;
   }
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_task_hndl_t multiinstance_task =
     mtapi_task_start(MTAPI_TASK_ID_NONE, multiinstance_job,
     MTAPI_NULL, 0,
-    &result[0], sizeof(mtapi_uint_t) * task_instances,
+    &result[0], sizeof(mtapi_uint_t) * kTaskInstances,
     &task_attr,
     MTAPI_GROUP_NONE,
     &status);
@@ -246,7 +245,7 @@ void TaskTest::TestBasic() {
   mtapi_task_wait(multiinstance_task, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
-  for (mtapi_uint_t ii = 0; ii < task_instances; ii++) {
+  for (mtapi_uint_t ii = 0; ii < kTaskInstances; ii++) {
     PT_EXPECT_EQ(result[ii], ii);
   }
 
