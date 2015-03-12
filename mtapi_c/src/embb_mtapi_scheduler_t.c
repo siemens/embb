@@ -356,12 +356,14 @@ int embb_mtapi_scheduler_worker(void * arg) {
       counter++;
     } else {
       /* no work, go to sleep */
+      embb_atomic_store_int(&thread_context->is_sleeping, 1);
       embb_mutex_lock(&thread_context->work_available_mutex);
       embb_condition_wait_for(
         &thread_context->work_available,
         &thread_context->work_available_mutex,
         &sleep_duration);
       embb_mutex_unlock(&thread_context->work_available_mutex);
+      embb_atomic_store_int(&thread_context->is_sleeping, 0);
     }
   }
 
@@ -593,8 +595,10 @@ mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
 
     if (pushed) {
       /* signal the worker thread a task was pushed to */
-      embb_condition_notify_one(
-        &scheduler->worker_contexts[ii].work_available);
+      if (embb_atomic_load_int(&scheduler->worker_contexts[ii].is_sleeping)) {
+        embb_condition_notify_one(
+          &scheduler->worker_contexts[ii].work_available);
+      }
     } else {
       /* task could not be launched */
       embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
