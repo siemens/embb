@@ -41,6 +41,9 @@ class SchedulerSequential : public Scheduler {
   virtual void Spawn(Action & action) {
     action.RunSequential();
   }
+  virtual void Enqueue(int, Action & action) {
+    action.RunSequential();
+  }
   virtual void WaitForSlice(int /*slice*/) {}
 };
 

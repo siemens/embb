@@ -60,7 +60,7 @@ bool sourceFunc(int & out) {
   source_array[source_counter] = out;
   source_counter++;
 
-  return source_counter < 12;
+  return source_counter < TEST_COUNT;
 }
 
 embb::base::Atomic<int> pred_counter;

@@ -24,3 +24,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <embb/dataflow/internal/node.h>
+
+int embb::dataflow::internal::Node::next_process_id_ = 0;
