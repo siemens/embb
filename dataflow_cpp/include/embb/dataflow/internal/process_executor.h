@@ -62,6 +62,10 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1> > {
     }
   }
 
+  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+  }
+
  private:
   FunctionType function_;
 };
@@ -89,6 +93,11 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2> > {
       outputs.template Get<0>().Send(Signal<O1>(clock));
       outputs.template Get<1>().Send(Signal<O2>(clock));
     }
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
   }
 
  private:
@@ -122,6 +131,12 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3> > {
       outputs.template Get<1>().Send(Signal<O2>(clock));
       outputs.template Get<2>().Send(Signal<O3>(clock));
     }
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
+    outputs.template Get<2>().SendInit(init_data);
   }
 
  private:
@@ -161,6 +176,13 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3, O4> > {
     }
   }
 
+  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3, O4> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
+    outputs.template Get<2>().SendInit(init_data);
+    outputs.template Get<3>().SendInit(init_data);
+  }
+
  private:
   FunctionType function_;
 };
@@ -187,6 +209,10 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1> > {
     } else {
       outputs.template Get<0>().Send(Signal<O1>(clock));
     }
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
   }
 
  private:
@@ -218,6 +244,11 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2> > {
       outputs.template Get<0>().Send(Signal<O1>(clock));
       outputs.template Get<1>().Send(Signal<O2>(clock));
     }
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
   }
 
  private:
@@ -255,6 +286,12 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2, O3> > {
     }
   }
 
+  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
+    outputs.template Get<2>().SendInit(init_data);
+  }
+
  private:
   FunctionType function_;
 };
@@ -282,6 +319,10 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1> > {
     } else {
       outputs.template Get<0>().Send(Signal<O1>(clock));
     }
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
   }
 
  private:
@@ -317,6 +358,11 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1, O2> > {
     }
   }
 
+  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
+  }
+
  private:
   FunctionType function_;
 };
@@ -346,6 +392,10 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3, I4>, Outputs<Slices, O1> > {
     } else {
       outputs.template Get<0>().Send(Signal<O1>(clock));
     }
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
   }
 
  private:

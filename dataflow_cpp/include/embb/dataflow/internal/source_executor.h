@@ -36,6 +36,8 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
+class Scheduler;
+
 template <class OUTPUTS>
 class SourceExecutor;
 
@@ -53,6 +55,10 @@ class SourceExecutor< Outputs<Slices, O1> > {
     bool result = function_(o1);
     outputs.template Get<0>().Send(Signal<O1>(clock, o1));
     return result;
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
   }
 
  private:
@@ -75,6 +81,11 @@ class SourceExecutor< Outputs<Slices, O1, O2> > {
     outputs.template Get<0>().Send(Signal<O1>(clock, o1));
     outputs.template Get<1>().Send(Signal<O2>(clock, o2));
     return result;
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
   }
 
  private:
@@ -101,6 +112,12 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3> > {
     return result;
   }
 
+  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
+    outputs.template Get<2>().SendInit(init_data);
+  }
+
  private:
   FunctionType function_;
 };
@@ -125,6 +142,13 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3, O4> > {
     outputs.template Get<2>().Send(Signal<O3>(clock, o3));
     outputs.template Get<3>().Send(Signal<O4>(clock, o4));
     return result;
+  }
+
+  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3, O4> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
+    outputs.template Get<2>().SendInit(init_data);
+    outputs.template Get<3>().SendInit(init_data);
   }
 
  private:
@@ -154,6 +178,15 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3, O4, O5> > {
     outputs.template Get<3>().Send(Signal<O4>(clock, o4));
     outputs.template Get<4>().Send(Signal<O5>(clock, o5));
     return result;
+  }
+
+  void Init(
+    InitData * init_data, Outputs<Slices, O1, O2, O3, O4, O5> & outputs) {
+    outputs.template Get<0>().SendInit(init_data);
+    outputs.template Get<1>().SendInit(init_data);
+    outputs.template Get<2>().SendInit(init_data);
+    outputs.template Get<3>().SendInit(init_data);
+    outputs.template Get<4>().SendInit(init_data);
   }
 
  private:

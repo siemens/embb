@@ -39,6 +39,8 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
+class Scheduler;
+
 template <typename, int>
 class Out;
 
@@ -94,6 +96,10 @@ class In {
     history_.push_back(value);
     lock_.Unlock();
 #endif
+  }
+
+  void ReceiveInit(InitData * init_data) {
+    listener_->OnInit(init_data);
   }
 };
 

@@ -78,6 +78,11 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
     executor_.Execute(clock, inputs_, outputs_);
   }
 
+  virtual void Init(InitData * init_data) {
+    SetScheduler(init_data->sched);
+    executor_.Init(init_data, outputs_);
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }
@@ -140,6 +145,10 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
       action_[idx] = Action(this, clock);
       sched_->Spawn(action_[idx]);
     }
+  }
+
+  virtual void OnInit(InitData * init_data) {
+    Init(init_data);
   }
 
  private:

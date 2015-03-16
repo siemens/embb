@@ -142,7 +142,7 @@ is used to construct the sink:
 
 \emph{\textbf{Note:} If you parallelize your own application using \embb and your compiler emits a lengthy error message containing lots of templates, it is very likely that for at least one process, the ports and their directions do not match the signature of the given function.}
 
-The network needs to know about the processes declared above, so we add them to our network:
+The network needs to know about the source declared above, so we add it to our network:
 %
 \\\inputlisting{../examples/dataflow/dataflow_add-snippet.h}
 %
@@ -303,11 +303,11 @@ The class-based approach has several advantages besides the use of templates: Fi
 
 Each instance of the class \lstinline|Network| maintains a list of source processes that belong to the network.
 % When you create a source process using \lstinline|MakeSource|, it is automatically added to this list. Otherwise, you must explicitly add it by a call to \lstinline|Add|. For example, if we want to feed our sorting network \lstinline|nw| with streams of integer values, we may write:
-You must explicitly add all processes to the network by a call to \lstinline|Add|. For example, if we want to feed our sorting network \lstinline|nw| with four streams of integer values, we may write:
+You must explicitly add all sources to the network by a call to \lstinline|AddSource|. For example, if we want to feed our sorting network \lstinline|nw| with four streams of integer values, we may write:
 %
 \\\inputlisting{../examples/dataflow/dataflow_declare_add_sources-snippet.h}
 %
-%This is only necessary for source processes. All other processes are automatically found via a depth-first search starting from the source processes.
+This is only necessary for source processes. All other processes are automatically found via a depth-first search starting from the source processes.
 
 The code for the comparators looks like this:
 %

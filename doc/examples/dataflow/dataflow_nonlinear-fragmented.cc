@@ -60,18 +60,10 @@ void RunDataflowNonLinear() {
     process4( embb::base::MakeFunction(comparator, &Comparator<int>::Run) ),
     process5( embb::base::MakeFunction(comparator, &Comparator<int>::Run) );
 
-  nw.Add(process1);
-  nw.Add(process2);
-  nw.Add(process3);
-  nw.Add(process4);
-  nw.Add(process5);
-
   Consumer<int> consumer;
 
   Network::Sink<int, int, int, int>
     sink1(embb::base::MakeFunction(consumer, &Consumer<int>::Run));
-
-  nw.Add(sink1);
 
   source1.GetOutput<0>() >> process1.GetInput<0>();
   source2.GetOutput<0>() >> process2.GetInput<0>();

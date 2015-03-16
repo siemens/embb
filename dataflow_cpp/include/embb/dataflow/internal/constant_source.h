@@ -56,6 +56,11 @@ class ConstantSource
     GetOutput<0>().Send(Signal<Type>(clock, value_));
   }
 
+  virtual void Init(InitData * init_data) {
+    SetScheduler(init_data->sched);
+    GetOutput<0>().SendInit(init_data);
+  }
+
   virtual bool Start(int clock) {
     Run(clock);
     return true;

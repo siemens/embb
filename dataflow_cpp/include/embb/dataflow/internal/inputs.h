@@ -57,6 +57,7 @@ class Inputs<Slices, embb::base::internal::Nil, embb::base::internal::Nil,
   bool AreNoneBlank(int /*clock*/) { return false; }
   bool AreAtClock(int /*clock*/) { return true; }
   virtual void OnClock(int /*clock*/) {}
+  virtual void OnInit(InitData * /*init_data*/) {}
 };
 
 template <int Slices, typename T1>
@@ -70,6 +71,7 @@ class Inputs<Slices, T1, embb::base::internal::Nil, embb::base::internal::Nil,
   Inputs() {
     for (int ii = 0; ii < Slices; ii++)
       count_[ii] = 1;
+    test_count_ = 1;
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -97,8 +99,14 @@ class Inputs<Slices, T1, embb::base::internal::Nil, embb::base::internal::Nil,
       listener_->OnClock(clock);
     }
   }
+  virtual void OnInit(InitData * init_data) {
+    if (--test_count_ == 0) {
+      listener_->OnInit(init_data);
+    }
+  }
  private:
   embb::base::Atomic<int> count_[Slices];
+  int test_count_;
   ClockListener * listener_;
 };
 
@@ -112,6 +120,7 @@ class Inputs<Slices, T1, T2, embb::base::internal::Nil,
   Inputs() {
     for (int ii = 0; ii < Slices; ii++)
       count_[ii] = 2;
+    test_count_ = 2;
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -143,8 +152,14 @@ class Inputs<Slices, T1, T2, embb::base::internal::Nil,
       listener_->OnClock(clock);
     }
   }
+  virtual void OnInit(InitData * init_data) {
+    if (--test_count_ == 0) {
+      listener_->OnInit(init_data);
+    }
+  }
  private:
   embb::base::Atomic<int> count_[Slices];
+  int test_count_;
   ClockListener * listener_;
 };
 
@@ -158,6 +173,7 @@ class Inputs<Slices, T1, T2, T3, embb::base::internal::Nil,
   Inputs() {
     for (int ii = 0; ii < Slices; ii++)
       count_[ii] = 3;
+    test_count_ = 3;
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -193,8 +209,14 @@ class Inputs<Slices, T1, T2, T3, embb::base::internal::Nil,
       listener_->OnClock(clock);
     }
   }
+  virtual void OnInit(InitData * init_data) {
+    if (--test_count_ == 0) {
+      listener_->OnInit(init_data);
+    }
+  }
  private:
   embb::base::Atomic<int> count_[Slices];
+  int test_count_;
   ClockListener * listener_;
 };
 
@@ -207,6 +229,7 @@ class Inputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
   Inputs() {
     for (int ii = 0; ii < Slices; ii++)
       count_[ii] = 4;
+    test_count_ = 4;
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -246,8 +269,14 @@ class Inputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
       listener_->OnClock(clock);
     }
   }
+  virtual void OnInit(InitData * init_data) {
+    if (--test_count_ == 0) {
+      listener_->OnInit(init_data);
+    }
+  }
  private:
   embb::base::Atomic<int> count_[Slices];
+  int test_count_;
   ClockListener * listener_;
 };
 
@@ -261,6 +290,7 @@ class Inputs
   Inputs() {
     for (int ii = 0; ii < Slices; ii++)
       count_[ii] = 5;
+    test_count_ = 5;
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -304,8 +334,14 @@ class Inputs
       listener_->OnClock(clock);
     }
   }
+  virtual void OnInit(InitData * init_data) {
+    if (--test_count_ == 0) {
+      listener_->OnInit(init_data);
+    }
+  }
  private:
   embb::base::Atomic<int> count_[Slices];
+  int test_count_;
   ClockListener * listener_;
 };
 

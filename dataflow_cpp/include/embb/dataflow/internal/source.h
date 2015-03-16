@@ -59,6 +59,11 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
     not_done_ = executor_.Execute(clock, outputs_);
   }
 
+  virtual void Init(InitData * init_data) {
+    SetScheduler(init_data->sched);
+    executor_.Init(init_data, outputs_);
+  }
+
   virtual bool Start(int clock) {
     if (not_done_) {
       Run(clock);

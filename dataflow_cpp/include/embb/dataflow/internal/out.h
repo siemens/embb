@@ -35,6 +35,8 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
+class Scheduler;
+
 template <typename Type, int Slices>
 class Out {
  public:
@@ -47,6 +49,12 @@ class Out {
   void Send(SignalType const & value) {
     for (size_t ii = 0; ii < targets_.size(); ii++) {
       targets_[ii]->Receive(value);
+    }
+  }
+
+  void SendInit(InitData * init_data) {
+    for (size_t ii = 0; ii < targets_.size(); ii++) {
+      targets_[ii]->ReceiveInit(init_data);
     }
   }
 

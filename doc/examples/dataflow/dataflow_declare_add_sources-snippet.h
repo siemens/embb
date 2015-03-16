@@ -14,7 +14,7 @@
     source4(
       embb::base::MakeFunction(producer4, &Producer<int>::Run) );
 
-  nw.Add(source1);
-  nw.Add(source2);
-  nw.Add(source3);
-  nw.Add(source4);
+  nw.AddSource(source1);
+  nw.AddSource(source2);
+  nw.AddSource(source3);
+  nw.AddSource(source4);
