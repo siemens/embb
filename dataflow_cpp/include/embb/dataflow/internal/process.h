@@ -122,7 +122,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
         }
         if (clk_res > clk) {
           if (next_clock_.CompareAndSwap(clk, clk_res)) {
-            while (queued_clock_.Load() < clk);
+            while (queued_clock_.Load() < clk) continue;
             for (int ii = clk; ii < clk_res; ii++) {
               const int idx = ii % Slices;
               action_[idx] = Action(this, ii);
