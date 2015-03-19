@@ -31,6 +31,7 @@
 #include <embb/base/thread_specific_storage.h>
 #include <embb/base/thread.h>
 #include <embb/containers/wait_free_array_value_pool.h>
+#include <embb/containers/internal/fixed_size_list.h>
 #include <embb/base/function.h>
 #include <algorithm>
 
@@ -43,113 +44,6 @@
 namespace embb {
 namespace containers {
 namespace internal {
-/**
- * A list with fixed size, implemented as an array. Replaces std::vector that
- * was used in previous hazard pointer implementation.
- *
- * Provides iterators, so we can apply algorithms from the STL.
- *
- * \tparam ElementT Type of the elements contained in the list.
- */
-template< typename ElementT >
-class FixedSizeList {
- private:
-   /**
-    * Capacity of the list
-    */
-  size_t max_size;
-
-  /**
-   * Size of the list
-   */
-  size_t size;
-
-  /**
-   * Pointer to the array containing the list
-   */
-  ElementT* elementsArray;
-
-  /**
-   * Copy constructor not implemented. Would require dynamic memory allocation.
-   */
-  FixedSizeList(
-    const FixedSizeList &
-    /**< [IN] Other list */);
-
- public:
-  /**
-   * Definition of an iterator
-   */
-  typedef ElementT * iterator;
-
-  /**
-   * Definition of a const iterator
-   */
-  typedef const ElementT * const_iterator;
-
-  /**
-   * Constructor, initializes list with given capacity
-   */
-  FixedSizeList(
-    size_t max_size
-    /**< [IN] Capacity of the list */);
-
-  /**
-   * Gets the current size of the list
-   *
-   * \return Size of the list
-   */
-  inline size_t GetSize() const;
-
-  /**
-   * Gets the capacity of the list
-   *
-   * \return The capacity of the list
-   */
-  inline size_t GetMaxSize() const;
-
-  /**
-   * Removes all elements from the list without changing the capacity
-   */
-  inline void clear();
-
-  /**
-   * Iterator pointing to the first element
-   *
-   * \return Begin iterator
-   */
-  iterator begin() const;
-
-  /**
-   * Iterator pointing beyond the last element
-   *
-   * \return End iterator
-   */
-  iterator end() const;
-
-  /**
-   * Copies the elements of another list to this list. The capacity of
-   * this list has to be greater than or equal to the size of the other list.
-   */
-  FixedSizeList & operator=(
-    const FixedSizeList & other
-    /**< [IN] Other list */);
-
-  /**
-   * Appends an element to the end of the list
-   *
-   * \return \c false if the operation was not successful because the list is
-   *         full, otherwise \c true.
-   */
-  bool PushBack(
-    ElementT const el
-    /**< [IN] Element to append to the list */);
-
-  /**
-   * Destructs the list.
-   */
-  ~FixedSizeList();
-};
 
 /**
  * Hazard pointer entry for a single thread. Holds the actual guards that
