@@ -27,6 +27,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include <embb_mtapi_network_socket.h>
+#include <embb/base/c/internal/config.h>
 #include <string.h>
 #ifdef _WIN32
 #include <WinSock2.h>
@@ -147,7 +148,14 @@ int embb_mtapi_network_socket_select(
 
   FD_ZERO(&read_set);
   for (ii = 0; ii < count; ii++) {
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4548)
+#endif
     FD_SET(sockets[ii].handle, &read_set);
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
     if (sockets[ii].handle > max_fd.handle)
       max_fd.handle = sockets[ii].handle;
   }
