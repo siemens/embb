@@ -26,6 +26,7 @@
 
 #include <CL/cl.h>
 #include <string.h>
+#include <assert.h>
 
 #include <embb/base/c/memory_allocation.h>
 #include <embb/mtapi/c/mtapi_ext.h>
@@ -90,6 +91,7 @@ static void CL_API_CALL opencl_task_complete(
   EMBB_UNUSED(status);
 
   cl_int err;
+  EMBB_UNUSED_IN_RELEASE(err);
   embb_mtapi_opencl_task_t * opencl_task = (embb_mtapi_opencl_task_t*)data;
 
   if (embb_mtapi_node_is_initialized()) {
@@ -102,12 +104,15 @@ static void CL_API_CALL opencl_task_complete(
           node->task_pool, opencl_task->task);
 
       err = clWaitForEvents(1, &opencl_task->kernel_finish_event);
+      assert(CL_SUCCESS == err);
 
       if (NULL != opencl_task->result_buffer) {
         err = clReleaseMemObject(opencl_task->result_buffer);
+        assert(CL_SUCCESS == err);
       }
       if (NULL != opencl_task->arguments) {
         err = clReleaseMemObject(opencl_task->arguments);
+        assert(CL_SUCCESS == err);
       }
 
       embb_mtapi_task_set_state(local_task, MTAPI_TASK_COMPLETED);
@@ -217,6 +222,7 @@ static void opencl_action_finalize(
   ) {
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
   cl_int err;
+  EMBB_UNUSED_IN_RELEASE(err);
 
   if (embb_mtapi_node_is_initialized()) {
     embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
@@ -227,12 +233,14 @@ static void opencl_action_finalize(
       embb_mtapi_opencl_action_t * opencl_action =
         (embb_mtapi_opencl_action_t *)local_action->plugin_data;
       if (NULL != opencl_action->node_local_data) {
-        cl_int err;
         err = clReleaseMemObject(opencl_action->node_local_data);
+        assert(CL_SUCCESS == err);
       }
 
       err = clReleaseKernel(opencl_action->kernel);
+      assert(CL_SUCCESS == err);
       err = clReleaseProgram(opencl_action->program);
+      assert(CL_SUCCESS == err);
 
       embb_free(opencl_action);
       local_status = MTAPI_SUCCESS;
@@ -253,20 +261,30 @@ void mtapi_opencl_plugin_initialize(
   embb_mtapi_opencl_link_at_runtime();
 
   err = clGetPlatformIDs(1, &plugin->platform_id, NULL);
-  err = clGetDeviceIDs(plugin->platform_id, CL_DEVICE_TYPE_DEFAULT,
-    1, &plugin->device_id, NULL);
-  plugin->context = clCreateContext(NULL, 1, &plugin->device_id,
-    NULL, NULL, &err);
+  if (CL_SUCCESS == err) {
+    err = clGetDeviceIDs(plugin->platform_id, CL_DEVICE_TYPE_DEFAULT,
+      1, &plugin->device_id, NULL);
+  }
+  if (CL_SUCCESS == err) {
+    plugin->context = clCreateContext(NULL, 1, &plugin->device_id,
+      NULL, NULL, &err);
+  }
+  if (CL_SUCCESS == err) {
+    err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE,
+      sizeof(cl_uint), &plugin->work_group_size, NULL);
+  }
+  if (CL_SUCCESS == err) {
+    err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES,
+      3 * sizeof(cl_uint), &plugin->work_item_sizes[0], NULL);
+  }
+  if (CL_SUCCESS == err) {
+    plugin->command_queue = clCreateCommandQueue(plugin->context,
+      plugin->device_id, 0, &err);
+  }
+  if (CL_SUCCESS == err) {
+    local_status = MTAPI_SUCCESS;
+  }
 
-  err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE,
-    sizeof(cl_uint), &plugin->work_group_size, NULL);
-  err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES,
-    3 * sizeof(cl_uint), &plugin->work_item_sizes[0], NULL);
-
-  plugin->command_queue = clCreateCommandQueue(plugin->context,
-    plugin->device_id, 0, &err);
-
-  local_status = MTAPI_SUCCESS;
   mtapi_status_set(status, local_status);
 }
 
@@ -275,11 +293,14 @@ void mtapi_opencl_plugin_finalize(
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
 
   cl_int err;
+  EMBB_UNUSED_IN_RELEASE(err);
   embb_mtapi_opencl_plugin_t * plugin = &embb_mtapi_opencl_plugin;
 
   /* finalization */
   err = clReleaseCommandQueue(plugin->command_queue);
+  assert(CL_SUCCESS == err);
   err = clReleaseContext(plugin->context);
+  assert(CL_SUCCESS == err);
 
   local_status = MTAPI_SUCCESS;
   mtapi_status_set(status, local_status);
@@ -301,8 +322,11 @@ mtapi_action_hndl_t mtapi_opencl_action_create(
   embb_mtapi_opencl_action_t * action =
     (embb_mtapi_opencl_action_t*)embb_alloc(
       sizeof(embb_mtapi_opencl_action_t));
-  mtapi_action_hndl_t action_hndl;
+  mtapi_action_hndl_t action_hndl = { 0, 0 }; // invalid handle
   size_t kernel_length = strlen(kernel_source);
+  mtapi_boolean_t free_program_on_error = MTAPI_FALSE;
+  mtapi_boolean_t free_kernel_on_error = MTAPI_FALSE;
+  mtapi_boolean_t free_node_local_data_on_error = MTAPI_FALSE;
 
   action->local_work_size = local_work_size;
   action->element_size = element_size;
@@ -310,41 +334,71 @@ mtapi_action_hndl_t mtapi_opencl_action_create(
   /* initialization */
   action->program = clCreateProgramWithSource(plugin->context,
     1, &kernel_source, &kernel_length, &err);
-  err = clBuildProgram(action->program, 1, &plugin->device_id,
-    NULL, NULL, NULL);
-  if (CL_SUCCESS != err) {
+  if (CL_SUCCESS == err) {
+    free_program_on_error = MTAPI_TRUE;
+    err = clBuildProgram(action->program, 1, &plugin->device_id,
+      NULL, NULL, NULL);
+  } else {
     err = clGetProgramBuildInfo(action->program, plugin->device_id,
       CL_PROGRAM_BUILD_LOG, 1024, buffer, NULL);
   }
-  action->kernel = clCreateKernel(action->program, kernel_name, &err);
+
+  if (CL_SUCCESS == err) {
+    action->kernel = clCreateKernel(action->program, kernel_name, &err);
+    if (CL_SUCCESS == err) {
+      free_kernel_on_error = MTAPI_TRUE;
+    }
+  }
 
   if (0 < node_local_data_size) {
     action->node_local_data = clCreateBuffer(plugin->context, CL_MEM_READ_ONLY,
       node_local_data_size, NULL, &err);
+    if (CL_SUCCESS == err) {
+      free_node_local_data_on_error = MTAPI_TRUE;
+    }
     action->node_local_data_size = node_local_data_size;
-    err = clEnqueueWriteBuffer(plugin->command_queue,
-      action->node_local_data, CL_TRUE, 0,
-      action->node_local_data_size, node_local_data, 0, NULL, NULL);
+    if (CL_SUCCESS == err) {
+      err = clEnqueueWriteBuffer(plugin->command_queue,
+        action->node_local_data, CL_TRUE, 0,
+        action->node_local_data_size, node_local_data, 0, NULL, NULL);
+    }
   } else {
     action->node_local_data = NULL;
     action->node_local_data_size = 0;
   }
 
-  err = clSetKernelArg(action->kernel, 4, sizeof(cl_mem),
-    (const void*)&action->node_local_data);
-  err = clSetKernelArg(action->kernel, 5, sizeof(cl_int),
-    (const void*)&action->node_local_data_size);
+  if (CL_SUCCESS == err) {
+    err = clSetKernelArg(action->kernel, 4, sizeof(cl_mem),
+      (const void*)&action->node_local_data);
+  }
+  if (CL_SUCCESS == err) {
+    err = clSetKernelArg(action->kernel, 5, sizeof(cl_int),
+      (const void*)&action->node_local_data_size);
+  }
 
-  action_hndl = mtapi_ext_plugin_action_create(
-    job_id,
-    opencl_task_start,
-    opencl_task_cancel,
-    opencl_action_finalize,
-    action,
-    node_local_data,
-    node_local_data_size,
-    MTAPI_NULL,
-    &local_status);
+  if (CL_SUCCESS == err) {
+    action_hndl = mtapi_ext_plugin_action_create(
+      job_id,
+      opencl_task_start,
+      opencl_task_cancel,
+      opencl_action_finalize,
+      action,
+      node_local_data,
+      node_local_data_size,
+      MTAPI_NULL,
+      &local_status);
+  } else {
+    if (free_node_local_data_on_error) {
+      clReleaseMemObject(action->node_local_data);
+    }
+    if (free_kernel_on_error) {
+      clReleaseKernel(action->kernel);
+    }
+    if (free_program_on_error) {
+      clReleaseProgram(action->program);
+    }
+    embb_free(action);
+  }
 
   mtapi_status_set(status, local_status);
 
