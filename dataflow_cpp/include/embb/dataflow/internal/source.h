@@ -27,13 +27,9 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SOURCE_H_
 #define EMBB_DATAFLOW_INTERNAL_SOURCE_H_
 
-#include <embb/base/atomic.h>
-#include <embb/base/thread.h>
-
 #include <embb/dataflow/internal/node.h>
 #include <embb/dataflow/internal/outputs.h>
 #include <embb/dataflow/internal/source_executor.h>
-#include <embb/dataflow/internal/action.h>
 
 namespace embb {
 namespace dataflow {
@@ -53,7 +49,6 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
 
   explicit Source(FunctionType function)
     : executor_(function), not_done_(true) {
-    next_clock_ = 0;
   }
 
   virtual bool HasOutputs() const {
@@ -62,7 +57,6 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
 
   virtual void Run(int clock) {
     not_done_ = executor_.Execute(clock, outputs_);
-    next_clock_++;
   }
 
   virtual bool Start(int clock) {
@@ -89,9 +83,7 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
  private:
   OutputsType outputs_;
   ExecutorType executor_;
-  Action action_[Slices];
   volatile bool not_done_;
-  embb::base::Atomic<int> next_clock_;
 };
 
 } // namespace internal

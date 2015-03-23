@@ -27,6 +27,7 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_INPUTS_H_
 #define EMBB_DATAFLOW_INTERNAL_INPUTS_H_
 
+#include <embb/base/atomic.h>
 #include <embb/dataflow/internal/tuple.h>
 #include <embb/dataflow/internal/in.h>
 

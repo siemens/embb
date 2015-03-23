@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Copyright (c) 2014-2015, Siemens AG. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,20 @@
 
 # Needs to be located in the folder containing the tests!!
 # Is copied automatically there when generating build files with cmake.
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-"$DIR/embb_base_c_test.exe"
-echo
-"$DIR/embb_base_cpp_test.exe"
-echo
-"$DIR/embb_mtapi_c_test.exe"
-echo
-"$DIR/embb_mtapi_cpp_test.exe"
-echo
-"$DIR/embb_algorithms_cpp_test.exe"
-echo
-"$DIR/embb_containers_cpp_test.exe"
-echo
-"$DIR/embb_dataflow_cpp_test.exe"
+
+SCRIPT_LOCATION="$0"
+
+# case we have symlinks...
+while [ -h "$SCRIPT_LOCATION" ] ; do
+   SCRIPT_LOCATION=`readlink "$SCRIPT_LOCATION"`
+done
+
+DIR=`dirname "$SCRIPT_LOCATION"`
+
+TESTS="embb_base_c_test embb_base_cpp_test embb_mtapi_c_test \
+  embb_mtapi_cpp_test embb_algorithms_cpp_test \
+  embb_containers_cpp_test embb_dataflow_cpp_test"
+
+for TEST in $TESTS; do
+  "$DIR/$TEST".exe;
+done

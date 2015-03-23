@@ -26,7 +26,7 @@ target_link_libraries(embb_dataflow_cpp embb_mtapi_cpp embb_base_cpp embb_mtapi_
 if (BUILD_TESTS STREQUAL ON)
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/../partest/include)
   add_executable (embb_dataflow_cpp_test ${EMBB_DATAFLOW_CPP_TEST_SOURCES})
-  target_link_libraries(embb_dataflow_cpp_test embb_mtapi_cpp embb_mtapi_c partest
+  target_link_libraries(embb_dataflow_cpp_test embb_dataflow_cpp embb_mtapi_cpp embb_mtapi_c partest
                         embb_base_cpp embb_base_c ${compiler_libs})
   CopyBin(BIN embb_dataflow_cpp_test DEST ${local_install_dir})
 endif()

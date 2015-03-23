@@ -27,7 +27,7 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SIGNAL_H_
 #define EMBB_DATAFLOW_INTERNAL_SIGNAL_H_
 
-#include <embb/dataflow/internal/spinlock.h>
+#include <embb/base/c/atomic.h>
 
 namespace embb {
 namespace dataflow {
@@ -42,27 +42,23 @@ class Signal {
   Signal(Signal const & other)
     : blank_(other.blank_), value_(other.value_), clock_(other.clock_) {}
   void operator = (Signal const & rhs) {
-    lock_.Lock();
     blank_ = rhs.blank_;
     value_ = rhs.value_;
     clock_ = rhs.clock_;
-    lock_.Unlock();
+    embb_atomic_memory_barrier();
   }
   int GetClock() const { return clock_; }
   bool IsBlank() const { return blank_; }
   Type const & GetValue() const { return value_; }
   void Clear() {
-    lock_.Lock();
     blank_ = true;
     clock_ = -1;
-    lock_.Unlock();
   }
 
  private:
   bool blank_;
   Type value_;
   int clock_;
-  SpinLock lock_;
 };
 
 } // namespace internal

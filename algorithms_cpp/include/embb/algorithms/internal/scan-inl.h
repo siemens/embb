@@ -173,8 +173,10 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
                        std::random_access_iterator_tag) {
   typedef typename std::iterator_traits<RAIIn>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
-  if (distance <= 0) {
+  if (distance == 0) {
     return;
+  } else if (distance < 0) {
+    EMBB_THROW(embb::base::ErrorException, "Negative range for Scan");
   }
   unsigned int num_cores = policy.GetCoreCount();
   if (num_cores == 0) {

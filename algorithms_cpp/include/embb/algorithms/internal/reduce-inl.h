@@ -129,7 +129,9 @@ ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
   if (distance == 0) {
-    EMBB_THROW(embb::base::ErrorException, "Distance for Reduce is 0");
+    return neutral;
+  } else if (distance < 0) {
+    EMBB_THROW(embb::base::ErrorException, "Negative range for Reduce");
   }
   unsigned int num_cores = policy.GetCoreCount();
   if (num_cores == 0) {

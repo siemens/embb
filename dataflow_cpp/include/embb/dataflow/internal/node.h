@@ -28,7 +28,7 @@
 #define EMBB_DATAFLOW_INTERNAL_NODE_H_
 
 #include <cstddef>
-
+#include <embb/base/exceptions.h>
 #include <embb/dataflow/internal/scheduler.h>
 
 namespace embb {
@@ -50,6 +50,9 @@ class Node {
 
  protected:
   Scheduler * sched_;
+  static int next_process_id_;
+
+  static int GetNextProcessID() { return next_process_id_++; }
 };
 
 } // namespace internal

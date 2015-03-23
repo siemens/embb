@@ -25,6 +25,7 @@
  */
 
 #include <partest/partest.h>
+#include <embb/base/c/thread.h>
 
 #include <stdio.h>
 
@@ -39,11 +40,12 @@
 
 PT_MAIN("MTAPI C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
+  embb_thread_set_max_count(1024);
 
+  PT_RUN(TaskTest);
   PT_RUN(PluginTest);
   PT_RUN(ErrorTest);
   PT_RUN(InitFinalizeTest);
-  PT_RUN(TaskTest);
   PT_RUN(GroupTest);
   PT_RUN(QueueTest);
 }

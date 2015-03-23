@@ -35,7 +35,7 @@
 namespace embb {
 namespace base {
 
-void Tick::CheckExceptions(int status, const char* msg) {
+void internal::Tick::CheckExceptions(int status, const char* msg) {
   switch (status) {
   case EMBB_SUCCESS: return;
   case EMBB_OVERFLOW: EMBB_THROW(OverflowException, msg);
@@ -44,16 +44,18 @@ void Tick::CheckExceptions(int status, const char* msg) {
   }
 }
 
-int Seconds::Set(embb_duration_t& duration, unsigned long long ticks) {
+int internal::Seconds::Set(embb_duration_t& duration,
+                           unsigned long long ticks) {
   return embb_duration_set_seconds(&duration, ticks);
 }
 
-void Seconds::SetAndCheck(embb_duration_t& duration, unsigned long long ticks) {
+void internal::Seconds::SetAndCheck(embb_duration_t& duration,
+                                   unsigned long long ticks) {
   int status = Set(duration, ticks);
   CheckExceptions(status, "Setting duration from seconds");
 }
 
-unsigned long long Seconds::Get(const embb_duration_t& duration) {
+unsigned long long internal::Seconds::Get(const embb_duration_t& duration) {
   unsigned long long ticks = 0;
   int status = embb_duration_as_seconds(&duration, &ticks);
   assert(status == EMBB_SUCCESS);
@@ -61,25 +63,27 @@ unsigned long long Seconds::Get(const embb_duration_t& duration) {
   return ticks;
 }
 
-unsigned long long Seconds::Min() {
+unsigned long long internal::Seconds::Min() {
   return 1;
 }
 
-unsigned long long Seconds::Max() {
+unsigned long long internal::Seconds::Max() {
   return EMBB_DURATION_MAX_SECONDS;
 }
 
-int Milliseconds::Set(embb_duration_t& duration, unsigned long long ticks) {
+int internal::Milliseconds::Set(embb_duration_t& duration,
+                                unsigned long long ticks) {
   return embb_duration_set_milliseconds(&duration, ticks);
 }
 
-void Milliseconds::SetAndCheck(
+void internal::Milliseconds::SetAndCheck(
   embb_duration_t& duration, unsigned long long ticks) {
   int status = Set(duration, ticks);
   CheckExceptions(status, "Setting duration from milliseconds");
 }
 
-unsigned long long Milliseconds::Get(const embb_duration_t& duration) {
+unsigned long long internal::Milliseconds::Get(
+    const embb_duration_t& duration) {
   unsigned long long ticks = 0;
   int status = embb_duration_as_milliseconds(&duration, &ticks);
   assert(status == EMBB_SUCCESS);
@@ -87,7 +91,7 @@ unsigned long long Milliseconds::Get(const embb_duration_t& duration) {
   return ticks;
 }
 
-unsigned long long Milliseconds::Min() {
+unsigned long long internal::Milliseconds::Min() {
 #if EMBB_DURATION_MIN_NANOSECONDS > 1000000
   assert(EMBB_DURATION_MIN_NANOSECONDS % 1000000 == 0);
   return EMBB_DURATION_MIN_NANOSECONDS / 1000000;
@@ -95,7 +99,7 @@ unsigned long long Milliseconds::Min() {
   return 1;
 }
 
-unsigned long long Milliseconds::Max() {
+unsigned long long internal::Milliseconds::Max() {
 #if EMBB_DURATION_MAX_SECONDS < ULLONG_MAX / 1000
   return ULLONG_MAX;
 #else
@@ -103,17 +107,19 @@ unsigned long long Milliseconds::Max() {
 #endif
 }
 
-int Microseconds::Set(embb_duration_t& duration, unsigned long long ticks) {
+int internal::Microseconds::Set(embb_duration_t& duration,
+                                unsigned long long ticks) {
   return embb_duration_set_microseconds(&duration, ticks);
 }
 
-void Microseconds::SetAndCheck(
+void internal::Microseconds::SetAndCheck(
   embb_duration_t& duration, unsigned long long ticks) {
   int status = Set(duration, ticks);
   CheckExceptions(status, "Setting duration from microseconds");
 }
 
-unsigned long long Microseconds::Get(const embb_duration_t& duration) {
+unsigned long long internal::Microseconds::Get(
+    const embb_duration_t& duration) {
   unsigned long long ticks = 0;
 
   int status = embb_duration_as_microseconds(&duration, &ticks);
@@ -123,7 +129,7 @@ unsigned long long Microseconds::Get(const embb_duration_t& duration) {
   return ticks;
 }
 
-unsigned long long Microseconds::Min() {
+unsigned long long internal::Microseconds::Min() {
 #if EMBB_DURATION_MIN_NANOSECONDS > 1000
   assert(EMBB_DURATION_MIN_NANOSECONDS % 1000 == 0);
   return EMBB_DURATION_MIN_NANOSECONDS / 1000;
@@ -131,7 +137,7 @@ unsigned long long Microseconds::Min() {
   return 1;
 }
 
-unsigned long long Microseconds::Max() {
+unsigned long long internal::Microseconds::Max() {
 #if EMBB_DURATION_MAX_SECONDS < ULLONG_MAX / 1000000
   return ULLONG_MAX;
 #else
@@ -139,17 +145,18 @@ unsigned long long Microseconds::Max() {
 #endif
 }
 
-int Nanoseconds::Set(embb_duration_t& duration, unsigned long long ticks) {
+int internal::Nanoseconds::Set(embb_duration_t& duration,
+                               unsigned long long ticks) {
   return embb_duration_set_nanoseconds(&duration, ticks);
 }
 
-void Nanoseconds::SetAndCheck(
+void internal::Nanoseconds::SetAndCheck(
   embb_duration_t& duration, unsigned long long ticks) {
   int status = Set(duration, ticks);
   CheckExceptions(status, "Setting duration from microseconds");
 }
 
-unsigned long long Nanoseconds::Get(const embb_duration_t& duration) {
+unsigned long long internal::Nanoseconds::Get(const embb_duration_t& duration) {
   unsigned long long ticks = 0;
   int status = embb_duration_as_nanoseconds(&duration, &ticks);
   assert(status == EMBB_SUCCESS);
@@ -157,11 +164,11 @@ unsigned long long Nanoseconds::Get(const embb_duration_t& duration) {
   return ticks;
 }
 
-unsigned long long Nanoseconds::Min() {
+unsigned long long internal::Nanoseconds::Min() {
   return EMBB_DURATION_MIN_NANOSECONDS;
 }
 
-unsigned long long Nanoseconds::Max() {
+unsigned long long internal::Nanoseconds::Max() {
 #if EMBB_DURATION_MAX_SECONDS < ULLONG_MAX / 1000000000
   return ULLONG_MAX;
 #else
