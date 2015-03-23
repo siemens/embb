@@ -228,7 +228,6 @@ static int embb_mtapi_network_thread(void * args) {
         int32_t arguments_size;
         int32_t priority;
         mtapi_job_hndl_t job_hndl;
-        mtapi_task_hndl_t task_hndl;
         mtapi_task_attributes_t task_attr;
         void * arguments;
         mtapi_task_complete_function_t func = embb_mtapi_network_task_complete;
@@ -285,6 +284,9 @@ static int embb_mtapi_network_thread(void * args) {
         mtapi_taskattr_init(&task_attr, &local_status);
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_USER_DATA,
           (void*)network_task, 0, &local_status);
+        mtapi_boolean_t task_detached = MTAPI_TRUE;
+        mtapi_taskattr_set(&task_attr, MTAPI_TASK_DETACHED,
+          (void*)&task_detached, sizeof(mtapi_boolean_t), &local_status);
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_PRIORITY,
           (void*)priority, 0, &local_status);
         assert(local_status == MTAPI_SUCCESS);
@@ -294,7 +296,7 @@ static int embb_mtapi_network_thread(void * args) {
         assert(local_status == MTAPI_SUCCESS);
         job_hndl = mtapi_job_get(job_id, domain_id, &local_status);
         assert(local_status == MTAPI_SUCCESS);
-        task_hndl = mtapi_task_start(
+        mtapi_task_start(
           MTAPI_TASK_ID_NONE, job_hndl,
           arguments, arguments_size,
           results, results_size,
