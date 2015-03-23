@@ -288,7 +288,7 @@ static int embb_mtapi_network_thread(void * args) {
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_DETACHED,
           (void*)&task_detached, sizeof(mtapi_boolean_t), &local_status);
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_PRIORITY,
-          (void*)priority, 0, &local_status);
+          (void*)&priority, sizeof(int32_t), &local_status);
         assert(local_status == MTAPI_SUCCESS);
         memcpy(&func_void, &func, sizeof(void*));
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_COMPLETE_FUNCTION,

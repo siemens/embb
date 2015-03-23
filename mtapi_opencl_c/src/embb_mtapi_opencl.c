@@ -153,7 +153,7 @@ static void opencl_task_start(
         if (0 == elements)
           elements = 1;
         global_work_size =
-          round_up((int)opencl_action->local_work_size, elements);
+          round_up((int)opencl_action->local_work_size, (int)elements);
 
         opencl_task->task = task;
 

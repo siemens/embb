@@ -161,9 +161,9 @@ int embb_mtapi_network_socket_select(
   }
 
   if (timeout >= 0) {
-    err = select(max_fd.handle + 1, &read_set, NULL, NULL, &tv);
+    err = select((int)max_fd.handle + 1, &read_set, NULL, NULL, &tv);
   } else {
-    err = select(max_fd.handle + 1, &read_set, NULL, NULL, NULL);
+    err = select((int)max_fd.handle + 1, &read_set, NULL, NULL, NULL);
   }
   if (0 == err) {
     // timeout
