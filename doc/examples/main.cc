@@ -25,9 +25,11 @@
  */
 
 #include <iostream>
+#include <embb/base/c/thread.h>
 
 void RunMTAPI_C();
 void RunMTAPI_CPP();
+void RunTasks();
 void RunDataflowLinear();
 void RunDataflowNonLinear();
 void RunSTLForEach();
@@ -45,6 +47,8 @@ void RunQueueExamples();
  * Runs all examples and tests their correctness.
  */
 int main() {
+  embb_thread_set_max_count(1024);
+
   std::cout << "Running examples ..." << std::endl;
 
   std::cout << "RunMTAPI_C() ..." << std::endl;
@@ -54,6 +58,10 @@ int main() {
   std::cout << "RunMTAPI_CPP() ..." << std::endl;
   RunMTAPI_CPP();
   std::cout << "RunMTAPI_CPP() ... done" << std::endl;
+
+  std::cout << "RunTasks() ..." << std::endl;
+  RunTasks();
+  std::cout << "RunTasks() ... done" << std::endl;
 
   std::cout << "RunDataflowLinear() ..." << std::endl;
   RunDataflowLinear();
