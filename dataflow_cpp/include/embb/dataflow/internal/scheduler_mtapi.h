@@ -29,7 +29,7 @@
 
 #include <embb/dataflow/internal/action.h>
 #include <embb/dataflow/internal/scheduler.h>
-#include <embb/mtapi/node.h>
+#include <embb/tasks/node.h>
 #include <embb/base/function.h>
 
 namespace embb {
@@ -40,24 +40,24 @@ template <int Slices>
 class SchedulerMTAPI : public Scheduler {
  public:
   SchedulerMTAPI() {
-    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::tasks::Node & node = embb::tasks::Node::GetInstance();
     for (int ii = 0; ii < Slices; ii++) {
-      embb::mtapi::Group & group = node.CreateGroup();
+      embb::tasks::Group & group = node.CreateGroup();
       group_[ii] = &group;
     }
 
     queue_count_ = static_cast<int>(node.GetWorkerThreadCount());
-    queue_ = reinterpret_cast<embb::mtapi::Queue**>(
+    queue_ = reinterpret_cast<embb::tasks::Queue**>(
       embb::base::Allocation::Allocate(
-        sizeof(embb::mtapi::Queue*)*queue_count_));
+      sizeof(embb::tasks::Queue*)*queue_count_));
 
     for (int ii = 0; ii < queue_count_; ii++) {
-      embb::mtapi::Queue & queue = node.CreateQueue(0, true);
+      embb::tasks::Queue & queue = node.CreateQueue(0, true);
       queue_[ii] = &queue;
     }
   }
   virtual ~SchedulerMTAPI() {
-    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::tasks::Node & node = embb::tasks::Node::GetInstance();
     for (int ii = 0; ii < Slices; ii++) {
       group_[ii]->WaitAll(MTAPI_INFINITE);
       node.DestroyGroup(*group_[ii]);
@@ -82,8 +82,8 @@ class SchedulerMTAPI : public Scheduler {
   }
 
  private:
-  embb::mtapi::Group * group_[Slices];
-  embb::mtapi::Queue ** queue_;
+  embb::tasks::Group * group_[Slices];
+  embb::tasks::Queue ** queue_;
   int queue_count_;
 };
 
