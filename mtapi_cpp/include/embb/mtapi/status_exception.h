@@ -36,7 +36,7 @@ namespace mtapi {
  * Represents an MTAPI error state and is thrown by almost all mtapi_cpp
  * methods.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class StatusException : public embb::base::Exception {
  public:

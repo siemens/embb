@@ -28,7 +28,7 @@
 #define EMBB_MTAPI_MTAPI_H_
 
 /**
- * \defgroup CPP_MTAPI_EXT MTAPI EXT
+ * \defgroup CPP_MTAPI MTAPI
  * C++ wrapper around C implementation of MTAPI.
  * For a description of the basic concepts, see the
  * \ref C_MTAPI "C implementation of MTAPI".

@@ -47,7 +47,7 @@ namespace mtapi {
  * Represents a facility to wait for multiple related
  * \link Task Tasks\endlink.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class Group {
  public:

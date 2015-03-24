@@ -36,7 +36,7 @@ namespace mtapi {
 /**
  * Provides information about the status of the currently running Task.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class TaskContext {
  public:

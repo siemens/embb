@@ -186,6 +186,8 @@ class CoreSet {
 
   /**
    * Provides access to internal representation to use it with C API.
+   *
+   * \return A reference to the internal embb_core_set_t structure.
    */
   embb_core_set_t const & GetInternal() const { return rep_; }
 

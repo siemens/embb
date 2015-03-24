@@ -36,7 +36,7 @@ namespace mtapi {
 /**
  * Contains attributes of a Queue.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class QueueAttributes {
 public:

@@ -47,7 +47,7 @@ namespace mtapi {
 /**
  * Allows for stream processing, either ordered or unordered.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class Queue {
  public:

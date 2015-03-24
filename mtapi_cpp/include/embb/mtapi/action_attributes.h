@@ -37,7 +37,7 @@ namespace mtapi {
 /**
  * Contains attributes of an Action.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class ActionAttributes {
 public:

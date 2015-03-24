@@ -37,7 +37,7 @@ namespace mtapi {
 /**
  * Contains attributes of a Node.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class NodeAttributes {
 public:
@@ -69,7 +69,15 @@ public:
     attributes_ = other.attributes_;
   }
 
-  NodeAttributes & SetCoreAffinity(embb::base::CoreSet const & cores) {
+  /**
+   * Sets the core affinity of the Node. This also determines the number of
+   * worker threads.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetCoreAffinity(
+    embb::base::CoreSet const & cores  /**< The cores to use. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_CORE_AFFINITY,
       &cores.GetInternal(), sizeof(embb_core_set_t), &status);
@@ -77,7 +85,14 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetMaxTasks(mtapi_uint_t value) {
+  /**
+   * Sets the maximum number of concurrently active tasks.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetMaxTasks(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_TASKS,
       &value, sizeof(value), &status);
@@ -85,7 +100,14 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetMaxActions(mtapi_uint_t value) {
+  /**
+   * Sets the maximum number of actions.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetMaxActions(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_ACTIONS,
       &value, sizeof(value), &status);
@@ -93,7 +115,14 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetMaxGroups(mtapi_uint_t value) {
+  /**
+   * Sets the maximum number of groups.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetMaxGroups(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_GROUPS,
       &value, sizeof(value), &status);
@@ -101,7 +130,14 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetMaxQueues(mtapi_uint_t value) {
+  /**
+   * Sets the maximum number of queues.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetMaxQueues(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_QUEUES,
       &value, sizeof(value), &status);
@@ -109,7 +145,14 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetQueueLimit(mtapi_uint_t value) {
+  /**
+   * Sets the default limit (capacity) of all queues.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetQueueLimit(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_QUEUE_LIMIT,
       &value, sizeof(value), &status);
@@ -117,7 +160,14 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetMaxJobs(mtapi_uint_t value) {
+  /**
+   * Sets the maximum number of available jobs.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetMaxJobs(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_JOBS,
       &value, sizeof(value), &status);
@@ -125,7 +175,14 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetMaxActionsPerJob(mtapi_uint_t value) {
+  /**
+   * Sets the maximum number of actions per job.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetMaxActionsPerJob(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_ACTIONS_PER_JOB,
       &value, sizeof(value), &status);
@@ -133,7 +190,15 @@ public:
     return *this;
   }
 
-  NodeAttributes & SetMaxPriorities(mtapi_uint_t value) {
+  /**
+   * Sets the maximum number of available priorities. The priority values
+   * will range from 0 to \c value - 1 with 0 being the highest priority.
+   *
+   * \returns Reference to this object.
+   */
+  NodeAttributes & SetMaxPriorities(
+    mtapi_uint_t value                 /**< The value to set. */
+    ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_PRIORITIES,
       &value, sizeof(value), &status);

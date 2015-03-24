@@ -37,7 +37,7 @@ namespace mtapi {
 /**
  * Holds the actual worker function used to execute a Task.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class Action {
  public:

@@ -48,7 +48,7 @@ namespace mtapi {
 /**
  * A singleton representing the MTAPI runtime.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class Node {
  public:

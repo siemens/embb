@@ -37,7 +37,7 @@ namespace tasks {
 /**
   * A function to be spawned as a Task.
   *
-  * \ingroup CPP_MTAPI
+  * \ingroup CPP_TASKS
   */
 class Action {
  public:

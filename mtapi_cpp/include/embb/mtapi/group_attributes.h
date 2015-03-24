@@ -36,7 +36,7 @@ namespace mtapi {
 /**
  * Contains attributes of a Group.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class GroupAttributes {
 public:

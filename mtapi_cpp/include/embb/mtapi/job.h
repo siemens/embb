@@ -36,7 +36,7 @@ namespace mtapi {
 /**
  * Represents a collection of Actions.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class Job {
 public:

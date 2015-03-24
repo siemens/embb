@@ -148,7 +148,8 @@ INPUT                  = "@CMAKE_SOURCE_DIR@/doc/reference/embb.dox" \
                          "@CMAKE_SOURCE_DIR@/containers_cpp/include" \
                          "@CMAKE_SOURCE_DIR@/dataflow_cpp/include" \
                          "@CMAKE_SOURCE_DIR@/algorithms_cpp/include" \
-                         "@CMAKE_SOURCE_DIR@/mtapi_cpp_ext/include" \
+                         "@CMAKE_SOURCE_DIR@/tasks_cpp/include" \
+                         "@CMAKE_SOURCE_DIR@/mtapi_cpp/include" \
                          "@CMAKE_SOURCE_DIR@/base_cpp/include" \
                          "@CMAKE_SOURCE_DIR@/mtapi_c/include" \
                          "@CMAKE_SOURCE_DIR@/base_c/include"

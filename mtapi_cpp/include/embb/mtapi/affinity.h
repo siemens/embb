@@ -36,7 +36,7 @@ namespace mtapi {
 /**
  * Describes the affinity of an Action or Task to a worker thread of a Node.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class Affinity {
 public:

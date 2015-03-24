@@ -36,7 +36,7 @@ namespace mtapi {
 /**
  * A Task represents a running Action of a specific Job.
  *
- * \ingroup CPP_MTAPI_EXT
+ * \ingroup CPP_MTAPI
  */
 class Task {
  public:
