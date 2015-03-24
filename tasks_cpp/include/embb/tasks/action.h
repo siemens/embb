@@ -24,15 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_ACTION_H_
-#define EMBB_MTAPI_ACTION_H_
+#ifndef EMBB_TASKS_ACTION_H_
+#define EMBB_TASKS_ACTION_H_
 
 #include <embb/base/function.h>
-#include <embb/mtapi/taskcontext.h>
-#include <embb/mtapi/execution_policy.h>
+#include <embb/tasks/task_context.h>
+#include <embb/tasks/execution_policy.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 /**
   * A function to be spawned as a Task.
@@ -103,7 +103,7 @@ class Action {
   ExecutionPolicy execution_policy_;
 };
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb
 
-#endif // EMBB_MTAPI_ACTION_H_
+#endif // EMBB_TASKS_ACTION_H_

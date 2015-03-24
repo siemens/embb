@@ -24,12 +24,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_GROUP_H_
-#define EMBB_MTAPI_GROUP_H_
+#ifndef EMBB_TASKS_QUEUE_H_
+#define EMBB_TASKS_QUEUE_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/action.h>
-#include <embb/mtapi/task.h>
+#include <embb/tasks/action.h>
+#include <embb/tasks/task.h>
+#include <embb/tasks/group.h>
 
 namespace embb {
 
@@ -39,18 +40,30 @@ class Allocation;
 
 } // namespace base
 
-namespace mtapi {
+namespace tasks {
 
 /**
-  * Represents a facility to wait for multiple related
-  * \link Task Tasks\endlink.
+  * Allows for stream processing, either ordered or unordered.
   *
-  * \ingroup CPP_MTAPI
+  * \ingroup CPP_TASKS
   */
-class Group {
+class Queue {
  public:
   /**
-    * Runs an Action within the Group.
+    * Enables the Queue. \link Task Tasks \endlink enqueued while the Queue was
+    * disabled are executed.
+    * \waitfree
+    */
+  void Enable();
+
+  /**
+    * Disables the Queue. Running \link Task Tasks \endlink are canceled.
+    * \waitfree
+    */
+  void Disable();
+
+  /**
+    * Runs an Action.
     * \return A Task identifying the Action to run
     * \throws ErrorException if the Task object could not be constructed.
     * \threadsafe
@@ -60,66 +73,44 @@ class Group {
     );
 
   /**
-    * Runs an Action within the Group. The \c id is returned by WaitAny().
+    * Runs an Action in the specified Group
     * \return A Task identifying the Action to run
     * \throws ErrorException if the Task object could not be constructed.
     * \threadsafe
     */
   Task Spawn(
-    mtapi_task_id_t id,                /**< [in] The id to return by
-                                            WaitAny() */
+    Group const * group,               /**< [in] The Group to run the Action
+                                            in */
     Action action                      /**< [in] The Action to run */
     );
 
   /**
-    * Waits for any Task in the Group to finish for \c timeout milliseconds.
-    * \return The status of the Task that finished execution
+    * Runs an Action in the specified Group. The \c id is returned by
+    * Group::WaitAny().
+    * \return A Task identifying the Action to run
+    * \throws ErrorException if the Task object could not be constructed.
     * \threadsafe
     */
-  mtapi_status_t WaitAny(
-    mtapi_timeout_t timeout            /**< [in] Timeout duration in
-                                            milliseconds */
-    );
-
-  /**
-    * Waits for any Task in the Group to finish for \c timeout milliseconds and
-    * retrieves the id given in Spawn().
-    * \return The status of the Task that finished execution, \c MTAPI_TIMEOUT
-    *         or \c MTAPI_ERR_*
-    * \threadsafe
-    */
-  mtapi_status_t WaitAny(
-    mtapi_timeout_t timeout,           /**< [in] Timeout duration in
-                                            milliseconds */
-    mtapi_task_id_t & id               /**< [out] The id given to Spawn() */
-    );
-
-  /**
-    * Waits for all Task in the Group to finish for \c timeout milliseconds.
-    * \return \c MTAPI_SUCCESS, \c MTAPI_TIMEOUT, \c MTAPI_ERR_* or the status
-    *         of any failed Task
-    * \threadsafe
-    */
-  mtapi_status_t WaitAll(
-    mtapi_timeout_t timeout            /**< [in] Timeout duration in
-                                            milliseconds */
+  Task Spawn(
+    mtapi_task_id_t id,                /**< [in] The id to return in
+                                            Group::WaitAny() */
+    Group const * group,               /**< [in] The Group to run the Action
+                                            in */
+    Action action                      /**< [in] The Action to run */
     );
 
   friend class embb::base::Allocation;
   friend class Node;
-  friend class Queue;
 
  private:
-  Group(Group const & group);
-  Group();
-  ~Group();
+  Queue(Queue const & taskqueue);
+  Queue(mtapi_uint_t priority, bool ordered);
+  ~Queue();
 
-  void Create();
-
-  mtapi_group_hndl_t handle_;
+  mtapi_queue_hndl_t handle_;
 };
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb
 
-#endif // EMBB_MTAPI_GROUP_H_
+#endif // EMBB_TASKS_QUEUE_H_

@@ -24,17 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_CPP_TEST_MTAPI_CPP_TEST_QUEUE_H_
-#define MTAPI_CPP_TEST_MTAPI_CPP_TEST_QUEUE_H_
+#ifndef TASKS_CPP_TEST_TASKS_CPP_TEST_GROUP_H_
+#define TASKS_CPP_TEST_TASKS_CPP_TEST_GROUP_H_
 
 #include <partest/partest.h>
 
-class QueueTest : public partest::TestCase {
+class GroupTest : public partest::TestCase {
  public:
-  QueueTest();
+  GroupTest();
 
  private:
   void TestBasic();
 };
 
-#endif // MTAPI_CPP_TEST_MTAPI_CPP_TEST_QUEUE_H_
+#endif // TASKS_CPP_TEST_TASKS_CPP_TEST_GROUP_H_

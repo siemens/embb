@@ -24,13 +24,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
-#define MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
+#include <cstdlib>
 
-#include <partest/partest.h>
-#include <embb/mtapi/mtapi.h>
+#include <tasks_cpp_test_config.h>
+#include <tasks_cpp_test_queue.h>
 
-#define THIS_DOMAIN_ID 1
-#define THIS_NODE_ID 1
+#include <embb/base/c/memory_allocation.h>
 
-#endif // MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
+#define JOB_TEST_TASK 42
+#define TASK_TEST_ID 23
+#define QUEUE_TEST_ID 17
+
+static void testQueueAction(embb::tasks::TaskContext & /*context*/) {
+  //std::cout << "testQueueAction on core " <<
+  //  context.GetCurrentCoreNumber() << std::endl;
+}
+
+static void testDoSomethingElse() {
+}
+
+QueueTest::QueueTest() {
+  CreateUnit("tasks_cpp queue test").Add(&QueueTest::TestBasic, this);
+}
+
+void QueueTest::TestBasic() {
+  //std::cout << "running testQueue..." << std::endl;
+
+  embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+
+  embb::tasks::Node & node = embb::tasks::Node::GetInstance();
+  embb::tasks::Queue & queue = node.CreateQueue(0, false);
+
+  embb::tasks::Task task = queue.Spawn(testQueueAction);
+
+  testDoSomethingElse();
+
+  task.Wait(MTAPI_INFINITE);
+
+  node.DestroyQueue(queue);
+
+  embb::tasks::Node::Finalize();
+
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
+  //std::cout << "...done" << std::endl << std::endl;
+}

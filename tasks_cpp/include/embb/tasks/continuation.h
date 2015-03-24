@@ -24,66 +24,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_CONTINUATION_H_
-#define EMBB_MTAPI_CONTINUATION_H_
+#ifndef EMBB_TASKS_CONTINUATION_H_
+#define EMBB_TASKS_CONTINUATION_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/taskcontext.h>
-#include <embb/mtapi/action.h>
-#include <embb/mtapi/task.h>
+#include <embb/tasks/task_context.h>
+#include <embb/tasks/action.h>
+#include <embb/tasks/task.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 /**
-  *  Helper struct for Continuation.
-  *
-  *  \ingroup CPP_MTAPI
-  */
+ *  Helper struct for Continuation.
+ *
+ *  \ingroup CPP_TASKS
+ */
 struct ContinuationStage;
 
 /**
-  * A Continuation encapsulates a chain of \link Action Actions \endlink to be
-  * executed consecutively.
-  *
-  * \ingroup CPP_MTAPI
-  */
+ * A Continuation encapsulates a chain of \link Action Actions \endlink to be
+ * executed consecutively.
+ *
+ * \ingroup CPP_TASKS
+ */
 class Continuation {
  public:
   /**
-  * Copy constructor.
-  */
+   * Copies a Continuation.
+   */
   Continuation(
     Continuation const & cont          /**< [in] The Continuation to copy. */
     );
 
   /**
-  * Destructor.
-  */
+   * Destroys a Continuation.
+   */
   ~Continuation();
 
   /**
-    * Appends an Action to the Continuation chain.
-    * \returns A reference to this Continuation chain.
-    * \notthreadsafe
-    */
+   * Appends an Action to the Continuation chain.
+   * \returns A reference to this Continuation chain.
+   * \notthreadsafe
+   */
   Continuation & Then(
     Action action                      /**< [in] The Action to append to the
                                             continuation */
     );
 
   /**
-    * Runs the Continuation chain.
-    * \returns The Task representing the Continuation chain.
-    * \notthreadsafe
-    */
+   * Runs the Continuation chain.
+   * \returns The Task representing the Continuation chain.
+   * \notthreadsafe
+   */
   Task Spawn();
 
   /**
-    * Runs the Continuation chain with the specified execution_policy.
-    * \returns The Task representing the Continuation chain.
-    * \notthreadsafe
-    */
+   * Runs the Continuation chain with the specified execution_policy.
+   * \returns The Task representing the Continuation chain.
+   * \notthreadsafe
+   */
   Task Spawn(
     ExecutionPolicy execution_policy   /**< [in] The execution policy to use */
     );
@@ -99,7 +99,7 @@ class Continuation {
   ContinuationStage * last_;
 };
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb
 
-#endif // EMBB_MTAPI_CONTINUATION_H_
+#endif // EMBB_TASKS_CONTINUATION_H_

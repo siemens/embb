@@ -28,10 +28,10 @@
 #include <cassert>
 
 #include <embb/base/exceptions.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 Group::Group() {
   Create();
@@ -92,5 +92,5 @@ mtapi_status_t Group::WaitAll(mtapi_timeout_t timeout) {
   return status;
 }
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb

@@ -27,10 +27,10 @@
 #include <cassert>
 
 #include <embb/base/exceptions.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 Queue::Queue(mtapi_uint_t priority, bool ordered) {
   mtapi_status_t status;
@@ -51,7 +51,7 @@ Queue::Queue(mtapi_uint_t priority, bool ordered) {
   assert(MTAPI_SUCCESS == status);
   mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
   assert(MTAPI_SUCCESS == status);
-  mtapi_job_hndl_t job = mtapi_job_get(MTAPI_CPP_TASK_JOB, domain_id, &status);
+  mtapi_job_hndl_t job = mtapi_job_get(TASKS_CPP_JOB, domain_id, &status);
   assert(MTAPI_SUCCESS == status);
   handle_ = mtapi_queue_create(MTAPI_QUEUE_ID_NONE, job, &attr, &status);
   if (MTAPI_SUCCESS != status) {
@@ -86,5 +86,5 @@ Task Queue::Spawn(Group const * group, Action action) {
   return Task(action, handle_, group->handle_);
 }
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb

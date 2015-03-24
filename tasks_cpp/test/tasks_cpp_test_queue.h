@@ -24,38 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cassert>
+#ifndef TASKS_CPP_TEST_TASKS_CPP_TEST_QUEUE_H_
+#define TASKS_CPP_TEST_TASKS_CPP_TEST_QUEUE_H_
 
-#include <embb/mtapi/mtapi.h>
+#include <partest/partest.h>
 
-namespace embb {
-namespace mtapi {
+class QueueTest : public partest::TestCase {
+ public:
+  QueueTest();
 
-TaskContext::TaskContext(mtapi_task_context_t * task_context)
-  : context_(task_context) {
-}
+ private:
+  void TestBasic();
+};
 
-bool TaskContext::ShouldCancel() {
-  mtapi_status_t status;
-  bool result =
-    MTAPI_TASK_CANCELLED == mtapi_context_taskstate_get(context_, &status);
-  assert(MTAPI_SUCCESS == status);
-  return result;
-}
-
-mtapi_uint_t TaskContext::GetCurrentCoreNumber() {
-  mtapi_status_t status;
-  mtapi_uint_t result =
-    mtapi_context_corenum_get(context_, &status);
-  assert(MTAPI_SUCCESS == status);
-  return result;
-}
-
-void TaskContext::SetStatus(mtapi_status_t error_code) {
-  mtapi_status_t status;
-  mtapi_context_status_set(context_, error_code, &status);
-  assert(MTAPI_SUCCESS == status);
-}
-
-} // namespace mtapi
-} // namespace embb
+#endif // TASKS_CPP_TEST_TASKS_CPP_TEST_QUEUE_H_

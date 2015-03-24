@@ -24,20 +24,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_CPP_SRC_CONTINUATIONSTAGE_H_
-#define MTAPI_CPP_SRC_CONTINUATIONSTAGE_H_
+#ifndef TASKS_CPP_SRC_CONTINUATIONSTAGE_H_
+#define TASKS_CPP_SRC_CONTINUATIONSTAGE_H_
 
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 struct ContinuationStage {
-  mtapi::Action action;
+  Action action;
   ContinuationStage * next;
 };
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb
 
-#endif // MTAPI_CPP_SRC_CONTINUATIONSTAGE_H_
+#endif // TASKS_CPP_SRC_CONTINUATIONSTAGE_H_

@@ -28,12 +28,12 @@
 
 #include <iostream>
 
-#include <mtapi_cpp_test_task.h>
-#include <mtapi_cpp_test_group.h>
-#include <mtapi_cpp_test_queue.h>
+#include <tasks_cpp_test_task.h>
+#include <tasks_cpp_test_group.h>
+#include <tasks_cpp_test_queue.h>
 
 
-PT_MAIN("MTAPI C++") {
+PT_MAIN("TASKS") {
   PT_RUN(TaskTest);
   PT_RUN(GroupTest);
   PT_RUN(QueueTest);

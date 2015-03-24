@@ -26,8 +26,8 @@
 
 #include <iostream>
 
-#include <mtapi_cpp_test_config.h>
-#include <mtapi_cpp_test_group.h>
+#include <tasks_cpp_test_config.h>
+#include <tasks_cpp_test_group.h>
 
 #include <embb/base/c/memory_allocation.h>
 
@@ -38,7 +38,7 @@ struct result_example_struct {
 
 typedef struct result_example_struct result_example_t;
 
-static void testGroupAction(embb::mtapi::TaskContext & /*context*/) {
+static void testGroupAction(embb::tasks::TaskContext & /*context*/) {
   //std::cout << "testGroupAction on core " <<
   //  context.GetCurrentCoreNumber() << std::endl;
 }
@@ -47,17 +47,17 @@ static void testDoSomethingElse() {
 }
 
 GroupTest::GroupTest() {
-  CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this);
+  CreateUnit("tasks_cpp group test").Add(&GroupTest::TestBasic, this);
 }
 
 void GroupTest::TestBasic() {
   //std::cout << "running testGroup..." << std::endl;
 
-  embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+  embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
-  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-  embb::mtapi::Group & group = node.CreateGroup();
-  embb::mtapi::Task task;
+  embb::tasks::Node & node = embb::tasks::Node::GetInstance();
+  embb::tasks::Group & group = node.CreateGroup();
+  embb::tasks::Task task;
 
   //std::cout << "wait all..." << std::endl;
 
@@ -81,8 +81,8 @@ void GroupTest::TestBasic() {
 
   node.DestroyGroup(group);
 
-  embb::mtapi::Node::Finalize();
+  embb::tasks::Node::Finalize();
 
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
   //std::cout << "...done" << std::endl << std::endl;
 }

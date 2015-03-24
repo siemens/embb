@@ -31,22 +31,22 @@
 
 #include <embb/base/memory_allocation.h>
 #include <embb/base/exceptions.h>
-#include <embb/mtapi/mtapi.h>
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+#include <embb/tasks/tasks.h>
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
 #include <embb/base/mutex.h>
 #endif
 
 namespace {
 
-static embb::mtapi::Node * node_instance = NULL;
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+static embb::tasks::Node * node_instance = NULL;
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
 static embb::base::Mutex init_mutex;
 #endif
 
 }
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 void Node::action_func(
   const void* args,
@@ -56,9 +56,9 @@ void Node::action_func(
   const void* /*node_local_data*/,
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t * context) {
-  mtapi::Action * action =
-    reinterpret_cast<mtapi::Action*>(const_cast<void*>(args));
-  mtapi::TaskContext task_context(context);
+  Action * action =
+    reinterpret_cast<Action*>(const_cast<void*>(args));
+  TaskContext task_context(context);
   (*action)(task_context);
   embb::base::Allocation::Delete(action);
 }
@@ -76,7 +76,7 @@ Node::Node(
   }
   core_count_ = info.hardware_concurrency;
   worker_thread_count_ = embb_core_set_count(&attr->core_affinity);
-  action_handle_ = mtapi_action_create(MTAPI_CPP_TASK_JOB, action_func,
+  action_handle_ = mtapi_action_create(TASKS_CPP_JOB, action_func,
     MTAPI_NULL, 0, MTAPI_NULL, &status);
   if (MTAPI_SUCCESS != status) {
     EMBB_THROW(embb::base::ErrorException,
@@ -201,12 +201,12 @@ bool Node::IsInitialized() {
 }
 
 Node & Node::GetInstance() {
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
   if (!IsInitialized()) {
     init_mutex.Lock();
     if (!IsInitialized()) {
       Node::Initialize(
-        MTAPI_CPP_AUTOMATIC_DOMAIN_ID, MTAPI_CPP_AUTOMATIC_NODE_ID);
+        TASKS_CPP_AUTOMATIC_DOMAIN_ID, TASKS_CPP_AUTOMATIC_NODE_ID);
       atexit(Node::Finalize);
     }
     init_mutex.Unlock();
@@ -217,7 +217,7 @@ Node & Node::GetInstance() {
     return *node_instance;
   } else {
     EMBB_THROW(embb::base::ErrorException,
-      "mtapi::Node is not initialized");
+      "embb::tasks::Node is not initialized");
   }
 #endif
 }
@@ -228,7 +228,7 @@ void Node::Finalize() {
     node_instance = NULL;
   } else {
     EMBB_THROW(embb::base::ErrorException,
-      "mtapi::Node is not initialized");
+      "embb::tasks::Node is not initialized");
   }
 }
 
@@ -270,5 +270,5 @@ Continuation Node::First(Action action) {
   return Continuation(action);
 }
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb

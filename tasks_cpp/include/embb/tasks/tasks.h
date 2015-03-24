@@ -24,18 +24,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_INTERNAL_CMAKE_CONFIG_H_
-#define EMBB_MTAPI_INTERNAL_CMAKE_CONFIG_H_
-
-/* This file is used as input for CMake. CMake creates a file cmake_config.h in
-   its current build directory under the path builddir/embb/mtapi/internal/. From
-   there, the cmake_config.h can be included as usual using
-   #include <embb/mtapi/internal/cmake_config.h>
- */
+#ifndef EMBB_TASKS_TASKS_H_
+#define EMBB_TASKS_TASKS_H_
 
 /**
- * Is used to enable automatic initialization of the MTAPI node
+ * \defgroup CPP_TASKS Tasks
+ * Simple task management based on MTAPI.
+ * \ingroup CPP
  */
-#define MTAPI_CPP_AUTOMATIC_INITIALIZE ${MTAPI_CPP_AUTOMATIC_INITIALIZE}
 
-#endif // EMBB_MTAPI_INTERNAL_CMAKE_CONFIG_H_
+#include <embb/tasks/internal/cmake_config.h>
+
+#define TASKS_CPP_JOB 1
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
+#define TASKS_CPP_AUTOMATIC_DOMAIN_ID 1
+#define TASKS_CPP_AUTOMATIC_NODE_ID 1
+#endif
+
+#include <embb/tasks/execution_policy.h>
+#include <embb/tasks/action.h>
+#include <embb/tasks/continuation.h>
+#include <embb/tasks/group.h>
+#include <embb/tasks/node.h>
+#include <embb/tasks/queue.h>
+#include <embb/tasks/task.h>
+#include <embb/tasks/task_context.h>
+
+#endif // EMBB_TASKS_TASKS_H_

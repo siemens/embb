@@ -28,8 +28,8 @@
 #include <string>
 #include <cassert>
 
-#include <mtapi_cpp_test_config.h>
-#include <mtapi_cpp_test_task.h>
+#include <tasks_cpp_test_config.h>
+#include <tasks_cpp_test_task.h>
 
 #include <embb/base/c/memory_allocation.h>
 
@@ -39,7 +39,7 @@
 static void testTaskAction(
   char const * msg,
   std::string * output,
-  embb::mtapi::TaskContext & /*context*/) {
+  embb::tasks::TaskContext & /*context*/) {
   //std::cout << "testTaskAction " << msg << " on core " <<
   //  context.GetCurrentCoreNumber() << std::endl;
   *output = msg;
@@ -47,11 +47,11 @@ static void testTaskAction(
 
 static void testRecursiveTaskAction(
   int * value,
-  embb::mtapi::TaskContext & /*context*/) {
-  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::tasks::TaskContext & /*context*/) {
+  embb::tasks::Node & node = embb::tasks::Node::GetInstance();
   *value = *value + 1;
   if (*value < 1000) {
-    embb::mtapi::Task task = node.Spawn(
+    embb::tasks::Task task = node.Spawn(
       embb::base::Bind(
         testRecursiveTaskAction, value, embb::base::Placeholder::_1));
     task.Wait(MTAPI_INFINITE);
@@ -59,7 +59,7 @@ static void testRecursiveTaskAction(
   PT_EXPECT(*value == 1000);
 }
 
-static void testErrorTaskAction(embb::mtapi::TaskContext & context) {
+static void testErrorTaskAction(embb::tasks::TaskContext & context) {
   context.SetStatus(MTAPI_ERR_ACTION_FAILED);
 }
 
@@ -67,17 +67,17 @@ static void testDoSomethingElse() {
 }
 
 TaskTest::TaskTest() {
-  CreateUnit("mtapi_cpp task test").Add(&TaskTest::TestBasic, this);
+  CreateUnit("tasks_cpp task test").Add(&TaskTest::TestBasic, this);
 }
 
 void TaskTest::TestBasic() {
   //std::cout << "running testTask..." << std::endl;
 
-  embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+  embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
-  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::tasks::Node & node = embb::tasks::Node::GetInstance();
 
-  embb::mtapi::ExecutionPolicy policy(false);
+  embb::tasks::ExecutionPolicy policy(false);
   PT_EXPECT_EQ(policy.GetAffinity(), 0u);
   PT_EXPECT_EQ(policy.GetPriority(), 0u);
   policy.AddWorker(0u);
@@ -90,7 +90,7 @@ void TaskTest::TestBasic() {
   PT_EXPECT_EQ(policy.IsSetWorker(1), true);
 
   std::string test;
-  embb::mtapi::Task task = node.Spawn(
+  embb::tasks::Task task = node.Spawn(
     embb::base::Bind(
       testTaskAction, "simple", &test, embb::base::Placeholder::_1));
   testDoSomethingElse();
@@ -129,7 +129,7 @@ void TaskTest::TestBasic() {
   status = task.Wait(MTAPI_INFINITE);
   PT_EXPECT(MTAPI_ERR_ACTION_FAILED == status);
 
-  embb::mtapi::Node::Finalize();
+  embb::tasks::Node::Finalize();
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
   //std::cout << "...done" << std::endl << std::endl;

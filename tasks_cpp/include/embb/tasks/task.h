@@ -24,71 +24,92 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstddef>
+#ifndef EMBB_TASKS_TASK_H_
+#define EMBB_TASKS_TASK_H_
 
-#include <embb/base/memory_allocation.h>
-#include <embb/base/function.h>
-#include <embb/tasks/tasks.h>
-
-#include <continuationstage.h>
+#include <embb/mtapi/c/mtapi.h>
+#include <embb/tasks/action.h>
 
 namespace embb {
 namespace tasks {
 
-Continuation::Continuation(Action action) {
-  first_ = last_ = embb::base::Allocation::New<ContinuationStage>();
-  first_->action = action;
-  first_->next = NULL;
-}
+/**
+  * A Task represents a running Action.
+  *
+  * \ingroup CPP_TASKS
+  */
+class Task {
+ public:
+  /**
+    * Constructs an empty Task
+    */
+  Task();
 
-Continuation::Continuation(Continuation const & cont)
-  : first_(cont.first_)
-  , last_(cont.last_) {
-}
+  /**
+    * Copies a Task
+    */
+  Task(
+    Task const & task                  /**< The task to copy. */
+    );
 
-Continuation::~Continuation() {
-}
+  /**
+    * Destroys a Task
+    */
+  ~Task();
 
-void Continuation::ExecuteContinuation(TaskContext &) {
-  ContinuationStage * stage = first_;
-  Node & node = Node::GetInstance();
-  while (NULL != stage) {
-    Task task = node.Spawn(stage->action);
-    task.Wait(MTAPI_INFINITE);
-    stage = stage->next;
-  }
+  /**
+    * Waits for Task to finish for \c timeout milliseconds.
+    * \return The status of the finished Task, \c MTAPI_TIMEOUT or
+    * \c MTAPI_ERR_*
+    * \threadsafe
+    */
+  mtapi_status_t Wait(
+    mtapi_timeout_t timeout          /**< [in] Timeout duration in
+                                          milliseconds */
+    );
 
-  // delete stages
-  stage = first_;
-  while (NULL != stage) {
-    ContinuationStage * next = stage->next;
-    embb::base::Allocation::Delete(stage);
-    stage = next;
-  }
-}
+  /**
+    * Signals the Task to cancel computation.
+    * \waitfree
+    */
+  void Cancel();
 
-Continuation & Continuation::Then(Action action) {
-  ContinuationStage * cur = embb::base::Allocation::New<ContinuationStage>();
-  cur->action = action;
-  cur->next = NULL;
+  friend class Group;
+  friend class Queue;
+  friend class Node;
 
-  last_->next = cur;
-  last_ = cur;
+ private:
+  Task(
+    Action action);
 
-  return *this;
-}
+  Task(
+    Action action,
+    mtapi_group_hndl_t group);
 
-Task Continuation::Spawn() {
-  return Spawn(ExecutionPolicy());
-}
+  Task(
+    mtapi_task_id_t id,
+    Action action,
+    mtapi_group_hndl_t group);
 
-Task Continuation::Spawn(ExecutionPolicy execution_policy) {
-  Node & node = Node::GetInstance();
-  return node.Spawn(
-    Action(
-      embb::base::MakeFunction(*this, &Continuation::ExecuteContinuation),
-      ExecutionPolicy(execution_policy)));
-}
+  Task(
+    Action action,
+    mtapi_queue_hndl_t queue);
+
+  Task(
+    Action action,
+    mtapi_queue_hndl_t queue,
+    mtapi_group_hndl_t group);
+
+  Task(
+    mtapi_task_id_t id,
+    Action action,
+    mtapi_queue_hndl_t queue,
+    mtapi_group_hndl_t group);
+
+  mtapi_task_hndl_t handle_;
+};
 
 } // namespace tasks
 } // namespace embb
+
+#endif // EMBB_TASKS_TASK_H_

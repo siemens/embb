@@ -24,92 +24,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_TASK_H_
-#define EMBB_MTAPI_TASK_H_
+#ifndef EMBB_TASKS_TASK_CONTEXT_H_
+#define EMBB_TASKS_TASK_CONTEXT_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/action.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 /**
-  * A Task represents a running Action.
+  * Provides information about the status of the currently running Task.
   *
-  * \ingroup CPP_MTAPI
+  * \ingroup CPP_TASKS
   */
-class Task {
+class TaskContext {
  public:
   /**
-    * Constructs an empty Task
+    * Queries whether the Task running in the TaskContext should finish.
+    * \return \c true if the Task should finish, otherwise \c false
+    * \notthreadsafe
     */
-  Task();
+  bool ShouldCancel();
 
   /**
-    * Copies a Task
+    * Queries the index of the worker thread the Task is running on.
+    * \return The worker thread index the Task is running on
+    * \notthreadsafe
     */
-  Task(
-    Task const & task                  /**< The task to copy. */
+  mtapi_uint_t GetCurrentCoreNumber();
+
+  /**
+    * Sets the return status of the running Task. This will be returned by
+    * Task::Wait() and is set to \c MTAPI_SUCCESS by default.
+    * \notthreadsafe
+    */
+  void SetStatus(
+    mtapi_status_t error_code          /**< [in] The status to return by
+                                            Task::Wait(), Group::WaitAny(),
+                                            Group::WaitAll() */
     );
 
-  /**
-    * Destroys a Task
-    */
-  ~Task();
-
-  /**
-    * Waits for Task to finish for \c timeout milliseconds.
-    * \return The status of the finished Task, \c MTAPI_TIMEOUT or
-    * \c MTAPI_ERR_*
-    * \threadsafe
-    */
-  mtapi_status_t Wait(
-    mtapi_timeout_t timeout          /**< [in] Timeout duration in
-                                          milliseconds */
-    );
-
-  /**
-    * Signals the Task to cancel computation.
-    * \waitfree
-    */
-  void Cancel();
-
-  friend class Group;
-  friend class Queue;
   friend class Node;
 
  private:
-  Task(
-    Action action);
+  explicit TaskContext(mtapi_task_context_t * task_context);
 
-  Task(
-    Action action,
-    mtapi_group_hndl_t group);
-
-  Task(
-    mtapi_task_id_t id,
-    Action action,
-    mtapi_group_hndl_t group);
-
-  Task(
-    Action action,
-    mtapi_queue_hndl_t queue);
-
-  Task(
-    Action action,
-    mtapi_queue_hndl_t queue,
-    mtapi_group_hndl_t group);
-
-  Task(
-    mtapi_task_id_t id,
-    Action action,
-    mtapi_queue_hndl_t queue,
-    mtapi_group_hndl_t group);
-
-  mtapi_task_hndl_t handle_;
+  mtapi_task_context_t * context_;
 };
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb
 
-#endif // EMBB_MTAPI_TASK_H_
+#endif // EMBB_TASKS_TASK_CONTEXT_H_

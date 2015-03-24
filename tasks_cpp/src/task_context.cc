@@ -24,55 +24,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_TASKCONTEXT_H_
-#define EMBB_MTAPI_TASKCONTEXT_H_
+#include <cassert>
 
-#include <embb/mtapi/c/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
-/**
-  * Provides information about the status of the currently running Task.
-  *
-  * \ingroup CPP_MTAPI
-  */
-class TaskContext {
- public:
-  /**
-    * Queries whether the Task running in the TaskContext should finish.
-    * \return \c true if the Task should finish, otherwise \c false
-    * \notthreadsafe
-    */
-  bool ShouldCancel();
+TaskContext::TaskContext(mtapi_task_context_t * task_context)
+  : context_(task_context) {
+}
 
-  /**
-    * Queries the index of the worker thread the Task is running on.
-    * \return The worker thread index the Task is running on
-    * \notthreadsafe
-    */
-  mtapi_uint_t GetCurrentCoreNumber();
+bool TaskContext::ShouldCancel() {
+  mtapi_status_t status;
+  bool result =
+    MTAPI_TASK_CANCELLED == mtapi_context_taskstate_get(context_, &status);
+  assert(MTAPI_SUCCESS == status);
+  return result;
+}
 
-  /**
-    * Sets the return status of the running Task. This will be returned by
-    * Task::Wait() and is set to \c MTAPI_SUCCESS by default.
-    * \notthreadsafe
-    */
-  void SetStatus(
-    mtapi_status_t error_code          /**< [in] The status to return by
-                                            Task::Wait(), Group::WaitAny(),
-                                            Group::WaitAll() */
-    );
+mtapi_uint_t TaskContext::GetCurrentCoreNumber() {
+  mtapi_status_t status;
+  mtapi_uint_t result =
+    mtapi_context_corenum_get(context_, &status);
+  assert(MTAPI_SUCCESS == status);
+  return result;
+}
 
-  friend class Node;
+void TaskContext::SetStatus(mtapi_status_t error_code) {
+  mtapi_status_t status;
+  mtapi_context_status_set(context_, error_code, &status);
+  assert(MTAPI_SUCCESS == status);
+}
 
- private:
-  explicit TaskContext(mtapi_task_context_t * task_context);
-
-  mtapi_task_context_t * context_;
-};
-
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb
-
-#endif // EMBB_MTAPI_TASKCONTEXT_H_

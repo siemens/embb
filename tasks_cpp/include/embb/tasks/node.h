@@ -24,17 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_NODE_H_
-#define EMBB_MTAPI_NODE_H_
+#ifndef EMBB_TASKS_NODE_H_
+#define EMBB_TASKS_NODE_H_
 
 #include <list>
 #include <embb/base/core_set.h>
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/action.h>
-#include <embb/mtapi/task.h>
-#include <embb/mtapi/continuation.h>
-#include <embb/mtapi/group.h>
-#include <embb/mtapi/queue.h>
+#include <embb/tasks/action.h>
+#include <embb/tasks/task.h>
+#include <embb/tasks/continuation.h>
+#include <embb/tasks/group.h>
+#include <embb/tasks/queue.h>
 
 namespace embb {
 
@@ -44,12 +44,12 @@ class Allocation;
 
 } // namespace base
 
-namespace mtapi {
+namespace tasks {
 
 /**
   * A singleton representing the MTAPI runtime.
   *
-  * \ingroup CPP_MTAPI
+  * \ingroup CPP_TASKS
   */
 class Node {
  public:
@@ -225,7 +225,7 @@ class Node {
   std::list<Group*> groups_;
 };
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb
 
-#endif // EMBB_MTAPI_NODE_H_
+#endif // EMBB_TASKS_NODE_H_

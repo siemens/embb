@@ -24,17 +24,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_CPP_TEST_MTAPI_CPP_TEST_GROUP_H_
-#define MTAPI_CPP_TEST_MTAPI_CPP_TEST_GROUP_H_
+#ifndef TASKS_CPP_TEST_TASKS_CPP_TEST_CONFIG_H_
+#define TASKS_CPP_TEST_TASKS_CPP_TEST_CONFIG_H_
 
 #include <partest/partest.h>
+#include <embb/tasks/tasks.h>
 
-class GroupTest : public partest::TestCase {
- public:
-  GroupTest();
+#define THIS_DOMAIN_ID 1
+#define THIS_NODE_ID 1
 
- private:
-  void TestBasic();
-};
-
-#endif // MTAPI_CPP_TEST_MTAPI_CPP_TEST_GROUP_H_
+#endif // TASKS_CPP_TEST_TASKS_CPP_TEST_CONFIG_H_
