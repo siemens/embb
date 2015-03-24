@@ -152,42 +152,49 @@ After everything is done, the action is deleted (\lstinline|mtapi_action_delete(
 \section{C++ Interface}
 \label{sec:mtapi_cpp_interface}
 
-\embb provides C++ wrappers for the MTAPI C interface. Using the example from the previous section, the signature of the action function for the C++ interface looks like this:
+\embb provides C++ wrappers for the MTAPI C interface. The signature of the action function for the C++ interface is the same as in the C interface:
 %
-%\\\inputlisting{../examples/mtapi/mtapi_cpp_action_signature-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_action_signature-snippet.h}
 %
-First, the node instance needs to be initialized.
-%
-%\\\inputlisting{../examples/mtapi/mtapi_cpp_initialize_node-snippet.h}
-%
-
-Checking the arguments and the result buffer is not necessary, since everything is safely typed. However, the terminating condition of the recursion still needs to be checked:
+Checking the arguments and the result buffer is not done this time for simplicity. However, the terminating condition of the recursion still needs to be checked:
 %
 \\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
 %
-After that, the first part of the computation is launched as an MTAPI task using \lstinline|embb::mtapi::Node::Spawn()| (registering an action function with a job is done automatically):
+After that, the first part of the computation is launched as an MTAPI task using \lstinline|embb::mtapi::Node::Start()| (the action function is registered with the job \lstinline|FIBONACCI_JOB| in the \lstinline|fibonacci()| function and the resulting handle is stored in the global variable \lstinline|embb::mtapi::Job fibonacciJob|):
 %
-%\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_task-snippet.h}
 %
 The second part can be executed directly:
 %
-%\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_direct-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_calc_direct-snippet.h}
 %
 Then, completion of the MTAPI task has to be waited for using \lstinline|embb::mtapi::Task::Wait()|:
 %
-%\\\inputlisting{../examples/mtapi/mtapi_cpp_wait_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_wait_task-snippet.h}
 %
 Finally, the two parts can be added and written into the result buffer:
 %
 \\\inputlisting{../examples/mtapi/mtapi_write_back-snippet.h}
 % 
 
-The \lstinline|fibonacci()| function also gets simpler compared to the C version. The MTAPI runtime is initialized automatically, only the node instance has to be fetched:
+The \lstinline|fibonacci()| function is about the same as in the C version. The MTAPI runtime needs to be initialized first:
 %
-%\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_initialize-snippet.h}
 %
-The root task can be started using \lstinline|embb::mtapi::Node::Start()| directly, registering with a job is done automatically:
+Then the node instance can to be fetched:
 %
-%\\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
 %
-Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task::Wait()|) before the result can be returned. The runtime is shut down by calling \lstinline|embb::mtapi::Node::Finalize|.
+After that, the action function needs to be associated to a job. By instancing an \lstinline|embb::mtap::Action| object, the action function is registered with the job \lstinline|FIBONACCI_JOB|. The job is stored in the global variable \lstinline|embb::mtapi::Job fibonacciJob| so that it can be accessed by the action function later on:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_register_action-snippet.h}
+%
+Not that the action is registered and the job is initialized, the root task can be started:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
+%
+Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task::Wait()|) before the result can be returned.
+
+The registered action will be unregistered when it goes out of scope.
+The runtime needs to be shut down by calling:
+\\\inputlisting{../examples/mtapi/mtapi_cpp_finalize-snippet.h}
