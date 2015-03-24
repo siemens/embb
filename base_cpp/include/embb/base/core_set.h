@@ -184,6 +184,11 @@ class CoreSet {
     /** [IN] Core set on right-hand side of union operation */
     );
 
+  /**
+   * Provides access to internal representation to use it with C API.
+   */
+  embb_core_set_t const & GetInternal() const { return rep_; }
+
  private:
   /**
    * Internal representation of core set.
