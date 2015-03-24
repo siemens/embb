@@ -93,7 +93,7 @@ ChunkPartitioner<ForwardIterator>::ChunkPartitioner(ForwardIterator first,
     size = amountChunks;
   } else {
     // if no concrete chunk size was given, use number of cores...
-    mtapi::Node& node = mtapi::Node::GetInstance();
+    embb::tasks::Node& node = embb::tasks::Node::GetInstance();
     size = node.GetWorkerThreadCount();
   }
 

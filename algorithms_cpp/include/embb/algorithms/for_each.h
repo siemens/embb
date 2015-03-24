@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_FOR_EACH_H_
 #define EMBB_ALGORITHMS_FOR_EACH_H_
 
-#include <embb/mtapi/execution_policy.h>
+#include <embb/tasks/execution_policy.h>
 
 namespace embb {
 namespace algorithms {
@@ -88,7 +88,7 @@ void ForEach(
   RAI first,
   RAI last,
   Function unary,
-  const embb::mtapi::ExecutionPolicy& policy,
+  const embb::tasks::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -101,7 +101,7 @@ void ForEach(
   RAI last,
   Function unary
   ) {
-  ForEach(first, last, unary, embb::mtapi::ExecutionPolicy(), 0);
+  ForEach(first, last, unary, embb::tasks::ExecutionPolicy(), 0);
 }
 
 /**
@@ -112,7 +112,7 @@ void ForEach(
   RAI first,
   RAI last,
   Function unary,
-  const embb::mtapi::ExecutionPolicy& policy
+  const embb::tasks::ExecutionPolicy& policy
   ) {
   ForEach(first, last, unary, policy, 0);
 }

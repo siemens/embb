@@ -17,18 +17,18 @@ include_directories(${EMBB_ALGORITHMS_CPP_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_SOURCE_DIR}/../base_cpp/include
                     ${CMAKE_CURRENT_BINARY_DIR}/../base_cpp/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/../mtapi_c/include
-                    ${CMAKE_CURRENT_SOURCE_DIR}/../mtapi_cpp/include
-                    ${CMAKE_CURRENT_BINARY_DIR}/../mtapi_cpp/include)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../tasks_cpp/include
+                    ${CMAKE_CURRENT_BINARY_DIR}/../tasks_cpp/include)
 
 add_library(embb_algorithms_cpp ${EMBB_ALGORITHMS_CPP_SOURCES}
             ${EMBB_ALGORITHMS_CPP_HEADERS})
-target_link_libraries(embb_algorithms_cpp embb_mtapi_cpp)
+target_link_libraries(embb_algorithms_cpp embb_tasks_cpp)
 
 if (BUILD_TESTS STREQUAL ON)
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/../partest/include)
   add_executable (embb_algorithms_cpp_test ${EMBB_ALGORITHMS_CPP_TEST_SOURCES})
   target_link_libraries(embb_algorithms_cpp_test embb_algorithms_cpp
-                        embb_mtapi_cpp embb_mtapi_c partest embb_base_cpp
+                        embb_tasks_cpp embb_mtapi_c partest embb_base_cpp
                         embb_base_c ${compiler_libs})
   CopyBin(BIN embb_algorithms_cpp_test DEST ${local_install_dir})
 endif()
