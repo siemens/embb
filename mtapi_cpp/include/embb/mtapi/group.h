@@ -28,10 +28,10 @@
 #define EMBB_MTAPI_GROUP_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/job.h>
-#include <embb/mtapi_ext/task.h>
-#include <embb/mtapi_ext/task_attributes.h>
-#include <embb/mtapi_ext/group_attributes.h>
+#include <embb/mtapi/job.h>
+#include <embb/mtapi/task.h>
+#include <embb/mtapi/task_attributes.h>
+#include <embb/mtapi/group_attributes.h>
 
 namespace embb {
 

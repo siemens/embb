@@ -24,46 +24,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_GROUP_ATTRIBUTES_H_
-#define EMBB_MTAPI_GROUP_ATTRIBUTES_H_
+#ifndef MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
+#define MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
 
-#include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/internal/check_status.h>
+#include <partest/partest.h>
+#include <embb/mtapi/mtapi.h>
 
-namespace embb {
-namespace mtapi {
+#define THIS_DOMAIN_ID 1
+#define THIS_NODE_ID 1
 
-/**
- * Contains attributes of a Group.
- *
- * \ingroup CPP_MTAPI_EXT
- */
-class GroupAttributes {
-public:
-  /**
-   * Constructs a GroupAttributes object.
-   */
-  GroupAttributes() {
-    mtapi_status_t status;
-    mtapi_groupattr_init(&attributes_, &status);
-    internal::CheckStatus(status);
-  }
-
-  /**
-   * Returns the internal representation of this object.
-   * Allows for interoperability with the C interface.
-   *
-   * \returns A reference to the internal mtapi_group_attributes_t structure.
-   */
-  mtapi_group_attributes_t const & GetInternal() const {
-    return attributes_;
-  }
-
-private:
-  mtapi_group_attributes_t attributes_;
-};
-
-} // namespace mtapi
-} // namespace embb
-
-#endif // EMBB_MTAPI_GROUP_ATTRIBUTES_H_
+#endif // MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_

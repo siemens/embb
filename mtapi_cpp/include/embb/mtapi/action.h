@@ -27,9 +27,9 @@
 #ifndef EMBB_MTAPI_ACTION_H_
 #define EMBB_MTAPI_ACTION_H_
 
-#include <embb/mtapi_ext/internal/check_status.h>
-#include <embb/mtapi_ext/action_attributes.h>
-#include <embb/mtapi_ext/job.h>
+#include <embb/mtapi/internal/check_status.h>
+#include <embb/mtapi/action_attributes.h>
+#include <embb/mtapi/job.h>
 
 namespace embb {
 namespace mtapi {

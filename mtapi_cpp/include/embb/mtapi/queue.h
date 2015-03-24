@@ -28,11 +28,11 @@
 #define EMBB_MTAPI_QUEUE_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/job.h>
-#include <embb/mtapi_ext/task.h>
-#include <embb/mtapi_ext/group.h>
-#include <embb/mtapi_ext/queue_attributes.h>
-#include <embb/mtapi_ext/task_attributes.h>
+#include <embb/mtapi/job.h>
+#include <embb/mtapi/task.h>
+#include <embb/mtapi/group.h>
+#include <embb/mtapi/queue_attributes.h>
+#include <embb/mtapi/task_attributes.h>
 
 namespace embb {
 

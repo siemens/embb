@@ -29,7 +29,7 @@
 
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/base/core_set.h>
-#include <embb/mtapi_ext/internal/check_status.h>
+#include <embb/mtapi/internal/check_status.h>
 
 namespace embb {
 namespace mtapi {

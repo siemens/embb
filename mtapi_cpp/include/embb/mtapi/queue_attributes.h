@@ -28,7 +28,7 @@
 #define EMBB_MTAPI_QUEUE_ATTRIBUTES_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/internal/check_status.h>
+#include <embb/mtapi/internal/check_status.h>
 
 namespace embb {
 namespace mtapi {

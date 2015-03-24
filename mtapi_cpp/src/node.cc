@@ -24,13 +24,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
-#define MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
+#include <embb/mtapi/node.h>
 
-#include <partest/partest.h>
-#include <embb/mtapi_ext/mtapi.h>
+namespace embb {
+namespace mtapi {
 
-#define THIS_DOMAIN_ID 1
-#define THIS_NODE_ID 1
+embb::mtapi::Node * embb::mtapi::Node::node_instance_ = NULL;
 
-#endif // MTAPI_CPP_TEST_MTAPI_CPP_TEST_CONFIG_H_
+} // namespace mtapi
+} // namespace embb

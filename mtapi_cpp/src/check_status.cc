@@ -24,10 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb/mtapi_ext/task_context.h>
+#include <embb/mtapi/task_context.h>
 
-#include <embb/mtapi_ext/internal/check_status.h>
-#include <embb/mtapi_ext/status_exception.h>
+#include <embb/mtapi/internal/check_status.h>
+#include <embb/mtapi/status_exception.h>
 #include <embb/base/internal/config.h>
 
 namespace embb {

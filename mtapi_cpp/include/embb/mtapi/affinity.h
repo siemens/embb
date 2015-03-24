@@ -28,7 +28,7 @@
 #define EMBB_MTAPI_AFFINITY_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/internal/check_status.h>
+#include <embb/mtapi/internal/check_status.h>
 
 namespace embb {
 namespace mtapi {

@@ -28,8 +28,8 @@
 #define EMBB_MTAPI_ACTION_ATTRIBUTES_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/internal/check_status.h>
-#include <embb/mtapi_ext/affinity.h>
+#include <embb/mtapi/internal/check_status.h>
+#include <embb/mtapi/affinity.h>
 
 namespace embb {
 namespace mtapi {

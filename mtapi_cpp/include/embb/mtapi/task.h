@@ -24,77 +24,115 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_JOB_H_
-#define EMBB_MTAPI_JOB_H_
+#ifndef EMBB_MTAPI_TASK_H_
+#define EMBB_MTAPI_TASK_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/internal/check_status.h>
+#include <embb/mtapi/internal/check_status.h>
 
 namespace embb {
 namespace mtapi {
 
 /**
- * Represents a collection of Actions.
+ * A Task represents a running Action of a specific Job.
  *
  * \ingroup CPP_MTAPI_EXT
  */
-class Job {
-public:
+class Task {
+ public:
   /**
-   * Constructs a Job.
-   * The Job object will be invalid.
+   * Constructs an invalid Task.
    */
-  Job() {
+  Task() {
     handle_.id = 0;
     handle_.tag = 0;
   }
 
   /**
-   * Constructs a Job with the given \c job_id and \c domain_id.
-   * Requires an initialized Node.
+   * Copies a Task.
    */
-  Job(
-    mtapi_job_id_t job_id,             /**< Job ID to use. */
-    mtapi_domain_t domain_id           /**< Domain ID to use. */
-    ) {
-    mtapi_status_t status;
-    handle_ = mtapi_job_get(job_id, domain_id, &status);
-    internal::CheckStatus(status);
+  Task(
+    Task const & other                 /**< The task to copy. */
+    ) : handle_(other.handle_) {
+    // emtpy
   }
 
   /**
-   * Copies a Job object.
+   * Copies a Task.
    */
-  Job(
-    Job const & other                  /**< The Job to copy from */
-    ) : handle_(other.handle_) {
+  void operator=(
+    Task const & other                 /**< The task to copy. */
+    ) {
+    handle_ = other.handle_;
+  }
+
+  /**
+   * Destroys a Task.
+   */
+  ~Task() {
     // empty
   }
 
   /**
-   * Copies a Job object.
+   * Waits for Task to finish for \c timeout milliseconds.
+   * \return The status of the finished Task, \c MTAPI_TIMEOUT or
+   * \c MTAPI_ERR_*
+   * \threadsafe
    */
-  void operator=(
-    Job const & other                  /**< The Job to copy from */
+  mtapi_status_t Wait(
+    mtapi_timeout_t timeout          /**< [in] Timeout duration in
+                                          milliseconds */
     ) {
-    handle_ = other.handle_;
+    mtapi_status_t status;
+    mtapi_task_wait(handle_, timeout, &status);
+    return status;
+  }
+
+  /**
+   * Waits for Task to finish.
+   * \return The status of the finished Task or \c MTAPI_ERR_*
+   * \threadsafe
+   */
+  mtapi_status_t Wait() {
+    mtapi_status_t status;
+    mtapi_task_wait(handle_, MTAPI_INFINITE, &status);
+    return status;
+  }
+
+  /**
+   * Signals the Task to cancel computation.
+   * \waitfree
+   */
+  void Cancel() {
+    mtapi_status_t status;
+    mtapi_task_cancel(handle_, &status);
+    internal::CheckStatus(status);
   }
 
   /**
    * Returns the internal representation of this object.
    * Allows for interoperability with the C interface.
    *
-   * \returns The internal mtapi_job_hndl_t.
+   * \returns The internal mtapi_task_hndl_t.
    */
-  mtapi_job_hndl_t GetInternal() const {
+  mtapi_task_hndl_t GetInternal() const {
     return handle_;
   }
 
-private:
-  mtapi_job_hndl_t handle_;
+ private:
+  Task(mtapi_task_hndl_t handle)
+    : handle_(handle) {
+    // empty
+  }
+
+  mtapi_task_hndl_t handle_;
+
+  friend class Node;
+  friend class Group;
+  friend class Queue;
 };
 
 } // namespace mtapi
 } // namespace embb
 
-#endif // EMBB_MTAPI_GROUP_ATTRIBUTES_H_
+#endif // EMBB_MTAPI_TASK_H_

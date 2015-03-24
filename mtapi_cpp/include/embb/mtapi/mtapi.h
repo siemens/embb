@@ -35,12 +35,12 @@
  * \ingroup CPP
  */
 
-#include <embb/mtapi_ext/job.h>
-#include <embb/mtapi_ext/action.h>
-#include <embb/mtapi_ext/group.h>
-#include <embb/mtapi_ext/queue.h>
-#include <embb/mtapi_ext/task.h>
-#include <embb/mtapi_ext/task_context.h>
-#include <embb/mtapi_ext/node.h>
+#include <embb/mtapi/job.h>
+#include <embb/mtapi/action.h>
+#include <embb/mtapi/group.h>
+#include <embb/mtapi/queue.h>
+#include <embb/mtapi/task.h>
+#include <embb/mtapi/task_context.h>
+#include <embb/mtapi/node.h>
 
 #endif // EMBB_MTAPI_MTAPI_H_

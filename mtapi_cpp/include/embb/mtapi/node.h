@@ -29,11 +29,11 @@
 
 #include <embb/base/memory_allocation.h>
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi_ext/status_exception.h>
-#include <embb/mtapi_ext/node_attributes.h>
-#include <embb/mtapi_ext/task.h>
-#include <embb/mtapi_ext/task_attributes.h>
-#include <embb/mtapi_ext/job.h>
+#include <embb/mtapi/status_exception.h>
+#include <embb/mtapi/node_attributes.h>
+#include <embb/mtapi/task.h>
+#include <embb/mtapi/task_attributes.h>
+#include <embb/mtapi/job.h>
 
 namespace embb {
 
