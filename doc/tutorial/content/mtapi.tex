@@ -154,13 +154,12 @@ After everything is done, the action is deleted (\lstinline|mtapi_action_delete(
 
 \embb provides C++ wrappers for the MTAPI C interface. Using the example from the previous section, the signature of the action function for the C++ interface looks like this:
 %
-\\\inputlisting{../examples/mtapi/mtapi_cpp_action_signature-snippet.h}
+%\\\inputlisting{../examples/mtapi/mtapi_cpp_action_signature-snippet.h}
 %
-First, the node instance needs to be obtained. If the node is not initialized yet, this function will do it.
+First, the node instance needs to be initialized.
 %
-\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
+%\\\inputlisting{../examples/mtapi/mtapi_cpp_initialize_node-snippet.h}
 %
-\emph{\textbf{Note:} Automatic initialization allows for easy usage of the \emph{Algorithms} and \emph{Dataflow} building blocks. For performance measurements however, explicit initialization by calling \lstinline|embb::mtapi::Node::Initialize| is imperative since the measurements will otherwise include the initialization time of MTAPI.}
 
 Checking the arguments and the result buffer is not necessary, since everything is safely typed. However, the terminating condition of the recursion still needs to be checked:
 %
@@ -168,15 +167,15 @@ Checking the arguments and the result buffer is not necessary, since everything 
 %
 After that, the first part of the computation is launched as an MTAPI task using \lstinline|embb::mtapi::Node::Spawn()| (registering an action function with a job is done automatically):
 %
-\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_task-snippet.h}
+%\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_task-snippet.h}
 %
 The second part can be executed directly:
 %
-\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_direct-snippet.h}
+%\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_direct-snippet.h}
 %
 Then, completion of the MTAPI task has to be waited for using \lstinline|embb::mtapi::Task::Wait()|:
 %
-\\\inputlisting{../examples/mtapi/mtapi_cpp_wait_task-snippet.h}
+%\\\inputlisting{../examples/mtapi/mtapi_cpp_wait_task-snippet.h}
 %
 Finally, the two parts can be added and written into the result buffer:
 %
@@ -185,12 +184,10 @@ Finally, the two parts can be added and written into the result buffer:
 
 The \lstinline|fibonacci()| function also gets simpler compared to the C version. The MTAPI runtime is initialized automatically, only the node instance has to be fetched:
 %
-\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
+%\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
 %
-The root task can be started using \lstinline|embb::mtapi::Node::Spawn()| directly, registering with a job is done automatically:
+The root task can be started using \lstinline|embb::mtapi::Node::Start()| directly, registering with a job is done automatically:
 %
-\\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
+%\\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
 %
-Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task::Wait()|) before the result can be returned. The runtime is shut down automatically in an \lstinline|atexit()| handler.
-
-\emph{\textbf{Note:} If the node was initialized explicitly by calling \lstinline|embb::mtapi::Node::Initialize|, the runtime must also be shut down explicitly by calling \lstinline|embb::mtapi::Node::Finalize|.}
+Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task::Wait()|) before the result can be returned. The runtime is shut down by calling \lstinline|embb::mtapi::Node::Finalize|.
