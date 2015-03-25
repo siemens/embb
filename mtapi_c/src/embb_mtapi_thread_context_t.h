@@ -56,6 +56,7 @@ struct embb_mtapi_thread_context_struct {
   embb_condition_t work_available;
   embb_thread_t thread;
   embb_tss_t tss_id;
+  embb_atomic_int is_sleeping;
 
   embb_mtapi_node_t* node;
   embb_mtapi_task_queue_t** queue;

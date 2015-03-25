@@ -24,14 +24,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb/mtapi/execution_policy.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/execution_policy.h>
+#include <embb/tasks/tasks.h>
 #include <embb/base/exceptions.h>
 #include <embb/base/c/internal/bitset.h>
 #include <cassert>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 ExecutionPolicy::ExecutionPolicy() :
     priority_(DefaultPriority) {
@@ -120,5 +120,5 @@ mtapi_uint_t ExecutionPolicy::GetPriority() const {
 
 const mtapi_uint_t ExecutionPolicy::DefaultPriority = 0;
 
-}  // namespace mtapi
+}  // namespace tasks
 }  // namespace embb

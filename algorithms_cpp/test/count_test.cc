@@ -26,7 +26,7 @@
 
 #include <count_test.h>
 #include <embb/algorithms/count.h>
-#include <embb/mtapi/execution_policy.h>
+#include <embb/tasks/execution_policy.h>
 #include <deque>
 #include <vector>
 #include <functional>
@@ -122,7 +122,7 @@ void CountTest::TestBlockSizes() {
 
 void CountTest::TestPolicy() {
   using embb::algorithms::Count;
-  using embb::mtapi::ExecutionPolicy;
+  using embb::tasks::ExecutionPolicy;
   int a[] = { 10, 20, 30, 30, 20, 10, 10, 20, 20, 20 };
   std::vector<int> vector(a, a + (sizeof a / sizeof a[0]));
   PT_EXPECT_EQ(Count(vector.begin(), vector.end(), 10, ExecutionPolicy()), 3);
@@ -134,7 +134,7 @@ void CountTest::TestPolicy() {
 
 void CountTest::StressTest() {
   using embb::algorithms::Count;
-  size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() *10;
+  size_t count = embb::tasks::Node::GetInstance().GetCoreCount() * 10;
   std::vector<int> large_vector(count);
   for (size_t i = 0; i < count; i++) {
     large_vector[i] = static_cast<int>(0);

@@ -70,6 +70,7 @@ void embb_mtapi_thread_context_initialize_with_node_worker_and_core(
 
   embb_mutex_init(&that->work_available_mutex, EMBB_MUTEX_PLAIN);
   embb_condition_init(&that->work_available);
+  embb_atomic_store_int(&that->is_sleeping, 0);
 }
 
 mtapi_boolean_t embb_mtapi_thread_context_start(

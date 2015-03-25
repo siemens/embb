@@ -13,8 +13,6 @@ else()
 endif()
 message("   (set with command line option -DUSE_AUTOMATIC_INITIALIZATION=ON/OFF)")
 
-configure_file("include/embb/mtapi/internal/cmake_config.h.in"
-               "include/embb/mtapi/internal/cmake_config.h")
 
 # Execute the GroupSources macro
 include(${CMAKE_SOURCE_DIR}/CMakeCommon/GroupSourcesMSVC.cmake)
@@ -24,7 +22,6 @@ GroupSourcesMSVC(test)
 
 set (EMBB_MTAPI_CPP_INCLUDE_DIRS "include" "src" "test")
 include_directories(${EMBB_MTAPI_CPP_INCLUDE_DIRS}
-                    ${CMAKE_CURRENT_BINARY_DIR}/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/../base_c/include
                     ${CMAKE_CURRENT_BINARY_DIR}/../base_c/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/../base_cpp/include
@@ -43,7 +40,5 @@ if (BUILD_TESTS STREQUAL ON)
 endif()
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
-        DESTINATION include FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/
         DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(TARGETS embb_mtapi_cpp DESTINATION lib)

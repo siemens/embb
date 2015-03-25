@@ -32,7 +32,7 @@
 #include <functional>
 
 #include <embb/base/exceptions.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 #include <embb/algorithms/internal/partition.h>
 
 namespace embb {
@@ -50,7 +50,7 @@ class MergeSortFunctor {
 
   MergeSortFunctor(size_t chunk_first, size_t chunk_last,
                    RAITemp temporary_first, ComparisonFunction comparison,
-                   const embb::mtapi::ExecutionPolicy& policy,
+                   const embb::tasks::ExecutionPolicy& policy,
                    const BlockSizePartitioner<RAI>& partitioner,
                    const RAI& global_first, int depth)
   : chunk_first_(chunk_first), chunk_last_(chunk_last),
@@ -59,7 +59,7 @@ class MergeSortFunctor {
     global_first_(global_first), depth_(depth) {
   }
 
-  void Action(mtapi::TaskContext&) {
+  void Action(embb::tasks::TaskContext&) {
     size_t chunk_split_index = (chunk_first_ + chunk_last_) / 2;
     if (chunk_first_ == chunk_last_) {
       // Leaf case: recurse into a single chunk's elements:
@@ -77,13 +77,13 @@ class MergeSortFunctor {
                        temp_first_,
                        comparison_, policy_, partitioner_,
                        global_first_, depth_ + 1);
-      mtapi::Node& node = mtapi::Node::GetInstance();
-      mtapi::Task task_l = node.Spawn(
-        mtapi::Action(
+      embb::tasks::Node& node = embb::tasks::Node::GetInstance();
+      embb::tasks::Task task_l = node.Spawn(
+        embb::tasks::Action(
           base::MakeFunction(functor_l, &self_t::Action),
           policy_));
-      mtapi::Task task_r = node.Spawn(
-        mtapi::Action(
+      embb::tasks::Task task_r = node.Spawn(
+        embb::tasks::Action(
           base::MakeFunction(functor_r, &self_t::Action),
           policy_));
       task_l.Wait(MTAPI_INFINITE);
@@ -177,7 +177,7 @@ class MergeSortFunctor {
   size_t chunk_last_;
   RAITemp temp_first_;
   ComparisonFunction comparison_;
-  const embb::mtapi::ExecutionPolicy& policy_;
+  const embb::tasks::ExecutionPolicy& policy_;
   const BlockSizePartitioner<RAI>& partitioner_;
   const RAI& global_first_;
   int depth_;
@@ -219,7 +219,7 @@ void MergeSortIteratorCheck(
   RAI last,
   RAITemp temporary_first,
   ComparisonFunction comparison,
-  const embb::mtapi::ExecutionPolicy& policy,
+  const embb::tasks::ExecutionPolicy& policy,
   size_t block_size,
   std::random_access_iterator_tag
   ) {
@@ -257,8 +257,8 @@ void MergeSortIteratorCheck(
                     partitioner,
                     first,
                     0);
-  mtapi::Task task = embb::mtapi::Node::GetInstance().Spawn(
-    mtapi::Action(
+  embb::tasks::Task task = embb::tasks::Node::GetInstance().Spawn(
+    embb::tasks::Action(
       base::MakeFunction(functor, &functor_t::Action),
       policy));
 
@@ -269,7 +269,7 @@ void MergeSortIteratorCheck(
 
 template<typename RAI, typename RAITemp, typename ComparisonFunction>
 void MergeSort(RAI first, RAI last, RAITemp temporary_first,
-  ComparisonFunction comparison, const embb::mtapi::ExecutionPolicy& policy,
+  ComparisonFunction comparison, const embb::tasks::ExecutionPolicy& policy,
   size_t block_size) {
   typedef typename std::iterator_traits<RAI>::iterator_category category;
   internal::MergeSortIteratorCheck(first, last, temporary_first, comparison,

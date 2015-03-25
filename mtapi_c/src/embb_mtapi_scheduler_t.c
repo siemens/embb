@@ -304,13 +304,16 @@ int embb_mtapi_scheduler_worker(void * arg) {
 
       switch (task->state) {
       case MTAPI_TASK_SCHEDULED:
+      /* multi-instance task, another instance might be running */
+      case MTAPI_TASK_RUNNING:
         /* there was work, execute it */
         embb_mtapi_task_context_initialize_with_thread_context_and_task(
           &task_context, thread_context, task);
-        embb_mtapi_task_execute(task, &task_context);
-        /* tell queue that a task is done */
-        if (MTAPI_NULL != local_queue) {
-          embb_mtapi_queue_task_finished(local_queue);
+        if (embb_mtapi_task_execute(task, &task_context)) {
+          /* tell queue that a task is done */
+          if (MTAPI_NULL != local_queue) {
+            embb_mtapi_queue_task_finished(local_queue);
+          }
         }
         counter = 0;
         break;
@@ -318,25 +321,27 @@ int embb_mtapi_scheduler_worker(void * arg) {
       case MTAPI_TASK_RETAINED:
         /* put task into queue again for later execution */
         embb_mtapi_scheduler_schedule_task(
-          node->scheduler, task);
+          node->scheduler, task, 0);
         /* yield, as there may be only retained tasks in the queue */
         embb_thread_yield();
         /* task is not done, so do not notify queue */
         break;
 
       case MTAPI_TASK_CANCELLED:
-        /* set return value to cancelled */
+        /* set return value to canceled */
         task->error_code = MTAPI_ERR_ACTION_CANCELLED;
-        /* tell queue that a task is done */
-        if (MTAPI_NULL != local_queue) {
-          embb_mtapi_queue_task_finished(local_queue);
+        if (embb_atomic_fetch_and_add_unsigned_int(
+          &task->instances_todo, (unsigned int)-1) == 0) {
+          /* tell queue that a task is done */
+          if (MTAPI_NULL != local_queue) {
+            embb_mtapi_queue_task_finished(local_queue);
+          }
         }
         break;
 
       case MTAPI_TASK_COMPLETED:
       case MTAPI_TASK_DELETED:
       case MTAPI_TASK_WAITING:
-      case MTAPI_TASK_RUNNING:
       case MTAPI_TASK_CREATED:
       case MTAPI_TASK_PRENATAL:
       case MTAPI_TASK_ERROR:
@@ -351,12 +356,14 @@ int embb_mtapi_scheduler_worker(void * arg) {
       counter++;
     } else {
       /* no work, go to sleep */
+      embb_atomic_store_int(&thread_context->is_sleeping, 1);
       embb_mutex_lock(&thread_context->work_available_mutex);
       embb_condition_wait_for(
         &thread_context->work_available,
         &thread_context->work_available_mutex,
         &sleep_duration);
       embb_mutex_unlock(&thread_context->work_available_mutex);
+      embb_atomic_store_int(&thread_context->is_sleeping, 0);
     }
   }
 
@@ -526,10 +533,11 @@ mtapi_boolean_t embb_mtapi_scheduler_process_tasks(
 
 mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
   embb_mtapi_scheduler_t * that,
-  embb_mtapi_task_t * task) {
+  embb_mtapi_task_t * task,
+  mtapi_uint_t instance) {
   embb_mtapi_scheduler_t * scheduler = that;
   /* distribute round robin */
-  mtapi_uint_t ii = task->handle.id % scheduler->worker_count;
+  mtapi_uint_t ii = (task->handle.id + instance) % scheduler->worker_count;
   mtapi_boolean_t pushed = MTAPI_FALSE;
   embb_mtapi_node_t* node = embb_mtapi_node_get_instance();
 
@@ -586,8 +594,8 @@ mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
     }
 
     if (pushed) {
-      /* signal all threads */
-      for (ii = 0; ii < scheduler->worker_count; ii++) {
+      /* signal the worker thread a task was pushed to */
+      if (embb_atomic_load_int(&scheduler->worker_contexts[ii].is_sleeping)) {
         embb_condition_notify_one(
           &scheduler->worker_contexts[ii].work_available);
       }

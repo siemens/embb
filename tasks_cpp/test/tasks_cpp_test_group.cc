@@ -24,38 +24,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cassert>
+#include <iostream>
 
-#include <embb/mtapi/mtapi.h>
+#include <tasks_cpp_test_config.h>
+#include <tasks_cpp_test_group.h>
 
-namespace embb {
-namespace mtapi {
+#include <embb/base/c/memory_allocation.h>
 
-TaskContext::TaskContext(mtapi_task_context_t * task_context)
-  : context_(task_context) {
+struct result_example_struct {
+  mtapi_uint_t value1;
+  mtapi_uint_t value2;
+};
+
+typedef struct result_example_struct result_example_t;
+
+static void testGroupAction(embb::tasks::TaskContext & /*context*/) {
+  // emtpy
 }
 
-bool TaskContext::ShouldCancel() {
+static void testDoSomethingElse() {
+}
+
+GroupTest::GroupTest() {
+  CreateUnit("tasks_cpp group test").Add(&GroupTest::TestBasic, this);
+}
+
+void GroupTest::TestBasic() {
+  embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+
+  embb::tasks::Node & node = embb::tasks::Node::GetInstance();
+  embb::tasks::Group & group = node.CreateGroup();
+  embb::tasks::Task task;
+
+  for (int ii = 0; ii < 4; ii++) {
+    task = group.Spawn(testGroupAction);
+  }
+  testDoSomethingElse();
+  group.WaitAll(MTAPI_INFINITE);
+
+  for (int ii = 0; ii < 4; ii++) {
+    task = group.Spawn(mtapi_task_id_t(ii + 1), testGroupAction);
+  }
+  testDoSomethingElse();
   mtapi_status_t status;
-  bool result =
-    MTAPI_TASK_CANCELLED == mtapi_context_taskstate_get(context_, &status);
-  assert(MTAPI_SUCCESS == status);
-  return result;
-}
+  mtapi_task_id_t result;
+  while (MTAPI_SUCCESS == (status = group.WaitAny(MTAPI_INFINITE, result))) {
+    // empty
+  }
 
-mtapi_uint_t TaskContext::GetCurrentCoreNumber() {
-  mtapi_status_t status;
-  mtapi_uint_t result =
-    mtapi_context_corenum_get(context_, &status);
-  assert(MTAPI_SUCCESS == status);
-  return result;
-}
+  node.DestroyGroup(group);
 
-void TaskContext::SetStatus(mtapi_status_t error_code) {
-  mtapi_status_t status;
-  mtapi_context_status_set(context_, error_code, &status);
-  assert(MTAPI_SUCCESS == status);
-}
+  embb::tasks::Node::Finalize();
 
-} // namespace mtapi
-} // namespace embb
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
+}

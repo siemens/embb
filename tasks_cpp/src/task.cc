@@ -29,10 +29,10 @@
 
 #include <embb/base/memory_allocation.h>
 #include <embb/base/exceptions.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 Task::Task() {
   handle_.id = 0;
@@ -59,7 +59,7 @@ Task::Task(
   assert(MTAPI_SUCCESS == status);
   mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
   assert(MTAPI_SUCCESS == status);
-  mtapi_job_hndl_t job = mtapi_job_get(MTAPI_CPP_TASK_JOB, domain_id, &status);
+  mtapi_job_hndl_t job = mtapi_job_get(TASKS_CPP_JOB, domain_id, &status);
   assert(MTAPI_SUCCESS == status);
   Action* holder = embb::base::Allocation::New<Action>(action);
   handle_ = mtapi_task_start(MTAPI_TASK_ID_NONE, job,
@@ -86,7 +86,7 @@ Task::Task(
   assert(MTAPI_SUCCESS == status);
   mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
   assert(MTAPI_SUCCESS == status);
-  mtapi_job_hndl_t job = mtapi_job_get(MTAPI_CPP_TASK_JOB, domain_id, &status);
+  mtapi_job_hndl_t job = mtapi_job_get(TASKS_CPP_JOB, domain_id, &status);
   assert(MTAPI_SUCCESS == status);
   Action* holder = embb::base::Allocation::New<Action>(action);
   handle_ = mtapi_task_start(MTAPI_TASK_ID_NONE, job,
@@ -114,7 +114,7 @@ Task::Task(
   assert(MTAPI_SUCCESS == status);
   mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
   assert(MTAPI_SUCCESS == status);
-  mtapi_job_hndl_t job = mtapi_job_get(MTAPI_CPP_TASK_JOB, domain_id, &status);
+  mtapi_job_hndl_t job = mtapi_job_get(TASKS_CPP_JOB, domain_id, &status);
   assert(MTAPI_SUCCESS == status);
   Action* holder = embb::base::Allocation::New<Action>(action);
   void * idptr = MTAPI_NULL;
@@ -216,5 +216,5 @@ void Task::Cancel() {
   assert(MTAPI_SUCCESS == status);
 }
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb

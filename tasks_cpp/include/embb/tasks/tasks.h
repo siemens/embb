@@ -24,20 +24,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_CPP_SRC_CONTINUATIONSTAGE_H_
-#define MTAPI_CPP_SRC_CONTINUATIONSTAGE_H_
+#ifndef EMBB_TASKS_TASKS_H_
+#define EMBB_TASKS_TASKS_H_
 
-#include <embb/mtapi/mtapi.h>
+/**
+ * \defgroup CPP_TASKS Tasks
+ * Simple task management based on MTAPI.
+ * \ingroup CPP
+ */
 
-namespace embb {
-namespace mtapi {
+#include <embb/tasks/internal/cmake_config.h>
 
-struct ContinuationStage {
-  mtapi::Action action;
-  ContinuationStage * next;
-};
+#define TASKS_CPP_JOB 1
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
+#define TASKS_CPP_AUTOMATIC_DOMAIN_ID 1
+#define TASKS_CPP_AUTOMATIC_NODE_ID 1
+#endif
 
-} // namespace mtapi
-} // namespace embb
+#include <embb/tasks/execution_policy.h>
+#include <embb/tasks/action.h>
+#include <embb/tasks/continuation.h>
+#include <embb/tasks/group.h>
+#include <embb/tasks/node.h>
+#include <embb/tasks/queue.h>
+#include <embb/tasks/task.h>
+#include <embb/tasks/task_context.h>
 
-#endif // MTAPI_CPP_SRC_CONTINUATIONSTAGE_H_
+#endif // EMBB_TASKS_TASKS_H_

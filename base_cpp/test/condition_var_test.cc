@@ -63,15 +63,15 @@ void ConditionVarTest::TestTimedWaitTimeouts() {
   PT_EXPECT_EQ(success, false);
 
   // Wait for a future timepoint
-  success = cond.WaitUntil(lock, Time(Duration<Milliseconds>(1)));
+  success = cond.WaitUntil(lock, Time(DurationMilliseconds(1)));
   PT_EXPECT_EQ(success, false);
 
   // Wait for a zero duration
-  success = cond.WaitFor(lock, Duration<Milliseconds>());
+  success = cond.WaitFor(lock, DurationMilliseconds());
   PT_EXPECT_EQ(success, false);
 
   // Wait for some duration
-  success = cond.WaitFor(lock, Duration<Milliseconds>(1));
+  success = cond.WaitFor(lock, DurationMilliseconds(1));
   PT_EXPECT_EQ(success, false);
 }
 
@@ -96,14 +96,14 @@ void ConditionVarTest::TestNotify() {
 
     cond_notify_.NotifyOne();
 
-    cond_wait_.WaitUntil(lock_wait, Time(Duration<Milliseconds>(1)));
+    cond_wait_.WaitUntil(lock_wait, Time(DurationMilliseconds(1)));
     while (embb_counter_get(&counter_) == 0)
     {}  // If hangs here signal has not succeeded
     PT_ASSERT_EQ_MSG(embb_counter_get(&counter_),
         static_cast<unsigned int>(1), "Only 1 thread notified");
     cond_notify_.NotifyAll();
 
-    cond_wait_.WaitUntil(lock_wait, Time(Duration<Milliseconds>(2)));
+    cond_wait_.WaitUntil(lock_wait, Time(DurationMilliseconds(2)));
 
     while (embb_counter_get(&counter_) !=
         static_cast<unsigned int>(num_threads_-1))

@@ -24,65 +24,90 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-
 #include <mtapi_cpp_test_config.h>
 #include <mtapi_cpp_test_group.h>
 
 #include <embb/base/c/memory_allocation.h>
 
+#define JOB_TEST_GROUP 5
+#define TASK_COUNT 4
+
 struct result_example_struct {
-  mtapi_uint_t value1;
-  mtapi_uint_t value2;
+  int value1;
+  int value2;
 };
 
 typedef struct result_example_struct result_example_t;
 
-static void testGroupAction(embb::mtapi::TaskContext & /*context*/) {
-  //std::cout << "testGroupAction on core " <<
-  //  context.GetCurrentCoreNumber() << std::endl;
+static void testGroupAction(
+  const void* args,
+  mtapi_size_t /*args_size*/,
+  void* results,
+  mtapi_size_t /*results_size*/,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/) {
+  result_example_t const * in = static_cast<result_example_t const *>(args);
+  result_example_t * out = static_cast<result_example_t *>(results);
+  out->value2 = in->value1;
 }
 
 static void testDoSomethingElse() {
 }
 
 GroupTest::GroupTest() {
-  CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this);
+  CreateUnit("mtapi_cpp group test").Add(&GroupTest::TestBasic, this);
 }
 
 void GroupTest::TestBasic() {
-  //std::cout << "running testGroup..." << std::endl;
-
   embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
-  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-  embb::mtapi::Group & group = node.CreateGroup();
-  embb::mtapi::Task task;
+  embb::mtapi::Job job(JOB_TEST_GROUP, THIS_DOMAIN_ID);
+  embb::mtapi::Action action(JOB_TEST_GROUP, testGroupAction);
 
-  //std::cout << "wait all..." << std::endl;
+  {
+    embb::mtapi::Group group;
 
-  for (int ii = 0; ii < 4; ii++) {
-    task = group.Spawn(testGroupAction);
+    result_example_t buffer[TASK_COUNT];
+    for (int ii = 0; ii < TASK_COUNT; ii++) {
+      buffer[ii].value1 = ii;
+      buffer[ii].value2 = -1;
+      group.Start(job, &buffer[ii], &buffer[ii]);
+    }
+
+    testDoSomethingElse();
+
+    group.WaitAll();
+
+    for (int ii = 0; ii < TASK_COUNT; ii++) {
+      PT_EXPECT_EQ(buffer[ii].value1, ii);
+      PT_EXPECT_EQ(buffer[ii].value2, ii);
+    }
   }
-  testDoSomethingElse();
-  group.WaitAll(MTAPI_INFINITE);
 
-  //std::cout << "wait any..." << std::endl;
+  {
+    embb::mtapi::Group group;
 
-  for (int ii = 0; ii < 4; ii++) {
-    task = group.Spawn(mtapi_task_id_t(ii + 1), testGroupAction);
+    result_example_t buffer[TASK_COUNT];
+    for (int ii = 0; ii < 4; ii++) {
+      buffer[ii].value1 = ii;
+      buffer[ii].value2 = -1;
+      group.Start(job, &buffer[ii], &buffer[ii]);
+    }
+
+    testDoSomethingElse();
+
+    mtapi_status_t status;
+    result_example_t* result;
+    while (MTAPI_SUCCESS ==
+      (status = group.WaitAny(reinterpret_cast<void**>(&result)))) {
+      PT_EXPECT(result != MTAPI_NULL);
+      PT_EXPECT_EQ(result->value1, result->value2);
+    }
+    PT_EXPECT_EQ(status, MTAPI_GROUP_COMPLETED);
   }
-  testDoSomethingElse();
-  mtapi_status_t status;
-  mtapi_task_id_t result;
-  while (MTAPI_SUCCESS == (status = group.WaitAny(MTAPI_INFINITE, result))) {
-    //std::cout << "got a result from task " << result << std::endl;
-  }
-
-  node.DestroyGroup(group);
 
   embb::mtapi::Node::Finalize();
 
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
-  //std::cout << "...done" << std::endl << std::endl;
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
 }

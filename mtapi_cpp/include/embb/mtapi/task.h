@@ -28,85 +28,109 @@
 #define EMBB_MTAPI_TASK_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/action.h>
+#include <embb/mtapi/internal/check_status.h>
 
 namespace embb {
 namespace mtapi {
 
 /**
-  * A Task represents a running Action.
-  *
-  * \ingroup CPP_MTAPI
-  */
+ * A Task represents a running Action of a specific Job.
+ *
+ * \ingroup CPP_MTAPI
+ */
 class Task {
  public:
   /**
-    * Constructs an empty Task
-    */
-  Task();
+   * Constructs an invalid Task.
+   */
+  Task() {
+    handle_.id = 0;
+    handle_.tag = 0;
+  }
 
   /**
-    * Copies a Task
-    */
+   * Copies a Task.
+   */
   Task(
-    Task const & task                  /**< The task to copy. */
-    );
+    Task const & other                 /**< The task to copy. */
+    ) : handle_(other.handle_) {
+    // emtpy
+  }
 
   /**
-    * Destroys a Task
-    */
-  ~Task();
+   * Copies a Task.
+   */
+  void operator=(
+    Task const & other                 /**< The task to copy. */
+    ) {
+    handle_ = other.handle_;
+  }
 
   /**
-    * Waits for Task to finish for \c timeout milliseconds.
-    * \return The status of the finished Task, \c MTAPI_TIMEOUT or
-    * \c MTAPI_ERR_*
-    * \threadsafe
-    */
+   * Destroys a Task.
+   */
+  ~Task() {
+    // empty
+  }
+
+  /**
+   * Waits for Task to finish for \c timeout milliseconds.
+   * \return The status of the finished Task, \c MTAPI_TIMEOUT or
+   * \c MTAPI_ERR_*
+   * \threadsafe
+   */
   mtapi_status_t Wait(
     mtapi_timeout_t timeout          /**< [in] Timeout duration in
                                           milliseconds */
-    );
+    ) {
+    mtapi_status_t status;
+    mtapi_task_wait(handle_, timeout, &status);
+    return status;
+  }
 
   /**
-    * Signals the Task to cancel computation.
-    * \waitfree
-    */
-  void Cancel();
+   * Waits for Task to finish.
+   * \return The status of the finished Task or \c MTAPI_ERR_*
+   * \threadsafe
+   */
+  mtapi_status_t Wait() {
+    mtapi_status_t status;
+    mtapi_task_wait(handle_, MTAPI_INFINITE, &status);
+    return status;
+  }
 
-  friend class Group;
-  friend class Queue;
-  friend class Node;
+  /**
+   * Signals the Task to cancel computation.
+   * \waitfree
+   */
+  void Cancel() {
+    mtapi_status_t status;
+    mtapi_task_cancel(handle_, &status);
+    internal::CheckStatus(status);
+  }
+
+  /**
+   * Returns the internal representation of this object.
+   * Allows for interoperability with the C interface.
+   *
+   * \returns The internal mtapi_task_hndl_t.
+   * \waitfree
+   */
+  mtapi_task_hndl_t GetInternal() const {
+    return handle_;
+  }
 
  private:
-  Task(
-    Action action);
-
-  Task(
-    Action action,
-    mtapi_group_hndl_t group);
-
-  Task(
-    mtapi_task_id_t id,
-    Action action,
-    mtapi_group_hndl_t group);
-
-  Task(
-    Action action,
-    mtapi_queue_hndl_t queue);
-
-  Task(
-    Action action,
-    mtapi_queue_hndl_t queue,
-    mtapi_group_hndl_t group);
-
-  Task(
-    mtapi_task_id_t id,
-    Action action,
-    mtapi_queue_hndl_t queue,
-    mtapi_group_hndl_t group);
+  explicit Task(mtapi_task_hndl_t handle)
+    : handle_(handle) {
+    // empty
+  }
 
   mtapi_task_hndl_t handle_;
+
+  friend class Node;
+  friend class Group;
+  friend class Queue;
 };
 
 } // namespace mtapi

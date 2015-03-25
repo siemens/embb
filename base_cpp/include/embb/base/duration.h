@@ -46,6 +46,9 @@ namespace base {
  * Represents a relative time duration for a given tick type.
  *
  * \notthreadsafe
+ * \note The typedefs DurationSeconds, DurationMilliseconds,
+ *       DurationMicroseconds, and DurationNanoseconds provide directly usable
+ *       duration types.
  * \tparam Tick Possible tick types are Seconds, Milliseconds, Microseconds,
  *              Nanoseconds
  * \ingroup CPP_BASE_TIMEDURATION
@@ -270,6 +273,8 @@ Duration<Tick> operator+(
   ) {
   return Duration<Tick>(lhs.Count() + rhs.Count());
 }
+
+namespace internal {
 
 /**
  * Base class for ticks.
@@ -516,6 +521,33 @@ class Nanoseconds : public Tick {
    */
   static unsigned long long Max();
 };
+
+} // namespace internal
+
+/**
+ * Duration with seconds tick.
+ *
+ * \ingroup CPP_BASE_TIMEDURATION
+ */
+typedef Duration<internal::Seconds> DurationSeconds;
+/**
+ * Duration with milliseconds tick.
+ *
+ * \ingroup CPP_BASE_TIMEDURATION
+ */
+typedef Duration<internal::Milliseconds> DurationMilliseconds;
+/**
+ * Duration with microseconds tick.
+ *
+ * \ingroup CPP_BASE_TIMEDURATION
+ */
+typedef Duration<internal::Microseconds> DurationMicroseconds;
+/**
+ * Duration with nanoseconds tick.
+ *
+ * \ingroup CPP_BASE_TIMEDURATION
+ */
+typedef Duration<internal::Nanoseconds> DurationNanoseconds;
 
 } // namespace base
 } // namespace embb

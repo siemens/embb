@@ -24,82 +24,78 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_CONTINUATION_H_
-#define EMBB_MTAPI_CONTINUATION_H_
+#ifndef EMBB_MTAPI_JOB_H_
+#define EMBB_MTAPI_JOB_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/taskcontext.h>
-#include <embb/mtapi/action.h>
-#include <embb/mtapi/task.h>
+#include <embb/mtapi/internal/check_status.h>
 
 namespace embb {
 namespace mtapi {
 
 /**
-  *  Helper struct for Continuation.
-  *
-  *  \ingroup CPP_MTAPI
-  */
-struct ContinuationStage;
-
-/**
-  * A Continuation encapsulates a chain of \link Action Actions \endlink to be
-  * executed consecutively.
-  *
-  * \ingroup CPP_MTAPI
-  */
-class Continuation {
+ * Represents a collection of Actions.
+ *
+ * \ingroup CPP_MTAPI
+ */
+class Job {
  public:
   /**
-  * Copy constructor.
-  */
-  Continuation(
-    Continuation const & cont          /**< [in] The Continuation to copy. */
-    );
+   * Constructs a Job.
+   * The Job object will be invalid.
+   */
+  Job() {
+    handle_.id = 0;
+    handle_.tag = 0;
+  }
 
   /**
-  * Destructor.
-  */
-  ~Continuation();
+   * Constructs a Job with the given \c job_id and \c domain_id.
+   * Requires an initialized Node.
+   */
+  Job(
+    mtapi_job_id_t job_id,             /**< Job ID to use. */
+    mtapi_domain_t domain_id           /**< Domain ID to use. */
+    ) {
+    mtapi_status_t status;
+    handle_ = mtapi_job_get(job_id, domain_id, &status);
+    internal::CheckStatus(status);
+  }
 
   /**
-    * Appends an Action to the Continuation chain.
-    * \returns A reference to this Continuation chain.
-    * \notthreadsafe
-    */
-  Continuation & Then(
-    Action action                      /**< [in] The Action to append to the
-                                            continuation */
-    );
+   * Copies a Job object.
+   */
+  Job(
+    Job const & other                  /**< The Job to copy from */
+    ) : handle_(other.handle_) {
+    // empty
+  }
 
   /**
-    * Runs the Continuation chain.
-    * \returns The Task representing the Continuation chain.
-    * \notthreadsafe
-    */
-  Task Spawn();
+   * Copies a Job object.
+   */
+  void operator=(
+    Job const & other                  /**< The Job to copy from */
+    ) {
+    handle_ = other.handle_;
+  }
 
   /**
-    * Runs the Continuation chain with the specified execution_policy.
-    * \returns The Task representing the Continuation chain.
-    * \notthreadsafe
-    */
-  Task Spawn(
-    ExecutionPolicy execution_policy   /**< [in] The execution policy to use */
-    );
-
-  friend class Node;
+   * Returns the internal representation of this object.
+   * Allows for interoperability with the C interface.
+   *
+   * \returns The internal mtapi_job_hndl_t.
+   * \waitfree
+   */
+  mtapi_job_hndl_t GetInternal() const {
+    return handle_;
+  }
 
  private:
-  explicit Continuation(Action action);
-
-  void ExecuteContinuation(TaskContext & context);
-
-  ContinuationStage * first_;
-  ContinuationStage * last_;
+  mtapi_job_hndl_t handle_;
 };
 
 } // namespace mtapi
 } // namespace embb
 
-#endif // EMBB_MTAPI_CONTINUATION_H_
+#endif // EMBB_MTAPI_JOB_H_

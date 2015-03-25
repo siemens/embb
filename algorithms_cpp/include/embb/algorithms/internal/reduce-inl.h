@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_INTERNAL_REDUCE_INL_H_
 #define EMBB_ALGORITHMS_INTERNAL_REDUCE_INL_H_
 
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 #include <embb/algorithms/internal/partition.h>
 
 #include <functional>
@@ -46,7 +46,7 @@ class ReduceFunctor {
                 ReturnType neutral,
                 ReductionFunction reduction,
                 TransformationFunction transformation,
-                const embb::mtapi::ExecutionPolicy& policy,
+                const embb::tasks::ExecutionPolicy& policy,
                 const BlockSizePartitioner<RAI>& partitioner,
                 ReturnType& result)
   : chunk_first_(chunk_first), chunk_last_(chunk_last), neutral_(neutral),
@@ -54,7 +54,7 @@ class ReduceFunctor {
     partitioner_(partitioner), result_(result) {
   }
 
-  void Action(mtapi::TaskContext&) {
+  void Action(embb::tasks::TaskContext&) {
     if (chunk_first_ == chunk_last_) {
       // Leaf case, recursed to single chunk. Do work on chunk:
       ChunkDescriptor<RAI> chunk = partitioner_[chunk_first_];
@@ -81,13 +81,13 @@ class ReduceFunctor {
                        neutral_, reduction_, transformation_, policy_,
                        partitioner_,
                        result_r);
-      mtapi::Task task_l = mtapi::Node::GetInstance().Spawn(
-        mtapi::Action(
+      embb::tasks::Task task_l = embb::tasks::Node::GetInstance().Spawn(
+        embb::tasks::Action(
           base::MakeFunction(
           functor_l, &self_t::Action),
           policy_));
-      mtapi::Task task_r = mtapi::Node::GetInstance().Spawn(
-        mtapi::Action(
+      embb::tasks::Task task_r = embb::tasks::Node::GetInstance().Spawn(
+        embb::tasks::Action(
           base::MakeFunction(
           functor_r, &self_t::Action),
           policy_));
@@ -108,7 +108,7 @@ class ReduceFunctor {
   ReturnType neutral_;
   ReductionFunction reduction_;
   TransformationFunction transformation_;
-  const embb::mtapi::ExecutionPolicy& policy_;
+  const embb::tasks::ExecutionPolicy& policy_;
   const BlockSizePartitioner<RAI>& partitioner_;
   ReturnType& result_;
 
@@ -124,7 +124,7 @@ template<typename RAI, typename ReturnType, typename ReductionFunction,
 ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
                            ReductionFunction reduction,
                            TransformationFunction transformation,
-                           const embb::mtapi::ExecutionPolicy& policy,
+                           const embb::tasks::ExecutionPolicy& policy,
                            size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
@@ -137,7 +137,7 @@ ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
   if (num_cores == 0) {
     EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
   }
-  mtapi::Node& node = mtapi::Node::GetInstance();
+  embb::tasks::Node& node = embb::tasks::Node::GetInstance();
   // Determine actually used block size
   if (block_size == 0) {
     block_size = (static_cast<size_t>(distance) / num_cores);
@@ -162,8 +162,8 @@ ReturnType ReduceRecursive(RAI first, RAI last, ReturnType neutral,
                   policy,
                   partitioner,
                   result);
-  mtapi::Task task = node.Spawn(
-    mtapi::Action(base::MakeFunction(
+  embb::tasks::Task task = node.Spawn(
+    embb::tasks::Action(base::MakeFunction(
       functor, &Functor::Action), policy));
   task.Wait(MTAPI_INFINITE);
   return result;
@@ -174,7 +174,7 @@ template<typename RAI, typename TransformationFunction,
 ReturnType ReduceIteratorCheck(RAI first, RAI last, ReductionFunction reduction,
                                TransformationFunction transformation,
                                ReturnType neutral,
-                               const embb::mtapi::ExecutionPolicy& policy,
+                               const embb::tasks::ExecutionPolicy& policy,
                                size_t block_size,
                                std::random_access_iterator_tag) {
     return ReduceRecursive(first, last, neutral, reduction, transformation,
@@ -188,7 +188,7 @@ template<typename RAI, typename ReturnType, typename ReductionFunction,
 ReturnType Reduce(RAI first, RAI last, ReturnType neutral,
                   ReductionFunction reduction,
                   TransformationFunction transformation,
-                  const embb::mtapi::ExecutionPolicy& policy,
+                  const embb::tasks::ExecutionPolicy& policy,
                   size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
   return internal::ReduceIteratorCheck(first, last, reduction, transformation,

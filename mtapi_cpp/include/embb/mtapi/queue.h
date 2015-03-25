@@ -28,9 +28,11 @@
 #define EMBB_MTAPI_QUEUE_H_
 
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/action.h>
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/task.h>
 #include <embb/mtapi/group.h>
+#include <embb/mtapi/queue_attributes.h>
+#include <embb/mtapi/task_attributes.h>
 
 namespace embb {
 
@@ -43,69 +45,270 @@ class Allocation;
 namespace mtapi {
 
 /**
-  * Allows for stream processing, either ordered or unordered.
-  *
-  * \ingroup CPP_MTAPI
-  */
+ * Allows for stream processing, either ordered or unordered.
+ *
+ * \ingroup CPP_MTAPI
+ */
 class Queue {
  public:
   /**
-    * Enables the Queue. \link Task Tasks \endlink enqueued while the Queue was
-    * disabled are executed.
-    * \waitfree
-    */
-  void Enable();
+   * Constructs a Queue with the given Job and default attributes.
+   * Requires an initialized Node.
+   */
+  Queue(
+    Job const & job                    /**< The Job to use for the Queue. */
+    ) {
+    Create(MTAPI_QUEUE_ID_NONE, job, MTAPI_DEFAULT_QUEUE_ATTRIBUTES);
+  }
 
   /**
-    * Disables the Queue. Running \link Task Tasks \endlink are canceled.
-    * \waitfree
-    */
-  void Disable();
+   * Constructs a Queue with the given Job and QueueAttributes.
+   * Requires an initialized Node.
+   */
+  Queue(
+    Job const & job,                   /**< The Job to use for the Queue. */
+    QueueAttributes const & attr       /**< The attributes to use. */
+    ) {
+    Create(MTAPI_QUEUE_ID_NONE, job, &attr.GetInternal());
+  }
 
   /**
-    * Runs an Action.
-    * \return A Task identifying the Action to run
-    * \throws ErrorException if the Task object could not be constructed.
-    * \threadsafe
-    */
-  Task Spawn(
-    Action action                      /**< [in] The Action to run */
-    );
+   * Destroys a Queue object.
+   */
+  ~Queue() {
+    mtapi_queue_delete(handle_, MTAPI_INFINITE, MTAPI_NULL);
+  }
 
   /**
-    * Runs an Action in the specified Group
-    * \return A Task identifying the Action to run
-    * \throws ErrorException if the Task object could not be constructed.
-    * \threadsafe
-    */
-  Task Spawn(
-    Group const * group,               /**< [in] The Group to run the Action
-                                            in */
-    Action action                      /**< [in] The Action to run */
-    );
+   * Enables the Queue. \link Task Tasks \endlink enqueued while the Queue was
+   * disabled are executed.
+   * \waitfree
+   */
+  void Enable() {
+    mtapi_status_t status;
+    mtapi_queue_enable(handle_, &status);
+    internal::CheckStatus(status);
+  }
 
   /**
-    * Runs an Action in the specified Group. The \c id is returned by
-    * Group::WaitAny().
-    * \return A Task identifying the Action to run
-    * \throws ErrorException if the Task object could not be constructed.
-    * \threadsafe
-    */
-  Task Spawn(
-    mtapi_task_id_t id,                /**< [in] The id to return in
-                                            Group::WaitAny() */
-    Group const * group,               /**< [in] The Group to run the Action
-                                            in */
-    Action action                      /**< [in] The Action to run */
-    );
+   * Disables the Queue. Running \link Task Tasks \endlink are canceled. The
+   * Queue waits for the Tasks to finish for \c timout milliseconds.
+   * \waitfree
+   */
+  void Disable(
+    mtapi_timeout_t timeout            /**< The timeout in milliseconds. */
+    ) {
+    mtapi_status_t status;
+    mtapi_queue_disable(handle_, timeout, &status);
+    internal::CheckStatus(status);
+  }
+
+  /**
+   * Disables the Queue. Running \link Task Tasks \endlink are canceled. The
+   * Queue waits for the Tasks to finish.
+   * \waitfree
+   */
+  void Disable() {
+    Disable(MTAPI_INFINITE);
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    TaskAttributes const & attributes, /**< Attributes of the Task */
+    Group const & group                /**< The Group to start the Task in */
+    ) {
+    return Enqueue(task_id,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      &attributes.GetInternal(), group.GetInternal());
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    Group const & group                /**< The Group to start the Task in */
+    ) {
+    return Enqueue(task_id,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES, group.GetInternal());
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    TaskAttributes const & attributes  /**< Attributes of the Task */
+    ) {
+    return Enqueue(task_id,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      &attributes.GetInternal(), MTAPI_GROUP_NONE);
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results                      /**< Pointer to the results. */
+    ) {
+    return Enqueue(task_id,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES, MTAPI_GROUP_NONE);
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    TaskAttributes const & attributes, /**< Attributes of the Task */
+    Group const & group                /**< The Group to start the Task in */
+    ) {
+    return Enqueue(MTAPI_TASK_ID_NONE,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      &attributes.GetInternal(), group.GetInternal());
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    Group const & group                /**< The Group to start the Task in */
+    ) {
+    return Enqueue(MTAPI_TASK_ID_NONE,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES, group.GetInternal());
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    TaskAttributes const & attributes  /**< Attributes of the Task */
+    ) {
+    return Enqueue(MTAPI_TASK_ID_NONE,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      &attributes.GetInternal(), MTAPI_GROUP_NONE);
+  }
+
+  /**
+   * Enqueues a new Task.
+   *
+   * \returns The handle to the enqueued Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Enqueue(
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results                      /**< Pointer to the results. */
+    ) {
+    return Enqueue(MTAPI_TASK_ID_NONE,
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES, MTAPI_GROUP_NONE);
+  }
+
+  /**
+   * Returns the internal representation of this object.
+   * Allows for interoperability with the C interface.
+   *
+   * \returns The internal mtapi_queue_hndl_t.
+   * \waitfree
+   */
+  mtapi_queue_hndl_t GetInternal() const {
+    return handle_;
+  }
 
   friend class embb::base::Allocation;
-  friend class Node;
 
  private:
-  Queue(Queue const & taskqueue);
-  Queue(mtapi_uint_t priority, bool ordered);
-  ~Queue();
+  // no default constructor
+  Queue();
+
+  // not copyable
+  Queue(Queue const & other);
+  void operator=(Queue const & other);
+
+  void Create(
+    mtapi_queue_id_t queue_id,
+    Job const & job,
+    mtapi_queue_attributes_t const * attributes
+    ) {
+    mtapi_status_t status;
+    handle_ = mtapi_queue_create(queue_id, job.GetInternal(),
+      attributes, &status);
+    internal::CheckStatus(status);
+  }
+
+  Task Enqueue(
+    mtapi_task_id_t task_id,
+    const void * arguments,
+    mtapi_size_t arguments_size,
+    void * results,
+    mtapi_size_t results_size,
+    mtapi_task_attributes_t const * attributes,
+    mtapi_group_hndl_t group
+    ) {
+    mtapi_status_t status;
+    mtapi_task_hndl_t task_hndl =
+      mtapi_task_enqueue(task_id, handle_, arguments, arguments_size,
+        results, results_size, attributes, group,
+        &status);
+    internal::CheckStatus(status);
+    return Task(task_hndl);
+  }
 
   mtapi_queue_hndl_t handle_;
 };

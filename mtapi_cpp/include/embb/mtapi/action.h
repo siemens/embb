@@ -27,80 +27,113 @@
 #ifndef EMBB_MTAPI_ACTION_H_
 #define EMBB_MTAPI_ACTION_H_
 
-#include <embb/base/function.h>
-#include <embb/mtapi/taskcontext.h>
-#include <embb/mtapi/execution_policy.h>
+#include <embb/mtapi/internal/check_status.h>
+#include <embb/mtapi/action_attributes.h>
+#include <embb/mtapi/job.h>
 
 namespace embb {
 namespace mtapi {
 
 /**
-  * A function to be spawned as a Task.
-  *
-  * \ingroup CPP_MTAPI
-  */
+ * Holds the actual worker function used to execute a Task.
+ *
+ * \ingroup CPP_MTAPI
+ */
 class Action {
  public:
   /**
-    * Constructs an empty Action.
-    */
-  Action()
-    : function_()
-    , execution_policy_() {
-    // empty
-  }
-
-  /**
-    * Constructs an Action from a function object.
-    *
-    * \tparam Function Function object
-    */
-  template <typename Function>
+   * Constructs an Action.
+   */
   Action(
-    Function func                      /**< [in] Function object */
-    )
-    : function_(func)
-    , execution_policy_() {
-    // empty
-  }
-
-  /**
-    * Constructs an Action from a function object and an Affinity.
-    *
-    * \tparam Function Function object
-    */
-  template <typename Function>
-  Action(
-    Function func,                     /**< [in] Function object */
-    ExecutionPolicy execution_policy   /**< [in] Execution policy */
-    )
-    : function_(func)
-    , execution_policy_(execution_policy) {
-    // empty
-  }
-
-  /**
-    * Executes the Action in a given TaskContext.
-    */
-  void operator() (
-    TaskContext & context              /**< [in, out] Context the operator
-                                            is executed in */
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func,      /**< The action function */
+    const void * node_local_data,      /**< Node local data available to all
+                                            Tasks using this Action */
+    mtapi_size_t node_local_data_size, /**< Size of node local data */
+    ActionAttributes const & attributes
+                                       /**< Attributes of the Action */
     ) {
-    function_(context);
+    Create(job_id, func, node_local_data, node_local_data_size,
+      &attributes.GetInternal());
   }
 
   /**
-    * Returns the ExecutionPolicy specified during creation.
-    * \return The ExecutionPolicy of the Action
-    * \waitfree
-    */
-  ExecutionPolicy GetExecutionPolicy() const {
-    return execution_policy_;
+   * Constructs an Action.
+   */
+  Action(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func,      /**< The action function */
+    const void * node_local_data,      /**< Node local data available to all
+                                            Tasks using this Action */
+    mtapi_size_t node_local_data_size  /**< Size of node local data */
+    ) {
+    Create(job_id, func, node_local_data, node_local_data_size,
+      MTAPI_DEFAULT_ACTION_ATTRIBUTES);
+  }
+
+  /**
+   * Constructs an Action.
+   */
+  Action(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func,      /**< The action function */
+    ActionAttributes const & attributes
+                                       /**< Attributes of the Action */
+    ) {
+    Create(job_id, func, MTAPI_NULL, 0, &attributes.GetInternal());
+  }
+
+  /**
+   * Constructs an Action.
+   */
+  Action(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func       /**< The action function */
+    ) {
+    Create(job_id, func, MTAPI_NULL, 0, MTAPI_DEFAULT_ACTION_ATTRIBUTES);
+  }
+
+  /**
+   * Destroys an Action.
+   */
+  ~Action() {
+    mtapi_action_delete(handle_, MTAPI_INFINITE, MTAPI_NULL);
+  }
+
+  /**
+   * Returns the internal representation of this object.
+   * Allows for interoperability with the C interface.
+   *
+   * \returns The internal mtapi_action_hndl_t.
+   * \waitfree
+   */
+  mtapi_action_hndl_t GetInternal() const {
+    return handle_;
   }
 
  private:
-  embb::base::Function<void, TaskContext &> function_;
-  ExecutionPolicy execution_policy_;
+  // no default constructor
+  Action();
+
+  // not copyable
+  Action(Action const & other);
+  void operator=(Action const & other);
+
+  void Create(
+    mtapi_job_id_t job_id,
+    mtapi_action_function_t func,
+    const void * node_local_data,
+    mtapi_size_t node_local_data_size,
+    mtapi_action_attributes_t const * attributes
+    ) {
+    mtapi_status_t status;
+    handle_ = mtapi_action_create(job_id, func,
+      node_local_data, node_local_data_size,
+      attributes, &status);
+    internal::CheckStatus(status);
+  }
+
+  mtapi_action_hndl_t handle_;
 };
 
 } // namespace mtapi

@@ -31,10 +31,13 @@ namespace base {
 namespace test {
 
 DurationTest::DurationTest() {
-  CreateUnit("Seconds").Add(&DurationTest::Test<Seconds>, this);
-  CreateUnit("Milliseconds").Add(&DurationTest::Test<Milliseconds>, this);
-  CreateUnit("Microseconds").Add(&DurationTest::Test<Microseconds>, this);
-  CreateUnit("Nanoseconds").Add(&DurationTest::Test<Nanoseconds>, this);
+  CreateUnit("Seconds").Add(&DurationTest::Test<internal::Seconds>, this);
+  CreateUnit("Milliseconds").Add(&DurationTest::Test<internal::Milliseconds>,
+                                 this);
+  CreateUnit("Microseconds").Add(&DurationTest::Test<internal::Microseconds>,
+                                 this);
+  CreateUnit("Nanoseconds").Add(&DurationTest::Test<internal::Nanoseconds>,
+                                this);
 }
 
 } // namespace test

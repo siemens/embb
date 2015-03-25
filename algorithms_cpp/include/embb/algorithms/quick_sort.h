@@ -28,7 +28,7 @@
 #define EMBB_ALGORITHMS_QUICK_SORT_H_
 
 #include <functional>
-#include <embb/mtapi/execution_policy.h>
+#include <embb/tasks/execution_policy.h>
 
 namespace embb {
 namespace algorithms {
@@ -72,7 +72,7 @@ void QuickSort(
             \c a appears before an element \c b in the sorted range if
             <tt>comparison(a, b) == true</tt>. The default value uses the
             less-than relation. */
-  const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
+  const embb::tasks::ExecutionPolicy& policy = embb::tasks::ExecutionPolicy(),
   /**< [IN] embb::mtapi::ExecutionPolicy for the quick sort algorithm */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
@@ -95,7 +95,7 @@ void QuickSort(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const embb::mtapi::ExecutionPolicy& policy,
+  const embb::tasks::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -109,7 +109,7 @@ void QuickSort(
   ) {
   QuickSort(first, last,
             std::less<typename std::iterator_traits<RAI>::value_type>(),
-            embb::mtapi::ExecutionPolicy(), 0);
+            embb::tasks::ExecutionPolicy(), 0);
 }
 
 /**
@@ -121,7 +121,7 @@ void QuickSort(
   RAI last,
   ComparisonFunction comparison
   ) {
-  QuickSort(first, last, comparison, embb::mtapi::ExecutionPolicy(), 0);
+  QuickSort(first, last, comparison, embb::tasks::ExecutionPolicy(), 0);
 }
 
 /**
@@ -132,7 +132,7 @@ void QuickSort(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const embb::mtapi::ExecutionPolicy& policy
+  const embb::tasks::ExecutionPolicy& policy
   ) {
   QuickSort(first, last, comparison, policy, 0);
 }

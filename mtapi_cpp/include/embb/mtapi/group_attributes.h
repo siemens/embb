@@ -24,55 +24,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_TASKCONTEXT_H_
-#define EMBB_MTAPI_TASKCONTEXT_H_
+#ifndef EMBB_MTAPI_GROUP_ATTRIBUTES_H_
+#define EMBB_MTAPI_GROUP_ATTRIBUTES_H_
 
 #include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/internal/check_status.h>
 
 namespace embb {
 namespace mtapi {
 
 /**
-  * Provides information about the status of the currently running Task.
-  *
-  * \ingroup CPP_MTAPI
-  */
-class TaskContext {
+ * Contains attributes of a Group.
+ *
+ * \ingroup CPP_MTAPI
+ */
+class GroupAttributes {
  public:
   /**
-    * Queries whether the Task running in the TaskContext should finish.
-    * \return \c true if the Task should finish, otherwise \c false
-    * \notthreadsafe
-    */
-  bool ShouldCancel();
+   * Constructs a GroupAttributes object.
+   */
+  GroupAttributes() {
+    mtapi_status_t status;
+    mtapi_groupattr_init(&attributes_, &status);
+    internal::CheckStatus(status);
+  }
 
   /**
-    * Queries the index of the worker thread the Task is running on.
-    * \return The worker thread index the Task is running on
-    * \notthreadsafe
-    */
-  mtapi_uint_t GetCurrentCoreNumber();
-
-  /**
-    * Sets the return status of the running Task. This will be returned by
-    * Task::Wait() and is set to \c MTAPI_SUCCESS by default.
-    * \notthreadsafe
-    */
-  void SetStatus(
-    mtapi_status_t error_code          /**< [in] The status to return by
-                                            Task::Wait(), Group::WaitAny(),
-                                            Group::WaitAll() */
-    );
-
-  friend class Node;
+   * Returns the internal representation of this object.
+   * Allows for interoperability with the C interface.
+   *
+   * \returns A reference to the internal mtapi_group_attributes_t structure.
+   * \waitfree
+   */
+  mtapi_group_attributes_t const & GetInternal() const {
+    return attributes_;
+  }
 
  private:
-  explicit TaskContext(mtapi_task_context_t * task_context);
-
-  mtapi_task_context_t * context_;
+  mtapi_group_attributes_t attributes_;
 };
 
 } // namespace mtapi
 } // namespace embb
 
-#endif // EMBB_MTAPI_TASKCONTEXT_H_
+#endif // EMBB_MTAPI_GROUP_ATTRIBUTES_H_
