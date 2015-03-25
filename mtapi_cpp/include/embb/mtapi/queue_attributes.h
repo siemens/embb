@@ -39,7 +39,7 @@ namespace mtapi {
  * \ingroup CPP_MTAPI
  */
 class QueueAttributes {
-public:
+ public:
   /**
    * Constructs a QueueAttributes object.
    */
@@ -166,7 +166,7 @@ public:
     return attributes_;
   }
 
-private:
+ private:
   mtapi_queue_attributes_t attributes_;
 };
 

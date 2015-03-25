@@ -39,7 +39,7 @@ namespace mtapi {
  * \ingroup CPP_MTAPI
  */
 class GroupAttributes {
-public:
+ public:
   /**
    * Constructs a GroupAttributes object.
    */
@@ -60,7 +60,7 @@ public:
     return attributes_;
   }
 
-private:
+ private:
   mtapi_group_attributes_t attributes_;
 };
 

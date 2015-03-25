@@ -96,8 +96,8 @@ class TaskWrapper {
     Function function,
     const embb::tasks::ExecutionPolicy& policy)
       : function_(function), task_() {
-    embb::tasks::Action action(embb::base::MakeFunction(*this, &TaskWrapper::Run),
-                         policy);
+    embb::tasks::Action action(embb::base::MakeFunction(
+      *this, &TaskWrapper::Run), policy);
     task_ = embb::tasks::Node::GetInstance().Spawn(action);
   }
 

@@ -40,7 +40,7 @@ namespace mtapi {
  * \ingroup CPP_MTAPI
  */
 class NodeAttributes {
-public:
+ public:
   /**
    * Constructs a NodeAttributes object.
    */
@@ -226,7 +226,7 @@ public:
     return attributes_;
   }
 
-private:
+ private:
   mtapi_node_attributes_t attributes_;
 };
 

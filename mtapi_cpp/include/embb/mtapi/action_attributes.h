@@ -40,7 +40,7 @@ namespace mtapi {
  * \ingroup CPP_MTAPI
  */
 class ActionAttributes {
-public:
+ public:
   /**
    * Constructs an ActionAttributes object.
    */
@@ -111,7 +111,7 @@ public:
     return attributes_;
   }
 
-private:
+ private:
   mtapi_action_attributes_t attributes_;
 };
 

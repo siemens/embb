@@ -73,8 +73,7 @@ class Node {
     if (IsInitialized()) {
       EMBB_THROW(StatusException,
         "MTAPI: node was already initialized.");
-    }
-    else {
+    } else {
       NodeAttributes attributes; // default attributes
       node_instance_ = embb::base::Allocation::New<Node>(
         domain_id, node_id, attributes);
@@ -96,8 +95,7 @@ class Node {
     if (IsInitialized()) {
       EMBB_THROW(StatusException,
         "MTAPI: node was already initialized.");
-    }
-    else {
+    } else {
       node_instance_ = embb::base::Allocation::New<Node>(
         domain_id, node_id, attributes);
     }
@@ -121,8 +119,7 @@ class Node {
   static Node & GetInstance() {
     if (IsInitialized()) {
       return *node_instance_;
-    }
-    else {
+    } else {
       EMBB_THROW(StatusException,
         "MTAPI: node is not initialized.");
     }
@@ -137,8 +134,7 @@ class Node {
     if (IsInitialized()) {
       embb::base::Allocation::Delete(node_instance_);
       node_instance_ = NULL;
-    }
-    else {
+    } else {
       EMBB_THROW(StatusException,
         "MTAPI: node is not initialized.");
     }

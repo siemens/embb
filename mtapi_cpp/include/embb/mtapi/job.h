@@ -39,7 +39,7 @@ namespace mtapi {
  * \ingroup CPP_MTAPI
  */
 class Job {
-public:
+ public:
   /**
    * Constructs a Job.
    * The Job object will be invalid.
@@ -91,11 +91,11 @@ public:
     return handle_;
   }
 
-private:
+ private:
   mtapi_job_hndl_t handle_;
 };
 
 } // namespace mtapi
 } // namespace embb
 
-#endif // EMBB_MTAPI_GROUP_ATTRIBUTES_H_
+#endif // EMBB_MTAPI_JOB_H_

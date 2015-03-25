@@ -111,7 +111,8 @@ void TaskTest::TestBasic() {
   {
     embb::mtapi::Job job_error(JOB_TEST_ERROR, THIS_DOMAIN_ID);
 
-    embb::mtapi::Action action_error(JOB_TEST_ERROR, testErrorAction, embb::mtapi::ActionAttributes());
+    embb::mtapi::Action action_error(JOB_TEST_ERROR, testErrorAction,
+      embb::mtapi::ActionAttributes());
 
     std::string test;
     embb::mtapi::Task task = node.Start(job_error, "simple", &test);

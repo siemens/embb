@@ -121,7 +121,7 @@ class Task {
   }
 
  private:
-  Task(mtapi_task_hndl_t handle)
+  explicit Task(mtapi_task_hndl_t handle)
     : handle_(handle) {
     // empty
   }

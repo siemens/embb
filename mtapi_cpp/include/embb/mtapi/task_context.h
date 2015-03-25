@@ -50,7 +50,7 @@ class TaskContext {
     : context_(task_context) {
     // empty
   }
-   
+
   /**
    * Queries whether the Task running in the TaskContext should finish.
    * \return \c true if the Task should finish, otherwise \c false

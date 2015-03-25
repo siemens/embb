@@ -39,7 +39,7 @@ namespace mtapi {
  * \ingroup CPP_MTAPI
  */
 class TaskAttributes {
-public:
+ public:
   /**
    * Constructs a TaskAttributes object.
    */
@@ -115,7 +115,7 @@ public:
     return attributes_;
   }
 
-private:
+ private:
   mtapi_task_attributes_t attributes_;
 };
 

@@ -127,7 +127,8 @@ class Action {
     mtapi_action_attributes_t const * attributes
     ) {
     mtapi_status_t status;
-    handle_ = mtapi_action_create(job_id, func, node_local_data, node_local_data_size,
+    handle_ = mtapi_action_create(job_id, func,
+      node_local_data, node_local_data_size,
       attributes, &status);
     internal::CheckStatus(status);
   }

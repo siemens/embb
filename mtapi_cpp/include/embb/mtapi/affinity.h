@@ -39,7 +39,7 @@ namespace mtapi {
  * \ingroup CPP_MTAPI
  */
 class Affinity {
-public:
+ public:
   /**
    * Constructs an Affinity object.
    */
@@ -135,7 +135,7 @@ public:
     return affinity_;
   }
 
-private:
+ private:
   mtapi_affinity_t affinity_;
 };
 

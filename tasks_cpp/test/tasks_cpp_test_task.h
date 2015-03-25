@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_CPP_TEST_MTAPI_CPP_TEST_TASK_H_
-#define MTAPI_CPP_TEST_MTAPI_CPP_TEST_TASK_H_
+#ifndef TASKS_CPP_TEST_TASKS_CPP_TEST_TASK_H_
+#define TASKS_CPP_TEST_TASKS_CPP_TEST_TASK_H_
 
 #include <partest/partest.h>
 
@@ -37,4 +37,4 @@ class TaskTest : public partest::TestCase {
   void TestBasic();
 };
 
-#endif // MTAPI_CPP_TEST_MTAPI_CPP_TEST_TASK_H_
+#endif // TASKS_CPP_TEST_TASKS_CPP_TEST_TASK_H_
