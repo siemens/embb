@@ -45,7 +45,7 @@ static
 #include "mtapi/mtapi_c_calc_direct-snippet.h"
     /* wait for completion */
 #include "mtapi/mtapi_cpp_wait_task-snippet.h"
-    /* add the two preceeding numbers */
+    /* add the two preceding numbers */
 #include "mtapi/mtapi_write_back-snippet.h"
 
 static
@@ -63,6 +63,5 @@ int fibonacci(int n) {
 }
 
 void RunMTAPI_CPP() {
-  int result = fibonacci(6);
-  std::cout << "result: " << result << std::endl;
+#include "mtapi/mtapi_cpp_main-snippet.h"
 }

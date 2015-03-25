@@ -156,7 +156,7 @@ After everything is done, the action is deleted (\lstinline|mtapi_action_delete(
 %
 \\\inputlisting{../examples/mtapi/mtapi_c_action_signature-snippet.h}
 %
-Checking the arguments and the result buffer is not done this time for simplicity. However, the terminating condition of the recursion still needs to be checked:
+Checking argument and result buffer sizes is the same as in the C example. Also, the terminating condition of the recursion still needs to be checked:
 %
 \\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
 %
@@ -176,6 +176,10 @@ Finally, the two parts can be added and written into the result buffer:
 %
 \\\inputlisting{../examples/mtapi/mtapi_write_back-snippet.h}
 % 
+Note that there is no need to do error checking everywhere, since errors are reported as exceptions. In this example there is only a single try/catch block in the main function:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_main-snippet.h}
+%
 
 The \lstinline|fibonacci()| function is about the same as in the C version. The MTAPI runtime needs to be initialized first:
 %
