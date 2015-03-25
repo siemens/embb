@@ -184,7 +184,7 @@ class Queue {
     ) {
     return Enqueue(task_id,
       arguments, internal::SizeOfType<ARGS>(),
-      results, sizeofinternal::SizeOfType<RES>(),
+      results, internal::SizeOfType<RES>(),
       MTAPI_DEFAULT_TASK_ATTRIBUTES, MTAPI_GROUP_NONE);
   }
 

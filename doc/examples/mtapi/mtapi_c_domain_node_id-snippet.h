@@ -2,4 +2,4 @@
 #define THIS_NODE_ID 1
 
 #define FIBONACCI_JOB 1
-mtapi_job_hndl_t fibonacciJob;
+static mtapi_job_hndl_t fibonacciJob;
