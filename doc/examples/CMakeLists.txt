@@ -22,15 +22,16 @@ include_directories(
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "-std=c++11")
+  set (EXTRA_LIBS dl)
 endif()
 
 IF(MSVC)
-set (NETWORK_LIBS ws2_32)
+  set (EXTRA_LIBS ws2_32)
 ENDIF()
 
 add_executable(examples ${EXAMPLES_SOURCES})
 target_link_libraries(examples embb_dataflow_cpp embb_algorithms_cpp embb_mtapi_cpp
                       embb_mtapi_network_c embb_mtapi_opencl_c embb_mtapi_c
                       embb_base_cpp embb_base_c embb_containers_cpp
-                      ${NETWORK_LIBS} ${compiler_libs})
+                      ${EXTRA_LIBS} ${compiler_libs})
 CopyBin(BIN examples DEST ${local_install_dir})
