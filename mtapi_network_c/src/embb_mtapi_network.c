@@ -583,36 +583,41 @@ mtapi_action_hndl_t mtapi_network_action_create(
   mtapi_action_hndl_t action_hndl = { 0, 0 };
   int err;
 
-  // TODO: check action for allocation failure
-  action->domain_id = domain_id;
-  action->job_id = remote_job_id;
+  if (NULL != action) {
+    action->domain_id = domain_id;
+    action->job_id = remote_job_id;
 
-  embb_mtapi_network_buffer_initialize(
-    &action->send_buffer, plugin->buffer_size);
-  embb_mutex_init(&action->send_mutex, 0);
+    embb_mtapi_network_buffer_initialize(
+      &action->send_buffer, plugin->buffer_size);
+    embb_mutex_init(&action->send_mutex, 0);
 
-  action->host = host;
-  action->port = port;
-  embb_mtapi_network_socket_initialize(&action->socket);
-  err = embb_mtapi_network_socket_connect(&action->socket, host, port);
+    action->host = host;
+    action->port = port;
+    embb_mtapi_network_socket_initialize(&action->socket);
+    err = embb_mtapi_network_socket_connect(&action->socket, host, port);
 
-  if (0 != err) {
-    // store socket for select
-    plugin->sockets[plugin->socket_count] = action->socket;
-    plugin->socket_count++;
+    if (0 != err) {
+      // store socket for select
+      plugin->sockets[plugin->socket_count] = action->socket;
+      plugin->socket_count++;
 
-    action_hndl = mtapi_ext_plugin_action_create(
-      local_job_id,
-      network_task_start,
-      network_task_cancel,
-      network_action_finalize,
-      action,
-      NULL, 0, // no node local data obviously
-      MTAPI_NULL,
-      &local_status);
-
-    mtapi_status_set(status, local_status);
+      action_hndl = mtapi_ext_plugin_action_create(
+        local_job_id,
+        network_task_start,
+        network_task_cancel,
+        network_action_finalize,
+        action,
+        NULL, 0, // no node local data obviously
+        MTAPI_NULL,
+        &local_status);
+    } else {
+      embb_mutex_destroy(&action->send_mutex);
+      embb_mtapi_network_buffer_finalize(&action->send_buffer);
+      embb_mtapi_network_socket_finalize(&action->socket);
+      embb_free(action);
+    }
   }
 
+  mtapi_status_set(status, local_status);
   return action_hndl;
 }
