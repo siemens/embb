@@ -1,5 +1,5 @@
 const char * kernel =
-"__kernel void test(\n"
+"__kernel void AddVector(\n"
 "  __global void* arguments,\n"
 "  int arguments_size,\n"
 "  __global void* result_buffer,\n"
