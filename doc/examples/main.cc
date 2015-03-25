@@ -25,8 +25,12 @@
  */
 
 #include <iostream>
+#include <embb/base/c/thread.h>
 
 void RunMTAPI_C();
+void RunMTAPI_C_Plugin();
+void RunMTAPI_C_Network();
+void RunMTAPI_C_OpenCL();
 void RunMTAPI_CPP();
 void RunDataflowLinear();
 void RunDataflowNonLinear();
@@ -45,11 +49,25 @@ void RunQueueExamples();
  * Runs all examples and tests their correctness.
  */
 int main() {
+  embb_thread_set_max_count(1024);
+
   std::cout << "Running examples ..." << std::endl;
 
   std::cout << "RunMTAPI_C() ..." << std::endl;
   RunMTAPI_C();
   std::cout << "RunMTAPI_C() ... done" << std::endl;
+
+  std::cout << "RunMTAPI_C_Plugin() ..." << std::endl;
+  RunMTAPI_C_Plugin();
+  std::cout << "RunMTAPI_C_Plugin() ... done" << std::endl;
+
+  std::cout << "RunMTAPI_C_Network() ..." << std::endl;
+  RunMTAPI_C_Network();
+  std::cout << "RunMTAPI_C_Network() ... done" << std::endl;
+
+  std::cout << "RunMTAPI_C_OpenCL() ..." << std::endl;
+  RunMTAPI_C_OpenCL();
+  std::cout << "RunMTAPI_C_OpenCL() ... done" << std::endl;
 
   std::cout << "RunMTAPI_CPP() ..." << std::endl;
   RunMTAPI_CPP();
