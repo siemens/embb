@@ -24,73 +24,67 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
 #include <cassert>
 
 #include <embb/base/exceptions.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
-Group::Group() {
-  Create();
+Queue::Queue(mtapi_uint_t priority, bool ordered) {
+  mtapi_status_t status;
+  mtapi_queue_attributes_t attr;
+  mtapi_boolean_t bb;
+  mtapi_queueattr_init(&attr, &status);
+  assert(MTAPI_SUCCESS == status);
+  mtapi_queueattr_set(&attr, MTAPI_QUEUE_PRIORITY,
+    &priority, sizeof(priority), &status);
+  assert(MTAPI_SUCCESS == status);
+  bb = ordered ? MTAPI_TRUE : MTAPI_FALSE;
+  mtapi_queueattr_set(&attr, MTAPI_QUEUE_ORDERED,
+    &bb, sizeof(bb), &status);
+  assert(MTAPI_SUCCESS == status);
+  bb = MTAPI_TRUE;
+  mtapi_queueattr_set(&attr, MTAPI_QUEUE_RETAIN,
+    &bb, sizeof(bb), &status);
+  assert(MTAPI_SUCCESS == status);
+  mtapi_domain_t domain_id = mtapi_domain_id_get(&status);
+  assert(MTAPI_SUCCESS == status);
+  mtapi_job_hndl_t job = mtapi_job_get(TASKS_CPP_JOB, domain_id, &status);
+  assert(MTAPI_SUCCESS == status);
+  handle_ = mtapi_queue_create(MTAPI_QUEUE_ID_NONE, job, &attr, &status);
+  if (MTAPI_SUCCESS != status) {
+    EMBB_THROW(embb::base::ErrorException,
+      "mtapi::Queue could not be constructed");
+  }
 }
 
-Group::~Group() {
+Queue::~Queue() {
   mtapi_status_t status;
-  mtapi_group_delete(handle_, &status);
+  mtapi_queue_delete(handle_, MTAPI_INFINITE, &status);
   assert(MTAPI_SUCCESS == status);
 }
 
-void Group::Create() {
+void Queue::Enable() {
   mtapi_status_t status;
-  handle_ = mtapi_group_create(MTAPI_GROUP_ID_NONE, MTAPI_NULL, &status);
-  if (MTAPI_SUCCESS != status) {
-    EMBB_THROW(embb::base::ErrorException,
-      "mtapi::Group could not be constructed");
-  }
+  mtapi_queue_enable(handle_, &status);
+  assert(MTAPI_SUCCESS == status);
 }
 
-Task Group::Spawn(Action action) {
+void Queue::Disable() {
+  mtapi_status_t status;
+  mtapi_queue_disable(handle_, MTAPI_INFINITE, &status);
+  assert(MTAPI_SUCCESS == status);
+}
+
+Task Queue::Spawn(Action action) {
   return Task(action, handle_);
 }
 
-Task Group::Spawn(mtapi_task_id_t id, Action action) {
-  return Task(id, action, handle_);
+Task Queue::Spawn(Group const * group, Action action) {
+  return Task(action, handle_, group->handle_);
 }
 
-mtapi_status_t Group::WaitAny(mtapi_timeout_t timeout) {
-  mtapi_status_t status;
-  mtapi_group_wait_any(handle_, MTAPI_NULL, timeout, &status);
-  if (MTAPI_GROUP_COMPLETED == status) {
-    // group has been deleted, so recreate it for simplicity
-    Create();
-  }
-  return status;
-}
-
-mtapi_status_t Group::WaitAny(
-  mtapi_timeout_t timeout,
-  mtapi_task_id_t & result) {
-  mtapi_status_t status;
-  void * res;
-  mtapi_group_wait_any(handle_, &res, timeout, &status);
-  memcpy(&result, &res, sizeof(result));
-  if (MTAPI_GROUP_COMPLETED == status) {
-    // group has been deleted, so recreate it for simplicity
-    Create();
-  }
-  return status;
-}
-
-mtapi_status_t Group::WaitAll(mtapi_timeout_t timeout) {
-  mtapi_status_t status;
-  mtapi_group_wait_all(handle_, timeout, &status);
-  // group has been deleted, so recreate it for simplicity
-  Create();
-  return status;
-}
-
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb

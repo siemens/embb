@@ -37,7 +37,7 @@ done
 DIR=`dirname "$SCRIPT_LOCATION"`
 
 TESTS="embb_base_c_test embb_base_cpp_test embb_mtapi_c_test \
-  embb_mtapi_cpp_test embb_algorithms_cpp_test \
+  embb_mtapi_cpp_test embb_tasks_cpp_test embb_algorithms_cpp_test \
   embb_containers_cpp_test embb_dataflow_cpp_test"
 
 for TEST in $TESTS; do

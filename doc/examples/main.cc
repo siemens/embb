@@ -32,6 +32,7 @@ void RunMTAPI_C_Plugin();
 void RunMTAPI_C_Network();
 void RunMTAPI_C_OpenCL();
 void RunMTAPI_CPP();
+void RunTasks();
 void RunDataflowLinear();
 void RunDataflowNonLinear();
 void RunSTLForEach();
@@ -72,6 +73,10 @@ int main() {
   std::cout << "RunMTAPI_CPP() ..." << std::endl;
   RunMTAPI_CPP();
   std::cout << "RunMTAPI_CPP() ... done" << std::endl;
+
+  std::cout << "RunTasks() ..." << std::endl;
+  RunTasks();
+  std::cout << "RunTasks() ... done" << std::endl;
 
   std::cout << "RunDataflowLinear() ..." << std::endl;
   RunDataflowLinear();

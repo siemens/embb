@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_REDUCE_H_
 #define EMBB_ALGORITHMS_REDUCE_H_
 
-#include <embb/mtapi/execution_policy.h>
+#include <embb/tasks/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
 namespace embb {
@@ -113,7 +113,7 @@ ReturnType Reduce(
   ReturnType neutral,
   ReductionFunction reduction,
   TransformationFunction transformation,
-  const embb::mtapi::ExecutionPolicy& policy,
+  const embb::tasks::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -128,7 +128,7 @@ ReturnType Reduce(
   ReductionFunction reduction
   ) {
   return Reduce(first, last, neutral, reduction, Identity(),
-    embb::mtapi::ExecutionPolicy(), 0);
+    embb::tasks::ExecutionPolicy(), 0);
 }
 
 /**
@@ -144,7 +144,7 @@ ReturnType Reduce(
   TransformationFunction transformation
   ) {
   return Reduce(first, last, neutral, reduction, transformation,
-    embb::mtapi::ExecutionPolicy(), 0);
+    embb::tasks::ExecutionPolicy(), 0);
 }
 
 /**
@@ -158,7 +158,7 @@ ReturnType Reduce(
   ReturnType neutral,
   ReductionFunction reduction,
   TransformationFunction transformation,
-  const embb::mtapi::ExecutionPolicy& policy
+  const embb::tasks::ExecutionPolicy& policy
   ) {
   return Reduce(first, last, neutral, reduction, transformation, policy, 0);
 }

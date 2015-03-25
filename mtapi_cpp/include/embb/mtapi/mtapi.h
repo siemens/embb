@@ -35,21 +35,12 @@
  * \ingroup CPP
  */
 
-#include <embb/mtapi/internal/cmake_config.h>
-
-#define MTAPI_CPP_TASK_JOB 1
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
-#define MTAPI_CPP_AUTOMATIC_DOMAIN_ID 1
-#define MTAPI_CPP_AUTOMATIC_NODE_ID 1
-#endif
-
-#include <embb/mtapi/execution_policy.h>
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/action.h>
-#include <embb/mtapi/continuation.h>
 #include <embb/mtapi/group.h>
-#include <embb/mtapi/node.h>
 #include <embb/mtapi/queue.h>
 #include <embb/mtapi/task.h>
-#include <embb/mtapi/taskcontext.h>
+#include <embb/mtapi/task_context.h>
+#include <embb/mtapi/node.h>
 
 #endif // EMBB_MTAPI_MTAPI_H_

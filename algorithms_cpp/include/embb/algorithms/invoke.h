@@ -28,7 +28,7 @@
 #define EMBB_ALGORITHMS_INVOKE_H_
 
 #include <embb/base/function.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 namespace embb {
 namespace algorithms {
@@ -89,15 +89,16 @@ template<typename Function>
 class TaskWrapper {
  public:
   /**
-   * Wraps the function into an mtapi::Action and spawns an mtapi::Task.
+   * Wraps the function into an embb::tasks::Action and spawns an
+   * embb::tasks::Task.
    */
   explicit TaskWrapper(
     Function function,
-    const embb::mtapi::ExecutionPolicy& policy)
+    const embb::tasks::ExecutionPolicy& policy)
       : function_(function), task_() {
-    mtapi::Action action(embb::base::MakeFunction(*this, &TaskWrapper::Run),
-                         policy);
-    task_ = mtapi::Node::GetInstance().Spawn(action);
+    embb::tasks::Action action(embb::base::MakeFunction(
+      *this, &TaskWrapper::Run), policy);
+    task_ = embb::tasks::Node::GetInstance().Spawn(action);
   }
 
   /**
@@ -109,9 +110,9 @@ class TaskWrapper {
 
  private:
   Function function_;
-  mtapi::Task task_;
+  embb::tasks::Task task_;
 
-  void Run(embb::mtapi::TaskContext&) {
+  void Run(embb::tasks::TaskContext&) {
     function_();
   }
 };
@@ -120,7 +121,7 @@ class TaskWrapper {
 template<typename Function1>
 void Invoke(
   Function1 func1,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
 }
 
@@ -128,7 +129,7 @@ template<typename Function1, typename Function2>
 void Invoke(
   Function1 func1,
   Function2 func2,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
 }
@@ -138,7 +139,7 @@ void Invoke(
   Function1 func1,
   Function2 func2,
   Function3 func3,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -151,7 +152,7 @@ template<typename Function1, typename Function2, typename Function3,
   Function2 func2,
   Function3 func3,
   Function4 func4,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -166,7 +167,7 @@ template<typename Function1, typename Function2, typename Function3,
   Function3 func3,
   Function4 func4,
   Function5 func5,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -183,7 +184,7 @@ template<typename Function1, typename Function2, typename Function3,
   Function4 func4,
   Function5 func5,
   Function6 func6,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -203,7 +204,7 @@ template<typename Function1, typename Function2, typename Function3,
   Function5 func5,
   Function6 func6,
   Function7 func7,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -225,7 +226,7 @@ template<typename Function1, typename Function2, typename Function3,
   Function6 func6,
   Function7 func7,
   Function8 func8,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -249,7 +250,7 @@ template<typename Function1, typename Function2, typename Function3,
   Function7 func7,
   Function8 func8,
   Function9 func9,
-  const embb::mtapi::ExecutionPolicy& policy) {
+  const embb::tasks::ExecutionPolicy& policy) {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -276,7 +277,7 @@ template<typename Function1, typename Function2, typename Function3,
   Function8 func8,
   Function9 func9,
   Function10 func10,
-  const embb::mtapi::ExecutionPolicy& policy)  {
+  const embb::tasks::ExecutionPolicy& policy)  {
   internal::TaskWrapper<Function1> wrap1(func1, policy);
   internal::TaskWrapper<Function2> wrap2(func2, policy);
   internal::TaskWrapper<Function3> wrap3(func3, policy);
@@ -292,21 +293,21 @@ template<typename Function1, typename Function2, typename Function3,
 template<typename Function1>
 void Invoke(
   Function1 func1) {
-  Invoke(func1, embb::mtapi::ExecutionPolicy());
+  Invoke(func1, embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2>
 void Invoke(
   Function1 func1,
   Function2 func2) {
-  Invoke(func1, func2, embb::mtapi::ExecutionPolicy());
+  Invoke(func1, func2, embb::tasks::ExecutionPolicy());
 }
 template<typename Function1, typename Function2, typename Function3>
 void Invoke(
   Function1 func1,
   Function2 func2,
   Function3 func3) {
-  Invoke(func1, func2, func3, embb::mtapi::ExecutionPolicy());
+  Invoke(func1, func2, func3, embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2, typename Function3,
@@ -316,7 +317,7 @@ void Invoke(
   Function2 func2,
   Function3 func3,
   Function4 func4) {
-  Invoke(func1, func2, func3, func4, embb::mtapi::ExecutionPolicy());
+  Invoke(func1, func2, func3, func4, embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2, typename Function3,
@@ -327,7 +328,7 @@ void Invoke(
   Function3 func3,
   Function4 func4,
   Function5 func5) {
-  Invoke(func1, func2, func3, func4, func5, embb::mtapi::ExecutionPolicy());
+  Invoke(func1, func2, func3, func4, func5, embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2, typename Function3,
@@ -340,7 +341,7 @@ void Invoke(
   Function5 func5,
   Function6 func6) {
   Invoke(func1, func2, func3, func4, func5, func6,
-    embb::mtapi::ExecutionPolicy());
+    embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2, typename Function3,
@@ -355,7 +356,7 @@ void Invoke(
   Function6 func6,
   Function7 func7) {
   Invoke(func1, func2, func3, func4, func5, func6, func7,
-    embb::mtapi::ExecutionPolicy());
+    embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2, typename Function3,
@@ -371,7 +372,7 @@ void Invoke(
   Function7 func7,
   Function8 func8) {
   Invoke(func1, func2, func3, func4, func5, func6, func7, func8,
-    embb::mtapi::ExecutionPolicy());
+    embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2, typename Function3,
@@ -388,7 +389,7 @@ void Invoke(
   Function8 func8,
   Function9 func9) {
   Invoke(func1, func2, func3, func4, func5, func6, func7, func8, func9,
-    embb::mtapi::ExecutionPolicy());
+    embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2, typename Function3,
@@ -407,7 +408,7 @@ void Invoke(
   Function9 func9,
   Function10 func10) {
   Invoke(func1, func2, func3, func4, func5, func6, func7, func8, func9, func10,
-    embb::mtapi::ExecutionPolicy());
+    embb::tasks::ExecutionPolicy());
 }
 
 #endif // else DOXYGEN

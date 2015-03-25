@@ -27,14 +27,13 @@
 #ifndef EMBB_MTAPI_NODE_H_
 #define EMBB_MTAPI_NODE_H_
 
-#include <list>
-#include <embb/base/core_set.h>
+#include <embb/base/memory_allocation.h>
 #include <embb/mtapi/c/mtapi.h>
-#include <embb/mtapi/action.h>
+#include <embb/mtapi/status_exception.h>
+#include <embb/mtapi/node_attributes.h>
 #include <embb/mtapi/task.h>
-#include <embb/mtapi/continuation.h>
-#include <embb/mtapi/group.h>
-#include <embb/mtapi/queue.h>
+#include <embb/mtapi/task_attributes.h>
+#include <embb/mtapi/job.h>
 
 namespace embb {
 
@@ -47,182 +46,251 @@ class Allocation;
 namespace mtapi {
 
 /**
-  * A singleton representing the MTAPI runtime.
-  *
-  * \ingroup CPP_MTAPI
-  */
+ * A singleton representing the MTAPI runtime.
+ *
+ * \ingroup CPP_MTAPI
+ */
 class Node {
  public:
   /**
-    * Initializes the runtime singleton using default values:
-    *   - all available cores will be used
-    *   - maximum number of tasks is 1024
-    *   - maximum number of groups is 128
-    *   - maximum number of queues is 16
-    *   - maximum queue capacity is 1024
-    *   - maximum number of priorities is 4.
-    *
-    * \notthreadsafe
-    * \throws ErrorException if the singleton was already initialized or the
-    *         Node could not be initialized.
-    * \memory Allocates about 200kb of memory.
-    */
+   * Initializes the runtime singleton using default values:
+   *   - all available cores will be used
+   *   - maximum number of tasks is 1024
+   *   - maximum number of groups is 128
+   *   - maximum number of queues is 16
+   *   - maximum queue capacity is 1024
+   *   - maximum number of priorities is 4.
+   *
+   * \notthreadsafe
+   * \throws ErrorException if the singleton was already initialized or the
+   *         Node could not be initialized.
+   * \memory Allocates about 200kb of memory.
+   */
   static void Initialize(
     mtapi_domain_t domain_id,          /**< [in] The domain id to use */
     mtapi_node_t node_id               /**< [in] The node id to use */
-    );
+    ) {
+    if (IsInitialized()) {
+      EMBB_THROW(StatusException,
+        "MTAPI: node was already initialized.");
+    } else {
+      NodeAttributes attributes; // default attributes
+      node_instance_ = embb::base::Allocation::New<Node>(
+        domain_id, node_id, attributes);
+    }
+  }
 
   /**
-    * Initializes the runtime singleton.
-    * \notthreadsafe
-    * \throws ErrorException if the singleton was already initialized or the
-    *         Node could not be initialized.
-    * \memory Allocates some memory depending on the values given.
-    */
+   * Initializes the runtime singleton.
+   * \notthreadsafe
+   * \throws ErrorException if the singleton was already initialized or the
+   *         Node could not be initialized.
+   * \memory Allocates some memory depending on the values given.
+   */
   static void Initialize(
     mtapi_domain_t domain_id,          /**< [in] The domain id to use */
     mtapi_node_t node_id,              /**< [in] The node id to use */
-    embb::base::CoreSet const & core_set,
-                                       /**< [in] A set of cores MTAPI should
-                                            use for its worker threads */
-    mtapi_uint_t max_tasks,            /**< [in] Maximum number of concurrent
-                                            \link Task Tasks \endlink */
-    mtapi_uint_t max_groups,           /**< [in] Maximum number of concurrent
-                                            \link Group Groups \endlink */
-    mtapi_uint_t max_queues,           /**< [in] Maximum number of concurrent
-                                            \link Queue Queues \endlink */
-    mtapi_uint_t queue_limit,          /**< [in] Maximum Queue capacity */
-    mtapi_uint_t max_priorities        /**< [in] Maximum number of priorities,
-                                            priorities will be between 0 and
-                                            max_priorities-1 */
-    );
+    NodeAttributes const & attributes  /**< [in] Attributes to use */
+    ) {
+    if (IsInitialized()) {
+      EMBB_THROW(StatusException,
+        "MTAPI: node was already initialized.");
+    } else {
+      node_instance_ = embb::base::Allocation::New<Node>(
+        domain_id, node_id, attributes);
+    }
+  }
 
   /**
-    * Checks if runtime is initialized.
-    * \return \c true if the Node singleton is already initialized, false
-    *         otherwise
-    * \waitfree
-    */
-  static bool IsInitialized();
+   * Checks if runtime is initialized.
+   * \return \c true if the Node singleton is already initialized, false
+   *         otherwise
+   * \waitfree
+   */
+  static bool IsInitialized() {
+    return NULL != node_instance_;
+  }
 
   /**
-    * Gets the instance of the runtime system.
-    * \return Reference to the Node singleton
-    * \threadsafe
-    */
-  static Node & GetInstance();
+   * Gets the instance of the runtime system.
+   * \return Reference to the Node singleton
+   * \threadsafe
+   */
+  static Node & GetInstance() {
+    if (IsInitialized()) {
+      return *node_instance_;
+    } else {
+      EMBB_THROW(StatusException,
+        "MTAPI: node is not initialized.");
+    }
+  }
 
   /**
-    * Shuts the runtime system down.
-    * \throws ErrorException if the singleton is not initialized.
-    * \notthreadsafe
-    */
-  static void Finalize();
+   * Shuts the runtime system down.
+   * \throws ErrorException if the singleton is not initialized.
+   * \notthreadsafe
+   */
+  static void Finalize() {
+    if (IsInitialized()) {
+      embb::base::Allocation::Delete(node_instance_);
+      node_instance_ = NULL;
+    } else {
+      EMBB_THROW(StatusException,
+        "MTAPI: node is not initialized.");
+    }
+  }
 
   /**
-    * Returns the number of available cores.
-    * \return The number of available cores
-    * \waitfree
-    */
+   * Returns the number of available cores.
+   * \return The number of available cores
+   * \waitfree
+   */
   mtapi_uint_t GetCoreCount() const {
     return core_count_;
   }
 
   /**
-    * Returns the number of worker threads.
-    * \return The number of worker threads.
-    * \waitfree
-    */
+   * Returns the number of worker threads.
+   * \return The number of worker threads.
+   * \waitfree
+   */
   mtapi_uint_t GetWorkerThreadCount() const {
     return worker_thread_count_;
   }
 
   /**
-    * Creates a Group to launch \link Task Tasks \endlink in.
-    * \return A reference to the created Group
-    * \throws ErrorException if the Group object could not be constructed.
-    * \threadsafe
-    * \memory Allocates some memory depending on the configuration of the
-    *         runtime.
-    */
-  Group & CreateGroup();
+   * Starts a new Task.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Start(
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    Job const & job,                   /**< The Job to execute. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    TaskAttributes const & attributes  /**< Attributes of the Task */
+    ) {
+    return Start(task_id,
+      job.GetInternal(),
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      &attributes.GetInternal());
+  }
 
   /**
-    * Destroys a Group. \link Task Tasks \endlink running in the Group will
-    * finish execution.
-    * \threadsafe
-    */
-  void DestroyGroup(
-    Group & group                      /**< [in,out] The Group to destroy */
-    );
+   * Starts a new Task.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Start(
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    Job const & job,                   /**< The Job to execute. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results                      /**< Pointer to the results. */
+    ) {
+    return Start(task_id,
+      job.GetInternal(),
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+  }
 
   /**
-    * Creates a Queue for stream processing. The queue might execute its 
-    * \link Task Tasks \endlink either in order or unordered.
-    * \return A reference to the new Queue
-    * \throws ErrorException if the Queue object could not be constructed.
-    * \threadsafe
-    * \memory Allocates some memory depending on the configuration of the
-    *         runtime.
-    */
-  Queue & CreateQueue(
-    mtapi_uint_t priority,             /**< [in] Priority of the Queue */
-    bool ordered                       /**< [in] \c true if the Queue should be
-                                            ordered, otherwise \c false */
-    );
+   * Starts a new Task.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Start(
+    Job const & job,                   /**< The Job to execute. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results,                     /**< Pointer to the results. */
+    TaskAttributes const & attributes  /**< Attributes of the Task */
+    ) {
+    return Start(MTAPI_TASK_ID_NONE,
+      job.GetInternal(),
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      &attributes.GetInternal());
+  }
 
   /**
-    * Destroys a Queue. Running \link Task Tasks \endlink will be canceled.
-    * \threadsafe
-    */
-  void DestroyQueue(
-    Queue & queue                      /**< [in,out] The Queue to destroy */
-    );
-
-  /**
-    * Runs an Action.
-    * \return A Task identifying the Action to run
-    * \throws ErrorException if the Task object could not be constructed.
-    * \threadsafe
-    */
-  Task Spawn(
-    Action action                      /**< [in] The Action to execute */
-    );
-
-  /**
-    * Creates a Continuation.
-    * \return A Continuation chain
-    * \threadsafe
-    */
-  Continuation First(
-    Action action                      /**< [in] The first Action of the
-                                            Continuation chain */
-    );
+   * Starts a new Task.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
+  template <typename ARGS, typename RES>
+  Task Start(
+    Job const & job,                   /**< The Job to execute. */
+    const ARGS * arguments,            /**< Pointer to the arguments. */
+    RES * results                      /**< Pointer to the results. */
+    ) {
+    return Start(MTAPI_TASK_ID_NONE,
+      job.GetInternal(),
+      arguments, internal::SizeOfType<ARGS>(),
+      results, internal::SizeOfType<RES>(),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+  }
 
   friend class embb::base::Allocation;
 
  private:
+  // not copyable
   Node(Node const & node);
+  Node const & operator=(Node const & other);
+
   Node(
     mtapi_domain_t domain_id,
     mtapi_node_t node_id,
-    mtapi_node_attributes_t * attr);
-  ~Node();
+    NodeAttributes const & attr) {
+    mtapi_status_t status;
+    mtapi_info_t info;
+    mtapi_initialize(domain_id, node_id, &attr.GetInternal(), &info, &status);
+    needs_finalize_ = status == MTAPI_SUCCESS;
+    internal::CheckStatus(status);
 
-  static void action_func(
-    const void* args,
-    mtapi_size_t args_size,
-    void* result_buffer,
-    mtapi_size_t result_buffer_size,
-    const void* node_local_data,
-    mtapi_size_t node_local_data_size,
-    mtapi_task_context_t * context);
+    core_count_ = info.hardware_concurrency;
+    worker_thread_count_ = embb_core_set_count(
+      &attr.GetInternal().core_affinity);
+  }
+
+  ~Node() {
+    if (needs_finalize_) {
+      mtapi_status_t status;
+      mtapi_finalize(&status);
+      internal::CheckStatus(status);
+    }
+  }
+
+  Task Start(
+    mtapi_task_id_t task_id,
+    mtapi_job_hndl_t job,
+    const void * arguments,
+    mtapi_size_t arguments_size,
+    void * results,
+    mtapi_size_t results_size,
+    mtapi_task_attributes_t const * attributes
+    ) {
+    mtapi_status_t status;
+    mtapi_task_hndl_t task_hndl =
+      mtapi_task_start(task_id, job, arguments, arguments_size,
+      results, results_size, attributes, MTAPI_GROUP_NONE,
+      &status);
+    internal::CheckStatus(status);
+    return Task(task_hndl);
+  }
+
+  static embb::mtapi::Node * node_instance_;
 
   mtapi_uint_t core_count_;
   mtapi_uint_t worker_thread_count_;
-  mtapi_action_hndl_t action_handle_;
-  std::list<Queue*> queues_;
-  std::list<Group*> groups_;
+  bool needs_finalize_;
 };
 
 } // namespace mtapi

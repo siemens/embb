@@ -1,0 +1,45 @@
+\chapter{Tasks}
+\label{cha:tasks}
+
+\embb provides a simple task management wrapper for the MTAPI interface. Using the example from the previous section, the signature of the action function for the tasks interface looks like this:
+%
+\\\inputlisting{../examples/tasks/tasks_cpp_action_signature-snippet.h}
+%
+First, the node instance needs to be obtained. If the node is not initialized yet, this function will do it.
+%
+\\\inputlisting{../examples/tasks/tasks_cpp_get_node-snippet.h}
+%
+\emph{\textbf{Note:} Automatic initialization allows for easy usage of the \emph{Algorithms} and \emph{Dataflow} building blocks. For performance measurements however, explicit initialization by calling \lstinline|embb::tasks::Node::Initialize| is imperative since the measurements will otherwise include the initialization time of MTAPI.}
+
+Checking the arguments and the result buffer is not necessary, since everything is safely typed. However, the terminating condition of the recursion still needs to be checked:
+%
+\\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
+%
+After that, the first part of the computation is launched as an MTAPI task using \lstinline|embb::tasks::Node::Spawn()| (registering an action function with a job is done automatically):
+%
+\\\inputlisting{../examples/tasks/tasks_cpp_calc_task-snippet.h}
+%
+The second part can be executed directly:
+%
+\\\inputlisting{../examples/tasks/tasks_cpp_calc_direct-snippet.h}
+%
+Then, completion of the MTAPI task has to be waited for using \lstinline|embb::tasks::Task::Wait()|:
+%
+\\\inputlisting{../examples/tasks/tasks_cpp_wait_task-snippet.h}
+%
+Finally, the two parts can be added and written into the result buffer:
+%
+\\\inputlisting{../examples/mtapi/mtapi_write_back-snippet.h}
+% 
+
+The \lstinline|fibonacci()| function also gets simpler compared to the C version. The MTAPI runtime is initialized automatically, only the node instance has to be fetched:
+%
+\\\inputlisting{../examples/tasks/tasks_cpp_get_node-snippet.h}
+%
+The root task can be started using \lstinline|embb::tasks::Node::Spawn()| directly, registering with a job is done automatically:
+%
+\\\inputlisting{../examples/tasks/tasks_cpp_start_task-snippet.h}
+%
+Again, the started task has to be waited for (using \lstinline|embb::tasks::Task::Wait()|) before the result can be returned. The runtime is shut down automatically in an \lstinline|atexit()| handler.
+
+\emph{\textbf{Note:} If the node was initialized explicitly by calling \lstinline|embb::tasks::Node::Initialize|, the runtime must also be shut down explicitly by calling \lstinline|embb::tasks::Node::Finalize|.}

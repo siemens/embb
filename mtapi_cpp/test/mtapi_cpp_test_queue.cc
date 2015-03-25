@@ -24,47 +24,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdlib>
-
 #include <mtapi_cpp_test_config.h>
 #include <mtapi_cpp_test_queue.h>
 
 #include <embb/base/c/memory_allocation.h>
 
-#define JOB_TEST_TASK 42
-#define TASK_TEST_ID 23
-#define QUEUE_TEST_ID 17
+#define JOB_TEST_QUEUE 42
 
-static void testQueueAction(embb::mtapi::TaskContext & /*context*/) {
-  //std::cout << "testQueueAction on core " <<
-  //  context.GetCurrentCoreNumber() << std::endl;
+static void testQueueAction(
+  const void* /*args*/,
+  mtapi_size_t /*args_size*/,
+  void* results,
+  mtapi_size_t /*results_size*/,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * context) {
+  embb::mtapi::TaskContext ctx(context);
+  int * out = reinterpret_cast<int*>(results);
+  *out = 1;
+  ctx.SetStatus(MTAPI_ERR_ACTION_CANCELLED);
 }
 
 static void testDoSomethingElse() {
 }
 
 QueueTest::QueueTest() {
-  CreateUnit("mtapi queue test").Add(&QueueTest::TestBasic, this);
+  CreateUnit("mtapi_cpp queue test").Add(&QueueTest::TestBasic, this);
 }
 
 void QueueTest::TestBasic() {
-  //std::cout << "running testQueue..." << std::endl;
-
   embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
-  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-  embb::mtapi::Queue & queue = node.CreateQueue(0, false);
+  embb::mtapi::Job job(JOB_TEST_QUEUE, THIS_DOMAIN_ID);
+  embb::mtapi::Action action(JOB_TEST_QUEUE, testQueueAction,
+    MTAPI_NULL, 0);
 
-  embb::mtapi::Task task = queue.Spawn(testQueueAction);
+  {
+    embb::mtapi::Queue queue(job);
 
-  testDoSomethingElse();
+    int result = 0;
+    embb::mtapi::Task task = queue.Enqueue<void, int>(MTAPI_NULL, &result);
 
-  task.Wait(MTAPI_INFINITE);
+    testDoSomethingElse();
 
-  node.DestroyQueue(queue);
+    mtapi_status_t status = task.Wait();
+    PT_EXPECT_EQ(status, MTAPI_ERR_ACTION_CANCELLED);
+    PT_EXPECT_EQ(result, 1);
+  }
 
   embb::mtapi::Node::Finalize();
 
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
-  //std::cout << "...done" << std::endl << std::endl;
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
 }

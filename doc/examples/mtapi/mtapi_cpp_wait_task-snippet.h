@@ -1,2 +1,5 @@
     mtapi_status_t status = task.Wait(MTAPI_INFINITE);
-    MTAPI_CHECK_STATUS(status);
+    if (status != MTAPI_SUCCESS) {
+      printf("task failed with error: %d\n\n", status);
+      exit(status);
+    }

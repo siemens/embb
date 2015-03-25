@@ -14,7 +14,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_network_c/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_opencl_c/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_cpp/include
-  ${CMAKE_CURRENT_BINARY_DIR}/../../mtapi_cpp/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../tasks_cpp/include
+  ${CMAKE_CURRENT_BINARY_DIR}/../../tasks_cpp/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../containers_cpp/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../algorithms_cpp/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../dataflow_cpp/include
@@ -30,7 +31,7 @@ IF(MSVC)
 ENDIF()
 
 add_executable(examples ${EXAMPLES_SOURCES})
-target_link_libraries(examples embb_dataflow_cpp embb_algorithms_cpp embb_mtapi_cpp
+target_link_libraries(examples embb_dataflow_cpp embb_algorithms_cpp embb_tasks_cpp embb_mtapi_cpp
                       embb_mtapi_network_c embb_mtapi_opencl_c embb_mtapi_c
                       embb_base_cpp embb_base_c embb_containers_cpp
                       ${EXTRA_LIBS} ${compiler_libs})

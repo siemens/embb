@@ -29,7 +29,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 #include <embb/base/function.h>
 #include <embb/base/c/memory_allocation.h>
@@ -143,7 +143,7 @@ SimpleTest::SimpleTest() {
 }
 
 void SimpleTest::TestBasic() {
-  embb::mtapi::Node::Initialize(1, 1);
+  embb::tasks::Node::Initialize(1, 1);
 
   for (int ii = 0; ii < 10000; ii++) {
     ArraySink<TEST_COUNT> asink;
@@ -203,7 +203,7 @@ void SimpleTest::TestBasic() {
     PT_EXPECT(asink.Check());
   }
 
-  embb::mtapi::Node::Finalize();
+  embb::tasks::Node::Finalize();
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

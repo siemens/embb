@@ -28,12 +28,12 @@
 
 #include <embb/base/memory_allocation.h>
 #include <embb/base/function.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 
 #include <continuationstage.h>
 
 namespace embb {
-namespace mtapi {
+namespace tasks {
 
 Continuation::Continuation(Action action) {
   first_ = last_ = embb::base::Allocation::New<ContinuationStage>();
@@ -50,10 +50,10 @@ Continuation::~Continuation() {
 }
 
 void Continuation::ExecuteContinuation(TaskContext &) {
-  mtapi::ContinuationStage * stage = first_;
-  mtapi::Node & node = mtapi::Node::GetInstance();
+  ContinuationStage * stage = first_;
+  Node & node = Node::GetInstance();
   while (NULL != stage) {
-    mtapi::Task task = node.Spawn(stage->action);
+    Task task = node.Spawn(stage->action);
     task.Wait(MTAPI_INFINITE);
     stage = stage->next;
   }
@@ -61,7 +61,7 @@ void Continuation::ExecuteContinuation(TaskContext &) {
   // delete stages
   stage = first_;
   while (NULL != stage) {
-    mtapi::ContinuationStage * next = stage->next;
+    ContinuationStage * next = stage->next;
     embb::base::Allocation::Delete(stage);
     stage = next;
   }
@@ -90,5 +90,5 @@ Task Continuation::Spawn(ExecutionPolicy execution_policy) {
       ExecutionPolicy(execution_policy)));
 }
 
-} // namespace mtapi
+} // namespace tasks
 } // namespace embb

@@ -29,8 +29,8 @@
 
 #include <cassert>
 #include <embb/base/exceptions.h>
-#include <embb/mtapi/mtapi.h>
-#include <embb/mtapi/execution_policy.h>
+#include <embb/tasks/tasks.h>
+#include <embb/tasks/execution_policy.h>
 #include <embb/algorithms/internal/partition.h>
 
 namespace embb {
@@ -44,7 +44,7 @@ class ScanFunctor {
   ScanFunctor(size_t chunk_first, size_t chunk_last, RAIOut output_iterator,
               ReturnType neutral, ScanFunction scan,
               TransformationFunction transformation,
-              const embb::mtapi::ExecutionPolicy& policy,
+              const embb::tasks::ExecutionPolicy& policy,
               const BlockSizePartitioner<RAIIn>& partitioner,
               ReturnType* tree_values, size_t node_id,
               bool going_down)
@@ -55,7 +55,7 @@ class ScanFunctor {
       node_id_(node_id), parent_value_(neutral), is_first_pass_(going_down)  {
   }
 
-  void Action(mtapi::TaskContext&) {
+  void Action(embb::tasks::TaskContext&) {
     if (chunk_first_ == chunk_last_) {
       ChunkDescriptor<RAIIn> chunk = partitioner_[chunk_first_];
       RAIIn iter_in = chunk.GetFirst();
@@ -104,13 +104,13 @@ class ScanFunctor {
         functor_r.parent_value_ = functor_l.GetTreeValue() + parent_value_;
       }
       // Spawn tasks to recurse:
-      mtapi::Node& node = mtapi::Node::GetInstance();
-      mtapi::Task task_l = node.Spawn(
-        mtapi::Action(
+      embb::tasks::Node& node = embb::tasks::Node::GetInstance();
+      embb::tasks::Task task_l = node.Spawn(
+        embb::tasks::Action(
           base::MakeFunction(functor_l, &ScanFunctor::Action),
           policy_));
-      mtapi::Task task_r = node.Spawn(
-        mtapi::Action(
+      embb::tasks::Task task_r = node.Spawn(
+        embb::tasks::Action(
           base::MakeFunction(functor_r, &ScanFunctor::Action),
           policy_));
       // Wait for tasks to complete:
@@ -131,7 +131,7 @@ class ScanFunctor {
  private:
   static const int LEFT  = 1;
   static const int RIGHT = 2;
-  const embb::mtapi::ExecutionPolicy& policy_;
+  const embb::tasks::ExecutionPolicy& policy_;
   size_t chunk_first_;
   size_t chunk_last_;
   RAIOut output_iterator_;
@@ -168,7 +168,7 @@ typename ScanFunction, typename TransformationFunction>
 void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
                        ReturnType neutral, ScanFunction scan,
                        TransformationFunction transformation,
-                       const embb::mtapi::ExecutionPolicy& policy,
+                       const embb::tasks::ExecutionPolicy& policy,
                        size_t block_size,
                        std::random_access_iterator_tag) {
   typedef typename std::iterator_traits<RAIIn>::difference_type difference_type;
@@ -199,15 +199,14 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
   // it creates the tree.
   typedef ScanFunctor<RAIIn, RAIOut, ReturnType, ScanFunction,
                       TransformationFunction> Functor;
-  mtapi::Node& node = mtapi::Node::GetInstance();
+  embb::tasks::Node& node = embb::tasks::Node::GetInstance();
 
   BlockSizePartitioner<RAIIn> partitioner_down(first, last, block_size);
   Functor functor_down(0, partitioner_down.Size() - 1, output_iterator,
                        neutral, scan, transformation, policy, partitioner_down,
                        values, 0, true);
-  mtapi::Task task_down = node.Spawn(mtapi::Action(base::MakeFunction(
-                          functor_down, &Functor::Action),
-                          policy));
+  embb::tasks::Task task_down = node.Spawn(embb::tasks::Action(
+    base::MakeFunction(functor_down, &Functor::Action), policy));
   task_down.Wait(MTAPI_INFINITE);
 
   // Second pass. Gives to each leaf the part of the prefix missing
@@ -215,9 +214,8 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
   Functor functor_up(0, partitioner_up.Size() - 1, output_iterator,
                      neutral, scan, transformation, policy, partitioner_up,
                      values, 0, false);
-  mtapi::Task task_up = node.Spawn(mtapi::Action(base::MakeFunction(
-                        functor_up, &Functor::Action),
-                        policy));
+  embb::tasks::Task task_up = node.Spawn(embb::tasks::Action(
+    base::MakeFunction(functor_up, &Functor::Action), policy));
   task_up.Wait(MTAPI_INFINITE);
 }
 
@@ -227,7 +225,7 @@ template<typename RAIIn, typename RAIOut, typename ReturnType,
          typename ScanFunction, typename TransformationFunction>
 void Scan(RAIIn first, RAIIn last, RAIOut output_iterator, ReturnType neutral,
           ScanFunction scan, TransformationFunction transformation,
-          const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+          const embb::tasks::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAIIn>::iterator_category category;
   internal::ScanIteratorCheck(first, last, output_iterator, neutral,
       scan, transformation, policy, block_size, category());
