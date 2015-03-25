@@ -30,6 +30,7 @@
 namespace embb {
 namespace containers {
 namespace internal {
+
 /**
  * A list with fixed size, implemented as an array. Replaces std::vector that
  * was used in previous hazard pointer implementation.
@@ -41,27 +42,20 @@ namespace internal {
 template< typename ElementT >
 class FixedSizeList {
  private:
-   /**
-    * Capacity of the list
-    */
-  size_t max_size;
+  /**
+   * Capacity of the list
+   */
+  size_t max_size_;
 
   /**
    * Size of the list
    */
-  size_t size;
+  size_t size_;
 
   /**
    * Pointer to the array containing the list
    */
   ElementT* elementsArray;
-
-  /**
-   * Copy constructor not implemented. Would require dynamic memory allocation.
-   */
-  FixedSizeList(
-    const FixedSizeList &
-    /**< [IN] Other list */);
 
  public:
   /**
@@ -78,20 +72,38 @@ class FixedSizeList {
    * Constructor, initializes list with given capacity
    */
   FixedSizeList(
-    size_t max_size
-    /**< [IN] Capacity of the list */);
+    size_t capacity
+    /**< [IN] Capacity of the list */
+  );
+    
+  /**
+   * Copy constructor.
+   */
+  FixedSizeList(
+    const FixedSizeList &
+    /**< [IN] Other list */
+  );
 
   /**
-   * Gets the current size of the list
+   * Copies the elements of another list to this list. The capacity of
+   * this list has to be greater than or equal to the size of the other list.
+   */
+  FixedSizeList & operator=(
+    const FixedSizeList & other
+    /**< [IN] Other list */
+  );
+
+  /**
+   * Gets the current number of element in the list
    *
    * \return Size of the list
    */
   inline size_t GetSize() const;
 
   /**
-   * Gets the capacity of the list
+   * Gets the maximum number of elements that the list can hold
    *
-   * \return The capacity of the list
+   * \return The element capacity of the list
    */
   inline size_t GetMaxSize() const;
 
@@ -115,22 +127,15 @@ class FixedSizeList {
   iterator end() const;
 
   /**
-   * Copies the elements of another list to this list. The capacity of
-   * this list has to be greater than or equal to the size of the other list.
-   */
-  FixedSizeList & operator=(
-    const FixedSizeList & other
-    /**< [IN] Other list */);
-
-  /**
    * Appends an element to the end of the list
    *
    * \return \c false if the operation was not successful because the list is
    *         full, otherwise \c true.
    */
   bool PushBack(
-    ElementT const el
-    /**< [IN] Element to append to the list */);
+    const ElementT & el
+    /**< [IN] Element to append to the list */
+  );
 
   /**
    * Destructs the list.
@@ -142,6 +147,6 @@ class FixedSizeList {
 } // namespace containers
 } // namespace embb
 
-#include "./fixed_size_list-inl.h"
+#include <embb/containers/internal/fixed_size_list-inl.h>
 
 #endif  // EMBB_CONTAINERS_INTERNAL_FIXED_SIZE_LIST_H_
