@@ -40,8 +40,6 @@ static void testTaskAction(
   char const * msg,
   std::string * output,
   embb::tasks::TaskContext & /*context*/) {
-  //std::cout << "testTaskAction " << msg << " on core " <<
-  //  context.GetCurrentCoreNumber() << std::endl;
   *output = msg;
 }
 
@@ -71,8 +69,6 @@ TaskTest::TaskTest() {
 }
 
 void TaskTest::TestBasic() {
-  //std::cout << "running testTask..." << std::endl;
-
   embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
   embb::tasks::Node & node = embb::tasks::Node::GetInstance();
@@ -96,7 +92,6 @@ void TaskTest::TestBasic() {
   testDoSomethingElse();
   task.Wait(MTAPI_INFINITE);
   PT_EXPECT(test == "simple");
-  //std::cout << "result: " << test.c_str() << std::endl;
 
   std::string test1, test2, test3;
   task = node.First(
@@ -112,9 +107,6 @@ void TaskTest::TestBasic() {
   PT_EXPECT(test1 == "first");
   PT_EXPECT(test2 == "second");
   PT_EXPECT(test3 == "third");
-  //std::cout << "result1: " << test1.c_str() << std::endl;
-  //std::cout << "result2: " << test2.c_str() << std::endl;
-  //std::cout << "result3: " << test3.c_str() << std::endl;
 
   int value = 0;
   task = node.Spawn(
@@ -132,5 +124,4 @@ void TaskTest::TestBasic() {
   embb::tasks::Node::Finalize();
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
-  //std::cout << "...done" << std::endl << std::endl;
 }

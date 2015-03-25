@@ -39,8 +39,7 @@ struct result_example_struct {
 typedef struct result_example_struct result_example_t;
 
 static void testGroupAction(embb::tasks::TaskContext & /*context*/) {
-  //std::cout << "testGroupAction on core " <<
-  //  context.GetCurrentCoreNumber() << std::endl;
+  // emtpy
 }
 
 static void testDoSomethingElse() {
@@ -51,23 +50,17 @@ GroupTest::GroupTest() {
 }
 
 void GroupTest::TestBasic() {
-  //std::cout << "running testGroup..." << std::endl;
-
   embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
   embb::tasks::Node & node = embb::tasks::Node::GetInstance();
   embb::tasks::Group & group = node.CreateGroup();
   embb::tasks::Task task;
 
-  //std::cout << "wait all..." << std::endl;
-
   for (int ii = 0; ii < 4; ii++) {
     task = group.Spawn(testGroupAction);
   }
   testDoSomethingElse();
   group.WaitAll(MTAPI_INFINITE);
-
-  //std::cout << "wait any..." << std::endl;
 
   for (int ii = 0; ii < 4; ii++) {
     task = group.Spawn(mtapi_task_id_t(ii + 1), testGroupAction);
@@ -76,7 +69,7 @@ void GroupTest::TestBasic() {
   mtapi_status_t status;
   mtapi_task_id_t result;
   while (MTAPI_SUCCESS == (status = group.WaitAny(MTAPI_INFINITE, result))) {
-    //std::cout << "got a result from task " << result << std::endl;
+    // empty
   }
 
   node.DestroyGroup(group);
@@ -84,5 +77,4 @@ void GroupTest::TestBasic() {
   embb::tasks::Node::Finalize();
 
   PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
-  //std::cout << "...done" << std::endl << std::endl;
 }

@@ -36,8 +36,7 @@
 #define QUEUE_TEST_ID 17
 
 static void testQueueAction(embb::tasks::TaskContext & /*context*/) {
-  //std::cout << "testQueueAction on core " <<
-  //  context.GetCurrentCoreNumber() << std::endl;
+  // empty
 }
 
 static void testDoSomethingElse() {
@@ -48,8 +47,6 @@ QueueTest::QueueTest() {
 }
 
 void QueueTest::TestBasic() {
-  //std::cout << "running testQueue..." << std::endl;
-
   embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
   embb::tasks::Node & node = embb::tasks::Node::GetInstance();
@@ -66,5 +63,4 @@ void QueueTest::TestBasic() {
   embb::tasks::Node::Finalize();
 
   PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
-  //std::cout << "...done" << std::endl << std::endl;
 }
