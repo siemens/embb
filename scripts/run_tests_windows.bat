@@ -40,6 +40,9 @@ echo.
 "%DIR:~0,-1%\embb_mtapi_cpp_test.exe"
 if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
 echo.
+"%DIR:~0,-1%\embb_tasks_cpp_test.exe"
+if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
+echo.
 "%DIR:~0,-1%\embb_algorithms_cpp_test.exe"
 if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
 echo.
