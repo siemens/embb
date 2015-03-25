@@ -37,14 +37,13 @@ using embb::containers::primitives::LlxScxRecord;
 using embb::containers::primitives::LlxScx;
 
 LlxScxTest::LlxScxTest() :
-  num_threads_(static_cast<int>
-  (partest::TestSuite::GetDefaultNumThreads())) {
+  num_threads_(
+    static_cast<int>(partest::TestSuite::GetDefaultNumThreads())) {
   CreateUnit("SerialTest").Add(&LlxScxTest::SerialTest, this);
 }
 
 void LlxScxTest::SerialTest() {
   typedef LlxScxTest::Node Node;
-
   // Global:
   LlxScx<Node> llxscx(3);
 
@@ -72,7 +71,7 @@ void LlxScxTest::SerialTest() {
   PT_ASSERT(llxscx.TryLoadLinked(&dr3, l3, finalized));
   PT_ASSERT(!finalized);
 
-  FixedSizeList< LlxScxRecord<Node> * > 
+  FixedSizeList< LlxScxRecord<Node> * >
     linked_deps(3);
   linked_deps.PushBack(&dr1);
   linked_deps.PushBack(&dr2);
@@ -92,6 +91,12 @@ void LlxScxTest::SerialTest() {
       linked_deps,   // V: dependencies, must be LL'd before
       finalize_deps  // R: Subsequence of V to be finalized
     ));
+  // Following LLX calls on finalized data records are
+  // expected to fail:
+  PT_ASSERT(!llxscx.TryLoadLinked(&dr2, l2, finalized));
+  PT_ASSERT(finalized);
+  PT_ASSERT(!llxscx.TryLoadLinked(&dr3, l3, finalized));
+  PT_ASSERT(finalized);
 }
 
 } // namespace test

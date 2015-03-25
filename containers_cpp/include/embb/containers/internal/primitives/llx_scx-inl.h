@@ -44,99 +44,8 @@ namespace embb {
 namespace containers {
 namespace primitives {
 
-namespace internal {
-
-#if 0
-/**
- * RAII-style implementation of a simplified hazard
- * pointer scheme. SmartHazardPointer instances should
- * reside only on the stack, never the heap, and T*
- * values should reside only in the heap. A NodePtr can
- * be automatically converted to a Node*, but an explicit
- * constructor is needed to go the other way.
- *
- * Example:
- *   SmartHazardPointer<Node> shp = SmartHazardPointer(
- *     nodePool?>allocate());
- *   // assign via default copy constructor:
- *   *shp = Node(...);
- */
-template< typename T >
-class SmartHazardPointer {
-
- public:
-  SmartHazardPointer(T ** node) {
-    while (true) {
-      ptr = *node;
-      table_->add(ptr);
-      // Full fence:
-      embb_atomic_memory_barrier();
-      T * reread = *node;
-      // @TODO: Prove practical wait-freedom
-      if (read == reread) {
-        return;
-      }
-    }
-  }
-
-  SmartHazardPointer(T * node) {
-    ptr = node;
-  }
-
-  /**
-   * Dereference operator.
-   */
-  T * operator->() {
-    return ptr;
-  }
-
-  /**
-   * Dereference lvalue.
-   */
-  T & operator*() {
-    return *ptr;
-  }
-
-  /**
-   * Equality test with regular pointer
-   */
-  bool operator==(T * const other) {
-    return ptr == other;
-  }
-
-  /**
-   * Equality test with another SmartHazardPointer
-   */
-  bool operator==(const SmartHazardPointer & other) {
-    return this->ptr == other->ptr;
-  }
-
-  /**
-   * Destructor, retires hazard pointer.
-   */
-  ~SmartHazardPointer() {
-    table_->remove(ptr);
-  }
-
-  /**
-   * Conversion to regular pointer.
-   */
-  operator T*() {
-    return ptr;
-  }
-
- private:
-  static HazardPointerTable * table_;
-  T * ptr;
-
-};
-
-#endif
-
-}  // namespace internal
-
-template< class UserData >
-unsigned int LlxScx<UserData>::ThreadId() {
+template< typename UserData, typename ValuePool >
+unsigned int LlxScx<UserData, ValuePool>::ThreadId() {
   unsigned int thread_index;
   int return_val = embb_internal_thread_index(&thread_index);
   if (return_val != EMBB_SUCCESS)
@@ -144,34 +53,33 @@ unsigned int LlxScx<UserData>::ThreadId() {
   return thread_index;
 }
 
-template< class UserData >
-LlxScx<UserData>::LlxScx(size_t max_links)
-: max_links_(max_links) {
+template< typename UserData, typename ValuePool >
+LlxScx<UserData, ValuePool>::LlxScx(size_t max_links)
+: max_links_(max_links),
+  max_threads_(embb::base::Thread::GetThreadsMaxCount()),
+  scx_record_list_pool_(max_threads_) {
   typedef embb::containers::internal::FixedSizeList<LlxResult>
     llx_result_list_t;
   typedef embb::containers::internal::FixedSizeList<ScxRecord_t>
     scx_record_list_t;
-  unsigned int num_threads = embb::base::Thread::GetThreadsMaxCount();
-  // Table in shared memory containing for each r in TryStoreConditional's
-  // dependent links, a copy of r's info value in this threads local table
-  // of LLX results.
-  scx_record_list_t empty_scx_list(3);
-  info_fields_ = static_cast<scx_record_list_t *>(
+  // Allocate a list of LLX results for every thread:
+  thread_llx_results_ = static_cast<llx_result_list_t *>(
     embb::base::Allocation::AllocateCacheAligned(
-      num_threads * sizeof(empty_scx_list)));
+      max_threads_ * sizeof(llx_result_list_t)));
 }
 
-template< class UserData >
-LlxScx<UserData>::~LlxScx() {
-  embb::base::Allocation::FreeAligned(info_fields_);
+template< typename UserData, typename ValuePool >
+LlxScx<UserData, ValuePool>::~LlxScx() {
+  embb::base::Allocation::FreeAligned(thread_llx_results_);
 }
 
-template< class UserData >
-bool LlxScx<UserData>::TryLoadLinked(
+template< typename UserData, typename ValuePool >
+bool LlxScx<UserData, ValuePool>::TryLoadLinked(
   DataRecord_t * const data_record,
   DataRecord_t & user_data,
   bool & finalized) {
   finalized = false;
+  unsigned int thread_id = ThreadId();
   // Order of initialization matters:
   bool           marked_1   = data_record->IsMarkedForFinalize();
   ScxRecord_t *  curr_scx   = data_record->ScxInfo().Load();
@@ -188,7 +96,7 @@ bool LlxScx<UserData>::TryLoadLinked(
       llx_result.data_record = data_record;
       llx_result.scx_record  = curr_scx;
       llx_result.user_data   = user_data_local;
-      thread_llx_results_.Get().PushBack(llx_result);
+      thread_llx_results_[thread_id].PushBack(llx_result);
       // Set return value:
       user_data = user_data_local;
       return true;
@@ -210,15 +118,15 @@ bool LlxScx<UserData>::TryLoadLinked(
   return false;
 }
 
-template< class UserData >
+template< typename UserData, typename ValuePool >
 template< typename FieldType >
-bool LlxScx<UserData>::TryStoreConditional(
+bool LlxScx<UserData, ValuePool>::TryStoreConditional(
   embb::base::Atomic<FieldType> * field,
   FieldType value,
   embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
   embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps) {
   typedef embb::containers::internal::FixedSizeList<DataRecord_t *> dr_list_t;
-//typedef embb::containers::internal::FixedSizeList<ScxRecord_t *> op_list_t;
+  typedef embb::containers::internal::FixedSizeList<ScxRecord_t> scx_op_list_t;
   // Preconditions:
   // 1. For each r in linked_deps, this thread has performed an invocation
   //    I_r of LLX(r) linked to this SCX.
@@ -228,17 +136,18 @@ bool LlxScx<UserData>::TryStoreConditional(
   unsigned int thread_id = ThreadId();
   // Let info_fields be a table in shared memory containing for each r in V,
   // a copy of r's info value in this threads local table of LLX results:
-  info_fields_[thread_id].clear();
+  scx_op_list_t * info_fields = scx_record_list_pool_.Allocate(max_links_);
   dr_list_t::const_iterator it;
   dr_list_t::const_iterator end;
   end = linked_deps.end();
-  // for each r in V ...
+  // for each r in linked_deps ...
   for (it = linked_deps.begin(); it != end; ++it) {
     // Find LLX result of r in thread-local table of LLX results:
     typedef embb::containers::internal::FixedSizeList<LlxResult>
       llx_result_list;
-    llx_result_list::iterator l_it  = thread_llx_results_.Get().begin();
-    llx_result_list::iterator l_end = thread_llx_results_.Get().end();
+    llx_result_list::iterator l_it  = thread_llx_results_[thread_id].begin();
+    llx_result_list::iterator l_end = thread_llx_results_[thread_id].end();
+    // Find LLX result of r in thread-local LLX results:
     for (; l_it != l_end && l_it->data_record != *it; ++l_it);
     if (l_it == l_end) {
       // Missing LLX result for given linked data record, user did not
@@ -246,9 +155,9 @@ bool LlxScx<UserData>::TryStoreConditional(
       EMBB_THROW(embb::base::ErrorException,
         "Missing preceding LLX on a data record used for SCX");
     }
-    // ... copy of r's info value in this threads local table of LLX results
+    // Copy of r's info value in this threads local table of LLX results
     ScxRecord_t scx_op(*(l_it->data_record->ScxInfo().Load()));
-    info_fields_[thread_id].PushBack(scx_op);
+    info_fields->PushBack(scx_op);
   }
   // Announce SCX operation. Lists linked_deps and finalize_dep are 
   // guaranteed to remain on the stack until this announced operation
@@ -263,27 +172,27 @@ bool LlxScx<UserData>::TryStoreConditional(
     // old value:
     reinterpret_cast<cas_t>(field->Load()),
     // linked SCX operations:
-    &info_fields_[thread_id],
+    info_fields,
     // initial operation state:
     OperationState::InProgress);
   return scx.Help();
 }
 
-template< class UserData >
-bool LlxScx<UserData>::TryValidateLink(
+template< typename UserData, typename ValuePool >
+bool LlxScx<UserData, ValuePool>::TryValidateLink(
   const DataRecord_t & field) {
   return true; // @TODO
 }
 
 // LlxScxRecord
 
-template< class UserData >
+template< typename UserData >
 LlxScxRecord<UserData>::LlxScxRecord()
 : marked_for_finalize_(false) {
   scx_op_.Store(&dummy_scx);
 }
 
-template< class UserData >
+template< typename UserData >
 LlxScxRecord<UserData>::LlxScxRecord(
   const UserData & user_data)
 : user_data_(user_data),
@@ -293,24 +202,26 @@ LlxScxRecord<UserData>::LlxScxRecord(
 
 // internal::ScxRecord
 
-template< class DataRecord >
+template< typename DataRecord >
 bool internal::ScxRecord<DataRecord>::Help() {
   // We ensure that an SCX S does not change a data record 
   // while it is frozen for another SCX S'. Instead, S uses 
   // the information in the SCX record of S' to help S'
   // complete, so that the data record can be unfrozen.
   typedef embb::containers::internal::FixedSizeList<DataRecord *> dr_list_t;
+  typedef embb::containers::internal::FixedSizeList<self_t> op_list_t;
   // Freeze all data records in data_records to protect their 
   // mutable fields from being changed by other SCXs:
   dr_list_t::iterator linked_it  = linked_data_records_->begin();
   dr_list_t::iterator linked_end = linked_data_records_->end();
-  for (unsigned int fieldIdx = 0;
-       linked_it != linked_end;
-       ++linked_it, ++fieldIdx) {
+  op_list_t::iterator scx_op_it  = scx_ops_->begin();
+  op_list_t::iterator scx_op_end = scx_ops_->end();
+  for (; linked_it != linked_end && scx_op_it != scx_op_end;
+       ++linked_it, ++scx_op_it) {
     DataRecord * r = *linked_it;
     // pointer indexed by r in this->info_fields:
-    ScxRecord<DataRecord> * rinfo = &info_fields_[fieldIdx];
-    if (!r->ScxInfo().CompareAndSwap(rinfo, this)) {
+    ScxRecord<DataRecord> * rinfo_exp = &(*scx_op_it);
+    if (!r->ScxInfo().CompareAndSwap(rinfo_exp, this)) {
       if (r->ScxInfo().Load() != this) {
         // could not freeze r because it is frozen for 
         // another SCX:
@@ -331,10 +242,8 @@ bool internal::ScxRecord<DataRecord>::Help() {
   // mark step:
   dr_list_t::iterator finalize_it  = finalize_data_records_->begin();
   dr_list_t::iterator finalize_end = finalize_data_records_->end();
-  for (unsigned int field_idx = finalize_range_.first;
-       finalize_it != finalize_end;
-       ++finalize_it, ++fieldRangeIdx) {
-    linked_data_records_[fieldRangeIdx]->MarkForFinalize();
+  for (; finalize_it != finalize_end; ++finalize_it) {
+    (*finalize_it)->MarkForFinalize();
   }
   // update CAS:
   cas_t expected_old_value = old_value_;
@@ -346,6 +255,11 @@ bool internal::ScxRecord<DataRecord>::Help() {
   state_ = Comitted;
   return true;
 }
+
+template< typename UserData >
+internal::ScxRecord< LlxScxRecord<UserData> > 
+  LlxScxRecord<UserData>::dummy_scx = 
+    internal::ScxRecord< LlxScxRecord<UserData> >();
 
 } // namespace primitives
 } // namespace containers

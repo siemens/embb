@@ -30,6 +30,8 @@
 #include <embb/base/thread.h>
 #include <embb/base/atomic.h>
 #include <embb/base/thread_specific_storage.h>
+#include <embb/containers/object_pool.h>
+#include <embb/containers/lock_free_tree_value_pool.h>
 #include <embb/containers/internal/fixed_size_list.h>
 
 namespace embb { 
@@ -42,7 +44,7 @@ namespace internal {
  * SCX operation description. An SCX record contains all information
  * required to allow any process to complete a pending SCX operation.
  */
-template< class DataRecord >
+template< typename DataRecord >
 class ScxRecord {
  
  private:
@@ -66,11 +68,11 @@ class ScxRecord {
    */
   ScxRecord()
   : linked_data_records_(0),
-    finalize_data_records_(0)
+    finalize_data_records_(0),
     new_value_(0),
     old_value_(0),
     scx_ops_(0),
-    state_(OperationState::Undefined),
+    state_(OperationState::Comitted),
     all_frozen_(false) {
     field_ = 0;
   }
@@ -84,7 +86,7 @@ class ScxRecord {
     embb::base::Atomic<cas_t> * field,
     cas_t new_value,
     cas_t old_value,
-    embb::containers::internal::FixedSizeList<self_t *> * scx_ops,
+    embb::containers::internal::FixedSizeList<self_t> * scx_ops,
     OperationState operation_state)
   : linked_data_records_(&linked_data_records),
     finalize_data_records_(&finalize_data_records),
@@ -143,7 +145,7 @@ class ScxRecord {
    * List of SCX operation descriptions associated with data records
    * linked with this SCX operation.
    */
-  embb::containers::internal::FixedSizeList<self_t *> scx_ops_;
+  embb::containers::internal::FixedSizeList<self_t> * scx_ops_;
 
   /**
    * Current state of this SCX record.
@@ -165,7 +167,7 @@ class ScxRecord {
  * Wraps user-defined data with fields required for LLX/SCX algorithm.
  * Mutable fields must each be contained in a single word.
  */
-template< class UserData >
+template< typename UserData >
 class LlxScxRecord {
 
  private:
@@ -203,9 +205,12 @@ class LlxScxRecord {
    * Assignment operator.
    */
   LlxScxRecord & operator=(const LlxScxRecord & rhs) {
-    user_data_ = rhs.user_data_;
-    scx_op_.Store(rhs.scx_info_.Load());
-    marked_for_finalize_ = rhs.marked_for_finalize_;
+    if (this != &rhs) {
+      user_data_ = rhs.user_data_;
+      scx_op_.Store(rhs.scx_op_.Load());
+      marked_for_finalize_ = rhs.marked_for_finalize_;
+    }
+    return *this;
   }
 
   /**
@@ -299,10 +304,13 @@ class LlxScxRecord {
  * "Pragmatic Primitives for Non-blocking Data Structures" 
  * (Brown et al., 2013).
  *
- * \tparam MaxLinks Maximum number of active LL-dependencies per thread
  * \tparam UserData Type containing mutable fields
+ * \tparam ValuePool Type containing mutable fields
  */
-template< class UserData >
+template<
+  typename UserData,
+  typename ValuePool = embb::containers::LockFreeTreeValuePool< bool, false >
+>
 class LlxScx {
 
  private:  
@@ -335,8 +343,7 @@ class LlxScx {
     DataRecord_t * const data_record,
     /**< [IN] Pointer to data record to load */
     DataRecord_t & data,
-    /**< [OUT] Atomic snapshot of \c NumMutableFields fields in data
-               record at given index */
+    /**< [OUT] Atomic snapshot of data record */
     bool & finalized
     /**< [OUT] Indicating whether requested fields have been finalized */
   );
@@ -393,6 +400,11 @@ class LlxScx {
   size_t max_links_;
 
   /**
+   * Maximum number of threads engaging in operations on this LLX/SCX instance.
+   */
+  unsigned int max_threads_;
+
+  /**
    * Shared table containing for each r in V, a copy of r's info 
    * value in this thread's local table of LLX results.
    * 
@@ -402,23 +414,38 @@ class LlxScx {
    *    r_i in V -> *ScxRecord(thread_llx_results_[r_i].data_record.ScxInfo())
    *  }
    */
-  embb::containers::internal::FixedSizeList<ScxRecord_t> * info_fields_;
+// embb::containers::internal::FixedSizeList<ScxRecord_t> * info_fields_;
+
+  /**
+   * Shared table containing for each r in V, a copy of r's info 
+   * value in this thread's local table of LLX results.
+   *
+   *   thread_id -> {
+   *     r_1 in V -> *ScxRecord(thread_llx_results_[r_1].data_record.ScxInfo()),
+   *     ...
+   *     r_i in V -> *ScxRecord(thread_llx_results_[r_i].data_record.ScxInfo())
+   *   }
+   */
+  embb::containers::ObjectPool<
+    embb::containers::internal::FixedSizeList<ScxRecord_t>, ValuePool >
+      scx_record_list_pool_;
 
   /**
    * Thread-specific list of LLX results performed by the thread.
    */
-  embb::base::ThreadSpecificStorage<
-    embb::containers::internal::FixedSizeList<LlxResult> >
-      thread_llx_results_;
+  embb::containers::internal::FixedSizeList<LlxResult> *
+    thread_llx_results_;
 
   /**
    * Prevent default construction.
    */
   LlxScx();
+
   /**
    * Prevent copy construction.
    */
   LlxScx(const LlxScx &);
+
   /**
    * Prevent assignment.
    */

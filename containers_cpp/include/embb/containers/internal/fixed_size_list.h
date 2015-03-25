@@ -75,7 +75,7 @@ class FixedSizeList {
     size_t capacity
     /**< [IN] Capacity of the list */
   );
-    
+
   /**
    * Copy constructor.
    */

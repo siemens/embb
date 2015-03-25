@@ -66,10 +66,19 @@ class LlxScxTest : public partest::TestCase {
       next_.Store(next_node);
     }
 
+    Node(const Node & other)
+    : value_(other.value_) {
+      next_.Store(other.next_.Load());
+      count_.Store(other.count_.Load());
+    }
+
     Node & operator=(const Node & rhs) {
-      count_.Store(rhs.count_.Load());
-      next_.Store(rhs.next_.Load());
-      value_ = rhs.value_;
+      if (this != &rhs) {
+        count_.Store(rhs.count_.Load());
+        next_.Store(rhs.next_.Load());
+        value_ = rhs.value_;
+      }
+      return *this;
     }
   };
 
