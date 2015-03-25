@@ -84,7 +84,7 @@ void RunMTAPI_C_OpenCL() {
 
   for (int ii = 0; ii < kElements; ii++) {
     if (results[ii] != ii * 2 + 1) {
-      printf("result %d was expected to be %d but was %d.\n",
+      printf("result %d was expected to be %d but was %f.\n",
         ii, ii * 2 + 1, results[ii]);
       exit(MTAPI_ERR_UNKNOWN);
     }
