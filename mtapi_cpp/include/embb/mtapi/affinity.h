@@ -81,6 +81,8 @@ public:
    * Initializes an Affinity object with the given initial affinity.
    * If \c initial_affinity is \c true the Affinity will map to all worker
    * threads, otherwise it will map to no worker threads.
+   *
+   * \notthreadsafe
    */
   void Init(
     bool initial_affinity              /**< The initial affinity to set. */
@@ -93,6 +95,8 @@ public:
 
   /**
    * Sets affinity to the given worker.
+   *
+   * \notthreadsafe
    */
   void Set(
     mtapi_uint_t worker,               /**< The worker to set affinity to. */
@@ -108,6 +112,7 @@ public:
    * Gets affinity to the given worker.
    *
    * \returns \c true, if the Affinity maps to the worker, \c false otherwise.
+   * \waitfree
    */
   bool Get(
     mtapi_uint_t worker                /**< The worker to get affinity of. */
@@ -124,6 +129,7 @@ public:
    * Allows for interoperability with the C interface.
    *
    * \returns The internal mtapi_affinity_t.
+   * \waitfree
    */
   mtapi_affinity_t GetInternal() const {
     return affinity_;

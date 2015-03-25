@@ -129,6 +129,7 @@ class TaskContext {
    * Allows for interoperability with the C interface.
    *
    * \returns A pointer to a mtapi_task_context_t.
+   * \notthreadsafe
    */
   mtapi_task_context_t * GetInternal() const {
     return context_;

@@ -116,6 +116,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -135,6 +136,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -153,6 +155,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -171,6 +174,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -188,6 +192,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -206,6 +211,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -223,6 +229,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -240,6 +247,7 @@ class Queue {
    * Enqueues a new Task.
    *
    * \returns The handle to the enqueued Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Enqueue(
@@ -257,6 +265,7 @@ class Queue {
    * Allows for interoperability with the C interface.
    *
    * \returns The internal mtapi_queue_hndl_t.
+   * \waitfree
    */
   mtapi_queue_hndl_t GetInternal() const {
     return handle_;

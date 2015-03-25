@@ -54,6 +54,7 @@ public:
    * Allows for interoperability with the C interface.
    *
    * \returns A reference to the internal mtapi_group_attributes_t structure.
+   * \waitfree
    */
   mtapi_group_attributes_t const & GetInternal() const {
     return attributes_;

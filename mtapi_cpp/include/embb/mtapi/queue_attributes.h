@@ -54,6 +54,7 @@ public:
    * This determines whether the object will be visible across nodes.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   QueueAttributes & SetGlobal(
     bool state                         /**< The state to set. */
@@ -71,6 +72,7 @@ public:
    * If set to \c true, tasks enqueued will be executed in order.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   QueueAttributes & SetOrdered(
     bool state                         /**< The state to set. */
@@ -89,6 +91,7 @@ public:
    * Otherwise the will be canceled.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   QueueAttributes & SetRetain(
     bool state                         /**< The state to set. */
@@ -106,6 +109,7 @@ public:
    * This determines whether the object will be visible across domains.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   QueueAttributes & SetDomainShared(
     bool state                         /**< The state to set. */
@@ -123,6 +127,7 @@ public:
    * The priority influences the order in which tasks are chosen for execution.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   QueueAttributes & SetPriority(
     mtapi_uint_t priority              /**< The priority to set. */
@@ -138,6 +143,7 @@ public:
    * Sets the limit (capacity) of a Queue.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   QueueAttributes & SetLimit(
     mtapi_uint_t limit                 /**< The limit to set. */
@@ -154,6 +160,7 @@ public:
    * Allows for interoperability with the C interface.
    *
    * \returns A reference to the internal mtapi_queue_attributes_t structure.
+   * \waitfree
    */
   mtapi_queue_attributes_t const & GetInternal() const {
     return attributes_;

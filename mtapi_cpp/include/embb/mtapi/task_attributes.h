@@ -55,6 +55,7 @@ public:
    * waited for.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   TaskAttributes & SetDetached(
     bool state                         /**< The state to set. */
@@ -72,6 +73,7 @@ public:
    * The priority influences the order in which tasks are chosen for execution.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   TaskAttributes & SetPriority(
     mtapi_uint_t priority              /**< The priority to set. */
@@ -90,6 +92,7 @@ public:
    * the TaskContext.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   TaskAttributes & SetInstances(
     mtapi_uint_t instances             /**< Number of instances to set. */
@@ -106,6 +109,7 @@ public:
    * Allows for interoperability with the C interface.
    *
    * \returns A reference to the internal mtapi_task_attributes_t structure.
+   * \waitfree
    */
   mtapi_task_attributes_t const & GetInternal() const {
     return attributes_;

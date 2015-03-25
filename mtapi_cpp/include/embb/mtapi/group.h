@@ -102,6 +102,7 @@ class Group {
    * Starts a new Task in this Group.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(
@@ -122,6 +123,7 @@ class Group {
    * Starts a new Task in this Group.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(
@@ -141,6 +143,7 @@ class Group {
    * Starts a new Task in this Group.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(
@@ -160,6 +163,7 @@ class Group {
    * Starts a new Task in this Group.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(
@@ -260,6 +264,7 @@ class Group {
    * Allows for interoperability with the C interface.
    *
    * \returns The internal mtapi_group_hndl_t.
+   * \waitfree
    */
   mtapi_group_hndl_t GetInternal() const {
     return handle_;

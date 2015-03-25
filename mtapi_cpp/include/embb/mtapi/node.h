@@ -166,6 +166,7 @@ class Node {
    * Starts a new Task.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(
@@ -186,6 +187,7 @@ class Node {
    * Starts a new Task.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(
@@ -205,6 +207,7 @@ class Node {
    * Starts a new Task.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(
@@ -224,6 +227,7 @@ class Node {
    * Starts a new Task.
    *
    * \returns The handle to the started Task.
+   * \threadsafe
    */
   template <typename ARGS, typename RES>
   Task Start(

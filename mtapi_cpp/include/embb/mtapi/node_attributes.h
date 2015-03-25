@@ -74,6 +74,7 @@ public:
    * worker threads.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetCoreAffinity(
     embb::base::CoreSet const & cores  /**< The cores to use. */
@@ -89,6 +90,7 @@ public:
    * Sets the maximum number of concurrently active tasks.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetMaxTasks(
     mtapi_uint_t value                 /**< The value to set. */
@@ -104,6 +106,7 @@ public:
    * Sets the maximum number of actions.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetMaxActions(
     mtapi_uint_t value                 /**< The value to set. */
@@ -119,6 +122,7 @@ public:
    * Sets the maximum number of groups.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetMaxGroups(
     mtapi_uint_t value                 /**< The value to set. */
@@ -134,6 +138,7 @@ public:
    * Sets the maximum number of queues.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetMaxQueues(
     mtapi_uint_t value                 /**< The value to set. */
@@ -149,6 +154,7 @@ public:
    * Sets the default limit (capacity) of all queues.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetQueueLimit(
     mtapi_uint_t value                 /**< The value to set. */
@@ -164,6 +170,7 @@ public:
    * Sets the maximum number of available jobs.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetMaxJobs(
     mtapi_uint_t value                 /**< The value to set. */
@@ -179,6 +186,7 @@ public:
    * Sets the maximum number of actions per job.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetMaxActionsPerJob(
     mtapi_uint_t value                 /**< The value to set. */
@@ -195,6 +203,7 @@ public:
    * will range from 0 to \c value - 1 with 0 being the highest priority.
    *
    * \returns Reference to this object.
+   * \notthreadsafe
    */
   NodeAttributes & SetMaxPriorities(
     mtapi_uint_t value                 /**< The value to set. */
@@ -211,6 +220,7 @@ public:
    * Allows for interoperability with the C interface.
    *
    * \returns A reference to the internal mtapi_node_attributes_t structure.
+   * \waitfree
    */
   mtapi_node_attributes_t const & GetInternal() const {
     return attributes_;

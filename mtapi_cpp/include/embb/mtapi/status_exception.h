@@ -52,6 +52,7 @@ class StatusException : public embb::base::Exception {
 
   /**
    * Returns the code of the exception.
+   * \waitfree
    */
   virtual int Code() const { return EMBB_ERROR; }
 };

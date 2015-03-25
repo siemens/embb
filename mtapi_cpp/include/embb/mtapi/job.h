@@ -85,6 +85,7 @@ public:
    * Allows for interoperability with the C interface.
    *
    * \returns The internal mtapi_job_hndl_t.
+   * \waitfree
    */
   mtapi_job_hndl_t GetInternal() const {
     return handle_;

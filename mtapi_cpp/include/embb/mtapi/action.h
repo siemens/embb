@@ -105,6 +105,7 @@ class Action {
    * Allows for interoperability with the C interface.
    *
    * \returns The internal mtapi_action_hndl_t.
+   * \waitfree
    */
   mtapi_action_hndl_t GetInternal() const {
     return handle_;
