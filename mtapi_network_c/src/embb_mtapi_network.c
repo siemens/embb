@@ -81,6 +81,9 @@ struct embb_mtapi_network_plugin_struct {
   int socket_count;
   embb_atomic_int run;
   mtapi_size_t buffer_size;
+
+  embb_mutex_t send_mutex;
+  embb_mtapi_network_buffer_t send_buffer;
 };
 
 typedef struct embb_mtapi_network_plugin_struct embb_mtapi_network_plugin_t;
@@ -132,40 +135,41 @@ static void embb_mtapi_network_task_complete(
         embb_mtapi_network_plugin_t * plugin = &embb_mtapi_network_plugin;
         embb_mtapi_network_task_t * network_task =
           (embb_mtapi_network_task_t*)local_task->attributes.user_data;
-        embb_mtapi_network_buffer_t send_buf;
+        embb_mtapi_network_buffer_t * send_buf = &plugin->send_buffer;
 
-        // init buffer for sending
-        embb_mtapi_network_buffer_initialize(&send_buf, plugin->buffer_size);
+        // serialize sending of results
+        embb_mutex_lock(&plugin->send_mutex);
+        embb_mtapi_network_buffer_clear(send_buf);
 
         // operation is "return result"
         err = embb_mtapi_network_buffer_push_back_int8(
-          &send_buf, EMBB_MTAPI_NETWORK_RETURN_RESULT);
+          send_buf, EMBB_MTAPI_NETWORK_RETURN_RESULT);
         assert(err == 1);
         // remote task id
         err = embb_mtapi_network_buffer_push_back_int32(
-          &send_buf, network_task->remote_task_id);
+          send_buf, network_task->remote_task_id);
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_int32(
-          &send_buf, network_task->remote_task_tag);
+          send_buf, network_task->remote_task_tag);
         assert(err == 4);
         // status
         err = embb_mtapi_network_buffer_push_back_int32(
-          &send_buf, local_task->error_code);
+          send_buf, local_task->error_code);
         assert(err == 4);
         // result size
         err = embb_mtapi_network_buffer_push_back_int32(
-          &send_buf, local_task->result_size);
+          send_buf, local_task->result_size);
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_rawdata(
-          &send_buf, local_task->result_size, local_task->result_buffer);
+          send_buf, local_task->result_size, local_task->result_buffer);
         assert(err == (int)local_task->result_size);
 
         err = embb_mtapi_network_socket_sendbuffer(
-          &network_task->socket, &send_buf);
-        assert(err == send_buf.size);
+          &network_task->socket, send_buf);
+        assert(err == send_buf->size);
 
-        // sending done, free the buffer
-        embb_mtapi_network_buffer_finalize(&send_buf);
+        // sending done
+        embb_mutex_unlock(&plugin->send_mutex);
 
         // we allocated arguments and results on receive, so free them here
         embb_free((void*)local_task->arguments);
@@ -416,6 +420,10 @@ void mtapi_network_plugin_initialize(
     plugin->sockets = (embb_mtapi_network_socket_t*)embb_alloc(
       sizeof(embb_mtapi_network_socket_t) * (1 + max_connections * 2));
 
+    embb_mtapi_network_buffer_initialize(
+      &plugin->send_buffer, plugin->buffer_size);
+    embb_mutex_init(&plugin->send_mutex, 0);
+
     if (NULL != plugin->sockets) {
       err = embb_mtapi_network_socket_initialize(&plugin->sockets[0]);
       if (err) {
@@ -443,6 +451,9 @@ void mtapi_network_plugin_finalize(
 
   embb_atomic_store_int(&plugin->run, 0);
   embb_thread_join(&plugin->thread, &err);
+
+  embb_mutex_destroy(&plugin->send_mutex);
+  embb_mtapi_network_buffer_finalize(&plugin->send_buffer);
 
   embb_mtapi_network_socket_finalize(&plugin->sockets[0]);
   embb_free(plugin->sockets);
