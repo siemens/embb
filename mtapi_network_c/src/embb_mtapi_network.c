@@ -117,6 +117,7 @@ static void embb_mtapi_network_task_complete(
   MTAPI_OUT mtapi_status_t* status) {
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
   int err;
+  EMBB_UNUSED_IN_RELEASE(err);
 
   if (embb_mtapi_node_is_initialized()) {
     embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
@@ -467,6 +468,7 @@ static void network_task_start(
   MTAPI_OUT mtapi_status_t* status) {
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
   int err;
+  EMBB_UNUSED_IN_RELEASE(err);
 
   if (embb_mtapi_node_is_initialized()) {
     embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
