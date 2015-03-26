@@ -38,8 +38,23 @@ using embb::containers::primitives::LlxScx;
 
 LlxScxTest::LlxScxTest() :
   num_threads_(
-    static_cast<int>(partest::TestSuite::GetDefaultNumThreads())) {
+    static_cast<int>(partest::TestSuite::GetDefaultNumThreads())),
+  llxscx_(3),
+  tail(0, '-'),
+  head(0, '-', Node::node_ptr_t(&tail)) {
   CreateUnit("SerialTest").Add(&LlxScxTest::SerialTest, this);
+  CreateUnit("ParallelTest").Add(&LlxScxTest::ParallelTest, this);
+}
+
+void LlxScxTest::ParallelTest() {
+  typedef LlxScxTest::Node Node;
+
+  unsigned int thread_index;
+  int return_val = embb_internal_thread_index(&thread_index);
+  if (return_val != EMBB_SUCCESS)
+    EMBB_THROW(embb::base::ErrorException, "Could not get thread id!");
+  
+  // Threads try to append n nodes to a linked list in parallel
 }
 
 void LlxScxTest::SerialTest() {
@@ -66,10 +81,13 @@ void LlxScxTest::SerialTest() {
   bool finalized;
   PT_ASSERT(llxscx.TryLoadLinked(&dr1, l1, finalized));
   PT_ASSERT(!finalized);
+  PT_ASSERT_EQ(l1->value_, dr1->value_);
   PT_ASSERT(llxscx.TryLoadLinked(&dr2, l2, finalized));
   PT_ASSERT(!finalized);
+  PT_ASSERT_EQ(l2->value_, dr2->value_);
   PT_ASSERT(llxscx.TryLoadLinked(&dr3, l3, finalized));
   PT_ASSERT(!finalized);
+  PT_ASSERT_EQ(l3->value_, dr3->value_);
 
   FixedSizeList< LlxScxRecord<Node> * >
     linked_deps(3);

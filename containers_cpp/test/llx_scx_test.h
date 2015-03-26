@@ -40,12 +40,11 @@ class LlxScxTest : public partest::TestCase {
   class Node {
    public:
     typedef primitives::LlxScxRecord<Node> * node_ptr_t;
-   private:    
-    char value_;
-
+   
    public:
     embb::base::Atomic<primitives::LlxScxRecord<Node> *> next_;
     embb::base::Atomic<int> count_;
+    char value_;
 
    public:
     Node()
@@ -90,9 +89,12 @@ class LlxScxTest : public partest::TestCase {
 
  private:
   void SerialTest();
+  void ParallelTest();
 
   int num_threads_;
-
+  LlxScx<Node> llxscx_;
+  Node tail;
+  Node head;
 };
 
 } // namespace test
