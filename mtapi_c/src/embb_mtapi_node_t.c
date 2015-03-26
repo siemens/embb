@@ -131,6 +131,11 @@ void mtapi_initialize(
 
           /* initialization succeeded, tell workers to start working */
           embb_atomic_store_int(&node->is_scheduler_running, MTAPI_TRUE);
+
+          if (MTAPI_SUCCESS != local_status) {
+            mtapi_finalize(MTAPI_NULL);
+            local_status = MTAPI_ERR_NODE_INITFAILED;
+          }
         } else {
           mtapi_finalize(MTAPI_NULL);
           local_status = MTAPI_ERR_NODE_INITFAILED;

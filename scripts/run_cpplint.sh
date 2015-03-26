@@ -79,7 +79,7 @@ retval=0
 
 ##Excluded files
 RAND_FILES=( embb_mtapi_test_group.cc embb_mtapi_test_queue.cc embb_mtapi_test_task.cc queue_test-inl.h )
-for project in base_c mtapi_c base_cpp mtapi_cpp tasks_cpp algorithms_cpp containers_cpp dataflow_cpp
+for project in base_c mtapi_c mtapi_network_c mtapi_opencl_c base_cpp mtapi_cpp tasks_cpp algorithms_cpp containers_cpp dataflow_cpp
 do
   echo "-> Doing project: $project"
   dir=$d/$project
@@ -88,7 +88,7 @@ do
     echo
     usage
   fi
-  for file in `find $dir -name "*.cc" -o -name "*.h" -o -name "*inl.h" -o -name "*.c"`
+  for file in `find $dir \( -name "*.cc" -o -name "*.h" -o -name "*inl.h" -o -name "*.c" \) -and -not -path "*/src/CL/*"`
   do
     echo "--> Run cpplint on file $file"
     current_rules=$EXCLUDED_RULES

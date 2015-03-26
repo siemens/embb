@@ -202,3 +202,126 @@ Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task
 The registered action will be unregistered when it goes out of scope.
 The runtime needs to be shut down by calling:
 \\\inputlisting{../examples/mtapi/mtapi_cpp_finalize-snippet.h}
+
+\section{Plugins}
+
+The \embb implementation of MTAPI provides an extension to allow for custom actions that are not executed by the scheduler for software actions as detailed in the previous sections.
+Two plugins are delivered with \embb, one for supporting distributed systems through TCP/IP networking and the other to allow for transparently using OpenCL accelerators.
+
+\subsection{Plugin API}
+
+The plugin API consists of a single function named \lstinline|mtapi_ext_plugin_action_create()| contained in the mtapi\_ext.h header file. It is used to associate the plugin action with a specific job ID:
+\begin{lstlisting}
+mtapi_action_hndl_t mtapi_ext_plugin_action_create(
+  MTAPI_IN mtapi_job_id_t job_id,
+  MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
+  MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
+  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
+  MTAPI_IN void* plugin_data,
+  MTAPI_IN void* node_local_data,
+  MTAPI_IN mtapi_size_t node_local_data_size,
+  MTAPI_IN mtapi_action_attributes_t* attributes,
+  MTAPI_OUT mtapi_status_t* status
+);
+\end{lstlisting}
+The plugin action is implemented through 3 callbacks, task start, task cancel and action finalize.
+
+\lstinline|task_start_function| is called when the user requests execution of the plugin action by calling \lstinline|mtapi_task_start()| or \lstinline|mtapi_task_enqueue()|. To those functions the fact that they operate on a plugin action is transparent, they only require the job handle of the job the action was registered with.
+
+\lstinline|task_cancel_function| is called when the user requests cancelation of a tasks by calling \lstinline|mtapi_task_cancel()| or by calling \lstinline|mtapi_queue_disable()| on a non-retaining queue.
+
+\lstinline|action_finalize_function| is called when the node is finalized and the action is deleted, or when the user explicitly deletes the action by calling \lstinline|mtapi_action_delete()|.
+
+For illustration our example plugin will provide a no-op action. The task start callback in that case looks like this:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_start_cb-snippet.h}
+%
+The scheduling operation is responsible for bringing the task to execution, this might involve instructing some hardware to execute the task or pushing the task into a queue for execution by a separate worker thread. Here however, the task is executed directly:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_schedule-snippet.h}
+%
+Since the task gets executed right away, it cannot be canceled and the task cancel callback implementation is empty:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_cancel_cb-snippet.h}
+%
+The plugin action did not acquire any resources so the action finalize callback is empty as well:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_action_finalize_cb-snippet.h}
+%
+
+Now that the callbacks are in place, the action can be registered with a job after the node was initialized using \lstinline|mtapi_initialize()|:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_action_create-snippet.h}
+%
+The job handle can now be obtained the normal MTAPI way. The fact that there is a plugin working behind the scenes is transparent by now:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_get_job-snippet.h}
+%
+Using the job handle tasks can be started like normal MTAPI tasks:
+%
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_start-snippet.h}
+%
+This call will lead to the invocation of then \lstinline|plugin_task_start| callback function, where the plugin implementor is responsible for bringing the task to execution.
+
+\subsection{Network}
+
+The MTAPI network plugin provides a means to distribute tasks over a TCP/IP network. As an example the following vector addition action is used:
+%
+\\\inputlisting{../examples/mtapi/mtapi_network_c_action_function-snippet.h}
+%
+It adds two float vectors and a float from node local data and writes the result into the result float vector. In the example code the vectors will hold \lstinline|kElements| floats each.
+
+To use the network plugin, its header file needs to be included first:
+%
+\\\inputlisting{../examples/mtapi/mtapi_network_c_header-snippet.h}
+%
+After initializing the node using \lstinline|mtapi_initialize()|, the plugin itself needs to be initialized:
+%
+\\\inputlisting{../examples/mtapi/mtapi_network_c_plugin_initialize-snippet.h}
+%
+This will set up a listening socket on the localhost interface (127.0.0.1) at port 12345. The socket will allow a maximum of 5 connections and have a maximum transfer buffer size of \lstinline|kElements * 4 * 3 + 32|. This buffer size needs to be big enough to fit at least the argument and result buffer sizes at once. The example uses 3 vectors of \lstinline|kElements| floats using \lstinline|kElements * sizeof(float) * 3| bytes.
+
+Since the example connects to itself on localhost, the "remote" action needs to be registered with the \lstinline|NETWORK_REMOTE_JOB|:
+%
+\\\inputlisting{../examples/mtapi/mtapi_network_c_remote_action_create-snippet.h}
+%
+After that, the local network action is created, that maps \lstinline|NETWORK_LOCAL_JOB| to \lstinline|NETWORK_REMOTE_JOB| through the network:
+%
+\\\inputlisting{../examples/mtapi/mtapi_network_c_local_action_create-snippet.h}
+%
+Now, \lstinline|NETWORK_LOCAL_JOB| can be used to execute tasks by simply calling \lstinline|mtapi_task_start()|. Their parameters will be transmitted through a socket connection and are consumed by the network plugin worker thread. The thread will start a task using the \lstinline|NETWORK_REMOTE_JOB|. When this task is finished, the results will be collected and sent back through the network. Again the network plugin thread will receive the results, provide them to the \lstinline|NETWORK_LOCAL_JOB| task and mark that task as finished.
+
+When all work is done, the plugin needs to be finalized. This will stop the plugin worker thread and close the sockets:
+%
+\\\inputlisting{../examples/mtapi/mtapi_network_c_plugin_finalize-snippet.h}
+%
+Then the node may be finalized by calling \lstinline|mtapi_finalize()|.
+
+\subsection{OpenCL}
+
+The MTAPI OpenCL plugin allows the user to incorporate the computational power of an OpenCL accelerator, if one is available in the system.
+
+The vector addition example from the network plugin is used again. However, the action function is an OpenCL kernel now:
+%
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_kernel-snippet.h}
+%
+The OpenCL plugin header file needs to be included first:
+%
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_header-snippet.h}
+%
+As with the network plugin, the OpenCL plugin needs to be initialized after the node has been initialized:
+%
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_plugin_initialize-snippet.h}
+%
+Then the plugin action can be registered with the \lstinline|OPENCL_JOB|:
+%
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_action_create-snippet.h}
+%
+The kernel source and the name of the kernel to use (AddVector) need to be specified while creating the action. The kernel will be compiled using the OpenCL runtime and the provided node local data transferred to accelerator memory. The local work size is the number of threads that will share OpenCL local memory, in this case 32. The element size instructs the OpenCL plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The OpenCL plugin will launch \lstinline|result_buffer_size/element_size| OpenCL threads to calculate the result.
+
+Now the \lstinline|OPENCL_JOB| can be used like a normal MTAPI job to start tasks.
+
+After all work is done, the plugin needs to be finalized. This will free all memory on the accelerator and delete the corresponding OpenCL context:
+%
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_plugin_finalize-snippet.h}
+%

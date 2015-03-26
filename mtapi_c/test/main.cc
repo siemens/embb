@@ -31,6 +31,7 @@
 
 #include <embb_mtapi_log.h>
 
+#include <embb_mtapi_test_plugin.h>
 #include <embb_mtapi_test_init_finalize.h>
 #include <embb_mtapi_test_task.h>
 #include <embb_mtapi_test_group.h>
@@ -42,6 +43,7 @@ PT_MAIN("MTAPI C") {
   embb_thread_set_max_count(1024);
 
   PT_RUN(TaskTest);
+  PT_RUN(PluginTest);
   PT_RUN(ErrorTest);
   PT_RUN(InitFinalizeTest);
   PT_RUN(GroupTest);

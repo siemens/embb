@@ -218,11 +218,11 @@ void TaskTest::TestBasic() {
   mtapi_taskattr_init(&task_attr, &status);
   MTAPI_CHECK_STATUS(status);
 
-  const int kTaskInstances = 5;
+  const mtapi_uint_t kTaskInstances = 5;
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_taskattr_set(&task_attr, MTAPI_TASK_INSTANCES,
-    MTAPI_ATTRIBUTE_VALUE(kTaskInstances), MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
+    &kTaskInstances, sizeof(mtapi_uint_t),
     &status);
   MTAPI_CHECK_STATUS(status);
 

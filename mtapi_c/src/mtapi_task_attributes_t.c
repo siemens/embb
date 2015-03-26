@@ -25,6 +25,7 @@
  */
 
 #include <assert.h>
+#include <string.h>
 
 #include <embb/mtapi/c/mtapi.h>
 
@@ -46,6 +47,7 @@ void mtapi_taskattr_init(
     attributes->num_instances = 1;
     attributes->is_detached = MTAPI_FALSE;
     attributes->priority = 0;
+    attributes->complete_func = MTAPI_NULL;
     mtapi_affinity_init(&attributes->affinity, MTAPI_TRUE, &local_status);
   } else {
     local_status = MTAPI_ERR_PARAMETER;
@@ -88,6 +90,16 @@ void mtapi_taskattr_set(
       case MTAPI_TASK_AFFINITY:
         local_status = embb_mtapi_attr_set_mtapi_affinity_t(
           &attributes->affinity, attribute, attribute_size);
+        break;
+
+      case MTAPI_TASK_USER_DATA:
+        attributes->user_data = (void*)attribute;
+        local_status = MTAPI_SUCCESS;
+        break;
+
+      case MTAPI_TASK_COMPLETE_FUNCTION:
+        memcpy(&attributes->complete_func, &attribute, sizeof(void*));
+        local_status = MTAPI_SUCCESS;
         break;
 
       default:

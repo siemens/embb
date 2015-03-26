@@ -227,9 +227,23 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
           task->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
         }
 
-        /* load balancing is unsupported right now,
-           so always choose action 0 */
+        /* load balancing: choose action with minimum tasks */
         action_index = 0;
+        for (mtapi_uint_t ii = 0; ii < local_job->num_actions; ii++) {
+          if (embb_mtapi_action_pool_is_handle_valid(
+            node->action_pool, local_job->actions[ii])) {
+            embb_mtapi_action_t * act_m =
+              embb_mtapi_action_pool_get_storage_for_handle(
+              node->action_pool, local_job->actions[action_index]);
+            embb_mtapi_action_t * act_i =
+              embb_mtapi_action_pool_get_storage_for_handle(
+              node->action_pool, local_job->actions[ii]);
+            if (embb_atomic_load_int(&act_m->num_tasks) >
+              embb_atomic_load_int(&act_i->num_tasks)) {
+              action_index = ii;
+            }
+          }
+        }
         if (embb_mtapi_action_pool_is_handle_valid(
           node->action_pool, local_job->actions[action_index])) {
           task->action = local_job->actions[action_index];
@@ -248,14 +262,28 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
         if (MTAPI_SUCCESS == local_status) {
           embb_mtapi_scheduler_t * scheduler = node->scheduler;
           mtapi_boolean_t was_scheduled;
+          embb_mtapi_action_t * local_action =
+            embb_mtapi_action_pool_get_storage_for_handle(
+              node->action_pool, task->action);
 
           embb_mtapi_task_set_state(task, MTAPI_TASK_SCHEDULED);
 
-          was_scheduled = MTAPI_TRUE;
+          if (local_action->is_plugin_action) {
+            /* schedule plugin task */
+            mtapi_status_t plugin_status = MTAPI_ERR_UNKNOWN;
+            local_action->plugin_task_start_function(
+              task_hndl, &plugin_status);
+            was_scheduled = (MTAPI_SUCCESS == plugin_status) ?
+              MTAPI_TRUE : MTAPI_FALSE;
+          } else {
+            /* schedule local task */
+            was_scheduled = MTAPI_TRUE;
 
-          for (mtapi_uint_t kk = 0; kk < task->attributes.num_instances; kk++) {
-            was_scheduled = was_scheduled &
-              embb_mtapi_scheduler_schedule_task(scheduler, task, kk);
+            for (mtapi_uint_t kk = 0; kk < task->attributes.num_instances;
+              kk++) {
+              was_scheduled = was_scheduled &
+                embb_mtapi_scheduler_schedule_task(scheduler, task, kk);
+            }
           }
 
           if (was_scheduled) {
@@ -474,7 +502,19 @@ void mtapi_task_cancel(
       embb_mtapi_task_t* local_task =
         embb_mtapi_task_pool_get_storage_for_handle(node->task_pool, task);
       embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
-      local_status = MTAPI_SUCCESS;
+
+      /* call plugin action cancel function */
+      if (embb_mtapi_action_pool_is_handle_valid(
+        node->action_pool, local_task->action)) {
+        embb_mtapi_action_t* local_action =
+          embb_mtapi_action_pool_get_storage_for_handle(
+          node->action_pool, local_task->action);
+        if (local_action->is_plugin_action) {
+          local_action->plugin_task_cancel_function(task, &local_status);
+        }
+      } else {
+        local_status = MTAPI_SUCCESS;
+      }
     } else {
       local_status = MTAPI_ERR_TASK_INVALID;
     }

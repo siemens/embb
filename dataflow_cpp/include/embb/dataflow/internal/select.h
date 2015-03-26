@@ -81,6 +81,11 @@ class Select
     }
   }
 
+  virtual void Init(InitData * init_data) {
+    SetScheduler(init_data->sched);
+    GetOutput<0>().SendInit(init_data);
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }
@@ -110,6 +115,10 @@ class Select
       EMBB_THROW(embb::base::ErrorException,
         "Some inputs are not at expected clock.")
     Run(clock);
+  }
+
+  virtual void OnInit(InitData * init_data) {
+    Init(init_data);
   }
 
  private:

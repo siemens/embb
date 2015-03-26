@@ -316,8 +316,6 @@ code using Cppcheck, a static analysis tool for C++.
 Known Bugs and Limitations
 --------------------------
 
-- The MTAPI implementation is currently limited to homogeneous systems.
-  Support for heterogeneous systems will be added in the near future.
 - For memory management reasons, the number of threads EMB² can deal with
   is bounded by a predefined but modifiable constant (see functions
   embb_thread_get_max_count() / embb_thread_set_max_count() and class

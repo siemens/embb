@@ -186,17 +186,8 @@ void SimpleTest::TestBasic() {
 
     sel.GetOutput<0>() >> sink.GetInput<0>();
 
-    network.Add(constant);
-    network.Add(source);
-
-    network.Add(filter);
-    network.Add(mult);
-
-    network.Add(pred);
-    network.Add(sw);
-    network.Add(sel);
-
-    network.Add(sink);
+    network.AddSource(constant);
+    network.AddSource(source);
 
     network();
 
