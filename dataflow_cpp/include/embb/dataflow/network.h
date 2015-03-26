@@ -246,13 +246,6 @@ class Network {
   };
 
   /**
-   * Adds a new serial process to the network.
-   * \param proc The process to add.
-   */
-  template <class Inputs, class Outputs>
-  void Add(SerialProcess<Inputs, Outputs> & proc);
-
-  /**
   * Generic parallel process template.
   *
   * Implements a generic parallel process in the network that may have one to
@@ -334,13 +327,6 @@ class Network {
   };
 
   /**
-  * Adds a new parallel process to the network.
-  * \param proc The process to add.
-  */
-  template <class Inputs, class Outputs>
-  void Add(ParallelProcess<Inputs, Outputs> & proc);
-
-  /**
    * Switch process template.
    *
    * A switch has 2 inputs and 2 outputs. Input port 0 is of type boolean and
@@ -410,13 +396,6 @@ class Network {
     template <typename T>
     void operator >> (T & target);
   };
-
-  /**
-   * Adds a new switch process to the network.
-   * \param sw The switch process to add.
-   */
-  template <typename Type>
-  void Add(Switch<Type> & sw);
 
   /**
    * Select process template.
@@ -490,13 +469,6 @@ class Network {
   };
 
   /**
-   * Adds a new select process to the network.
-   * \param sel The select process to add.
-   */
-  template <typename Type>
-  void Add(Select<Type> & sel);
-
-  /**
    * Sink process template.
    *
    * A sink marks the end of a particular processing chain. It can have one to
@@ -555,13 +527,6 @@ class Network {
      */
     virtual bool HasOutputs() const;
   };
-
-  /**
-   * Adds a new sink process to the network.
-   * \param sink The sink process to add.
-   */
-  template<typename I1, typename I2, typename I3, typename I4, typename I5>
-  void Add(Sink<I1, I2, I3, I4, I5> & sink);
 
   /**
    * Source process template.
@@ -635,7 +600,7 @@ class Network {
    * \param source The source process to add.
    */
   template<typename O1, typename O2, typename O3, typename O4, typename O5>
-  void Add(Source<O1, O2, O3, O4, O5> & source);
+  void AddSource(Source<O1, O2, O3, O4, O5> & source);
 
   /**
    * Constant source process template.
@@ -694,7 +659,7 @@ class Network {
    * \param source The constant source process to add.
    */
   template<typename Type>
-  void Add(ConstantSource<Type> & source);
+  void AddSource(ConstantSource<Type> & source);
 
   /**
    * Executes the network until one of the the sources returns \c false.
@@ -748,11 +713,6 @@ class Network : public internal::ClockListener {
     }
   };
 
-  template <class Inputs, class Outputs>
-  void Add(SerialProcess<Inputs, Outputs> & proc) {
-    processes_.push_back(&proc);
-  }
-
   template <class Inputs, class Outputs> class ParallelProcess;
 
   template <
@@ -776,30 +736,15 @@ class Network : public internal::ClockListener {
     }
   };
 
-  template <class Inputs, class Outputs>
-  void Add(ParallelProcess<Inputs, Outputs> & proc) {
-    processes_.push_back(&proc);
-  }
-
   template<typename Type>
   class Switch : public internal::Switch<Slices, Type> {
    public:
   };
 
-  template <typename Type>
-  void Add(Switch<Type> & sw) {
-    processes_.push_back(&sw);
-  }
-
   template<typename Type>
   class Select : public internal::Select<Slices, Type> {
    public:
   };
-
-  template <typename Type>
-  void Add(Select<Type> & sel) {
-    processes_.push_back(&sel);
-  }
 
   template<typename I1, typename I2 = embb::base::internal::Nil,
     typename I3 = embb::base::internal::Nil,
@@ -817,12 +762,6 @@ class Network : public internal::ClockListener {
       //empty
     }
   };
-
-  template<typename I1, typename I2, typename I3, typename I4, typename I5>
-  void Add(Sink<I1, I2, I3, I4, I5> & sink) {
-    sink.SetListener(this);
-    sinks_.push_back(&sink);
-  }
 
   template<typename O1, typename O2 = embb::base::internal::Nil,
     typename O3 = embb::base::internal::Nil,
@@ -843,7 +782,7 @@ class Network : public internal::ClockListener {
   };
 
   template<typename O1, typename O2, typename O3, typename O4, typename O5>
-  void Add(Source<O1, O2, O3, O4, O5> & source) {
+  void AddSource(Source<O1, O2, O3, O4, O5> & source) {
     sources_.push_back(&source);
   }
 
@@ -857,7 +796,7 @@ class Network : public internal::ClockListener {
   };
 
   template<typename Type>
-  void Add(ConstantSource<Type> & source) {
+  void AddSource(ConstantSource<Type> & source) {
     sources_.push_back(&source);
   }
 
@@ -866,19 +805,20 @@ class Network : public internal::ClockListener {
     internal::SchedulerMTAPI<Slices> sched_mtapi;
     internal::Scheduler * sched = &sched_mtapi;
 
-    for (size_t it = 0; it < sources_.size(); it++)
-      sources_[it]->SetScheduler(sched);
-    for (size_t it = 0; it < processes_.size(); it++)
-      processes_[it]->SetScheduler(sched);
-    for (size_t it = 0; it < sinks_.size(); it++)
-      sinks_[it]->SetScheduler(sched);
+    internal::InitData init_data;
+    init_data.sched = sched;
+    init_data.sink_listener = this;
 
-    for (int ii = 0; ii < Slices; ii++) sink_count_[ii] = 0;
+    sink_count_ = 0;
+    for (size_t it = 0; it < sources_.size(); it++)
+      sources_[it]->Init(&init_data);
+
+    for (int ii = 0; ii < Slices; ii++) sink_counter_[ii] = 0;
 
     int clock = 0;
     while (clock >= 0) {
       const int idx = clock % Slices;
-      while (sink_count_[idx] > 0) embb::base::Thread::CurrentYield();
+      while (sink_counter_[idx] > 0) embb::base::Thread::CurrentYield();
       sched->WaitForSlice(idx);
       if (!SpawnClock(clock))
         break;
@@ -889,7 +829,7 @@ class Network : public internal::ClockListener {
     if (ii < 0) ii = 0;
     for (; ii < clock; ii++) {
       const int idx = ii % Slices;
-      while (sink_count_[idx] > 0) embb::base::Thread::CurrentYield();
+      while (sink_counter_[idx] > 0) embb::base::Thread::CurrentYield();
       sched->WaitForSlice(idx);
     }
   }
@@ -902,17 +842,28 @@ class Network : public internal::ClockListener {
    */
   virtual void OnClock(int clock) {
     const int idx = clock % Slices;
-    const int cnt = --sink_count_[idx];
+    const int cnt = --sink_counter_[idx];
     if (cnt < 0)
       EMBB_THROW(embb::base::ErrorException,
         "More sinks than expected signaled reception of given clock.")
+  }
+
+  /**
+   * Internal.
+   * \internal
+   * Gets called when an init token has reached all sinks.
+   */
+  virtual void OnInit(internal::InitData * /*sched*/) {
+    sink_count_++;
   }
 
  private:
   std::vector<internal::Node*> processes_;
   std::vector<internal::Node*> sources_;
   std::vector<internal::Node*> sinks_;
-  embb::base::Atomic<int> sink_count_[Slices];
+  embb::base::Atomic<int> sink_counter_[Slices];
+  int sink_count_;
+
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
   std::vector<int> spawn_history_[Slices];
 #endif
@@ -923,7 +874,7 @@ class Network : public internal::ClockListener {
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
     spawn_history_[idx].push_back(clock);
 #endif
-    sink_count_[idx] = static_cast<int>(sinks_.size());
+    sink_counter_[idx] = sink_count_;
     for (size_t kk = 0; kk < sources_.size(); kk++) {
       result &= sources_[kk]->Start(clock);
     }

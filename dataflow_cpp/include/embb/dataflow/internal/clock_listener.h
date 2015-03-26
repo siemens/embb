@@ -31,10 +31,19 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
+class Scheduler;
+class ClockListener;
+
+struct InitData {
+  Scheduler * sched;
+  ClockListener * sink_listener;
+};
+
 class ClockListener {
  public:
   virtual ~ClockListener() {}
   virtual void OnClock(int /*clock*/) = 0;
+  virtual void OnInit(InitData * /*sched*/) = 0;
 };
 
 } // namespace internal

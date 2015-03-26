@@ -72,6 +72,12 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
     listener_->OnClock(clock);
   }
 
+  virtual void Init(InitData * init_data) {
+    SetListener(init_data->sink_listener);
+    SetScheduler(init_data->sched);
+    listener_->OnInit(init_data);
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }
@@ -113,6 +119,10 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
         retry = false;
       }
     }
+  }
+
+  virtual void OnInit(InitData * init_data) {
+    Init(init_data);
   }
 
  private:
