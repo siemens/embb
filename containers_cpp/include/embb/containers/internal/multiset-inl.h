@@ -37,8 +37,32 @@ namespace containers {
 namespace internal {
 
 template< typename Type >
-MultisetNode<Type>::MultisetNode(const Type & key, size_t count, node_ptr_t next) :
+inline MultisetNode<Type>::MultisetNode() :
+  key_() {
+  count_.Store(0);
+  next_.Store(0);
+}
+
+template< typename Type >
+inline MultisetNode<Type>::MultisetNode(
+  const Type & key, size_t count, node_ptr_t next) :
   key_(key), count_(count), next_(next) {
+}
+
+template< typename Type >
+inline MultisetNode<Type>::MultisetNode(
+  const MultisetNode<Type> & other) :
+  key_(other.key_) {
+  count_.Store(other.count_.Load());
+  next_.Store(other.next_.Load());
+}
+
+template< typename Type >
+inline MultisetNode<Type> & MultisetNode<Type>::operator=(
+  MultisetNode<Type> & rhs) {
+  key_ = rhs.key_;
+  count_.Store(rhs.count_.Load());
+  next_.Store(rhs.next_.Load());
 }
 
 template< typename Type >
@@ -47,32 +71,35 @@ inline Type & MultisetNode<Type>::Key() const {
 }
 
 template< typename Type >
-inline embb::base::Atomic<size_t> & MultisetNode<Type>::Count() {
-  return count_;
+inline embb::base::Atomic<size_t> * MultisetNode<Type>::Count() {
+  return &count_;
 }
 
 template< typename Type >
-inline embb::base::Atomic<node_ptr_t> & MultisetNode<Type>::Next() {
-  return next_;
+inline embb::base::Atomic<
+  primitives::LlxScxRecord< internal::MultisetNode<Type> > *
+> * MultisetNode<Type>::Next() {
+  return &next_;
 }
 
 }  // namespace internal
 
 template< typename Type, Type UndefinedKey, class ValuePool >
 Multiset<Type, UndefinedKey, ValuePool>::Multiset(size_t capacity) :
+  node_pool_(capacity),
   llx_scx_(NUM_LLX_SCX_LINKS) {
   internal::MultisetNode<Type> sentinel_node(UndefinedKey, 0, UNDEFINED_POINTER);
   head_ = node_pool_.Allocate(sentinel_node);
   tail_ = node_pool_.Allocate(sentinel_node);
-  head_->Next().Store(tail_);
-  tail_->Next().Store(UNDEFINED_POINTER);
+  (*head_)->Next()->Store(tail_);
+  (*tail_)->Next()->Store(UNDEFINED_POINTER);
 }
 
 template< typename Type, Type UndefinedKey, class ValuePool >
 bool Multiset<Type, UndefinedKey, ValuePool>::Search(
   const Type key,
-  node_ptr_t & node,
-  node_ptr_t & next) {
+  primitives::LlxScxRecord< internal::MultisetNode<Type> > * & node,
+  primitives::LlxScxRecord< internal::MultisetNode<Type> > * & next) {
   node = head_;
   next = tail_;
   while (key > next->Key() && next->Key() != UndefinedKey) {
@@ -86,7 +113,7 @@ template< typename Type, Type UndefinedKey, class ValuePool >
 size_t Multiset<Type, UndefinedKey, ValuePool>::Get(Type key) {
   node_ptr_t node, next;
   if (Search(key, node, next)) {
-    return next->Count().Load();
+    return (*next)->Count()->Load();
   }
   return 0;
 }
@@ -96,39 +123,37 @@ void Multiset<Type, UndefinedKey, ValuePool>::Insert(Type key, size_t count) {
   if (count == 0) {
     return;
   }
-  while (true) {
+  for (;;) {
     node_ptr_t node, next, local_next;
     Search(key, node, next);
     // Key value is stored in node->next as head node
     // is sentinel.
-    if (key == next->Key()) {
+    if (key == (*next)->Key()) {
       node_ptr_t local_next;
       // Key already present in multiset, increment count of its node:
       // LLX(r:next)
-      if (llx_scx_.TryLoadLinked(next, local_next)) {
+      if (llx_scx_.TryLoadLinked(next, *local_next)) {
         internal::FixedSizeList<node_ptr_t> linked_deps(1);
         linked_deps.PushBack(next);
         // SCX(fld:next->count, value:next->count + count, V:<next>);
         if (llx_scx_.TryStoreConditional(
-          next->Count(),
-          local_next->Count()->Load() + count,
+          (*next)->Count(),
+          (*local_next)->Count()->Load() + count,
           linked_deps)) {
           return;
         }
       }
-    }
-    else {
+    } else {
       // Key not present in multiset yet, add node:
       node_ptr_t local_node;
-      if (llx_scx_.TryLoadLinked(node, local_node) && next == local_node->Next()) {
+      if (llx_scx_.TryLoadLinked(node, local_node) && next == (*local_node)->Next()) {
         internal::FixedSizeList<node_ptr_t> linked_deps(1);
         linked_deps.PushBack(node);
         node_t new_node(internal::MultisetNode<Type>(key, count, next));
         node_ptr_t new_node_ptr = node_pool_.Allocate(new_node);
         if (llx_scx_.TryStoreConditional(node->Next(), new_node_ptr, linked_deps)) {
           return;
-        }
-        else {
+        } else {
           // Insert failed, return new node object to pool:
           node_pool_.Free(new_node_ptr);
         }
@@ -142,7 +167,7 @@ bool Multiset<Type, UndefinedKey, ValuePool>::TryDelete(Type key, size_t count) 
   if (count == 0) {
     return false;
   }
-  while (true) {
+  for (;;) {
     node_ptr_t node, next, local_node, local_next;
     Search(key, node, next);
     if (llx_scx_.TryLoadLinked(node, local_node) &&
@@ -152,8 +177,7 @@ bool Multiset<Type, UndefinedKey, ValuePool>::TryDelete(Type key, size_t count) 
         // Key not present in multiset or existing count less
         // than amount of elements requested for deletion:
         return false;
-      }
-      else if (local_next->Count() > count) {
+      } else if (local_next->Count() > count) {
         // Inserting a new node with decremented count instead
         // of decrementing the exising node's count to reduce
         // number of linked dependencies in SCX.
@@ -167,8 +191,7 @@ bool Multiset<Type, UndefinedKey, ValuePool>::TryDelete(Type key, size_t count) 
           node->Next(), new_node_ptr, linked_deps, finalize_deps)) {
           return true;
         }
-      }
-      else {
+      } else {
         assert(local_next->Count() == count);
         node_ptr_t local_next_next;
         if (llx_scx_.TryLoadLinked(next->Next(), local_next_next)) {
@@ -181,7 +204,7 @@ bool Multiset<Type, UndefinedKey, ValuePool>::TryDelete(Type key, size_t count) 
           finalize_deps.PushBack(next);
           finalize_deps.PushBack(local_next_next);
           if (llx_scx_.TryStoreConditional(
-            node->Next(), new_next_next_ptr, linked_deps, finalize_deps) {
+            node->Next(), new_next_next_ptr, linked_deps, finalize_deps)) {
             return true;
           }
           else {

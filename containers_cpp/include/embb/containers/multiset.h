@@ -42,15 +42,43 @@ namespace internal {
 template< typename Type >
 class MultisetNode {
  private:
-  typedef primitives::LlxScxRecord< internal::MultisetNode<Type> > * node_ptr_t;
+  typedef primitives::LlxScxRecord< internal::MultisetNode<Type> > *
+    node_ptr_t;
 
- public:  
-  MultisetNode(const Type & key, size_t count, node_ptr_t next);
+ public:
+  /**
+   * Default constructor, creates an empty node
+   */
+  inline MultisetNode();
 
-  inline Type & Key();
+  /**
+   * Constructor, creates a multiset entry as node in a linked list
+   */
+  inline MultisetNode(const Type & key, size_t count, node_ptr_t next);
+  
+  /**
+   * Copy constructor
+   */
+  inline MultisetNode(const MultisetNode<Type> & other);
 
-  inline embb::base::Atomic<size_t> * Count() const;
+  /**
+   * Assignment operator
+   */
+  inline MultisetNode<Type> & operator=(MultisetNode<Type> & rhs);
 
+  /**
+   * Returns the key value contained in this multiset element
+   */
+  inline Type & Key() const;
+
+  /**
+   * Returns the count number of this multiset element
+   */
+  inline embb::base::Atomic<size_t> * Count();
+
+  /**
+   * Returns a CAS-enabled pointer to this element's successor element
+   */
   inline embb::base::Atomic<node_ptr_t> * Next();
 
  private:
@@ -61,10 +89,10 @@ class MultisetNode {
 
 }  // namespace internal
 
-template< 
+template<
   typename Type,
   Type UndefinedKey,
-  typename ValuePool = embb::containers::LockFreeTreeValuePool< bool, false > 
+  typename ValuePool = embb::containers::LockFreeTreeValuePool< bool, false >
 >
 class Multiset {
 
@@ -75,16 +103,50 @@ class Multiset {
   static const size_t NUM_LLX_SCX_LINKS = 3;
 
  public:
+  /**
+   * Constructor, creates a multiset for a maximum number \c capacity of
+   * elements.
+   */
   Multiset(size_t capacity);
 
-  size_t Get(Type key);
+  /**
+   * Returns the number of occurrences of the given key in the multiset
+   *
+   * \returns The number of occurrences of the key, or 0 if the key is not
+   *          contained in the multiset
+   */
+  size_t Get(
+    Type key
+    ///< [IN] The element key to search in the multiset
+  );
 
-  void Insert(Type key, size_t count);
+  /**
+   * Adds an element \c key with \c count occurrences to the multiset.
+   */
+  void Insert(
+    Type key,
+    ///< [IN] The element key to add to the multiset */
+    size_t count
+    ///< [IN] The amount of occurrences of the key to add */
+  );
 
-  bool TryDelete(Type key, size_t count);
+  /**
+   * Tentatively removes \c count occurrences of element \c key from the
+   * multiset
+   *
+   * \returns True if the given amount of occurrences have been removed
+   *          successfully, or false if the multiset did not contain the
+   *          given occurrences of \c key
+   */
+  bool TryDelete(
+    Type key,
+    ///< [IN] The element key to remove from the multiset */
+    size_t count
+    ///< [IN] The amount of occurrences to remove */
+  );
 
  private:
-  void Search(
+  bool Search(
     const Type key,
     ///< [IN] The element key to search in the multiset
     node_ptr_t & node,
@@ -94,6 +156,11 @@ class Multiset {
   );
 
  private:
+  /**
+   * Prevent default construction
+   */
+  Multiset();
+
   ObjectPool< node_t, ValuePool > node_pool_;
   node_ptr_t head_;
   node_ptr_t tail_;
@@ -103,6 +170,6 @@ class Multiset {
 } // namespace containers
 } // namespace embb
 
-// #include <embb/containers/internal/multiset-inl.h>
+#include <embb/containers/internal/multiset-inl.h>
 
 #endif  // EMBB_CONTAINERS_MULTISET_H_

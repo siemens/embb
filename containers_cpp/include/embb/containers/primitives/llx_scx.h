@@ -346,6 +346,19 @@ class LlxScx {
     bool & finalized
     /**< [OUT] Indicating whether requested fields have been finalized */
   );
+
+  /**
+   * Tentatively performs an LLX (extended load-linked) operation on given 
+   * LLX/SCX data record.
+   * Returns true and stores result in given reference variable on success, 
+   * otherwise returns false.
+   */
+  bool TryLoadLinked(
+    DataRecord_t * const data_record,
+    /**< [IN] Pointer to data record to load */
+    DataRecord_t & data
+    /**< [OUT] Atomic snapshot of data record */
+  );
  
   /**
    * Tentatively performs a single-record Store-Conditional operation on 
@@ -363,6 +376,22 @@ class LlxScx {
     /**< [IN] Data records linked to this store operation */
     embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps
     /**< [IN] Data records to be finalized in this store operation */
+  );
+
+  /**
+   * Tentatively performs a single-record Store-Conditional operation on 
+   * given LLX/SCX data record.
+   * Returns true if the given value has been stored successfully, otherwise
+   * false.
+   */
+  template< typename FieldType >
+  bool TryStoreConditional(
+    embb::base::Atomic<FieldType> * field,
+    /**< [IN] Pointer to the field the value will be stored into */
+    FieldType value,
+    /**< [IN] Value to store */
+    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps
+    /**< [IN] Data records linked to this store operation */
   );
   
   /**

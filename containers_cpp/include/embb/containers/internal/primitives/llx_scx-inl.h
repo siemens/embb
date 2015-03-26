@@ -130,6 +130,14 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
 }
 
 template< typename UserData, typename ValuePool >
+bool LlxScx<UserData, ValuePool>::TryLoadLinked(
+  DataRecord_t * const data_record,
+  DataRecord_t & user_data) {
+  bool finalized;
+  return TryLoadLinked(data_record, user_data, finalized);
+}
+
+template< typename UserData, typename ValuePool >
 template< typename FieldType >
 bool LlxScx<UserData, ValuePool>::TryStoreConditional(
   embb::base::Atomic<FieldType> * field,
@@ -188,6 +196,16 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
   // Allocate from pool as this operation description is global:
   ScxRecord_t * scx = scx_record_pool_.Allocate(new_scx);
   return scx->Help();
+}
+
+template< typename UserData, typename ValuePool >
+template< typename FieldType >
+bool LlxScx<UserData, ValuePool>::TryStoreConditional(
+  embb::base::Atomic<FieldType> * field,
+  FieldType value,
+  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps) {
+  embb::containers::internal::FixedSizeList<DataRecord_t *> finalize_deps(0);
+  return TryStoreConditional(field, value, linked_deps, finalize_deps);
 }
 
 template< typename UserData, typename ValuePool >
