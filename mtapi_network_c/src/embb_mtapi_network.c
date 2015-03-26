@@ -159,10 +159,10 @@ static void embb_mtapi_network_task_complete(
         assert(err == 4);
         // result size
         err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, local_task->result_size);
+          send_buf, (int32_t)local_task->result_size);
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_rawdata(
-          send_buf, local_task->result_size, local_task->result_buffer);
+          send_buf, (int32_t)local_task->result_size, local_task->result_buffer);
         assert(err == (int)local_task->result_size);
 
         err = embb_mtapi_network_socket_sendbuffer(
@@ -191,7 +191,7 @@ static int embb_mtapi_network_thread(void * args) {
 
   EMBB_UNUSED(args);
 
-  embb_mtapi_network_buffer_initialize(&buffer, plugin->buffer_size);
+  embb_mtapi_network_buffer_initialize(&buffer, (int)plugin->buffer_size);
 
   while (embb_atomic_load_int(&plugin->run)) {
     err = embb_mtapi_network_socket_select(
@@ -266,12 +266,12 @@ static int embb_mtapi_network_thread(void * args) {
         err = embb_mtapi_network_buffer_pop_front_int32(&buffer,
           &results_size);
         assert(err == 4);
-        results = embb_alloc(results_size);
+        results = embb_alloc((size_t)results_size);
         assert(results != NULL);
         // arguments size
         embb_mtapi_network_buffer_pop_front_int32(&buffer, &arguments_size);
         assert(err == 4);
-        arguments = embb_alloc(arguments_size);
+        arguments = embb_alloc((size_t)arguments_size);
         assert(arguments != NULL);
 
         embb_mtapi_network_buffer_clear(&buffer);
@@ -303,12 +303,12 @@ static int embb_mtapi_network_thread(void * args) {
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_COMPLETE_FUNCTION,
           func_void, 0, &local_status);
         assert(local_status == MTAPI_SUCCESS);
-        job_hndl = mtapi_job_get(job_id, domain_id, &local_status);
+        job_hndl = mtapi_job_get((mtapi_job_id_t)job_id, (mtapi_domain_t)domain_id, &local_status);
         assert(local_status == MTAPI_SUCCESS);
         mtapi_task_start(
           MTAPI_TASK_ID_NONE, job_hndl,
-          arguments, arguments_size,
-          results, results_size,
+          arguments, (mtapi_size_t)arguments_size,
+          results, (mtapi_size_t)results_size,
           &task_attr, MTAPI_GROUP_NONE,
           &local_status);
         assert(local_status == MTAPI_SUCCESS);
@@ -354,8 +354,8 @@ static int embb_mtapi_network_thread(void * args) {
             socket, &buffer, results_size);
           assert(err == results_size);
 
-          task.id = task_id;
-          task.tag = task_tag;
+          task.id = (mtapi_task_id_t)task_id;
+          task.tag = (mtapi_uint_t)task_tag;
 
           if (embb_mtapi_task_pool_is_handle_valid(node->task_pool, task)) {
             embb_mtapi_task_t * local_task =
@@ -376,7 +376,7 @@ static int embb_mtapi_network_thread(void * args) {
                 &buffer, results_size, local_task->result_buffer);
               assert(err == results_size);
 
-              local_task->error_code = task_status;
+              local_task->error_code = (mtapi_status_t)task_status;
               local_task->state = MTAPI_TASK_COMPLETED;
               embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
 
@@ -422,7 +422,7 @@ void mtapi_network_plugin_initialize(
       sizeof(embb_mtapi_network_socket_t) * (1 + max_connections * 2));
 
     embb_mtapi_network_buffer_initialize(
-      &plugin->send_buffer, plugin->buffer_size);
+      &plugin->send_buffer, (int)plugin->buffer_size);
     embb_mutex_init(&plugin->send_mutex, 0);
 
     if (NULL != plugin->sockets) {
@@ -496,33 +496,33 @@ static void network_task_start(
         assert(err == 1);
 
         err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, network_action->domain_id);
+          send_buf, (int32_t)network_action->domain_id);
         assert(err == 4);
 
         err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, network_action->job_id);
+          send_buf, (int32_t)network_action->job_id);
         assert(err == 4);
 
         err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, local_task->attributes.priority);
+          send_buf, (int32_t)local_task->attributes.priority);
         assert(err == 4);
 
         err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, local_task->handle.id);
+          send_buf, (int32_t)local_task->handle.id);
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, local_task->handle.tag);
-        assert(err == 4);
-
-        err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, local_task->result_size);
+          send_buf, (int32_t)local_task->handle.tag);
         assert(err == 4);
 
         err = embb_mtapi_network_buffer_push_back_int32(
-          send_buf, local_task->arguments_size);
+          send_buf, (int32_t)local_task->result_size);
+        assert(err == 4);
+
+        err = embb_mtapi_network_buffer_push_back_int32(
+          send_buf, (int32_t)local_task->arguments_size);
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_rawdata(
-          send_buf, local_task->arguments_size, local_task->arguments);
+          send_buf, (int32_t)local_task->arguments_size, local_task->arguments);
         assert(err == (int)local_task->arguments_size);
 
         err = embb_mtapi_network_socket_sendbuffer(
@@ -601,7 +601,7 @@ mtapi_action_hndl_t mtapi_network_action_create(
     action->job_id = remote_job_id;
 
     embb_mtapi_network_buffer_initialize(
-      &action->send_buffer, plugin->buffer_size);
+      &action->send_buffer, (int)plugin->buffer_size);
     embb_mutex_init(&action->send_mutex, 0);
 
     action->host = host;

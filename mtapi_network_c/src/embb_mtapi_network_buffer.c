@@ -33,7 +33,7 @@ void embb_mtapi_network_buffer_initialize(
   int capacity) {
   that->position = 0;
   that->size = 0;
-  that->data = embb_alloc(capacity);
+  that->data = (char*)embb_alloc((size_t)capacity);
   if (NULL != that->data) {
     that->capacity = capacity;
   } else {
@@ -98,7 +98,7 @@ int embb_mtapi_network_buffer_push_back_rawdata(
   if (that->size + size > that->capacity) {
     return 0;
   }
-  memcpy(that->data + that->size, rawdata, size);
+  memcpy(that->data + that->size, rawdata, (size_t)size);
   that->size += size;
   return size;
 }
@@ -143,7 +143,7 @@ int embb_mtapi_network_buffer_pop_front_rawdata(
   if (that->position + size > that->size) {
     return 0;
   }
-  memcpy(rawdata, that->data + that->position, size);
+  memcpy(rawdata, that->data + that->position, (size_t)size);
   that->position += size;
   return size;
 }
