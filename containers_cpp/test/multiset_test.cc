@@ -24,8 +24,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if 0
-
 #include <multiset_test.h>
 #include <embb/containers/multiset.h>
 
@@ -58,5 +56,3 @@ void MultisetTest::SerialTest() {
 } // namespace test
 } // namespace containers
 } // namespace embb
-
-#endif

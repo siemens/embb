@@ -71,7 +71,7 @@ class Multiset {
  private:
   typedef primitives::LlxScxRecord< internal::MultisetNode<Type> > node_t;
   typedef primitives::LlxScxRecord< internal::MultisetNode<Type> > * node_ptr_t;
-  static const size_t UNDEFINED_POINTER = static_cast<node_ptr_t>(0);
+  static const node_ptr_t UNDEFINED_POINTER;
   static const size_t NUM_LLX_SCX_LINKS = 3;
 
  public:
@@ -97,7 +97,7 @@ class Multiset {
   ObjectPool< node_t, ValuePool > node_pool_;
   node_ptr_t head_;
   node_ptr_t tail_;
-  primitives::LlxScx< MultisetNode<Type> > llx_scx_;
+  primitives::LlxScx< internal::MultisetNode<Type> > llx_scx_;
 };
 
 } // namespace containers

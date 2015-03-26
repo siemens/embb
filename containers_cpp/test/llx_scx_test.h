@@ -92,7 +92,7 @@ class LlxScxTest : public partest::TestCase {
   void ParallelTest();
 
   int num_threads_;
-  LlxScx<Node> llxscx_;
+  primitives::LlxScx<Node> llxscx_;
   Node tail;
   Node head;
 };
