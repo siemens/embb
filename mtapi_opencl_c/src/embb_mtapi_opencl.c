@@ -258,31 +258,32 @@ void mtapi_opencl_plugin_initialize(
   cl_int err;
   embb_mtapi_opencl_plugin_t * plugin = &embb_mtapi_opencl_plugin;
 
-  embb_mtapi_opencl_link_at_runtime();
-
-  err = clGetPlatformIDs(1, &plugin->platform_id, NULL);
-  if (CL_SUCCESS == err) {
-    err = clGetDeviceIDs(plugin->platform_id, CL_DEVICE_TYPE_DEFAULT,
-      1, &plugin->device_id, NULL);
-  }
-  if (CL_SUCCESS == err) {
-    plugin->context = clCreateContext(NULL, 1, &plugin->device_id,
-      NULL, NULL, &err);
-  }
-  if (CL_SUCCESS == err) {
-    err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE,
-      sizeof(cl_uint), &plugin->work_group_size, NULL);
-  }
-  if (CL_SUCCESS == err) {
-    err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES,
-      3 * sizeof(cl_uint), &plugin->work_item_sizes[0], NULL);
-  }
-  if (CL_SUCCESS == err) {
-    plugin->command_queue = clCreateCommandQueue(plugin->context,
-      plugin->device_id, 0, &err);
-  }
-  if (CL_SUCCESS == err) {
-    local_status = MTAPI_SUCCESS;
+  err = embb_mtapi_opencl_link_at_runtime();
+  if (err != 0) {
+    err = clGetPlatformIDs(1, &plugin->platform_id, NULL);
+    if (CL_SUCCESS == err) {
+      err = clGetDeviceIDs(plugin->platform_id, CL_DEVICE_TYPE_DEFAULT,
+        1, &plugin->device_id, NULL);
+    }
+    if (CL_SUCCESS == err) {
+      plugin->context = clCreateContext(NULL, 1, &plugin->device_id,
+        NULL, NULL, &err);
+    }
+    if (CL_SUCCESS == err) {
+      err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE,
+        sizeof(cl_uint), &plugin->work_group_size, NULL);
+    }
+    if (CL_SUCCESS == err) {
+      err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES,
+        3 * sizeof(cl_uint), &plugin->work_item_sizes[0], NULL);
+    }
+    if (CL_SUCCESS == err) {
+      plugin->command_queue = clCreateCommandQueue(plugin->context,
+        plugin->device_id, 0, &err);
+    }
+    if (CL_SUCCESS == err) {
+      local_status = MTAPI_SUCCESS;
+    }
   }
 
   mtapi_status_set(status, local_status);
