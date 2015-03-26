@@ -25,6 +25,7 @@
  */
 
 #include <CL/opencl.h>
+#include <embb/base/c/internal/config.h>
 
 //////////////////////////////////////////////////////////////////////////
 // function pointer wrappers to hide runtime linking
@@ -252,6 +253,9 @@ DECLARECLFUNC(cl_mem, clCreateFromGLBuffer, (cl_context context,
 
 #endif
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int embb_mtapi_opencl_link_at_runtime() {
 #ifdef _WIN32
   HMODULE opencl_dll_handle = LoadLibraryA("opencl.dll");
@@ -261,6 +265,10 @@ int embb_mtapi_opencl_link_at_runtime() {
   if (opencl_dll_handle == 0)
     return 0;
 
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4191)
+#endif
   CHECKEDIMPORT(clGetPlatformIDs);
   CHECKEDIMPORT(clGetPlatformInfo);
   CHECKEDIMPORT(clGetDeviceIDs);
@@ -293,6 +301,9 @@ int embb_mtapi_opencl_link_at_runtime() {
   CHECKEDIMPORT(clEnqueueAcquireGLObjects);
   CHECKEDIMPORT(clEnqueueReleaseGLObjects);
   CHECKEDIMPORT(clCreateFromGLBuffer);
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
   return 1;
 }

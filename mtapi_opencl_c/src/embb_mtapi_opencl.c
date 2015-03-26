@@ -76,8 +76,8 @@ struct embb_mtapi_opencl_task_struct {
 
 typedef struct embb_mtapi_opencl_task_struct embb_mtapi_opencl_task_t;
 
-static int round_up(int group_size, int global_size) {
-  int r = global_size % group_size;
+static size_t round_up(size_t group_size, size_t global_size) {
+  size_t r = global_size % group_size;
   if (r == 0) {
     return global_size;
   } else {
@@ -153,18 +153,18 @@ static void opencl_task_start(
         if (0 == elements)
           elements = 1;
         global_work_size =
-          round_up((int)opencl_action->local_work_size, (int)elements);
+          round_up(opencl_action->local_work_size, elements);
 
         opencl_task->task = task;
 
-        opencl_task->arguments_size = local_task->arguments_size;
+        opencl_task->arguments_size = (int)local_task->arguments_size;
         if (0 < local_task->arguments_size) {
           opencl_task->arguments = clCreateBuffer(plugin->context,
             CL_MEM_READ_ONLY, local_task->arguments_size, NULL, &err);
         } else {
           opencl_task->arguments = NULL;
         }
-        opencl_task->result_buffer_size = local_task->result_size;
+        opencl_task->result_buffer_size = (int)local_task->result_size;
         if (0 < local_task->result_size) {
           opencl_task->result_buffer = clCreateBuffer(plugin->context,
             CL_MEM_WRITE_ONLY, local_task->result_size, NULL, &err);
@@ -184,13 +184,13 @@ static void opencl_task_start(
 
         err = clEnqueueWriteBuffer(plugin->command_queue,
           opencl_task->arguments, CL_FALSE, 0,
-          opencl_task->arguments_size, local_task->arguments, 0, NULL, NULL);
+          (size_t)opencl_task->arguments_size, local_task->arguments, 0, NULL, NULL);
         err = clEnqueueNDRangeKernel(plugin->command_queue,
           opencl_action->kernel, 1, NULL,
           &global_work_size, &opencl_action->local_work_size, 0, NULL, NULL);
         err = clEnqueueReadBuffer(plugin->command_queue,
           opencl_task->result_buffer, CL_FALSE, 0,
-          opencl_task->result_buffer_size, local_task->result_buffer,
+          (size_t)opencl_task->result_buffer_size, local_task->result_buffer,
           0, NULL, &opencl_task->kernel_finish_event);
         err = clSetEventCallback(opencl_task->kernel_finish_event,
           CL_COMPLETE, opencl_task_complete, opencl_task);
@@ -357,11 +357,11 @@ mtapi_action_hndl_t mtapi_opencl_action_create(
     if (CL_SUCCESS == err) {
       free_node_local_data_on_error = MTAPI_TRUE;
     }
-    action->node_local_data_size = node_local_data_size;
+    action->node_local_data_size = (int)node_local_data_size;
     if (CL_SUCCESS == err) {
       err = clEnqueueWriteBuffer(plugin->command_queue,
         action->node_local_data, CL_TRUE, 0,
-        action->node_local_data_size, node_local_data, 0, NULL, NULL);
+        (size_t)action->node_local_data_size, node_local_data, 0, NULL, NULL);
     }
   } else {
     action->node_local_data = NULL;
