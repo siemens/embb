@@ -45,8 +45,13 @@ set (EMBB_BASE_VERSION_PATCH 3)
 # See http://www.cmake.org/cmake/help/v3.1/policy/CMP0053.html
 #
 # Set those policies to be treated the legacy (CMake < 3.1) way.
-cmake_policy(SET CMP0054 OLD)
-cmake_policy(SET CMP0053 OLD)
+if(POLICY CMP0054)
+  cmake_policy(SET CMP0054 OLD)
+endif(POLICY CMP0054)
+
+if(POLICY CMP0053)
+  cmake_policy(SET CMP0053 OLD)
+endif(POLICY CMP0053)
 
 
 if(NOT CMAKE_BUILD_TYPE)
