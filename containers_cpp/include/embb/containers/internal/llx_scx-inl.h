@@ -111,14 +111,14 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
   }
   if (marked_1 && 
       (curr_scx->State() == OperationState::Comitted ||
-       (curr_scx->State() == OperationState::InProgress && curr_scx->Help()))) {
+       (curr_scx->State() == OperationState::InProgress && Help(curr_scx)))) {
     // Successfully completed active SCX:
     finalized = true;
     return false;
   }
   if (data_record->ScxInfo().Load()->State() == OperationState::InProgress) {
     // Help active SCX:
-    data_record->ScxInfo().Load()->Help();
+    Help(data_record->ScxInfo().Load());
   }
   return false;
 }
@@ -212,10 +212,10 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditionalCAS(
       EMBB_THROW(embb::base::ErrorException,
         "Missing preceding LLX on a data record used for SCX");
     }
-    // ScxRecord_t scx_op(*(l_it->data_record->ScxInfo().Load()));
     info_fields->PushBack(
       l_it->data_record->ScxInfo().Load());
   }
+  thread_llx_results_[thread_id]->clear();
   // Announce SCX operation. Lists linked_deps and finalize_dep are 
   // guaranteed to remain on the stack until this announced operation
   // is completed, so no allocation/pool is necessary.
@@ -234,13 +234,78 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditionalCAS(
     OperationState::InProgress);
   // Allocate from pool as this operation description is global:
   ScxRecord_t * scx = scx_record_pool_.Allocate(new_scx);
-  return scx->Help();
+  return Help(scx);
 }
 
 template< typename UserData, typename ValuePool >
 bool LlxScx<UserData, ValuePool>::TryValidateLink(
   const DataRecord_t & field) {
   return true; // @TODO
+}
+
+// ScxRecord
+
+template< typename UserData, typename ValuePool >
+bool LlxScx<UserData, ValuePool>::Help(
+  ScxRecord_t * scx) {
+  // We ensure that an SCX S does not change a data record 
+  // while it is frozen for another SCX S'. Instead, S uses 
+  // the information in the SCX record of S' to help S'
+  // complete, so that the data record can be unfrozen.
+  typedef embb::containers::internal::FixedSizeList<DataRecord_t *> dr_list_t;
+  typedef embb::containers::internal::FixedSizeList<ScxRecord_t *> op_list_t;
+  // Freeze all data records in data_records (i.e. reserve them for this 
+  // SCX operation) to protect their mutable fields from being changed by 
+  // other SCXs:
+  dr_list_t::iterator linked_it  = scx->linked_data_records_->begin();
+  dr_list_t::iterator linked_end = scx->linked_data_records_->end();
+  op_list_t::iterator scx_op_it  = scx->scx_ops_->begin();
+  op_list_t::iterator scx_op_end = scx->scx_ops_->end();
+  for (; linked_it != linked_end && scx_op_it != scx_op_end;
+       ++linked_it, ++scx_op_it) {
+    DataRecord_t * r = *linked_it;
+    ScxRecord<DataRecord_t> * rinfo_old = *scx_op_it;
+    // Try to freeze the data record by setting its SCX info field
+    // to this SCX operation description:
+    if (!r->ScxInfo().CompareAndSwap(rinfo_old, scx)) {
+      if (r->ScxInfo().Load() != scx) {
+        // could not freeze r because it is frozen for another SCX:
+        if (scx->all_frozen_) {
+          // SCX already completed:
+          return true;
+        }
+        // Atomically unfreeze all nodes frozen for this SCX (see LLX):
+        scx->state_ = ScxRecord_t::Aborted;
+        return false;
+      }
+    } else {
+      // Do not try to delete the sentinel scx record:
+      if (rinfo_old->field_ != 0) {
+        scx_record_list_pool_.Free(rinfo_old->scx_ops_);
+        scx_record_pool_.Free(rinfo_old);
+      }
+    }
+  }
+  // finished freezing data records
+  assert(scx->state_ == ScxRecord_t::InProgress ||
+         scx->state_ == ScxRecord_t::Comitted);
+  // frozen step:
+  scx->all_frozen_ = true;
+  // mark step:
+  dr_list_t::iterator finalize_it  = scx->finalize_data_records_->begin();
+  dr_list_t::iterator finalize_end = scx->finalize_data_records_->end();
+  for (; finalize_it != finalize_end; ++finalize_it) {
+    (*finalize_it)->MarkForFinalize();
+  }
+  // update CAS:
+  cas_t expected_old_value = scx->old_value_;
+  scx->field_->CompareAndSwap(expected_old_value, scx->new_value_);
+  // Commit step.
+  // Finalizes all r in data_records within finalize range and
+  // unfreezes all r in data_records outside of finalize range. 
+  // Linearization point of this operation.
+  scx->state_ = ScxRecord_t::Comitted;
+  return true;
 }
 
 // LlxScxRecord
@@ -257,66 +322,6 @@ LlxScxRecord<UserData>::LlxScxRecord(
 : user_data_(user_data),
   marked_for_finalize_(false) {
   scx_op_.Store(&dummy_scx);
-}
-
-// internal::ScxRecord
-
-template< typename DataRecord >
-bool ScxRecord<DataRecord>::Help() {
-  // We ensure that an SCX S does not change a data record 
-  // while it is frozen for another SCX S'. Instead, S uses 
-  // the information in the SCX record of S' to help S'
-  // complete, so that the data record can be unfrozen.
-  typedef embb::containers::internal::FixedSizeList<DataRecord *> dr_list_t;
-  typedef embb::containers::internal::FixedSizeList<self_t *> op_list_t;
-  // Freeze all data records in data_records (i.e. reserve them for this 
-  // SCX operation) to protect their mutable fields from being changed by 
-  // other SCXs:
-  dr_list_t::iterator linked_it  = linked_data_records_->begin();
-  dr_list_t::iterator linked_end = linked_data_records_->end();
-  op_list_t::iterator scx_op_it  = scx_ops_->begin();
-  op_list_t::iterator scx_op_end = scx_ops_->end();
-  for (; linked_it != linked_end && scx_op_it != scx_op_end;
-       ++linked_it, ++scx_op_it) {
-    DataRecord * r = *linked_it;
-    ScxRecord<DataRecord> * rinfo_old = *scx_op_it;
-    // Try to freeze the data record by setting its SCX info field
-    // to this SCX operation description:
-    if (!r->ScxInfo().CompareAndSwap(rinfo_old, this)) {
-      if (r->ScxInfo().Load() != this) {
-        // could not freeze r because it is frozen for another SCX:
-        if (all_frozen_) {
-          // SCX already completed:
-          return true;
-        }
-        // Atomically unfreeze all nodes frozen for this SCX (see LLX):
-        state_ = Aborted;
-        return false;
-      }
-    }
-    else {
-  //  free_scx_ops.PushBack(rinfo_old);
-    }
-  }
-  // finished freezing data records
-  assert(state_ == InProgress || state_ == Comitted);
-  // frozen step:
-  all_frozen_ = true;
-  // mark step:
-  dr_list_t::iterator finalize_it  = finalize_data_records_->begin();
-  dr_list_t::iterator finalize_end = finalize_data_records_->end();
-  for (; finalize_it != finalize_end; ++finalize_it) {
-    (*finalize_it)->MarkForFinalize();
-  }
-  // update CAS:
-  cas_t expected_old_value = old_value_;
-  field_->CompareAndSwap(expected_old_value, new_value_);
-  // Commit step.
-  // Finalizes all r in data_records within finalize range and
-  // unfreezes all r in data_records outside of finalize range. 
-  // Linearization point of this operation.
-  state_ = Comitted;
-  return true;
 }
 
 template< typename UserData >

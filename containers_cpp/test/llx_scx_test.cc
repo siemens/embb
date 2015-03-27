@@ -41,21 +41,62 @@ LlxScxTest::LlxScxTest() :
     static_cast<int>(partest::TestSuite::GetDefaultNumThreads())),
   llxscx_(3),
   tail(0, '-'),
-  head(0, '-', Node::node_ptr_t(&tail)) {
+  head(0, '-'),
+  tail_llx(tail),
+  head_llx(head) {
   CreateUnit("SerialArrayTest").Add(&LlxScxTest::SerialArrayTest, this);
   CreateUnit("SerialListTest").Add(&LlxScxTest::SerialListTest, this);
-  CreateUnit("ParallelTest").Add(&LlxScxTest::ParallelTest, this);
+//  CreateUnit("ParallelTest")
+//    .Add(&LlxScxTest::ParallelTest, this)
+//    .Post(&LlxScxTest::ParallelTestPost, this);
 }
 
 void LlxScxTest::ParallelTest() {
-  typedef LlxScxTest::Node Node;
-
   unsigned int thread_index;
   int return_val = embb_internal_thread_index(&thread_index);
   if (return_val != EMBB_SUCCESS)
-    EMBB_THROW(embb::base::ErrorException, "Could not get thread id!");
-  
+    EMBB_THROW(embb::base::ErrorException, "Could not get thread id!"); 
+
   // Threads try to append n nodes to a linked list in parallel
+  for (char value = 'a'; value <= 'z';) {
+    // Find node to append new element on:
+    internal::LlxScxRecord<Node> * node = &head_llx;
+    internal::LlxScxRecord<Node> * next = node->Data().next_;
+    while (next != 0 && next->Data().value_ < value) {
+      node = next;
+      next = next->Data().next_;
+    }
+    Node n;
+    llxscx_.TryLoadLinked(node, n);
+    if (n.next_ == next) {
+      // Pointer still valid after LLX, call SCX(node, node.next, new_node)
+      internal::FixedSizeList<LlxScxRecord<Node> *> linked_deps(1);
+      linked_deps.PushBack(node);
+      // Create new node:
+      Node new_node(static_cast<int>(thread_index), value);
+      internal::LlxScxRecord<Node> * new_node_ptr =
+        new internal::LlxScxRecord<Node>(new_node);
+      bool element_inserted =
+        llxscx_.TryStoreConditional(
+          &(node->Data().next_),
+          new_node_ptr,
+          linked_deps);
+      if (element_inserted) {
+        // Value has been added to list, continue with next value
+        ++value;
+      }
+    } 
+  }
+}
+
+void LlxScxTest::ParallelTestPost() {
+  internal::LlxScxRecord<Node> * node = &head_llx;
+  internal::LlxScxRecord<Node> * next = head_llx.Data().next_;
+  while (next != 0) {
+    delete node;
+    node = next;
+    next = next->Data().next_;
+  }
 }
 
 void LlxScxTest::SerialArrayTest() {
@@ -67,7 +108,7 @@ void LlxScxTest::SerialArrayTest() {
   // Atomic<size_t> not assignable, TryStoreConditional requires
   // a specialization for atomics that uses a.Store(b.Load()).
   AtomicField field(23);
-  // Initialize 
+
   LlxScxRecord< Payload > * my_list =
     new LlxScxRecord<Payload>[10];
   for (int i = 0; i != 10; ++i) {

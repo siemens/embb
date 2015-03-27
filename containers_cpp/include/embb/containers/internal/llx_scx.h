@@ -29,6 +29,7 @@
 
 #include <embb/base/thread.h>
 #include <embb/base/atomic.h>
+#include <embb/base/function.h>
 #include <embb/base/thread_specific_storage.h>
 #include <embb/containers/object_pool.h>
 #include <embb/containers/lock_free_tree_value_pool.h>
@@ -245,14 +246,14 @@ class ScxRecord {
    * Constructor.
    */
   ScxRecord(
-    embb::containers::internal::FixedSizeList<DataRecord *> &
+    FixedSizeList<DataRecord *> &
       linked_data_records,
-    embb::containers::internal::FixedSizeList<DataRecord *> &
+    FixedSizeList<DataRecord *> &
       finalize_data_records,
     embb::base::Atomic<cas_t> * field,
     cas_t new_value,
     cas_t old_value,
-    embb::containers::internal::FixedSizeList<self_t *> * scx_ops,
+    FixedSizeList<self_t *> * scx_ops,
     OperationState operation_state)
   : linked_data_records_(&linked_data_records),
     finalize_data_records_(&finalize_data_records),
@@ -267,25 +268,20 @@ class ScxRecord {
   OperationState State() const {
     return state_;
   }
-
-  /**
-   * Returns true if helped operation has been completed.
-   */
-  bool Help();
-
- private:
+  
+ public:
   /**
    * Sequence of load-linked data records for this SCX operation.
    * Named 'V' in original publication.
    */
-   const embb::containers::internal::FixedSizeList<DataRecord *> *
+   const FixedSizeList<DataRecord *> *
     linked_data_records_;
 
   /**
    * Sequence of data records to be finalized in this SCX operation.
    * Named 'R' in original publication.
    */
-   const embb::containers::internal::FixedSizeList<DataRecord *> *
+   const FixedSizeList<DataRecord *> *
     finalize_data_records_;
 
   /**
@@ -311,7 +307,7 @@ class ScxRecord {
    * List of SCX operation descriptions associated with data records
    * linked with this SCX operation.
    */
-  embb::containers::internal::FixedSizeList<self_t *> * scx_ops_;
+  FixedSizeList<self_t *> * scx_ops_;
 
   /**
    * Current state of this SCX record.
@@ -648,6 +644,8 @@ class LlxScx {
    * Prevent assignment.
    */
   LlxScx & operator=(const LlxScx &);
+
+  bool Help(ScxRecord_t * scx);
 
   /**
    * Actual implementation of StoreConditional operating on unified fields/values

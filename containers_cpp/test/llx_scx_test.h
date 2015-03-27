@@ -91,11 +91,14 @@ class LlxScxTest : public partest::TestCase {
   void SerialArrayTest();
   void SerialListTest();
   void ParallelTest();
+  void ParallelTestPost();
 
   int num_threads_;
   internal::LlxScx<Node> llxscx_;
   Node tail;
   Node head;
+  internal::LlxScxRecord<Node> tail_llx;
+  internal::LlxScxRecord<Node> head_llx;
 };
 
 } // namespace test
