@@ -30,6 +30,25 @@ set (EMBB_BASE_VERSION_MAJOR 0)
 set (EMBB_BASE_VERSION_MINOR 2)
 set (EMBB_BASE_VERSION_PATCH 3)
 
+# Fix compilation for CMake versions >= 3.1
+#
+# New Policy 0054:
+# CMake 3.1 and above no longer implicitly dereference variables
+# or interpret keywords in an if() command argument when it is a
+# Quoted Argument.
+# See http://www.cmake.org/cmake/help/v3.1/policy/CMP0054.html
+#
+# New Policy 0053:
+# CMake 3.1 introduced faster implementation of evaluation of the
+# Variable References and Escape Sequences. This breaks compilation
+# here.
+# See http://www.cmake.org/cmake/help/v3.1/policy/CMP0053.html
+#
+# Set those policies to be treated the legacy (CMake < 3.1) way.
+cmake_policy(SET CMP0054 OLD)
+cmake_policy(SET CMP0053 OLD)
+
+
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Choose the type of build, options are: Debug Release
