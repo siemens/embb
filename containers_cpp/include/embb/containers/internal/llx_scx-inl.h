@@ -24,25 +24,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_CONTAINERS_PRIMITIVES_LLX_SCX_INL_H_
-#define EMBB_CONTAINERS_PRIMITIVES_LLX_SCX_INL_H_
+#ifndef EMBB_CONTAINERS_INTERNAL_LLX_SCX_INL_H_
+#define EMBB_CONTAINERS_INTERNAL_LLX_SCX_INL_H_
 
-#include <embb/containers/primitives/llx_scx.h>
+#include <embb/containers/internal/llx_scx.h>
 #include <embb/base/thread.h>
 #include <embb/base/atomic.h>
 #include <embb/base/memory_allocation.h>
 #include <vector>
 #include <stdarg.h>
 
-/** 
- * Implementation of the LX/STX primitive as presented in 
- * "Pragmatic Primitives for Non-blocking Data Structures" 
- * (Brown et al., 2013).
- */
-
 namespace embb { 
 namespace containers {
-namespace primitives {
+namespace internal {
 
 template< typename UserData, typename ValuePool >
 unsigned int LlxScx<UserData, ValuePool>::ThreadId() {
@@ -89,7 +83,7 @@ LlxScx<UserData, ValuePool>::~LlxScx() {
 template< typename UserData, typename ValuePool >
 bool LlxScx<UserData, ValuePool>::TryLoadLinked(
   DataRecord_t * const data_record,
-  DataRecord_t & user_data,
+  UserData & user_data,
   bool & finalized) {
   finalized = false;
   unsigned int thread_id = ThreadId();
@@ -132,7 +126,7 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
 template< typename UserData, typename ValuePool >
 bool LlxScx<UserData, ValuePool>::TryLoadLinked(
   DataRecord_t * const data_record,
-  DataRecord_t & user_data) {
+  UserData & user_data) {
   bool finalized;
   return TryLoadLinked(data_record, user_data, finalized);
 }
@@ -142,6 +136,51 @@ template< typename FieldType >
 bool LlxScx<UserData, ValuePool>::TryStoreConditional(
   embb::base::Atomic<FieldType> * field,
   FieldType value,
+  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
+  embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps) {
+  embb::base::Atomic<cas_t> * cas_field =
+    reinterpret_cast<embb::base::Atomic<cas_t> *>(field);
+  cas_t cas_value = static_cast<cas_t>(value);
+  return TryStoreConditionalCAS(cas_field, cas_value, linked_deps, finalize_deps);
+}
+
+template< typename UserData, typename ValuePool >
+template< typename FieldType >
+bool LlxScx<UserData, ValuePool>::TryStoreConditional(
+  embb::base::Atomic<FieldType*> * field,
+  FieldType * value,
+  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
+  embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps) {
+  embb::base::Atomic<cas_t> * cas_field =
+    reinterpret_cast<embb::base::Atomic<cas_t> *>(field);
+  cas_t cas_value = reinterpret_cast<cas_t>(value);
+  return TryStoreConditionalCAS(cas_field, cas_value, linked_deps, finalize_deps);
+}
+
+template< typename UserData, typename ValuePool >
+template< typename FieldType >
+bool LlxScx<UserData, ValuePool>::TryStoreConditional(
+  embb::base::Atomic<FieldType> * field,
+  FieldType value,
+  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps) {
+  embb::containers::internal::FixedSizeList<DataRecord_t *> finalize_deps(0);
+  return TryStoreConditional(field, value, linked_deps, finalize_deps);
+}
+
+template< typename UserData, typename ValuePool >
+template< typename FieldType >
+bool LlxScx<UserData, ValuePool>::TryStoreConditional(
+  embb::base::Atomic<FieldType*> * field,
+  FieldType * value,
+  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps) {
+  embb::containers::internal::FixedSizeList<DataRecord_t *> finalize_deps(0);
+  return TryStoreConditional(field, value, linked_deps, finalize_deps);
+}
+
+template< typename UserData, typename ValuePool >
+bool LlxScx<UserData, ValuePool>::TryStoreConditionalCAS(
+  embb::base::Atomic<cas_t> * cas_field,
+  cas_t cas_value,
   embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
   embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps) {
   typedef embb::containers::internal::FixedSizeList<DataRecord_t *> dr_list_t;
@@ -184,11 +223,11 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
     linked_deps,
     finalize_deps,
     // target field:
-    reinterpret_cast<embb::base::Atomic<cas_t> *>(field),
+    cas_field,
     // new value:
-    reinterpret_cast<cas_t>(value),
+    cas_value,
     // old value:
-    reinterpret_cast<cas_t>(field->Load()),
+    cas_field->Load(),
     // linked SCX operations:
     info_fields,
     // initial operation state:
@@ -196,16 +235,6 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
   // Allocate from pool as this operation description is global:
   ScxRecord_t * scx = scx_record_pool_.Allocate(new_scx);
   return scx->Help();
-}
-
-template< typename UserData, typename ValuePool >
-template< typename FieldType >
-bool LlxScx<UserData, ValuePool>::TryStoreConditional(
-  embb::base::Atomic<FieldType> * field,
-  FieldType value,
-  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps) {
-  embb::containers::internal::FixedSizeList<DataRecord_t *> finalize_deps(0);
-  return TryStoreConditional(field, value, linked_deps, finalize_deps);
 }
 
 template< typename UserData, typename ValuePool >
@@ -233,7 +262,7 @@ LlxScxRecord<UserData>::LlxScxRecord(
 // internal::ScxRecord
 
 template< typename DataRecord >
-bool internal::ScxRecord<DataRecord>::Help() {
+bool ScxRecord<DataRecord>::Help() {
   // We ensure that an SCX S does not change a data record 
   // while it is frozen for another SCX S'. Instead, S uses 
   // the information in the SCX record of S' to help S'
@@ -291,12 +320,12 @@ bool internal::ScxRecord<DataRecord>::Help() {
 }
 
 template< typename UserData >
-internal::ScxRecord< LlxScxRecord<UserData> > 
+ScxRecord< LlxScxRecord<UserData> > 
   LlxScxRecord<UserData>::dummy_scx = 
-    internal::ScxRecord< LlxScxRecord<UserData> >();
+    ScxRecord< LlxScxRecord<UserData> >();
 
-} // namespace primitives
+} // namespace internal
 } // namespace containers
 } // namespace embb
 
-#endif  // EMBB_CONTAINERS_PRIMITIVES_LLX_SCX_INL_H_
+#endif  // EMBB_CONTAINERS_INTERNAL_LLX_SCX_INL_H_

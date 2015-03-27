@@ -26,15 +26,15 @@
 
 #include <llx_scx_test.h>
 #include <embb/containers/internal/fixed_size_list.h>
-#include <embb/containers/primitives/llx_scx.h>
+#include <embb/containers/internal/llx_scx.h>
 
 namespace embb {
 namespace containers {
 namespace test {
 
 using embb::containers::internal::FixedSizeList;
-using embb::containers::primitives::LlxScxRecord;
-using embb::containers::primitives::LlxScx;
+using embb::containers::internal::LlxScxRecord;
+using embb::containers::internal::LlxScx;
 
 LlxScxTest::LlxScxTest() :
   num_threads_(
@@ -42,7 +42,8 @@ LlxScxTest::LlxScxTest() :
   llxscx_(3),
   tail(0, '-'),
   head(0, '-', Node::node_ptr_t(&tail)) {
-  CreateUnit("SerialTest").Add(&LlxScxTest::SerialTest, this);
+  CreateUnit("SerialArrayTest").Add(&LlxScxTest::SerialArrayTest, this);
+  CreateUnit("SerialListTest").Add(&LlxScxTest::SerialListTest, this);
   CreateUnit("ParallelTest").Add(&LlxScxTest::ParallelTest, this);
 }
 
@@ -57,7 +58,39 @@ void LlxScxTest::ParallelTest() {
   // Threads try to append n nodes to a linked list in parallel
 }
 
-void LlxScxTest::SerialTest() {
+void LlxScxTest::SerialArrayTest() {
+  typedef int Payload;
+  typedef embb::base::Atomic<size_t> AtomicField;
+  // LLX/SCX with maximum of 3 active load-links in every thread:
+  LlxScx<Payload> llxscx(3);
+
+  // Atomic<size_t> not assignable, TryStoreConditional requires
+  // a specialization for atomics that uses a.Store(b.Load()).
+  AtomicField field(23);
+  // Initialize 
+  LlxScxRecord< Payload > * my_list =
+    new LlxScxRecord<Payload>[10];
+  for (int i = 0; i != 10; ++i) {
+    my_list[i] = i;
+  }
+
+  Payload l1, l2;
+  PT_ASSERT(llxscx.TryLoadLinked(&my_list[0], l1));
+  PT_ASSERT(llxscx.TryLoadLinked(&my_list[5], l2));
+
+  FixedSizeList< LlxScxRecord<Payload> * >
+    links(2);
+  links.PushBack(&my_list[0]);
+  links.PushBack(&my_list[5]);
+
+  // Try to store new value depending on links:
+  size_t a = 42;
+  PT_ASSERT(llxscx.TryStoreConditional(&field, a, links));
+  // New value should have been changed successfully:
+  PT_ASSERT_EQ(field.Load(), a);
+}
+
+void LlxScxTest::SerialListTest() {
   typedef LlxScxTest::Node Node;
   // Global:
   LlxScx<Node> llxscx(3);
@@ -77,17 +110,17 @@ void LlxScxTest::SerialTest() {
   dr2->next_.Store(&dr3);
 
   // Thread-local:
-  LlxScxRecord<Node> l1, l2, l3;
+  Node l1, l2, l3;
   bool finalized;
   PT_ASSERT(llxscx.TryLoadLinked(&dr1, l1, finalized));
   PT_ASSERT(!finalized);
-  PT_ASSERT_EQ(l1->value_, dr1->value_);
+  PT_ASSERT_EQ(l1.value_, dr1->value_);
   PT_ASSERT(llxscx.TryLoadLinked(&dr2, l2, finalized));
   PT_ASSERT(!finalized);
-  PT_ASSERT_EQ(l2->value_, dr2->value_);
+  PT_ASSERT_EQ(l2.value_, dr2->value_);
   PT_ASSERT(llxscx.TryLoadLinked(&dr3, l3, finalized));
   PT_ASSERT(!finalized);
-  PT_ASSERT_EQ(l3->value_, dr3->value_);
+  PT_ASSERT_EQ(l3.value_, dr3->value_);
 
   FixedSizeList< LlxScxRecord<Node> * >
     linked_deps(3);
@@ -103,7 +136,7 @@ void LlxScxTest::SerialTest() {
   
   LlxScxRecord<Node> new_node(n3);
   PT_ASSERT(
-    llxscx.TryStoreConditional<LlxScxRecord<Node> *>(
+    llxscx.TryStoreConditional(
       &n2.next_,     // fld: field to update
       &new_node,     // new value
       linked_deps,   // V: dependencies, must be LL'd before

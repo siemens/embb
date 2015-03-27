@@ -28,7 +28,7 @@
 #define CONTAINERS_CPP_TEST_LLX_SCX_TEST_H_
 
 #include <partest/partest.h>
-#include <embb/containers/primitives/llx_scx.h>
+#include <embb/containers/internal/llx_scx.h>
 
 namespace embb {
 namespace containers {
@@ -39,10 +39,10 @@ class LlxScxTest : public partest::TestCase {
  private:
   class Node {
    public:
-    typedef primitives::LlxScxRecord<Node> * node_ptr_t;
+     typedef internal::LlxScxRecord<Node> * node_ptr_t;
    
    public:
-    embb::base::Atomic<primitives::LlxScxRecord<Node> *> next_;
+     embb::base::Atomic<internal::LlxScxRecord<Node> *> next_;
     embb::base::Atomic<int> count_;
     char value_;
 
@@ -88,11 +88,12 @@ class LlxScxTest : public partest::TestCase {
   LlxScxTest();
 
  private:
-  void SerialTest();
+  void SerialArrayTest();
+  void SerialListTest();
   void ParallelTest();
 
   int num_threads_;
-  primitives::LlxScx<Node> llxscx_;
+  internal::LlxScx<Node> llxscx_;
   Node tail;
   Node head;
 };
