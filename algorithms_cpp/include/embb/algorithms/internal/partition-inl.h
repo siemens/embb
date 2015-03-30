@@ -31,109 +31,103 @@ namespace embb {
 namespace algorithms {
 namespace internal {
 
-template<typename ForwardIterator>
-ChunkDescriptor<ForwardIterator>::ChunkDescriptor(ForwardIterator first,
-    ForwardIterator last) :
-    first(first), last(last) {
+template<typename RAI>
+ChunkDescriptor<RAI>::ChunkDescriptor(
+  RAI first, RAI last) :
+  first_(first), last_(last) {
 }
 
-template<typename ForwardIterator>
-ForwardIterator ChunkDescriptor<ForwardIterator>::GetFirst() const {
-  return first;
+template<typename RAI>
+RAI ChunkDescriptor<RAI>::GetFirst() const {
+  return first_;
 }
 
-template<typename ForwardIterator>
-ForwardIterator ChunkDescriptor<ForwardIterator>::GetLast() const {
-  return last;
+template<typename RAI>
+RAI ChunkDescriptor<RAI>::GetLast() const {
+  return last_;
 }
 
-template<typename ForwardIterator>
-BlockSizePartitioner<ForwardIterator>::BlockSizePartitioner(
-    ForwardIterator first, ForwardIterator last, size_t chunkSize) :
-    first(first), last(last), chunkSize(chunkSize) {
-  elements_count = static_cast<size_t>(std::distance(first, last));
-  chunks = elements_count / chunkSize;
-  if (elements_count % chunkSize != 0)
-    chunks++;
-}
-
-template<typename ForwardIterator>
-size_t BlockSizePartitioner<ForwardIterator>::Size() {
-  return chunks;
-}
-
-template<typename ForwardIterator>
-const ChunkDescriptor<ForwardIterator>
-  BlockSizePartitioner<ForwardIterator>::operator[](
-    size_t const& index) const {
-  ForwardIterator first_new = first;
-  std::advance(first_new, index * chunkSize);
-
-  ForwardIterator last_new = first_new;
-
-  if (index >= chunks - 1) {
-    last_new = last;
-  } else {
-    std::advance(last_new, chunkSize);
+template<typename RAI>
+BlockSizePartitioner<RAI>::BlockSizePartitioner(
+    RAI first, RAI last, size_t chunkSize) :
+    first_(first), last_(last), chunk_size_(chunkSize) {
+  elements_count_ = static_cast<size_t>(std::distance(first_, last_));
+  chunks_ = elements_count_ / chunk_size_;
+  if (elements_count_ % chunk_size_ != 0) {
+    chunks_++;
   }
-
-  return ChunkDescriptor<ForwardIterator>(first_new, last_new);
 }
 
-template<typename ForwardIterator>
-size_t ChunkPartitioner<ForwardIterator>::Size() {
-  return size;
+template<typename RAI>
+size_t BlockSizePartitioner<RAI>::Size() {
+  return chunks_;
 }
 
-template<typename ForwardIterator>
-ChunkPartitioner<ForwardIterator>::ChunkPartitioner(ForwardIterator first,
-    ForwardIterator last, size_t amountChunks) :
-    first(first), last(last) {
+template<typename RAI>
+const ChunkDescriptor<RAI>
+  BlockSizePartitioner<RAI>::operator[](
+    size_t const & index) const {
+  typedef std::iterator_traits<RAI>::difference_type difference_type;
+  RAI first_new(first_);
+  first_new += static_cast<difference_type>(chunk_size_ * index);
+  RAI last_new(first_new);
+  if (index >= chunks_ - 1) {
+    last_new = last_;
+  } else {
+    last_new += static_cast<difference_type>(chunk_size_);
+  }
+  return ChunkDescriptor<RAI>(first_new, last_new);
+}
+
+template<typename RAI>
+size_t ChunkPartitioner<RAI>::Size() {
+  return size_;
+}
+
+template<typename RAI>
+ChunkPartitioner<RAI>::ChunkPartitioner(
+  RAI first, RAI last, size_t amountChunks) :
+  first_(first), last_(last) {
   if (amountChunks > 0) {
-    size = amountChunks;
+    size_ = amountChunks;
   } else {
-    // if no concrete chunk size was given, use number of cores...
+    // if no concrete chunk size was given, use number of cores
     embb::tasks::Node& node = embb::tasks::Node::GetInstance();
-    size = node.GetWorkerThreadCount();
+    size_ = node.GetWorkerThreadCount();
   }
-
-  elements_count = static_cast<size_t>(std::distance(first, last));
-  if (size > elements_count) {
+  elements_count_ = static_cast<size_t>(std::distance(first_, last_));
+  if (size_ > elements_count_) {
     // if we want to make more chunks than we have elements, correct
     // the number of chunks
-    size = elements_count;
+    size_ = elements_count_;
   }
-  standard_chunk_size = elements_count / size;
-  bigger_chunk_count = elements_count % size;
+  standard_chunk_size_ = elements_count_ / size_;
+  bigger_chunk_count_  = elements_count_ % size_;
 }
 
-template<typename ForwardIterator>
-const ChunkDescriptor<ForwardIterator>
-  ChunkPartitioner<ForwardIterator>::operator[](
+template<typename RAI>
+const ChunkDescriptor<RAI>
+  ChunkPartitioner<RAI>::operator[](
     size_t const& index) const {
-  typedef typename std::iterator_traits<ForwardIterator>::difference_type
+  typedef typename std::iterator_traits<RAI>::difference_type
       difference_type;
+  // Number of element preceding elements in the given chunk
   size_t prec_elements_count = 0;
-
-  if (index <= bigger_chunk_count) {
-    prec_elements_count = index * (standard_chunk_size + 1);
+  if (index <= bigger_chunk_count_) {
+    prec_elements_count = index * (standard_chunk_size_ + 1);
   } else {
-    prec_elements_count = (standard_chunk_size + 1) * bigger_chunk_count
-        + standard_chunk_size * (index - bigger_chunk_count);
+    prec_elements_count = 
+      (standard_chunk_size_ + 1) * bigger_chunk_count_ + 
+      (standard_chunk_size_ * (index - bigger_chunk_count_));
   }
-
-  size_t cur_elements_count =
-      (index < bigger_chunk_count) ?
-          (standard_chunk_size + 1) : standard_chunk_size;
-
-  ForwardIterator first_new = first;
-  std::advance(first_new, prec_elements_count);
-
-  first_new = first + static_cast<difference_type>(prec_elements_count);
-  ForwardIterator last_new = first_new;
-  std::advance(last_new, cur_elements_count);
-
-  return ChunkDescriptor<ForwardIterator>(first_new, last_new);
+  size_t cur_elements_count = (index < bigger_chunk_count_)
+           ? (standard_chunk_size_ + 1)
+           : standard_chunk_size_;
+  RAI first_new(first_);
+  first_new += static_cast<difference_type>(prec_elements_count);
+  RAI last_new(first_new);
+  last_new += static_cast<difference_type>(cur_elements_count);
+  return ChunkDescriptor<RAI>(first_new, last_new);
 }
 
 }  // namespace internal
