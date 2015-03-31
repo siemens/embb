@@ -68,7 +68,7 @@
  *     <td>\code{.cpp} Queue<Type>(capacity) \endcode</td>
  *     <td>Nothing</td>
  *     <td>
- *      Constructs a queue with capacity \c capacity that holds elements of
+ *      Constructs a queue with minimal capacity \c capacity that holds elements of
  *      type \c T.
  *     </td>
  *   </tr>
@@ -145,11 +145,17 @@ class WaitFreeSPSCQueue {
    */
   embb::base::Atomic<size_t> tail_index;
 
+  /**
+   * Align capacity to the next smallest power of two
+   */
+  static size_t AlignCapacityToPowerOfTwo(size_t capacity);
+
  public:
   /**
-   * Creates a queue with the specified capacity.
+   * Creates a queue with at least the specified capacity.
    *
-   * \memory Allocates \c capacity elements of type \c Type.
+   * \memory Allocates \c 2^k elements of type \c Type, where \k is the
+   * smallest number such that <tt>capacity <= 2^k</tt> holds.
    *
    * \notthreadsafe
    *

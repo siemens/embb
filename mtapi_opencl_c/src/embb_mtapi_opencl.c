@@ -46,8 +46,8 @@ struct embb_mtapi_opencl_plugin_struct {
   cl_device_id device_id;
   cl_context context;
   cl_command_queue command_queue;
-  cl_uint work_group_size;
-  cl_uint work_item_sizes[3];
+  size_t work_group_size;
+  size_t work_item_sizes[3];
 };
 
 typedef struct embb_mtapi_opencl_plugin_struct embb_mtapi_opencl_plugin_t;
@@ -270,12 +270,13 @@ void mtapi_opencl_plugin_initialize(
         NULL, NULL, &err);
     }
     if (CL_SUCCESS == err) {
+      size_t work_group_size;
       err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE,
-        sizeof(cl_uint), &plugin->work_group_size, NULL);
+        sizeof(size_t), &plugin->work_group_size, NULL);
     }
     if (CL_SUCCESS == err) {
       err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES,
-        3 * sizeof(cl_uint), &plugin->work_item_sizes[0], NULL);
+        3 * sizeof(size_t), &plugin->work_item_sizes[0], NULL);
     }
     if (CL_SUCCESS == err) {
       plugin->command_queue = clCreateCommandQueue(plugin->context,
