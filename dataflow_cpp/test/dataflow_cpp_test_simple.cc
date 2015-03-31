@@ -160,8 +160,7 @@ void SimpleTest::TestBasic() {
     // with (max_queues + 1), see defect embb449
     num_cores + 1, // max queues (default: 16)
     1024, // queue capacity (default: 1024)
-    4     // num priorities (default: 4)
-  );
+    4);   // num priorities (default: 4)
 
   for (int ii = 0; ii < 10000; ii++) {
     ArraySink<TEST_COUNT> asink;
