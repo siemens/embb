@@ -116,8 +116,8 @@ const ChunkDescriptor<RAI>
   if (index <= bigger_chunk_count_) {
     prec_elements_count = index * (standard_chunk_size_ + 1);
   } else {
-    prec_elements_count = 
-      (standard_chunk_size_ + 1) * bigger_chunk_count_ + 
+    prec_elements_count =
+      (standard_chunk_size_ + 1) * bigger_chunk_count_ +
       (standard_chunk_size_ * (index - bigger_chunk_count_));
   }
   size_t cur_elements_count = (index < bigger_chunk_count_)
