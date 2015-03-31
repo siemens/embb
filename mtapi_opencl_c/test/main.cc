@@ -29,17 +29,8 @@
 #include <embb_mtapi_opencl_test_linker.h>
 #include <embb_mtapi_opencl_test_task.h>
 
-#include <embb_mtapi_opencl_runtimelinker.h>
-
 
 PT_MAIN("MTAPI OPENCL") {
-  if ( embb_mtapi_opencl_link_at_runtime() != 0 ) {
-    PT_RUN(LinkerTest);
-    PT_RUN(TaskTest);
-  }
-  else {
-    ::std::cout <<
-      "! Skipping OpenCL tests, as OpenCL is not installed on your system." <<
-      ::std::endl;
-  }
+  PT_RUN(LinkerTest);
+  PT_RUN(TaskTest);
 }

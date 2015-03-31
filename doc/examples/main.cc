@@ -26,7 +26,6 @@
 
 #include <iostream>
 #include <embb/base/c/thread.h>
-#include "../../mtapi_opencl_c/src/embb_mtapi_opencl_runtimelinker.h"
 
 void RunMTAPI_C();
 void RunMTAPI_C_Plugin();
@@ -68,14 +67,7 @@ int main() {
   std::cout << "RunMTAPI_C_Network() ... done" << std::endl;
 
   std::cout << "RunMTAPI_C_OpenCL() ..." << std::endl;
-  if (embb_mtapi_opencl_link_at_runtime() != 0) {
-    RunMTAPI_C_OpenCL();
-  }
-  else {
-    ::std::cout <<
-      "! Skipping OpenCL tests, as OpenCL is not installed on your system." <<
-      ::std::endl;
-  }
+  RunMTAPI_C_OpenCL();
   std::cout << "RunMTAPI_C_OpenCL() ... done" << std::endl;
 
   std::cout << "RunMTAPI_CPP() ..." << std::endl;
