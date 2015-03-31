@@ -54,7 +54,13 @@ Queue::Queue(mtapi_uint_t priority, bool ordered) {
   mtapi_job_hndl_t job = mtapi_job_get(TASKS_CPP_JOB, domain_id, &status);
   assert(MTAPI_SUCCESS == status);
   handle_ = mtapi_queue_create(MTAPI_QUEUE_ID_NONE, job, &attr, &status);
-  if (MTAPI_SUCCESS != status) {
+  if (status == MTAPI_SUCCESS) {
+    return;
+  } else if (status == MTAPI_ERR_QUEUE_LIMIT) {
+    EMBB_THROW(embb::base::ErrorException,
+      "mtapi::Queue could not be constructed, "
+      "maximum number of queues exceeded");
+  } else {
     EMBB_THROW(embb::base::ErrorException,
       "mtapi::Queue could not be constructed");
   }
