@@ -158,7 +158,7 @@ void SimpleTest::TestBasic() {
     128,  // max groups (default: 128)
     // Currently needs to be initialized
     // with (max_queues + 1), see defect embb449
-    num_cores, // max queues (default: 16)
+    num_cores + 1, // max queues (default: 16)
     1024, // queue capacity (default: 1024)
     4     // num priorities (default: 4)
   );
