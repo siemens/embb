@@ -29,8 +29,6 @@
 #include <embb/base/exceptions.h>
 #include <embb/tasks/tasks.h>
 
-#include <iostream>
-
 namespace embb {
 namespace tasks {
 
