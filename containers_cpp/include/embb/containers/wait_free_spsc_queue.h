@@ -68,7 +68,7 @@
  *     <td>\code{.cpp} Queue<Type>(capacity) \endcode</td>
  *     <td>Nothing</td>
  *     <td>
- *      Constructs a queue with capacity \c capacity that holds elements of
+ *      Constructs a queue with minimal capacity \c capacity that holds elements of
  *      type \c T.
  *     </td>
  *   </tr>
