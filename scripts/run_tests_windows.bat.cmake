@@ -28,29 +28,28 @@
 setlocal EnableDelayedExpansion 
 SET NUM_ERRORS=0
 SET DIR=%~dp0 
-"%DIR:~0,-1%\embb_base_c_test.exe"
-if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
-echo.
-"%DIR:~0,-1%\embb_base_cpp_test.exe"
-if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
-echo.
-"%DIR:~0,-1%\embb_mtapi_c_test.exe"
-if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
-echo.
-"%DIR:~0,-1%\embb_mtapi_cpp_test.exe"
-if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
-echo.
-"%DIR:~0,-1%\embb_tasks_cpp_test.exe"
-if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
-echo.
-"%DIR:~0,-1%\embb_algorithms_cpp_test.exe"
-if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
-echo.
-"%DIR:~0,-1%\embb_containers_cpp_test.exe"
-if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1 
-echo.
-"%DIR:~0,-1%\embb_dataflow_cpp_test.exe"
+SET EMBB_EXECUTABLES=@EXPECTED_EMBB_TEST_EXECUTABLES@
+
+call :parse "%EMBB_EXECUTABLES%"
+goto :end
+
+:parse
+set list=%1
+set list=%list:"=%
+FOR /f "tokens=1* delims=;" %%a IN ("%list%") DO (
+  if not "%%a" == "" call :sub %%a
+  if not "%%b" == "" call :parse "%%b"
+)
+exit /b
+
+:sub
+call "%DIR:~0,-1%\%1.exe"
 if not !ERRORLEVEL! ==0 set /a NUM_ERRORS=!NUM_ERRORS!+1
+exit /b
+
+
+:end
+
 if not !NUM_ERRORS! ==0 (
  echo.
  SET ERRORLEVEL=1
