@@ -33,9 +33,15 @@
 #include <vector>
 #include <list>
 
-PartitionerTest::PartitionerTest() {
-  CreateUnit("algorithms partitioner test").
-  Add(&PartitionerTest::TestBasic, this);
+PartitionerTest::PartitionerTest()
+: partitioned_array_size_(16384) {
+  // Size of array to be partitioned should be power of 2
+  CreateUnit("TestBasic")
+    .Add(&PartitionerTest::TestBasic, this);
+  CreateUnit("TestLargeRange")
+    .Pre(&PartitionerTest::TestLargeRangePre, this)
+    .Add(&PartitionerTest::TestLargeRange, this)
+    .Post(&PartitionerTest::TestLargeRangePost, this);
 }
 
 void PartitionerTest::TestBasic() {
@@ -68,5 +74,64 @@ void PartitionerTest::TestBasic() {
   PT_EXPECT_EQ_MSG(*(partitioner2[2].GetLast() - 1), 13, "Get end iterator");
 
   PT_EXPECT_EQ_MSG(partitioner2.Size(), size_t(3), "Check count of partitions");
+}
+
+void PartitionerTest::TestLargeRangePre() {
+  partitioned_array_ = new int[partitioned_array_size_];
+  for (size_t i = 0; i < partitioned_array_size_; ++i) {
+    partitioned_array_[i] = static_cast<int>(i);
+  }
+}
+
+void PartitionerTest::TestLargeRangePost() {
+  delete[] partitioned_array_;
+}
+
+void PartitionerTest::TestLargeRange() {
+  // Test chunk partitioner with increasing number of chunks:
+  for (size_t num_chunks = 2;
+       num_chunks < partitioned_array_size_;
+       num_chunks *= 2) {
+    embb::algorithms::internal::ChunkPartitioner<int *>
+      chunk_partitioner(
+      partitioned_array_,
+      partitioned_array_ + partitioned_array_size_,
+      num_chunks);
+    int last_value_prev = -1;
+    PT_EXPECT_EQ(num_chunks, chunk_partitioner.Size());
+    // Iterate over chunks in partition:
+    for (size_t chunk = 0; chunk < chunk_partitioner.Size(); ++chunk) {
+      int first_value = *(chunk_partitioner[chunk].GetFirst());
+      int last_value  = *(chunk_partitioner[chunk].GetLast() - 1);
+      PT_EXPECT_LT(first_value, last_value);
+      // Test seams between chunks: chunk[i].last + 1 == chunk[i+1].first
+      PT_EXPECT_EQ((last_value_prev + 1), first_value);
+      last_value_prev = last_value;
+    }
+  }
+  // Test block size partitioner with increasing chunk size:
+  for (size_t block_size = 1;
+       block_size < partitioned_array_size_;
+       block_size *= 2) {
+    embb::algorithms::internal::BlockSizePartitioner<int *>
+      chunk_partitioner(
+      partitioned_array_,
+      partitioned_array_ + partitioned_array_size_,
+      block_size);
+    int last_value_prev = -1;
+    // Iterate over chunks in partition:
+    for (size_t chunk = 0; chunk < chunk_partitioner.Size(); ++chunk) {
+      int first_value = *(chunk_partitioner[chunk].GetFirst());
+      int last_value  = *(chunk_partitioner[chunk].GetLast() - 1);
+      if (block_size == 1) {
+        PT_EXPECT_EQ(first_value, last_value);
+      } else {
+        PT_EXPECT_LT(first_value, last_value);
+      }
+      // Test seams between chunks: chunk[i].last + 1 == chunk[i+1].first
+      PT_EXPECT_EQ((last_value_prev + 1), first_value);
+      last_value_prev = last_value;
+    }
+  }
 }
 

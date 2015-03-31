@@ -276,15 +276,42 @@ QueueTestSingleProducerSingleConsumer_ThreadMethod() {
 template<typename Queue_t, bool MultipleProducers, bool MultipleConsumers>
 void QueueTest<Queue_t, MultipleProducers, MultipleConsumers>::
 QueueTestSingleThreadEnqueueDequeue_ThreadMethod() {
+  // Enqueue the expected amount of elements
   for (int i = 0; i != n_queue_size; ++i) {
     bool success = queue->TryEnqueue(element_t(0, i * 133));
     PT_ASSERT(success == true);
   }
+
+  // Some queues may allow enqueueing more elements than their capacity
+  // permits, so try to enqueue additional elements until the queue is full
+  int oversized_count = n_queue_size;
+  while ( queue->TryEnqueue(element_t(0, oversized_count * 133)) ) {
+    ++oversized_count;
+  }
+  // Oversized amount should not be larger than the original capacity
+  PT_ASSERT_LT(oversized_count, 2 * n_queue_size);
+ 
+  // Dequeue the expected amount of elements
   for (int i = 0; i != n_queue_size; ++i) {
     element_t dequ(0, -1);
     bool success = queue->TryDequeue(dequ);
     PT_ASSERT(success == true);
     PT_ASSERT(dequ.second == i * 133);
+  }
+
+  // Dequeue any elements enqueued above the original capacity
+  for (int i = n_queue_size; i != oversized_count; ++i) {
+    element_t dequ(0, -1);
+    bool success = queue->TryDequeue(dequ);
+    PT_ASSERT(success == true);
+    PT_ASSERT(dequ.second == i * 133);
+  }
+
+  // Ensure the queue is now empty
+  {
+    element_t dequ;
+    bool success = queue->TryDequeue(dequ);
+    PT_ASSERT(success == false);
   }
 }
 

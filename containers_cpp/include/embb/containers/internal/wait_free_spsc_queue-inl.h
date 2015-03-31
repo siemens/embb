@@ -37,11 +37,19 @@
 namespace embb {
 namespace containers {
 template<typename Type, class Allocator>
-WaitFreeSPSCQueue<Type, Allocator>::WaitFreeSPSCQueue(size_t capacity) :
-capacity(capacity),
-  head_index(0),
-  tail_index(0) {
-  queue_array = allocator.allocate(capacity);
+size_t WaitFreeSPSCQueue<Type, Allocator>::
+AlignCapacityToPowerOfTwo(size_t capacity) {
+  size_t result = 1;
+  while (result < capacity) result <<= 1;
+  return result;
+}
+
+template<typename Type, class Allocator>
+WaitFreeSPSCQueue<Type, Allocator>::WaitFreeSPSCQueue(size_t capacity)
+    : capacity(AlignCapacityToPowerOfTwo(capacity)),
+      head_index(0),
+      tail_index(0) {
+  queue_array = allocator.allocate(this->capacity);
 }
 
 template<typename Type, class Allocator>
@@ -51,7 +59,7 @@ size_t WaitFreeSPSCQueue<Type, Allocator>::GetCapacity() {
 
 template<typename Type, class Allocator>
 bool WaitFreeSPSCQueue<Type, Allocator>::TryEnqueue(Type const & element) {
-  if (head_index - tail_index == capacity)
+  if (tail_index - head_index == capacity)
     return false;
 
   queue_array[tail_index % capacity] = element;
