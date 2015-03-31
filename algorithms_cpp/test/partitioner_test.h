@@ -35,6 +35,13 @@ class PartitionerTest : public partest::TestCase {
 
  private:
   void TestBasic();
+
+  void TestLargeRangePre();
+  void TestLargeRangePost();
+  void TestLargeRange();
+
+  int * partitioned_array_;
+  size_t partitioned_array_size_;
 };
 
 #endif  // ALGORITHMS_CPP_TEST_PARTITIONER_TEST_H_
