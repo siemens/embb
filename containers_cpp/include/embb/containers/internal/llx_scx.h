@@ -39,171 +39,6 @@ namespace embb {
 namespace containers {
 namespace internal {
 
-#ifdef DOXYGEN
-/**
-* Wraps user-defined data with fields required for LLX/SCX algorithm.
-* Mutable fields must each be contained in a single word.
-*/
-template< typename UserData >
-class LlxScxRecord {
- public:
-  /**
-   * Default constructor.
-   */
-  LlxScxRecord();
-
-  /**
-   * Constructor. Creates an instance of \c DataRecord_t wrapping a user
-   * data object.
-   */
-  LlxScxRecord(const UserData & user_data);
-
-  /**
-   * Copy constructor
-   */
-  LlxScxRecord(const LlxScxRecord & other);
-
-  /**
-   * Assignment operator.
-   */
-  LlxScxRecord & operator=(const LlxScxRecord & rhs);
-
-  /**
-   * Destructor.
-   */
-  ~LlxScxRecord();
-    
-  /**
-   * Returns user data payload of this LLX/SCX record
-   */
-  UserData & Data();
-
-  /**
-   * Allows pointer semantics, returns user data payload of this 
-   * LLX/SCX record
-   */
-  UserData * operator*();
-
-  /**
-   * Allows pointer semantics, returns user data payload of this 
-   * LLX/SCX record
-   */
-  UserData * operator->();
-
-  /** 
-   * Whether this data record is marked for finalizing.
-   */
-  bool IsMarkedForFinalize() const;
-};
-
-/** 
- * Multiword LL/SC
- * 
- * Implementation of the LLX/STX primitive as presented in 
- * "Pragmatic Primitives for Non-blocking Data Structures" 
- * (Brown et al., 2013).
- *
- * \tparam UserData Type containing mutable fields
- * \tparam ValuePool Type containing mutable fields
- */
-template<
-  typename UserData,
-  typename ValuePool = embb::containers::LockFreeTreeValuePool< bool, false >
->
-class LlxScx {
- public:
-  /**
-   * Constructs a new instance of LlxScx.
-   */
-  LlxScx(
-    size_t max_links
-    /**< [IN] Maximum number of links depending on a single SCX operation */
-  );
-
-  /**
-   * Destructor, frees memory.
-   */
-  ~LlxScx();
-
-  /**
-   * Tentatively performs an LLX (extended load-linked) operation on given 
-   * LLX/SCX data record.
-   * Returns true and stores result in given reference variable on success, 
-   * otherwise returns false.
-   */
-  bool TryLoadLinked(
-    DataRecord_t * const data_record,
-    /**< [IN] Pointer to data record to load */
-    UserData & data,
-    /**< [OUT] Atomic snapshot of data record */
-    bool & finalized
-    /**< [OUT] Indicating whether requested fields have been finalized */
-  );
-
-  /**
-   * Tentatively performs an LLX (extended load-linked) operation on given 
-   * LLX/SCX data record.
-   * Returns true and stores result in given reference variable on success, 
-   * otherwise returns false.
-   */
-  bool TryLoadLinked(
-    DataRecord_t * const data_record,
-    /**< [IN] Pointer to data record to load */
-    UserData & data
-    /**< [OUT] Atomic snapshot of data record */
-  );
- 
-  /**
-   * Tentatively performs a single-record Store-Conditional operation on 
-   * given LLX/SCX data record.
-   * Returns true if the given value has been stored successfully, otherwise
-   * false.
-   */
-  template< typename FieldType >
-  bool TryStoreConditional(
-    embb::base::Atomic<FieldType> * field,
-    /**< [IN] Pointer to the field the value will be stored into */
-    FieldType value,
-    /**< [IN] Value to store */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
-    /**< [IN] Data records linked to this store operation */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps
-    /**< [IN] Data records to be finalized in this store operation */
-  );
-
-  /**
-   * Tentatively performs a single-record Store-Conditional operation on 
-   * given LLX/SCX data record.
-   * Returns true if the given value has been stored successfully, otherwise
-   * false.
-   */
-  template< typename FieldType >
-  bool TryStoreConditional(
-    embb::base::Atomic<FieldType> * field,
-    /**< [IN] Pointer to the field the value will be stored into */
-    FieldType value,
-    /**< [IN] Value to store */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps
-    /**< [IN] Data records linked to this store operation */
-  );
-
-  /**
-   * Performs a VLX (extended validate link) operation on given LLX data
-   * record. 
-   * Before calling this method, the given LLX/SCX record must have been
-   * linked via \c TryLoadLinked.
-   *
-   * \returns True if the calling thread's link obtained by its most recent
-   *          invocation of SCX is still valid.
-   */
-  bool TryValidateLink(
-    const DataRecord_t & data_record
-    /**< [IN] Linked data record to validate */
-  );
-};
-
-#else
-
 /**
  * SCX operation description. An SCX record contains all information
  * required to allow any process to complete a pending SCX operation.
@@ -335,10 +170,11 @@ class LlxScxRecord {
   typedef internal::ScxRecord<self_t> ScxRecord_t;
   typedef typename ScxRecord_t::OperationState OperationState;
 
+ public:
   /**
    * The dummy SCX record always has state = Aborted.
    */
-  static ScxRecord_t dummy_scx;
+  static ScxRecord_t DummyScx;
 
  public:
   /**
@@ -470,9 +306,9 @@ template<
 >
 class LlxScx {
 
- private:  
+ private:
   typedef size_t cas_t;
-  typedef LlxScxRecord<UserData> DataRecord_t;
+  typedef LlxScxRecord< UserData > DataRecord_t;
   typedef internal::ScxRecord< LlxScxRecord<UserData> > ScxRecord_t;
   typedef typename ScxRecord_t::OperationState OperationState;
 
@@ -506,73 +342,23 @@ class LlxScx {
   );
 
   /**
-   * Tentatively performs an LLX (extended load-linked) operation on given 
-   * LLX/SCX data record.
-   * Returns true and stores result in given reference variable on success, 
-   * otherwise returns false.
-   */
-  bool TryLoadLinked(
-    DataRecord_t * const data_record,
-    /**< [IN] Pointer to data record to load */
-    UserData & data
-    /**< [OUT] Atomic snapshot of data record */
-  );
- 
-  /**
+   * Actual implementation of StoreConditional operating on unified fields/values
+   * of type cas_t.
    * Tentatively performs a single-record Store-Conditional operation on 
    * given LLX/SCX data record.
    * Returns true if the given value has been stored successfully, otherwise
    * false.
    */
-  template< typename FieldType >
   bool TryStoreConditional(
-    embb::base::Atomic<FieldType> * field,
+    embb::base::Atomic<cas_t> * cas_field,
     /**< [IN] Pointer to the field the value will be stored into */
-    FieldType value,
+    cas_t cas_value,
     /**< [IN] Value to store */
     embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
     /**< [IN] Data records linked to this store operation */
     embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps
     /**< [IN] Data records to be finalized in this store operation */
   );
-
-  template< typename FieldType >
-  bool TryStoreConditional(
-    embb::base::Atomic<FieldType *> * field,
-    /**< [IN] Pointer to the field the value will be stored into */
-    FieldType * value,
-    /**< [IN] Value to store */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
-    /**< [IN] Data records linked to this store operation */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps
-    /**< [IN] Data records to be finalized in this store operation */
-    );
-
-  /**
-   * Tentatively performs a single-record Store-Conditional operation on 
-   * given LLX/SCX data record.
-   * Returns true if the given value has been stored successfully, otherwise
-   * false.
-   */
-  template< typename FieldType >
-  bool TryStoreConditional(
-    embb::base::Atomic<FieldType> * field,
-    /**< [IN] Pointer to the field the value will be stored into */
-    FieldType value,
-    /**< [IN] Value to store */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps
-    /**< [IN] Data records linked to this store operation */
-  );
-
-  template< typename FieldType >
-  bool TryStoreConditional(
-    embb::base::Atomic<FieldType*> * field,
-    /**< [IN] Pointer to the field the value will be stored into */
-    FieldType * value,
-    /**< [IN] Value to store */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps
-    /**< [IN] Data records linked to this store operation */
-    );
 
   /**
    * Performs a VLX (extended validate link) operation on given LLX data
@@ -589,7 +375,10 @@ class LlxScx {
   );
   
  private:
-
+  /**
+   * Result of a Load-Linked operation, to be stored in thread-specific
+   * array range within thread_llx_results_.
+   */
   typedef struct {
     DataRecord_t * data_record;
     ScxRecord_t * scx_record;
@@ -600,6 +389,11 @@ class LlxScx {
    * Resolves the calling thread's Id.
    */
   unsigned int ThreadId();
+    
+  /**
+   * Help complete an SCX operation referenced by the given SCX record
+   */
+  bool Help(ScxRecord_t * scx);
 
   /**
    * Maximum number of active links created via TryLoadLinked per thread.
@@ -616,7 +410,7 @@ class LlxScx {
    * thread's local table of LLX results.
    */
   embb::containers::ObjectPool<
-    embb::containers::internal::FixedSizeList<ScxRecord_t *>, ValuePool >
+    embb::containers::internal::FixedSizeList< ScxRecord_t * >, ValuePool >
       scx_record_list_pool_;
 
   /**
@@ -627,7 +421,7 @@ class LlxScx {
   /**
    * Thread-specific list of LLX results performed by the thread.
    */
-  embb::containers::internal::FixedSizeList<LlxResult> **
+  embb::containers::internal::FixedSizeList< LlxResult > **
     thread_llx_results_;
 
   /**
@@ -645,35 +439,8 @@ class LlxScx {
    */
   LlxScx & operator=(const LlxScx &);
 
-  bool Help(ScxRecord_t * scx);
-
-  /**
-   * Actual implementation of StoreConditional operating on unified fields/values
-   * of type cas_t.
-   */
-  bool TryStoreConditionalCAS(
-    embb::base::Atomic<cas_t> * cas_field,
-    /**< [IN] Pointer to the field the value will be stored into */
-    cas_t cas_value,
-    /**< [IN] Value to store */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
-    /**< [IN] Data records linked to this store operation */
-    embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps
-    /**< [IN] Data records to be finalized in this store operation */
-  );
-
-  template < typename FieldType >
-  cas_t ToCASValue(FieldType value) {
-    return static_cast<cas_t>(value);
-  }
-
-  template < typename FieldType >
-  cas_t ToCASValue(FieldType * value) {
-    return reinterpret_cast<cas_t>(value);
-  }
 };
 
-#endif  // DOXYGEN
 } // namespace primitives
 } // namespace containers
 } // namespace embb

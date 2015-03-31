@@ -31,8 +31,6 @@
 #include <embb/base/thread.h>
 #include <embb/base/atomic.h>
 #include <embb/base/memory_allocation.h>
-#include <vector>
-#include <stdarg.h>
 
 namespace embb { 
 namespace containers {
@@ -124,61 +122,7 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
 }
 
 template< typename UserData, typename ValuePool >
-bool LlxScx<UserData, ValuePool>::TryLoadLinked(
-  DataRecord_t * const data_record,
-  UserData & user_data) {
-  bool finalized;
-  return TryLoadLinked(data_record, user_data, finalized);
-}
-
-template< typename UserData, typename ValuePool >
-template< typename FieldType >
 bool LlxScx<UserData, ValuePool>::TryStoreConditional(
-  embb::base::Atomic<FieldType> * field,
-  FieldType value,
-  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
-  embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps) {
-  embb::base::Atomic<cas_t> * cas_field =
-    reinterpret_cast<embb::base::Atomic<cas_t> *>(field);
-  cas_t cas_value = static_cast<cas_t>(value);
-  return TryStoreConditionalCAS(cas_field, cas_value, linked_deps, finalize_deps);
-}
-
-template< typename UserData, typename ValuePool >
-template< typename FieldType >
-bool LlxScx<UserData, ValuePool>::TryStoreConditional(
-  embb::base::Atomic<FieldType*> * field,
-  FieldType * value,
-  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
-  embb::containers::internal::FixedSizeList<DataRecord_t *> & finalize_deps) {
-  embb::base::Atomic<cas_t> * cas_field =
-    reinterpret_cast<embb::base::Atomic<cas_t> *>(field);
-  cas_t cas_value = reinterpret_cast<cas_t>(value);
-  return TryStoreConditionalCAS(cas_field, cas_value, linked_deps, finalize_deps);
-}
-
-template< typename UserData, typename ValuePool >
-template< typename FieldType >
-bool LlxScx<UserData, ValuePool>::TryStoreConditional(
-  embb::base::Atomic<FieldType> * field,
-  FieldType value,
-  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps) {
-  embb::containers::internal::FixedSizeList<DataRecord_t *> finalize_deps(0);
-  return TryStoreConditional(field, value, linked_deps, finalize_deps);
-}
-
-template< typename UserData, typename ValuePool >
-template< typename FieldType >
-bool LlxScx<UserData, ValuePool>::TryStoreConditional(
-  embb::base::Atomic<FieldType*> * field,
-  FieldType * value,
-  embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps) {
-  embb::containers::internal::FixedSizeList<DataRecord_t *> finalize_deps(0);
-  return TryStoreConditional(field, value, linked_deps, finalize_deps);
-}
-
-template< typename UserData, typename ValuePool >
-bool LlxScx<UserData, ValuePool>::TryStoreConditionalCAS(
   embb::base::Atomic<cas_t> * cas_field,
   cas_t cas_value,
   embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps,
@@ -193,28 +137,40 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditionalCAS(
   //    any I_r was linearized.
   unsigned int thread_id = ThreadId();
   // Let info_fields be a table in shared memory containing for each r in V,
-  // a copy of r's info value in this threads local table of LLX results:
+  // a copy of r's info value in this threads local table of LLX results.
+  // Will be freed in Help() once the SCX operation has been completed.
   scx_op_list_t * info_fields = scx_record_list_pool_.Allocate(max_links_);
+  if (info_fields == NULL) {    
+    EMBB_THROW(embb::base::ErrorException,
+      "Could not allocate SCX record list");
+  }
   dr_list_t::const_iterator it;
   dr_list_t::const_iterator end;
   end = linked_deps.end();
-  // for each r in linked_deps ...
+  // Copy SCX operation of all LLX results of link dependencies into a list.
+  // For each r in linked_deps ...
   for (it = linked_deps.begin(); it != end; ++it) {
     typedef embb::containers::internal::FixedSizeList<LlxResult>
       llx_result_list;
-    llx_result_list::iterator l_it  = thread_llx_results_[thread_id]->begin();
-    llx_result_list::iterator l_end = thread_llx_results_[thread_id]->end();
+    llx_result_list::iterator llx_result_it;
+    llx_result_list::iterator llx_result_end;
+    llx_result_end = thread_llx_results_[thread_id]->end();
     // Find LLX result of r in thread-local LLX results:
-    for (; l_it != l_end && l_it->data_record != *it; ++l_it);
-    if (l_it == l_end) {
+    for (llx_result_it = thread_llx_results_[thread_id]->begin();
+         llx_result_it != llx_result_end &&
+           llx_result_it->data_record != *it;
+         ++llx_result_it);
+    if (llx_result_it == llx_result_end) {
       // Missing LLX result for given linked data record, user did not
       // load-link a data record this SCX depends on.
       EMBB_THROW(embb::base::ErrorException,
-        "Missing preceding LLX on a data record used for SCX");
+        "Missing preceding LLX on a data record used as SCX dependency");
     }
+    // Copy SCX operation from LLX result of link dependency into list: 
     info_fields->PushBack(
-      l_it->data_record->ScxInfo().Load());
+      llx_result_it->data_record->ScxInfo().Load());
   }
+  // Clear thread-local list of LLX results
   thread_llx_results_[thread_id]->clear();
   // Announce SCX operation. Lists linked_deps and finalize_dep are 
   // guaranteed to remain on the stack until this announced operation
@@ -267,24 +223,24 @@ bool LlxScx<UserData, ValuePool>::Help(
     ScxRecord<DataRecord_t> * rinfo_old = *scx_op_it;
     // Try to freeze the data record by setting its SCX info field
     // to this SCX operation description:
-    if (!r->ScxInfo().CompareAndSwap(rinfo_old, scx)) {
+    if (r->ScxInfo().CompareAndSwap(rinfo_old, scx)) {
+      // Do not try to delete the sentinel scx record:
+      if (rinfo_old != &DataRecord_t::DummyScx) {
+        scx_record_list_pool_.Free(rinfo_old->scx_ops_);
+        scx_record_pool_.Free(rinfo_old);
+      }
+    } else {
       if (r->ScxInfo().Load() != scx) {
         // could not freeze r because it is frozen for another SCX:
         if (scx->all_frozen_) {
-          // SCX already completed:
+          // SCX already completed by any other thread:
           return true;
         }
         // Atomically unfreeze all nodes frozen for this SCX (see LLX):
         scx->state_ = ScxRecord_t::Aborted;
         return false;
       }
-    } else {
-      // Do not try to delete the sentinel scx record:
-      if (rinfo_old->field_ != 0) {
-        scx_record_list_pool_.Free(rinfo_old->scx_ops_);
-        scx_record_pool_.Free(rinfo_old);
-      }
-    }
+    } 
   }
   // finished freezing data records
   assert(scx->state_ == ScxRecord_t::InProgress ||
@@ -313,7 +269,7 @@ bool LlxScx<UserData, ValuePool>::Help(
 template< typename UserData >
 LlxScxRecord<UserData>::LlxScxRecord()
 : marked_for_finalize_(false) {
-  scx_op_.Store(&dummy_scx);
+  scx_op_.Store(&DummyScx);
 }
 
 template< typename UserData >
@@ -321,13 +277,13 @@ LlxScxRecord<UserData>::LlxScxRecord(
   const UserData & user_data)
 : user_data_(user_data),
   marked_for_finalize_(false) {
-  scx_op_.Store(&dummy_scx);
+  scx_op_.Store(&DummyScx);
 }
 
 template< typename UserData >
 ScxRecord< LlxScxRecord<UserData> > 
-  LlxScxRecord<UserData>::dummy_scx = 
-    ScxRecord< LlxScxRecord<UserData> >();
+LlxScxRecord<UserData>::DummyScx =
+  ScxRecord< LlxScxRecord<UserData> >();
 
 } // namespace internal
 } // namespace containers

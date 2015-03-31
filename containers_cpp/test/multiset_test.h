@@ -28,7 +28,7 @@
 #define CONTAINERS_CPP_TEST_MULTISET_TEST_H_
 
 #include <partest/partest.h>
-#include <embb/containers/primitives/llx_scx.h>
+#include <embb/containers/internal/llx_scx.h>
 
 namespace embb {
 namespace containers {

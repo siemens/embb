@@ -27,6 +27,7 @@
 #include <llx_scx_test.h>
 #include <embb/containers/internal/fixed_size_list.h>
 #include <embb/containers/internal/llx_scx.h>
+// #include <embb/containers/multiword_ll_sc.h>
 
 namespace embb {
 namespace containers {
@@ -44,11 +45,11 @@ LlxScxTest::LlxScxTest() :
   head(0, '-'),
   tail_llx(tail),
   head_llx(head) {
-  CreateUnit("SerialArrayTest").Add(&LlxScxTest::SerialArrayTest, this);
-  CreateUnit("SerialListTest").Add(&LlxScxTest::SerialListTest, this);
-//  CreateUnit("ParallelTest")
-//    .Add(&LlxScxTest::ParallelTest, this)
-//    .Post(&LlxScxTest::ParallelTestPost, this);
+  CreateUnit("SerialArrayTest")
+    .Add(&LlxScxTest::SerialArrayTest, this);
+  CreateUnit("ParallelTest")
+    .Add(&LlxScxTest::ParallelTest, this)
+    .Post(&LlxScxTest::ParallelTestPost, this);
 }
 
 void LlxScxTest::ParallelTest() {
@@ -56,7 +57,6 @@ void LlxScxTest::ParallelTest() {
   int return_val = embb_internal_thread_index(&thread_index);
   if (return_val != EMBB_SUCCESS)
     EMBB_THROW(embb::base::ErrorException, "Could not get thread id!"); 
-
   // Threads try to append n nodes to a linked list in parallel
   for (char value = 'a'; value <= 'z';) {
     // Find node to append new element on:
@@ -67,25 +67,36 @@ void LlxScxTest::ParallelTest() {
       next = next->Data().next_;
     }
     Node n;
-    llxscx_.TryLoadLinked(node, n);
+    bool finalized;
+    // LLX on node the new element will be appended to:
+    llxscx_.TryLoadLinked(node, n, finalized);
     if (n.next_ == next) {
-      // Pointer still valid after LLX, call SCX(node, node.next, new_node)
+      // Pointer still valid after LLX, try to append new node
       internal::FixedSizeList<LlxScxRecord<Node> *> linked_deps(1);
+      internal::FixedSizeList<LlxScxRecord<Node> *> finalize_deps(0);
       linked_deps.PushBack(node);
       // Create new node:
       Node new_node(static_cast<int>(thread_index), value);
       internal::LlxScxRecord<Node> * new_node_ptr =
         new internal::LlxScxRecord<Node>(new_node);
+      // Convert node pointer to size_t:
+      size_t new_cas_value = reinterpret_cast<size_t>(new_node_ptr);
+      // Convert target field pointer to size_t*:
+      embb::base::Atomic<size_t> * field_cas_ptr =
+        reinterpret_cast< embb::base::Atomic<size_t> * >(
+          &(node->Data().next_));
+      // Call SCX:
       bool element_inserted =
         llxscx_.TryStoreConditional(
-          &(node->Data().next_),
-          new_node_ptr,
-          linked_deps);
+          field_cas_ptr,
+          new_cas_value,
+          linked_deps,
+          finalize_deps);
       if (element_inserted) {
         // Value has been added to list, continue with next value
         ++value;
       }
-    } 
+    }
   }
 }
 
@@ -109,86 +120,38 @@ void LlxScxTest::SerialArrayTest() {
   // a specialization for atomics that uses a.Store(b.Load()).
   AtomicField field(23);
 
-  LlxScxRecord< Payload > * my_list =
-    new LlxScxRecord<Payload>[10];
-  for (int i = 0; i != 10; ++i) {
-    my_list[i] = i;
-  }
+  LlxScxRecord< Payload > r1(100);
+  LlxScxRecord< Payload > r2(200);
+  LlxScxRecord< Payload > r3(300);
 
-  Payload l1, l2;
-  PT_ASSERT(llxscx.TryLoadLinked(&my_list[0], l1));
-  PT_ASSERT(llxscx.TryLoadLinked(&my_list[5], l2));
+  Payload l1, l2, l3;
+  bool finalized;  
+  PT_ASSERT(llxscx.TryLoadLinked(&r1, l1, finalized));
+  PT_ASSERT_EQ(100, l1);
+  PT_ASSERT(llxscx.TryLoadLinked(&r2, l2, finalized));
+  PT_ASSERT_EQ(200, l2);
+  PT_ASSERT(llxscx.TryLoadLinked(&r3, l3, finalized));
+  PT_ASSERT_EQ(300, l3);
+
+  // links = { dr1, dr2, dr3 }
+  FixedSizeList< LlxScxRecord<Payload> * >
+    links(3);
+  links.PushBack(&r1);
+  links.PushBack(&r2);
+  links.PushBack(&r3);
 
   FixedSizeList< LlxScxRecord<Payload> * >
-    links(2);
-  links.PushBack(&my_list[0]);
-  links.PushBack(&my_list[5]);
+    finalize_links(1);
+  finalize_links.PushBack(&r3);
 
   // Try to store new value depending on links:
   size_t a = 42;
-  PT_ASSERT(llxscx.TryStoreConditional(&field, a, links));
+  PT_ASSERT(llxscx.TryStoreConditional(
+    &field, a,
+    links,
+    finalize_links));
   // New value should have been changed successfully:
   PT_ASSERT_EQ(field.Load(), a);
-}
-
-void LlxScxTest::SerialListTest() {
-  typedef LlxScxTest::Node Node;
-  // Global:
-  LlxScx<Node> llxscx(3);
-
-  // Multiset { a, b, b, c }
-  Node n1(1, 'a');
-  Node n2(2, 'b');
-  Node n3(1, 'c');
-  
-  // V = { dr1, dr2, dr3 }
-  // R = { dr1, dr2 }
-  LlxScxRecord<Node> dr1(n1);
-  LlxScxRecord<Node> dr2(n2);
-  LlxScxRecord<Node> dr3(n3);
-
-  dr1->next_.Store(&dr2);
-  dr2->next_.Store(&dr3);
-
-  // Thread-local:
-  Node l1, l2, l3;
-  bool finalized;
-  PT_ASSERT(llxscx.TryLoadLinked(&dr1, l1, finalized));
-  PT_ASSERT(!finalized);
-  PT_ASSERT_EQ(l1.value_, dr1->value_);
-  PT_ASSERT(llxscx.TryLoadLinked(&dr2, l2, finalized));
-  PT_ASSERT(!finalized);
-  PT_ASSERT_EQ(l2.value_, dr2->value_);
-  PT_ASSERT(llxscx.TryLoadLinked(&dr3, l3, finalized));
-  PT_ASSERT(!finalized);
-  PT_ASSERT_EQ(l3.value_, dr3->value_);
-
-  FixedSizeList< LlxScxRecord<Node> * >
-    linked_deps(3);
-  linked_deps.PushBack(&dr1);
-  linked_deps.PushBack(&dr2);
-  linked_deps.PushBack(&dr3);
-  FixedSizeList< LlxScxRecord<Node> * >
-    finalize_deps(2);
-  finalize_deps.PushBack(&dr2);
-  finalize_deps.PushBack(&dr3);
-
-  typedef LlxScxRecord<Node> * field_t;
-  
-  LlxScxRecord<Node> new_node(n3);
-  PT_ASSERT(
-    llxscx.TryStoreConditional(
-      &n2.next_,     // fld: field to update
-      &new_node,     // new value
-      linked_deps,   // V: dependencies, must be LL'd before
-      finalize_deps  // R: Subsequence of V to be finalized
-    ));
-  // Following LLX calls on finalized data records are
-  // expected to fail:
-  PT_ASSERT(!llxscx.TryLoadLinked(&dr2, l2, finalized));
-  PT_ASSERT(finalized);
-  PT_ASSERT(!llxscx.TryLoadLinked(&dr3, l3, finalized));
-  PT_ASSERT(finalized);
 }
 
 } // namespace test

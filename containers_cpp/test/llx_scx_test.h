@@ -89,7 +89,6 @@ class LlxScxTest : public partest::TestCase {
 
  private:
   void SerialArrayTest();
-  void SerialListTest();
   void ParallelTest();
   void ParallelTestPost();
 

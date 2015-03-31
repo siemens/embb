@@ -41,7 +41,6 @@
 #include "./hazard_pointer_test.h"
 #include "./object_pool_test.h"
 #include "./llx_scx_test.h"
-// #include "./multiset_test.h"
 
 #define COMMA ,
 
@@ -58,7 +57,6 @@ using embb::containers::test::QueueTest;
 using embb::containers::test::StackTest;
 using embb::containers::test::ObjectPoolTest;
 using embb::containers::test::LlxScxTest;
-// using embb::containers::test::MultisetTest;
 
 PT_MAIN("Data Structures C++") {
   unsigned int max_threads = static_cast<unsigned int>(
@@ -75,7 +73,6 @@ PT_MAIN("Data Structures C++") {
   PT_RUN(ObjectPoolTest< LockFreeTreeValuePool<bool COMMA false > >);
   PT_RUN(ObjectPoolTest< WaitFreeArrayValuePool<bool COMMA false> >);
   PT_RUN(LlxScxTest);
-//PT_RUN(MultisetTest);
 
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), static_cast<size_t>(0));
 }
