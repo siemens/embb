@@ -54,6 +54,13 @@ if(POLICY CMP0053)
 endif(POLICY CMP0053)
 
 
+include(CMakeCommon/FindOpenCL.cmake)
+IF(NOT OpenCL_FOUND)
+  MESSAGE( STATUS "OpenCL is not there, will build without MTAPI OpenCL Plugin." )
+ENDIF()
+
+
+
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Choose the type of build, options are: Debug Release
@@ -150,7 +157,9 @@ add_subdirectory(base_c)
 add_subdirectory(base_cpp)
 add_subdirectory(mtapi_c)
 add_subdirectory(mtapi_network_c)
-add_subdirectory(mtapi_opencl_c)
+if(OpenCL_FOUND)
+  add_subdirectory(mtapi_opencl_c)
+endif()
 add_subdirectory(tasks_cpp)
 add_subdirectory(mtapi_cpp)
 add_subdirectory(containers_cpp)

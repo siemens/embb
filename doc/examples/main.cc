@@ -30,7 +30,9 @@
 void RunMTAPI_C();
 void RunMTAPI_C_Plugin();
 void RunMTAPI_C_Network();
+#ifdef EMBB_WITH_OPENCL
 void RunMTAPI_C_OpenCL();
+#endif
 void RunMTAPI_CPP();
 void RunTasks();
 void RunDataflowLinear();
@@ -66,9 +68,11 @@ int main() {
   RunMTAPI_C_Network();
   std::cout << "RunMTAPI_C_Network() ... done" << std::endl;
 
+#ifdef EMBB_WITH_OPENCL
   std::cout << "RunMTAPI_C_OpenCL() ..." << std::endl;
   RunMTAPI_C_OpenCL();
   std::cout << "RunMTAPI_C_OpenCL() ... done" << std::endl;
+#endif
 
   std::cout << "RunMTAPI_CPP() ..." << std::endl;
   RunMTAPI_CPP();
