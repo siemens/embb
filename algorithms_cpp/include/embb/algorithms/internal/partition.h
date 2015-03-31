@@ -38,14 +38,14 @@ namespace internal {
  * Describes a single partition of a 1-dimensional
  * partitioning, using first and last iterator.
  *
- * \tparam  ForwardIterator  Type of the iterator.
+ * \tparam  RAI  Type of the iterator.
  */
 
-template<typename ForwardIterator>
+template<typename RAI>
 class ChunkDescriptor {
  private:
-  ForwardIterator first;
-  ForwardIterator last;
+  RAI first_;
+  RAI last_;
 
  public:
   /**
@@ -54,7 +54,7 @@ class ChunkDescriptor {
    * \param first The first iterator.
    * \param last  The last iterator
    */
-  ChunkDescriptor(ForwardIterator first, ForwardIterator last);
+  ChunkDescriptor(RAI first, RAI last);
 
   /**
    * Gets the first iterator.
@@ -63,7 +63,7 @@ class ChunkDescriptor {
    * 
    * \waitfree
    */
-  ForwardIterator GetFirst() const;
+  RAI GetFirst() const;
 
   /**
    * Gets the last iterator.
@@ -72,7 +72,7 @@ class ChunkDescriptor {
    * 
    * \waitfree
    */
-  ForwardIterator GetLast() const;
+  RAI GetLast() const;
 };
 
 /**
@@ -80,9 +80,9 @@ class ChunkDescriptor {
  *        
  * Describes the interface for accessing a 1-dimensional partitioning. 
  *
- * \tparam  ForwardIterator  Type of the iterator.
+ * \tparam  RAI  Type of the iterator.
  */
-template<typename ForwardIterator>
+template<typename RAI>
 class IPartitioner {
  public:
   virtual ~IPartitioner() {}
@@ -106,7 +106,7 @@ class IPartitioner {
    * 
    * \waitfree
    */
-  virtual const ChunkDescriptor<ForwardIterator> operator[](
+  virtual const ChunkDescriptor<RAI> operator[](
     size_t const& index) const = 0;
 };
 
@@ -129,16 +129,16 @@ class IPartitioner {
  *    2: [6,7,8,9,10]  
  *    3: [11,12,13]
  * 
- * \tparam  ForwardIterator  Type of the iterator.
+ * \tparam  RAI  Type of the iterator.
  */
-template<typename ForwardIterator>
-class BlockSizePartitioner : IPartitioner < ForwardIterator > {
+template<typename RAI>
+class BlockSizePartitioner : IPartitioner < RAI > {
  private:
-  ForwardIterator first;
-  ForwardIterator last;
-  size_t chunkSize;
-  size_t elements_count;
-  size_t chunks;
+  RAI first_;
+  RAI last_;
+  size_t chunk_size_;
+  size_t elements_count_;
+  size_t chunks_;
 
  public:
   /**
@@ -150,7 +150,7 @@ class BlockSizePartitioner : IPartitioner < ForwardIterator > {
    * \param chunkSize (Optional) size of the chunk.
    */
   BlockSizePartitioner(
-    ForwardIterator first, ForwardIterator last, size_t chunkSize = 1);
+    RAI first, RAI last, size_t chunkSize = 1);
 
   /**
    * See IPartitioner
@@ -164,7 +164,7 @@ class BlockSizePartitioner : IPartitioner < ForwardIterator > {
    *
    * \waitfree
    */
-  virtual const ChunkDescriptor<ForwardIterator> operator[](
+  virtual const ChunkDescriptor<RAI> operator[](
     size_t const& index) const;
 };
 
@@ -196,17 +196,17 @@ class BlockSizePartitioner : IPartitioner < ForwardIterator > {
  * 4: [10,11]  
  * 5: [12,13]   
  *  
- * \tparam  ForwardIterator  Type of the iterator.
+ * \tparam  RAI  Type of the iterator.
  */
-template<typename ForwardIterator>
-class ChunkPartitioner : IPartitioner < ForwardIterator > {
+template<typename RAI>
+class ChunkPartitioner : IPartitioner < RAI > {
  private:
-  size_t size;
-  size_t elements_count;
-  ForwardIterator first;
-  ForwardIterator last;
-  size_t standard_chunk_size;
-  size_t bigger_chunk_count;
+  size_t size_;
+  size_t elements_count_;
+  RAI first_;
+  RAI last_;
+  size_t standard_chunk_size_;
+  size_t bigger_chunk_count_;
 
  public:
   /**
@@ -227,7 +227,7 @@ class ChunkPartitioner : IPartitioner < ForwardIterator > {
    * \param last           The last.
    * \param amountChunks  (Optional) the amount chunks.
    */
-  ChunkPartitioner(ForwardIterator first, ForwardIterator last,
+  ChunkPartitioner(RAI first, RAI last,
     size_t amountChunks = 0);
 
   /**
@@ -235,7 +235,7 @@ class ChunkPartitioner : IPartitioner < ForwardIterator > {
    *
    * \waitfree
    */
-  virtual const ChunkDescriptor<ForwardIterator> operator[](
+  virtual const ChunkDescriptor<RAI> operator[](
     size_t const& index) const;
 };
 
