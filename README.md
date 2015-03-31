@@ -117,7 +117,7 @@ To simplify programming of homogeneous systems, tasks_cpp contains abstractions
 to the MTAPI interfaces. Component algorithms_cpp provides high-level constructs
 for typical parallelization tasks in C++, and dataflow_cpp generic skeletons for
 the development of parallel stream-based applications. Finally, containers_cpp
-provides data structures for storing object in an organized and thread-safe way.
+provides data structures for storing objects in a thread-safe way.
 
 
 Build and Installation
