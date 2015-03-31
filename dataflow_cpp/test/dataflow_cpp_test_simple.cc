@@ -36,6 +36,9 @@
 
 #include <embb/dataflow/dataflow.h>
 
+#define NUM_SLICES 8
+#define TEST_COUNT 12
+
 typedef embb::dataflow::Network<8> MyNetwork;
 typedef MyNetwork::ConstantSource< int > MyConstantSource;
 typedef MyNetwork::Source< int > MySource;
@@ -48,8 +51,6 @@ typedef MyNetwork::ParallelProcess< MyNetwork::Inputs<int, int>::Type,
 typedef MyNetwork::Sink< int > MySink;
 typedef MyNetwork::Switch< int > MySwitch;
 typedef MyNetwork::Select< int > MySelect;
-
-#define TEST_COUNT 12
 
 embb::base::Atomic<int> source_counter;
 int source_array[TEST_COUNT];
@@ -148,13 +149,16 @@ SimpleTest::SimpleTest() {
 void SimpleTest::TestBasic() {
   // All available cores
   embb::base::CoreSet core_set(true);
+  int num_cores = core_set.Count();
   embb::tasks::Node::Initialize(
     MTAPI_DOMAIN_ID,
     MTAPI_NODE_ID,
     core_set,
     1024, // max tasks (default: 1024)
     128,  // max groups (default: 128)
-    128,  // max queues (default: 16)
+    // Currently needs to be initialized
+    // with (max_queues + 1), see defect embb449
+    num_cores + 1, // max queues (default: 16)
     1024, // queue capacity (default: 1024)
     4     // num priorities (default: 4)
   );
@@ -204,7 +208,12 @@ void SimpleTest::TestBasic() {
     network.AddSource(constant);
     network.AddSource(source);
 
-    network();
+    try {
+      network();
+    } catch (embb::base::ErrorException & e) {
+      std::cout << e.What() << std::endl;
+      break;
+    }
 
     PT_EXPECT(asink.Check());
   }
