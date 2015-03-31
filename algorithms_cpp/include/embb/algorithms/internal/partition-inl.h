@@ -67,7 +67,8 @@ template<typename RAI>
 const ChunkDescriptor<RAI>
   BlockSizePartitioner<RAI>::operator[](
     size_t const & index) const {
-  typedef std::iterator_traits<RAI>::difference_type difference_type;
+  typedef typename std::iterator_traits<RAI>::difference_type
+    difference_type;
   RAI first_new(first_);
   first_new += static_cast<difference_type>(chunk_size_ * index);
   RAI last_new(first_new);
