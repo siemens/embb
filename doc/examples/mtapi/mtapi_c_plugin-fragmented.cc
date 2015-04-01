@@ -42,15 +42,15 @@
 #define PLUGIN_NODE_ID 1
 #define PLUGIN_JOB_ID 1
 
-#include "mtapi_check_status-snippet.h"
+#include "mtapi/mtapi_check_status-snippet.h"
 
-#include "mtapi_c_plugin_task_schedule-snippet.h"
+#include "mtapi/mtapi_c_plugin_task_schedule-snippet.h"
 
-#include "mtapi_c_plugin_task_start_cb-snippet.h"
+#include "mtapi/mtapi_c_plugin_task_start_cb-snippet.h"
 
-#include "mtapi_c_plugin_task_cancel_cb-snippet.h"
+#include "mtapi/mtapi_c_plugin_task_cancel_cb-snippet.h"
 
-#include "mtapi_c_plugin_action_finalize_cb-snippet.h"
+#include "mtapi/mtapi_c_plugin_action_finalize_cb-snippet.h"
 
 void RunMTAPI_C_Plugin() {
   mtapi_status_t status;
@@ -66,13 +66,13 @@ void RunMTAPI_C_Plugin() {
     &status);
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_c_plugin_action_create-snippet.h"
+#include "mtapi/mtapi_c_plugin_action_create-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_c_plugin_get_job-snippet.h"
+#include "mtapi/mtapi_c_plugin_get_job-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_c_plugin_task_start-snippet.h"
+#include "mtapi/mtapi_c_plugin_task_start-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
   mtapi_task_wait(task, MTAPI_INFINITE, &status);

@@ -25,16 +25,16 @@
  */
 
 #include <embb/mtapi/c/mtapi.h>
-#include "mtapi_opencl_c_header-snippet.h"
+#include "mtapi/mtapi_opencl_c_header-snippet.h"
 
-#include "mtapi_check_status-snippet.h"
+#include "mtapi/mtapi_check_status-snippet.h"
 
 #define OPENCL_DOMAIN 1
 #define OPENCL_NODE 2
 #define OPENCL_JOB 2
 
 // OpenCL Kernel Function for element by element vector addition
-#include "mtapi_opencl_c_kernel-snippet.h"
+#include "mtapi/mtapi_opencl_c_kernel-snippet.h"
 
 void RunMTAPI_C_OpenCL() {
   mtapi_status_t status;
@@ -59,10 +59,10 @@ void RunMTAPI_C_OpenCL() {
     &status);
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_opencl_c_plugin_initialize-snippet.h"
+#include "mtapi/mtapi_opencl_c_plugin_initialize-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_opencl_c_action_create-snippet.h"
+#include "mtapi/mtapi_opencl_c_action_create-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
@@ -90,7 +90,7 @@ void RunMTAPI_C_OpenCL() {
     }
   }
 
-#include "mtapi_opencl_c_plugin_finalize-snippet.h"
+#include "mtapi/mtapi_opencl_c_plugin_finalize-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
   mtapi_finalize(&status);
