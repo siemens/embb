@@ -149,7 +149,7 @@ SimpleTest::SimpleTest() {
 void SimpleTest::TestBasic() {
   // All available cores
   embb::base::CoreSet core_set(true);
-  int num_cores = core_set.Count();
+  unsigned int num_cores = core_set.Count();
   embb::tasks::Node::Initialize(
     MTAPI_DOMAIN_ID,
     MTAPI_NODE_ID,
