@@ -149,15 +149,23 @@ typedef void(*mtapi_ext_plugin_action_finalize_function_t)(
  * \ingroup C_MTAPI_EXT
  */
 mtapi_action_hndl_t mtapi_ext_plugin_action_create(
-  MTAPI_IN mtapi_job_id_t job_id,
+  MTAPI_IN mtapi_job_id_t job_id, /**< [in] Job id */
   MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
+                              /**< [in] Task start function */
   MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
+                              /**< [in] Task cancel function */
   MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
+                              /**< [in] Finalize action function */
   MTAPI_IN void* plugin_data,
+                              /**< [in] Pointer to plugin data */
   MTAPI_IN void* node_local_data,
+                              /**< [in] Pointer to node local data */
   MTAPI_IN mtapi_size_t node_local_data_size,
+                              /**< [in] Size of node local data */
   MTAPI_IN mtapi_action_attributes_t* attributes,
-  MTAPI_OUT mtapi_status_t* status
+                              /**< [out] Pointer to attributes */
+  MTAPI_OUT mtapi_status_t* status/**< [out] Pointer to error code,
+                                             may be \c MTAPI_NULL */
 );
 
 
