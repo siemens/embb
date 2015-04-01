@@ -54,6 +54,13 @@ if(POLICY CMP0053)
 endif(POLICY CMP0053)
 
 
+include(CMakeCommon/FindOpenCL.cmake)
+IF(NOT OpenCL_FOUND)
+  MESSAGE( STATUS "OpenCL is not there, will build without MTAPI OpenCL Plugin." )
+ENDIF()
+
+
+
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Choose the type of build, options are: Debug Release
@@ -117,8 +124,26 @@ else()
 endif()
 message("   (set with command line option -DUSE_EXCEPTIONS=ON/OFF)")
 
+# these are the test executables, we expect to be generated.
+set(EXPECTED_EMBB_TEST_EXECUTABLES "embb_algorithms_cpp_test"
+                "embb_base_c_test"
+                "embb_base_cpp_test"
+                "embb_containers_cpp_test"
+                "embb_dataflow_cpp_test"
+                "embb_mtapi_c_test"
+                "embb_mtapi_cpp_test"
+                "embb_mtapi_network_c_test"
+                "embb_tasks_cpp_test"
+                )
+
+# if opencl is there, we also expect the mtapi opencl test to be generated
+if(OpenCL_FOUND)
+  list(APPEND EXPECTED_EMBB_TEST_EXECUTABLES "embb_mtapi_opencl_c_test")
+endif()
+
+
 ## Copy test execution script to local binaries folder
-#
+
 if (DEFINED CYGWIN)
   set(test_script_in run_tests_cygwin.sh)
   set(test_script_out run_tests.sh)
@@ -129,9 +154,7 @@ else()
   set(test_script_in run_tests_windows.bat)
   set(test_script_out run_tests.bat)
 endif()
-execute_process(
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/scripts/${test_script_in} binaries/${test_script_out}
-  )
+CONFIGURE_FILE( ${CMAKE_SOURCE_DIR}/scripts/${test_script_in}.cmake binaries/${test_script_out} )
 
 ## Test and Partest build
 #
@@ -150,7 +173,9 @@ add_subdirectory(base_c)
 add_subdirectory(base_cpp)
 add_subdirectory(mtapi_c)
 add_subdirectory(mtapi_network_c)
-add_subdirectory(mtapi_opencl_c)
+if(OpenCL_FOUND)
+  add_subdirectory(mtapi_opencl_c)
+endif()
 add_subdirectory(tasks_cpp)
 add_subdirectory(mtapi_cpp)
 add_subdirectory(containers_cpp)
