@@ -281,8 +281,8 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
 
             for (mtapi_uint_t kk = 0; kk < task->attributes.num_instances;
               kk++) {
-              was_scheduled = was_scheduled &
-                embb_mtapi_scheduler_schedule_task(scheduler, task, kk);
+              was_scheduled = (mtapi_boolean_t)(was_scheduled &
+                embb_mtapi_scheduler_schedule_task(scheduler, task, kk));
             }
           }
 

@@ -25,10 +25,10 @@
  */
 
 #include <embb/mtapi/c/mtapi.h>
-#include "mtapi_network_c_header-snippet.h"
+#include "mtapi/mtapi_network_c_header-snippet.h"
 #include <embb/base/c/internal/unused.h>
 
-#include "mtapi_check_status-snippet.h"
+#include "mtapi/mtapi_check_status-snippet.h"
 
 #define NETWORK_DOMAIN 1
 #define NETWORK_LOCAL_NODE 3
@@ -36,7 +36,7 @@
 #define NETWORK_REMOTE_NODE 3
 #define NETWORK_REMOTE_JOB 4
 
-#include "mtapi_network_c_action_function-snippet.h"
+#include "mtapi/mtapi_network_c_action_function-snippet.h"
 
 void RunMTAPI_C_Network() {
   mtapi_status_t status;
@@ -61,13 +61,13 @@ void RunMTAPI_C_Network() {
     &status);
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_network_c_plugin_initialize-snippet.h"
+#include "mtapi/mtapi_network_c_plugin_initialize-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_network_c_remote_action_create-snippet.h"
+#include "mtapi/mtapi_network_c_remote_action_create-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
-#include "mtapi_network_c_local_action_create-snippet.h"
+#include "mtapi/mtapi_network_c_local_action_create-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
   job = mtapi_job_get(NETWORK_LOCAL_JOB, NETWORK_DOMAIN, &status);
@@ -94,7 +94,7 @@ void RunMTAPI_C_Network() {
     }
   }
 
-#include "mtapi_network_c_plugin_finalize-snippet.h"
+#include "mtapi/mtapi_network_c_plugin_finalize-snippet.h"
   MTAPI_CHECK_STATUS(status);
 
   mtapi_finalize(&status);

@@ -270,7 +270,6 @@ void mtapi_opencl_plugin_initialize(
         NULL, NULL, &err);
     }
     if (CL_SUCCESS == err) {
-      size_t work_group_size;
       err = clGetDeviceInfo(plugin->device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE,
         sizeof(size_t), &plugin->work_group_size, NULL);
     }
