@@ -6,6 +6,8 @@
 build*
 *~
 *#
+*.swp
+*.swo
 
 # Eclipse CDT project files
 .project
