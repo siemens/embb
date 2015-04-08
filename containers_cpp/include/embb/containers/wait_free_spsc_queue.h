@@ -154,7 +154,7 @@ class WaitFreeSPSCQueue {
   /**
    * Creates a queue with at least the specified capacity.
    *
-   * \memory Allocates \c 2^k elements of type \c Type, where \k is the
+   * \memory Allocates \c 2^k elements of type \c Type, where \c k is the
    * smallest number such that <tt>capacity <= 2^k</tt> holds.
    *
    * \notthreadsafe

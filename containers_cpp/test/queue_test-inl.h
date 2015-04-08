@@ -290,7 +290,7 @@ QueueTestSingleThreadEnqueueDequeue_ThreadMethod() {
   }
   // Oversized amount should not be larger than the original capacity
   PT_ASSERT_LT(oversized_count, 2 * n_queue_size);
- 
+
   // Dequeue the expected amount of elements
   for (int i = 0; i != n_queue_size; ++i) {
     element_t dequ(0, -1);
