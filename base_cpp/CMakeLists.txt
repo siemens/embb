@@ -21,6 +21,7 @@ GroupSourcesMSVC(include/embb/base)
 GroupSourcesMSVC(src)
 if (BUILD_TESTS STREQUAL ON)
   GroupSourcesMSVC(test)
+  GroupSourcesMSVC(perf/include/embb/perf)
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -47,9 +48,14 @@ if (BUILD_TESTS STREQUAL ON)
   # Performance tests
   include_directories(perf/include
                       ${CMAKE_CURRENT_BINARY_DIR}/../partest/include
+					  ${CMAKE_CURRENT_SOURCE_DIR}/../tasks_cpp/include
+                      ${CMAKE_CURRENT_BINARY_DIR}/../tasks_cpp/include
                       )
-  add_library (embb_base_cpp_perf ${EMBB_BASE_PERF_SOURCES})
-  target_link_libraries(embb_base_cpp_perf partest embb_base_cpp embb_base_c
+  add_library (embb_base_cpp_perf
+               ${EMBB_BASE_PERF_HEADERS}
+               ${EMBB_BASE_PERF_SOURCES})
+  target_link_libraries(embb_base_cpp_perf
+                        partest embb_tasks_cpp embb_base_cpp embb_base_c 
                         ${compiler_libs})
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/perf/include/embb
           DESTINATION include FILES_MATCHING PATTERN "*.h")

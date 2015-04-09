@@ -43,21 +43,18 @@ namespace perf {
  * \notthreadsafe
  * \ingroup CPP_BASE_PERF
  */
-template<typename ParallelF>
+template<typename SerialF, typename ParallelF, class TestParams>
 class PerformanceTest : public partest::TestCase {
  public:
   /**
    * Constructs PerformanceTest.
    */
-  explicit PerformanceTest(
-      size_t thread_count = partest::TestSuite::GetDefaultNumThreads(),
-      size_t iteration_count = partest::TestSuite::GetDefaultNumIterations()) :
-      partest::TestCase() {
-    /* maximum one thread per available core */
-    size_t threads = std::min<size_t>(thread_count,
+  explicit PerformanceTest(const TestParams & params)
+    : partest::TestCase(), params_(params) {
+    // maximum one thread per available core
+    size_t threads = std::min<size_t>(params.MaxThreads(),
                                       embb::base::CoreSet::CountAvailable());
-
-    unit = &CreateUnit< PerfTestUnit<ParallelF> >(threads, iteration_count);
+    unit_ = &CreateUnit< PerfTestUnit<ParallelF, TestParams> >(params_);
   }
 
   /**
@@ -70,14 +67,15 @@ class PerformanceTest : public partest::TestCase {
   /**
    * Prints the durations of all units in comma separated format.
    */
-  void PrintReport(std::ostream &ostr) const {
-    /* print execution duration */
-    ostr << "P" << unit->GetThreadCount << std::endl << unit->GetDuration()
-         << std::endl;
+  void PrintReport(std::ostream & ostr) const {
+    // print execution duration
+//    ostr << "P" << unit_->GetThreadCount() << std::endl
+//         << unit_->GetDuration() << std::endl;
   }
 
  private:
-  PerfTestUnit<ParallelF> *unit;
+  const TestParams & params_;
+  PerfTestUnit<ParallelF, TestParams> * unit_;
 
   /* prohibit copy and assignment */
   PerformanceTest(const PerformanceTest &other);

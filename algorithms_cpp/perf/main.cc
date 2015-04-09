@@ -46,9 +46,14 @@
 #include <quick_sort_perf.h>
 #include <merge_sort_perf.h>
 
+#include <embb/base/perf/performance_test.h>
+
 using namespace embb::algorithms::perf;
 using embb::base::perf::Timer;
 using embb::base::perf::CallArgs;
+using embb::base::perf::PerformanceTest;
+
+#if 0
 
 void ReportResult(
   const std::string & name,
@@ -156,17 +161,6 @@ void RunPerformanceTest(
   }
 }
 
-template<typename EType>
-void RunPerformanceTests(
-  const CallArgs & args) {
-  RunPerformanceTest<SerialForEach<EType>, ParallelForEach<EType> >(args, "ForEach");
-  RunPerformanceTest<SerialReduce<EType>, ParallelReduce<EType> >(args, "Reduce");
-  RunPerformanceTest<SerialScan<EType>, ParallelScan<EType> >(args, "Scan");
-  RunPerformanceTest<SerialCount<EType>, ParallelCount<EType> >(args, "Count");
-  RunPerformanceTest<SerialQuickSort<EType>, ParallelQuickSort<EType> >(args, "Quicksort");
-  RunPerformanceTest<SerialMergeSort<EType>, ParallelMergeSort<EType> >(args, "Mergesort");
-}
-
 int main(int argc, char * argv[]) {
   // Parse command line arguments:
   embb::base::perf::CallArgs args;
@@ -174,22 +168,37 @@ int main(int argc, char * argv[]) {
     args.Parse(argc, argv);
   } catch (::std::runtime_error & re) {
     ::std::cerr << re.what() << ::std::endl;
+  }  
+  // Print test settings:
+  args.Print(::std::cout);
+  // Run tests:
+  RunPerformanceTest< SerialForEach<float>, ParallelForEach<float> >(args, "ForEach");
+  RunPerformanceTest< SerialReduce<float>, ParallelReduce<float> >(args, "Reduce");
+  RunPerformanceTest< SerialScan<float>, ParallelScan<float> >(args, "Scan");
+  RunPerformanceTest< SerialCount<float>, ParallelCount<float> >(args, "Count");
+  RunPerformanceTest< SerialQuickSort<float>, ParallelQuickSort<float> >(args, "Quicksort");
+  RunPerformanceTest< SerialMergeSort<float>, ParallelMergeSort<float> >(args, "Mergesort");
+  return 0;
+}
+
+#endif
+
+int main(int argc, char * argv[]) {
+  // Parse command line arguments:
+  CallArgs args;
+  try {
+    args.Parse(argc, argv);
   }
-  if (args.ParallelBaseReference() == 1) {
-    embb_log_set_log_level(EMBB_LOG_LEVEL_TRACE);
+  catch (::std::runtime_error & re) {
+    ::std::cerr << re.what() << ::std::endl;
   }
   // Print test settings:
   args.Print(::std::cout);
   // Run tests:
-  switch (args.ElementType()) {
-  case CallArgs::FLOAT:
-    RunPerformanceTests<float>(args);
-    break;
-  case CallArgs::DOUBLE:
-    RunPerformanceTests<double>(args);
-    break;
-  case CallArgs::UNDEFINED_SCALAR_TYPE:
-    break;
-  }
+  PerformanceTest< SerialForEach<float>, ParallelForEach<float>, CallArgs >
+    test(args);
+  test.Run();
+  test.PrintReport(std::cout);
+
   return 0;
 }

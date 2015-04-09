@@ -86,7 +86,7 @@ class SpeedupTest : public partest::TestCase {
   /**
    * Prints the durations of all units in comma separated format.
    */
-  void PrintReport(std::ostream &ostr) {
+  void PrintReport(std::ostream & ostr) {
     /* print sample row for sequential run (degree 0): */
     ostr << "0," 
          << std::fixed << std::setprecision(2) 

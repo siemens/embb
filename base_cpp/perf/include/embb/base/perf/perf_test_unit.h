@@ -32,7 +32,7 @@
 #include <partest/partest.h>
 #include <partest/test_unit.h>
 #include <embb/base/perf/timer.h>
-#include <embb/mtapi/mtapi.h>
+#include <embb/tasks/tasks.h>
 #include <embb/base/c/thread.h>
 #include <embb/base/c/internal/thread_index.h>
 
@@ -63,25 +63,18 @@ namespace perf {
  * \notthreadsafe
  * \ingroup CPP_BASE_PERF
  */
-template<typename F>
+template<typename F, class TestParams >
 class PerfTestUnit : public partest::TestUnit {
  public:
   /**
    * Constructs PerfTestUnit and sets up partest::TestUnit with Functor \c F.
    */
-  explicit PerfTestUnit(
-      size_t thread_count = partest::TestSuite::GetDefaultNumThreads(),
-      size_t iteration_count = partest::TestSuite::GetDefaultNumIterations()) :
-      partest::TestUnit("PTU"), duration_(0), thread_count_(thread_count),
-      iteration_count_(iteration_count) {
-    /* TODO: move creation and deletion of functor data (e.g. vector of doubles)
-     * to functor-specific Pre/Post methods to avoid memory shortage */
-    /* TODO: create possibility to initialize memory in these functor-specific
-     * Pre/Post methods to avoid first-touch problem. */
-    func = new F;
-    Pre(&PerfTestUnit::Tic, this);
-    Add(&F::Run, func, 1, iteration_count_);
-    Post(&PerfTestUnit::Toc, this);
+  explicit PerfTestUnit(const TestParams & params)
+  : partest::TestUnit("PTU"),
+    params_(params),
+    duration_(0) {
+    func = new F(params_);
+//  Add(&PerfTestUnit<F, TestParams>::Run, this);
   }
 
   /**
@@ -97,6 +90,7 @@ class PerfTestUnit : public partest::TestUnit {
    */
   double GetDuration() const { return duration_; }
 
+#if 0
   /**
    * Returns thread count of this unit.
    * \return Thread count of this unit.
@@ -108,59 +102,73 @@ class PerfTestUnit : public partest::TestUnit {
    * \return Iteration count of this unit.
    */
   size_t GetIterationCount() const { return iteration_count_; }
+#endif
 
  private:
+   void Run() {
+     for (unsigned int num_threads = 1;
+       num_threads < params_.MaxThreads();) {
+       func->Pre();
+       Tic();
+       func->Run(num_threads);
+       Toc();
+       func->Post();
+       if (num_threads < 4) {
+         num_threads++;
+       } else {
+         num_threads += 4;
+       }
+     }
+  }
+  
   /**
    * Sets up EMBB and starts timer.
    */
   void Tic() {
-    /* if thread_count equals 0, run without EMBB */
-    if (thread_count_ > 0) {
-      /* initialize EMBB with thread_count worker threads */
-      embb::base::CoreSet core_set_(false);
-      for (unsigned int i = 0; (i < embb::base::CoreSet::CountAvailable()) &&
-               (i < thread_count_); i++) {
-        core_set_.Add(i);
-      }
-      embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID, core_set_,
-                                    MTAPI_NODE_MAX_TASKS_DEFAULT,
-                                    MTAPI_NODE_MAX_GROUPS_DEFAULT,
-                                    MTAPI_NODE_MAX_QUEUES_DEFAULT,
-                                    MTAPI_NODE_QUEUE_LIMIT_DEFAULT,
-                                    MTAPI_NODE_MAX_PRIORITIES_DEFAULT);
+    // Set number of available threads to given limit:
+    embb_internal_thread_index_reset();
+    // Configure cores to be used by EMBB:
+    embb::base::CoreSet cores(false);
+    for (unsigned int coreId = 0;
+         coreId < params_.MaxThreads();
+         ++coreId) {
+      cores.Add(coreId);
     }
-    /* start timer */
+    embb::tasks::Node::Initialize(
+      THIS_DOMAIN_ID, THIS_NODE_ID,
+      cores,
+      MTAPI_NODE_MAX_TASKS_DEFAULT,
+      MTAPI_NODE_MAX_GROUPS_DEFAULT,
+      MTAPI_NODE_MAX_QUEUES_DEFAULT,
+      MTAPI_NODE_QUEUE_LIMIT_DEFAULT,
+      MTAPI_NODE_MAX_PRIORITIES_DEFAULT);
+    // start timer
     timer_ = Timer();
   }
 
   /**
-   * Stops timer and resets EMBB */
+   * Stops timer and resets EMBB
+   */
   void Toc() {
-    /* stop timer */
+    // stop timer
     duration_ = timer_.Elapsed();
-    /* execute EMBB Finalize (if EMBB was initialized) */
-    if (thread_count_ > 0) {
-      embb::mtapi::Node::Finalize();
-      /* reset internal thread count in EMBB. required in order to avoid
-       * lock-ups */
-      /* TODO: Talk to TobFuchs about nicer implementation */
-      embb_internal_thread_index_reset();
-    }
+    embb::tasks::Node::Finalize();    
   }
 
+  const TestParams & params_;
   double duration_;
-  size_t thread_count_;
-  size_t iteration_count_;
+//size_t thread_count_;
+//size_t iteration_count_;
   Timer timer_;
   F *func;
 
-  /* prohibit copy and assignment */
+  // prohibit copy and assignment
   PerfTestUnit(const PerfTestUnit &other);
   PerfTestUnit& operator=(const PerfTestUnit &other);
 };
 
-} /* perf */
-} /* base */
-} /* embb */
+}  // perf
+}  // base
+}  // embb
 
 #endif /* EMBB_BASE_PERF_PERF_TEST_UNIT_H_ */

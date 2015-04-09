@@ -47,8 +47,7 @@ SerialForEach<T>::SerialForEach(const embb::base::perf::CallArgs & args)
     for (size_t i = 0; i < vector_size; i++) {
       v[i] = static_cast<T>(i);
     }
-  }
-  else {
+  } else {
     v = 0;
   }
 }
@@ -67,8 +66,7 @@ void SerialForEach<T>::Run() {
       T v = static_cast<T>(i);
       op(v);
     }
-  }
-  else if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+  } else if (cargs.StressMode() == CallArgs::RAM_STRESS) {
     for (size_t i = 0; i < vector_size; i++) {
       op(v[i]);
     }
@@ -84,8 +82,7 @@ ParallelForEach<T>::ParallelForEach(const embb::base::perf::CallArgs & args)
     for (size_t i = 0; i < vector_size; i++) {
       v[i] = static_cast<T>(i);
     }
-  }
-  else {
+  } else {
     v = 0;
   }
 }
