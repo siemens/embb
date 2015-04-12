@@ -37,17 +37,6 @@ void CallArgs::Parse(int argc, char * argv[]) {
         counter_scale = scale_param;
       }
     }
-    // Element type:
-    if (std::string(argv[paramIndex]) == "-e") {
-      element_type = UNDEFINED_SCALAR_TYPE;
-      ::std::string type = argv[paramIndex + 1];
-      if (type == "float") {
-        element_type = FLOAT;
-      }
-      else if (type == "double") {
-        element_type = DOUBLE;
-      }
-    }
     // Stress type:
     if (std::string(argv[paramIndex]) == "-s") {
       stress_type = UNDEFINED_STRESS_TYPE;
@@ -64,15 +53,6 @@ void CallArgs::Parse(int argc, char * argv[]) {
       load_factor = static_cast<size_t>(
         atoi(argv[paramIndex + 1]));
     }
-    // Additional test parameter:
-    if (std::string(argv[paramIndex]) == "-p") {
-      parallel_base_ref = atoi(argv[paramIndex + 1]);
-    }
-    // Sanitizing and error handling:
-    if (element_type == UNDEFINED_SCALAR_TYPE) {
-      throw ::std::runtime_error(
-        "Invalid setting for element type (-e int|float|double)");
-    }
     if (stress_type == UNDEFINED_STRESS_TYPE) {
       throw ::std::runtime_error(
         "Invalid setting for stress test type (-s ram|cpu)");
@@ -88,9 +68,7 @@ void CallArgs::Print(std::ostream & os) {
   os << "Max. threads:    (-t) " << MaxThreads() << std::endl
      << "Vector size:     (-n) " << VectorSize() << std::endl
      << "Load factor:     (-l) " << LoadFactor() << std::endl
-     << "Element type:    (-e) " << ElementTypeName() << std::endl
      << "Stress mode:     (-s) " << StressModeName() << std::endl
-     << "Serial base ref: (-p) " << ParallelBaseReference() << std::endl
      << "Time sampling:   (-f) " << embb::base::perf::Timer::TimerName() 
      << std::endl;
 }

@@ -110,7 +110,7 @@ class ParallelScan {
 public:
   explicit ParallelScan(const embb::base::perf::CallArgs & args);
   ~ParallelScan();
-  void Pre() { }
+  void Pre();
   void Run(unsigned int numThreads);
   void Post() { }
 

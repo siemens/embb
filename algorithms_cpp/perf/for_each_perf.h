@@ -34,15 +34,13 @@ namespace embb {
 namespace algorithms {
 namespace perf {
 
-using embb::base::perf::CallArgs;
-
 /**
  * Operation performed in each loop iteration.
  */
 template<typename T>
 class ForEachOp {
 public:
-  explicit ForEachOp(const CallArgs & args) :
+  explicit ForEachOp(const embb::base::perf::CallArgs & args) :
     load_factor(args.LoadFactor()) { }
   void operator()(T & val) const {
     T x = val;
@@ -54,13 +52,13 @@ public:
     val = x;
   }
 private:
-  unsigned int load_factor;
+  size_t load_factor;
 };
 
 template<typename T>
 class ForEachFunctor {
 public:
-  ForEachFunctor(const CallArgs & args) :
+  ForEachFunctor(const embb::base::perf::CallArgs & args) :
     cargs(args), op(args) { }
   void operator()(T & value) const {
     op(value);
@@ -75,7 +73,7 @@ public:
     return *this;
   }
 private:
-  const CallArgs & cargs;
+  const embb::base::perf::CallArgs & cargs;
   ForEachOp<T> op;
 };
 
@@ -103,7 +101,7 @@ class ParallelForEach {
 public:
   explicit ParallelForEach(const embb::base::perf::CallArgs & args);
   ~ParallelForEach();
-  void Pre() { }
+  void Pre();
   void Run(unsigned int numThreads);
   void Post() { }
 

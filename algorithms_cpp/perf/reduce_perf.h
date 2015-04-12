@@ -51,8 +51,8 @@ public:
   T operator()(T val) const {
     T x = 0;
     // Simulate more complex operation depending on
-    // load factor. Default load factor is 1.
-    for (size_t i = 0; i < load_factor * 10000; ++i) {
+    // load factor. Default load factor is 100.
+    for (size_t i = 0; i < load_factor * 10; ++i) {
       x = (val + static_cast<T>(0.5)) * step_size * i;
       x = static_cast<T>(4.0 / (1.0 + x * x / load_factor));
     }
@@ -87,7 +87,7 @@ public:
   explicit ParallelReduce(
     const embb::base::perf::CallArgs & args);
   ~ParallelReduce();
-  void Pre() { }
+  void Pre();
   void Run(unsigned int numThreads);
   void Post() { }
 

@@ -43,9 +43,6 @@ SerialMergeSort<T>::SerialMergeSort(const embb::base::perf::CallArgs & args)
 : cargs(args), vector_size(args.VectorSize()) {
   v = static_cast<T *>(embb::base::Allocation::AllocateCacheAligned(
     vector_size * sizeof(T)));
-  for (size_t i = 0; i < vector_size; i++) {
-    v[i] = static_cast<T>(i);
-  }
 }
 
 template<typename T>
@@ -71,6 +68,14 @@ ParallelMergeSort<T>::ParallelMergeSort(const embb::base::perf::CallArgs & args)
 template<typename T>
 ParallelMergeSort<T>::~ParallelMergeSort() {
   embb::base::Allocation::FreeAligned(v);
+}
+
+template<typename T>
+void ParallelMergeSort<T>::Pre() {
+  // Initialize input vector with incrementing values:
+  for (size_t i = 0; i < vector_size; i++) {
+    v[i] = static_cast<T>(i);
+  }
 }
 
 template<typename T>

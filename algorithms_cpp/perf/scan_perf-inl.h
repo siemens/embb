@@ -101,9 +101,6 @@ ParallelScan<T>::ParallelScan(const embb::base::perf::CallArgs & args) :
   if (cargs.StressMode() == CallArgs::RAM_STRESS) {
     in = (T *) Allocation::AllocateCacheAligned(
       vector_size * sizeof(T));
-    for (size_t i = 0; i < vector_size; i++) {
-      in[i] = static_cast<T>(1);
-    }
   }
   else {
     in  = 0;
@@ -116,6 +113,16 @@ template<typename T>
 ParallelScan<T>::~ParallelScan() {
   if (in != 0) {
     Allocation::FreeAligned(in);
+  }
+}
+
+template<typename T>
+void ParallelScan<T>::Pre() {
+  if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+    // Initialize input vector with 1's:
+    for (size_t i = 0; i < vector_size; i++) {
+      in[i] = static_cast<T>(1);
+    }
   }
 }
 

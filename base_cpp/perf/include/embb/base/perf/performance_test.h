@@ -50,10 +50,7 @@ class PerformanceTest : public partest::TestCase {
    * Constructs PerformanceTest.
    */
   explicit PerformanceTest(const TestParams & params)
-    : partest::TestCase(), params_(params) {
-    // maximum one thread per available core
-    size_t threads = std::min<size_t>(params.MaxThreads(),
-                                      embb::base::CoreSet::CountAvailable());
+  : partest::TestCase(), params_(params) {
     unit_ = &CreateUnit< PerfTestUnit<ParallelF, TestParams> >(params_);
   }
 
@@ -82,8 +79,8 @@ class PerformanceTest : public partest::TestCase {
   PerformanceTest& operator=(const PerformanceTest &other);
 };
 
-} /* perf */
-} /* base */
-} /* embb */
+}  // perf
+}  // base
+}  // embb
 
-#endif /* EMBB_BASE_PERF_PERFORMANCE_TEST_H_ */
+#endif  // EMBB_BASE_PERF_PERFORMANCE_TEST_H_

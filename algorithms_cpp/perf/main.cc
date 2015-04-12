@@ -24,20 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
 #include <partest/partest.h>
-
-#include <embb/base/core_set.h>
-#include <embb/base/thread.h>
-#include <embb/base/c/log.h>
-#include <embb/base/c/internal/thread_index.h>
-#include <embb/tasks/tasks.h>
-
-#include <embb/base/perf/call_args.h>
-#include <embb/base/perf/timer.h>
 
 #include <for_each_perf.h>
 #include <reduce_perf.h>
@@ -46,159 +33,33 @@
 #include <quick_sort_perf.h>
 #include <merge_sort_perf.h>
 
-#include <embb/base/perf/performance_test.h>
+#include <embb/base/perf/perf.h>
+#include <embb/base/perf/speedup_test.h>
 
-using namespace embb::algorithms::perf;
+using embb::algorithms::perf::SerialForEach;
+using embb::algorithms::perf::SerialReduce;
+using embb::algorithms::perf::SerialScan;
+using embb::algorithms::perf::SerialCount;
+using embb::algorithms::perf::SerialScan;
+using embb::algorithms::perf::SerialMergeSort;
+using embb::algorithms::perf::SerialQuickSort;
+using embb::algorithms::perf::ParallelForEach;
+using embb::algorithms::perf::ParallelReduce;
+using embb::algorithms::perf::ParallelScan;
+using embb::algorithms::perf::ParallelCount;
+using embb::algorithms::perf::ParallelMergeSort;
+using embb::algorithms::perf::ParallelQuickSort;
 using embb::base::perf::Timer;
 using embb::base::perf::CallArgs;
-using embb::base::perf::PerformanceTest;
+using embb::base::perf::SpeedupTest;
 
-#if 0
+#define COMMA ,
 
-void ReportResult(
-  const std::string & name,
-  unsigned int threads,
-  const CallArgs & args,
-  double elapsed,
-  double speedup) {
-  std::cout
-    << args.VectorSize() << ","
-    << args.ElementTypeName() << ","
-    << args.LoadFactor() << ","
-    << args.StressModeName() << ","
-    << threads << ","
-    << std::fixed << elapsed << ","
-    << std::setprecision(3) << speedup
-    << std::endl;
-  std::ofstream file;
-  std::string filename = "performance_tests_result.csv";
-  file.open(filename.c_str(), ::std::ofstream::out | ::std::ofstream::app);
-  file
-    << name << ","
-    << args.VectorSize() << ","
-    << args.ElementTypeName() << ","
-    << args.LoadFactor() << ","
-    << args.StressModeName() << ","
-    << threads << ","
-    << std::fixed << elapsed << ","
-    << std::setprecision(3) << speedup
-    << std::endl;
-}
-
-template< typename TestSerial, typename TestParallel >
-void RunPerformanceTest(
-  const embb::base::perf::CallArgs & args,
-  const std::string & name) {
-  std::cout << "--- Running " << name << std::endl;
-  // Initialize new test instances:
-  TestParallel testParallel(args);
-  // Parallel runs:  
-  unsigned int threads = 1;
-  // Base value to compute speedup; parallel execution
-  // with 1 thread or serial execution.
-  double baseDuration = 0;
-
-  // Whether to use serial or parallel exeuction using 1
-  // thread for speedup reference:
-  if (args.ParallelBaseReference() == 0) {
-    TestSerial testSerial(args);
-    // Serial run:
-    Timer t;
-    testSerial.Run();
-    double elapsed = t.Elapsed();
-    ReportResult(
-      name,
-      0,
-      args,
-      elapsed,
-      1.0);
-    baseDuration = elapsed;
-  }
-  threads += args.ParallelBaseReference();
-  // Run executions with incrementing number of threads:
-  embb_internal_thread_index_set_max(args.MaxThreads());
-  while(threads <= args.MaxThreads()) {
-    // Set number of available threads to given limit: 
-    // embb::base::Thread::SetThreadsMaxCount(threads);
-    embb_internal_thread_index_reset();
-    // Configure cores to be used by EMBB:
-    embb::base::CoreSet cores(false);
-    for (unsigned int coreId = 0; coreId < threads; ++coreId) {
-      cores.Add(coreId);
-    }
-    embb::tasks::Node::Initialize(
-      1, 1, cores,
-      MTAPI_NODE_MAX_TASKS_DEFAULT * 8,
-      MTAPI_NODE_MAX_GROUPS_DEFAULT * 8,
-      MTAPI_NODE_MAX_QUEUES_DEFAULT * 8,
-      MTAPI_NODE_QUEUE_LIMIT_DEFAULT * 8,
-      MTAPI_NODE_MAX_PRIORITIES_DEFAULT);
-    // Test setup:
-    testParallel.Pre();
-    // Initialize timer:
-    Timer t;
-    // Run the test body:
-    testParallel.Run(threads);
-    // Report duration:
-    double elapsed = t.Elapsed();
-    if (threads == 1) {
-      baseDuration = elapsed;
-    }
-    ReportResult(
-      name,
-      threads,
-      args,
-      elapsed,
-      static_cast<double>(baseDuration) / static_cast<double>(elapsed));
-    // Test teardown:
-    testParallel.Post();
-    if (threads < 4) {
-      ++threads;
-    } else {
-      threads += 4;
-    }
-    embb::tasks::Node::Finalize();
-  }
-}
-
-int main(int argc, char * argv[]) {
-  // Parse command line arguments:
-  embb::base::perf::CallArgs args;
-  try {
-    args.Parse(argc, argv);
-  } catch (::std::runtime_error & re) {
-    ::std::cerr << re.what() << ::std::endl;
-  }  
-  // Print test settings:
-  args.Print(::std::cout);
-  // Run tests:
-  RunPerformanceTest< SerialForEach<float>, ParallelForEach<float> >(args, "ForEach");
-  RunPerformanceTest< SerialReduce<float>, ParallelReduce<float> >(args, "Reduce");
-  RunPerformanceTest< SerialScan<float>, ParallelScan<float> >(args, "Scan");
-  RunPerformanceTest< SerialCount<float>, ParallelCount<float> >(args, "Count");
-  RunPerformanceTest< SerialQuickSort<float>, ParallelQuickSort<float> >(args, "Quicksort");
-  RunPerformanceTest< SerialMergeSort<float>, ParallelMergeSort<float> >(args, "Mergesort");
-  return 0;
-}
-
-#endif
-
-int main(int argc, char * argv[]) {
-  // Parse command line arguments:
-  CallArgs args;
-  try {
-    args.Parse(argc, argv);
-  }
-  catch (::std::runtime_error & re) {
-    ::std::cerr << re.what() << ::std::endl;
-  }
-  // Print test settings:
-  args.Print(::std::cout);
-  // Run tests:
-  PerformanceTest< SerialForEach<float>, ParallelForEach<float>, CallArgs >
-    test(args);
-  test.Run();
-  test.PrintReport(std::cout);
-
-  return 0;
+PT_PERF_MAIN("Algorithms") {
+  PT_PERF_RUN(SpeedupTest< SerialForEach<float> COMMA ParallelForEach<float> >);
+  PT_PERF_RUN(SpeedupTest< SerialReduce<float> COMMA ParallelReduce<float> >);
+  PT_PERF_RUN(SpeedupTest< SerialScan<float> COMMA ParallelScan<float> >);
+  PT_PERF_RUN(SpeedupTest< SerialCount<float> COMMA ParallelCount<float> >);
+  PT_PERF_RUN(SpeedupTest< SerialMergeSort<float> COMMA ParallelMergeSort<float> >);
+  PT_PERF_RUN(SpeedupTest< SerialQuickSort<float> COMMA ParallelQuickSort<float> >);
 }

@@ -24,14 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_BASE_PERF_PERF_TEST_UNIT_H_
-#define EMBB_BASE_PERF_PERF_TEST_UNIT_H_
+#ifndef EMBB_BASE_PERF_PARALLEL_PERF_TEST_UNIT_H_
+#define EMBB_BASE_PERF_PARALLEL_PERF_TEST_UNIT_H_
 
 #include <cmath>
 #include <vector>
 #include <partest/partest.h>
 #include <partest/test_unit.h>
 #include <embb/base/perf/timer.h>
+#include <embb/base/perf/call_args.h>
 #include <embb/tasks/tasks.h>
 #include <embb/base/c/thread.h>
 #include <embb/base/c/internal/thread_index.h>
@@ -63,62 +64,52 @@ namespace perf {
  * \notthreadsafe
  * \ingroup CPP_BASE_PERF
  */
-template<typename F, class TestParams >
-class PerfTestUnit : public partest::TestUnit {
+template<typename ParallelF>
+class ParallelPerfTestUnit : public partest::TestUnit {
  public:
   /**
    * Constructs PerfTestUnit and sets up partest::TestUnit with Functor \c F.
    */
-  explicit PerfTestUnit(const TestParams & params)
-  : partest::TestUnit("PTU"),
-    params_(params),
-    duration_(0) {
-    func = new F(params_);
-//  Add(&PerfTestUnit<F, TestParams>::Run, this);
+   explicit ParallelPerfTestUnit(const CallArgs & params) :
+    partest::TestUnit("ParallelPerfTestUnit"),
+    params_(params) {
+    func_ = new ParallelF(params_);
+    Add(&ParallelPerfTestUnit<ParallelF>::Run, this);
   }
 
   /**
-   * Destructs PerfTestUnit
+   * Destructs ParallelPerfTestUnit
    */
-  ~PerfTestUnit() {
-    delete func;
+   ~ParallelPerfTestUnit() {
+    delete func_;
   }
 
   /**
-   * Returns duration of this unit in microseconds.
-   * \return Duration of this unit in microseconds.
+   * Durations of single runs of this unit in microseconds.
+   * \return Vector of durations of single runs of this unit
+   *         ordered by number of threads, in microseconds.
    */
-  double GetDuration() const { return duration_; }
-
-#if 0
-  /**
-   * Returns thread count of this unit.
-   * \return Thread count of this unit.
-   */
-  size_t GetThreadCount() const { return thread_count_; }
-
-  /**
-   * Returns iteration count of this unit.
-   * \return Iteration count of this unit.
-   */
-  size_t GetIterationCount() const { return iteration_count_; }
-#endif
+  const std::vector< std::pair<unsigned int, double> > & GetDurations() const {
+    return durations_;
+  }
 
  private:
-   void Run() {
-     for (unsigned int num_threads = 1;
-       num_threads < params_.MaxThreads();) {
-       func->Pre();
-       Tic();
-       func->Run(num_threads);
-       Toc();
-       func->Post();
-       if (num_threads < 4) {
-         num_threads++;
-       } else {
-         num_threads += 4;
-       }
-     }
+   /**
+    * Run performance test
+    */
+  void Run() {
+    for (unsigned int num_threads = 1; num_threads <= params_.MaxThreads();) {
+      func_->Pre();
+      Tic();
+      func_->Run(num_threads);
+      Toc(num_threads);
+      func_->Post();
+      if (num_threads < 4) {
+        num_threads++;
+      } else {
+        num_threads += 4;
+      }
+    }
   }
   
   /**
@@ -149,26 +140,25 @@ class PerfTestUnit : public partest::TestUnit {
   /**
    * Stops timer and resets EMBB
    */
-  void Toc() {
+  void Toc(unsigned int num_threads) {
     // stop timer
-    duration_ = timer_.Elapsed();
+    durations_.push_back(
+      std::make_pair(num_threads, timer_.Elapsed()));
     embb::tasks::Node::Finalize();    
   }
 
-  const TestParams & params_;
-  double duration_;
-//size_t thread_count_;
-//size_t iteration_count_;
+  const CallArgs params_;
+  std::vector< std::pair<unsigned int, double> > durations_;
   Timer timer_;
-  F *func;
+  ParallelF * func_;
 
   // prohibit copy and assignment
-  PerfTestUnit(const PerfTestUnit &other);
-  PerfTestUnit& operator=(const PerfTestUnit &other);
+  ParallelPerfTestUnit(const ParallelPerfTestUnit &other);
+  ParallelPerfTestUnit& operator=(const ParallelPerfTestUnit & other);
 };
 
 }  // perf
 }  // base
 }  // embb
 
-#endif /* EMBB_BASE_PERF_PERF_TEST_UNIT_H_ */
+#endif  // EMBB_BASE_PERF_PARALLEL_PERF_TEST_UNIT_H_

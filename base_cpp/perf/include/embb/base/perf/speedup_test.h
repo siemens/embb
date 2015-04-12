@@ -31,7 +31,9 @@
 #include <iomanip>
 #include <partest/partest.h>
 #include <embb/base/perf/timer.h>
-#include <embb/base/perf/perf_test_unit.h>
+#include <embb/base/perf/call_args.h>
+#include <embb/base/perf/parallel_perf_test_unit.h>
+#include <embb/base/perf/serial_perf_test_unit.h>
 
 namespace embb {
 namespace base {
@@ -49,32 +51,18 @@ namespace perf {
  * \notthreadsafe
  * \ingroup CPP_BASE_PERF
  */
-template<typename ParallelF, typename SerialF>
+template<typename SerialF, typename ParallelF>
 class SpeedupTest : public partest::TestCase {
  public:
   /**
    * Constructs SpeedupTest and creates test units.
    */
-  explicit SpeedupTest(
-      size_t max_thread_count = partest::TestSuite::GetDefaultNumThreads(),
-      size_t iteration_count  = partest::TestSuite::GetDefaultNumIterations()) :
-      partest::TestCase() {
-    /* maximum one thread per available core */
-    size_t threads = std::min<size_t>(
-        max_thread_count,
-        embb::base::CoreSet::CountAvailable());
-
-    std::cout << "Test configuration ------------------------------------" << std::endl;
-    std::cout << "  Num threads: " << threads << std::endl;
-    std::cout << "  Iterations:  " << iteration_count << std::endl;
-
-    /* create unit for serial version */
-    ser_unit_ = &CreateUnit< PerfTestUnit<SerialF> >(0, iteration_count);
-    /* create log2(threads)+1 units for parallel version */
-    for (size_t i = 1; i <= threads; i = i * 2) {
-      par_units_.push_back(
-        &CreateUnit< PerfTestUnit<ParallelF> >(i, iteration_count));
-    }
+  explicit SpeedupTest(const embb::base::perf::CallArgs & params)
+  : partest::TestCase(), params_(params) {
+    // create unit for serial version
+    ser_unit_ = &CreateUnit< SerialPerfTestUnit<SerialF>, CallArgs >(params_);
+    // create unit for parallel version
+    par_unit_ = &CreateUnit< ParallelPerfTestUnit<ParallelF>, CallArgs >(params_);
   }
 
   /**
@@ -87,31 +75,39 @@ class SpeedupTest : public partest::TestCase {
    * Prints the durations of all units in comma separated format.
    */
   void PrintReport(std::ostream & ostr) {
-    /* print sample row for sequential run (degree 0): */
+    double serial_duration = ser_unit_->GetDuration();
+    // print sample row for sequential run (degree 0):
     ostr << "0," 
          << std::fixed << std::setprecision(2) 
-         << ser_unit_->GetDuration() << std::endl;
-    /* print sample rows for parallel runs (degree > 0): */
-    for (int i = 0; i < par_units_.size(); ++i) {
-      ostr << std::fixed << par_units_[i]->GetThreadCount()
+         << serial_duration << ","
+         << std::fixed << 1.0
+         << std::endl;
+    // print sample rows for parallel runs (degree > 0):
+    std::vector < std::pair< unsigned int, double > > durations =
+      par_unit_->GetDurations();
+    for (unsigned int i = 0; i < durations.size(); ++i) {
+      ostr << std::fixed << durations[i].first
            << "," 
            << std::fixed << std::setprecision(2) 
-           << par_units_[i]->GetDuration() 
+           << durations[i].second
+           << ","
+           << std::fixed << serial_duration / durations[i].second
            << std::endl;
     }
   }
 
  private:
-  std::vector<PerfTestUnit<ParallelF> *> par_units_;
-  PerfTestUnit<SerialF> *ser_unit_;
+  const CallArgs & params_;
+  ParallelPerfTestUnit<ParallelF> * par_unit_;
+  SerialPerfTestUnit<SerialF> * ser_unit_;
 
   /* prohibit copy and assignment */
   SpeedupTest(const SpeedupTest &other);
   SpeedupTest& operator=(const SpeedupTest &other);
 };
 
-} /* perf */
-} /* base */
-} /* embb */
+}  // perf
+}  // base
+}  // embb
 
 #endif /* EMBB_BASE_PERF_SPEEDUP_TEST_H_ */

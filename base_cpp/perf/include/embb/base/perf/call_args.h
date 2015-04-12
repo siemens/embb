@@ -36,31 +36,28 @@ namespace base {
 namespace perf {
 
 class CallArgs {
-
-public: 
-
-  typedef enum {
-    UNDEFINED_SCALAR_TYPE = 0,
-    FLOAT,
-    DOUBLE
-  } ScalarType;
-
+ public:
   typedef enum {
     UNDEFINED_STRESS_TYPE = 0,
     RAM_STRESS,
     CPU_STRESS
   } StressType;
 
-public: 
-
+ public:
   inline CallArgs() :
-    element_type(CallArgs::FLOAT),
     stress_type(CallArgs::RAM_STRESS),
     max_threads(embb::base::CoreSet::CountAvailable()),
     vector_size(10000000),
-    load_factor(100),
-    parallel_base_ref(0),
+    load_factor(10),
     counter_scale(0) { 
+  }
+
+  inline CallArgs(const CallArgs & other) :
+    stress_type(other.stress_type),
+    max_threads(other.max_threads),
+    vector_size(other.vector_size),
+    load_factor(other.load_factor),
+    counter_scale(other.counter_scale) {
   }
 
   inline CallArgs(int argc, char * argv[]) {
@@ -77,18 +74,6 @@ public:
 
   inline unsigned int CounterScale() const {
     return counter_scale;
-  }
-
-  inline ScalarType ElementType() const {
-    return element_type;
-  }
-
-  inline ::std::string ElementTypeName() const {
-    return ((ElementType() == UNDEFINED_SCALAR_TYPE)
-      ? "undefined"
-      : ((ElementType() == FLOAT)
-        ? "float"
-        : "double"));
   }
 
   inline StressType StressMode() const {
@@ -108,21 +93,13 @@ public:
   inline size_t LoadFactor() const {
     return load_factor;
   }
-
-  inline unsigned int ParallelBaseReference() const {
-    return parallel_base_ref;;
-  }
-
-private:
-
-  ScalarType element_type;
+  
+ private:
   StressType stress_type;
   size_t max_threads;
   size_t vector_size;
   size_t load_factor;
-  unsigned int parallel_base_ref;
   unsigned int counter_scale;
-
 };
 
 } // namespace perf

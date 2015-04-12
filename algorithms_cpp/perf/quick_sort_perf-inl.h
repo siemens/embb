@@ -72,14 +72,19 @@ ParallelQuickSort<T>::ParallelQuickSort(const embb::base::perf::CallArgs & args)
 : cargs(args), vector_size(args.VectorSize()) {
   v = static_cast<T *>(embb::base::Allocation::AllocateCacheAligned(
     vector_size * sizeof(T)));
-  for (size_t i = 0; i < vector_size; i++) {
-    v[i] = static_cast<T>(i);
-  }
 }
 
 template<typename T>
 ParallelQuickSort<T>::~ParallelQuickSort() {
   embb::base::Allocation::FreeAligned(v);
+}
+
+template<typename T>
+void ParallelQuickSort<T>::Pre() {
+  // Initialize input vector with incrementing values:
+  for (size_t i = 0; i < vector_size; i++) {
+    v[i] = static_cast<T>(i);
+  }
 }
 
 template<typename T>

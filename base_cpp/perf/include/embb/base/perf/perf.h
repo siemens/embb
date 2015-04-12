@@ -24,59 +24,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_ALGORITHMS_PERF_QUICK_SORT_PERF_H_
-#define EMBB_ALGORITHMS_PERF_QUICK_SORT_PERF_H_
+#ifndef EMBB_BASE_CPP_PERF_PERF_H_
+#define EMBB_BASE_CPP_PERF_PERF_H_
 
 #include <embb/base/perf/call_args.h>
-#include <cmath>
+#include <string>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
-namespace embb {
-namespace algorithms {
-namespace perf {
+#define PT_PERF_MAIN(component) \
+template <class Test> \
+void PartestRunPerformanceTest(Test & test) { \
+  test.Run(); \
+  test.PrintReport(std::cout); \
+} \
+void PartestRunPerformanceTests( \
+  embb::base::perf::CallArgs & perf_test_params); \
+int main(int argc, char** argv) { \
+  std::cout << component << ::std::endl; \
+  embb::base::perf::CallArgs perf_test_params; \
+  try { \
+    perf_test_params.Parse(argc, argv); \
+  } \
+  catch (::std::runtime_error & re) { \
+    ::std::cerr << re.what() << ::std::endl; \
+  } \
+  perf_test_params.Print(::std::cout); \
+  PartestRunPerformanceTests(perf_test_params); \
+} \
+void PartestRunPerformanceTests( \
+  embb::base::perf::CallArgs & perf_test_params)
 
-using embb::base::perf::CallArgs;
+#define PT_PERF_RUN(PT_PERF_TEST) \
+( \
+  (std::cout << "Running " << #PT_PERF_TEST << " ..." << std::endl), \
+  PartestRunPerformanceTest<PT_PERF_TEST>(PT_PERF_TEST(perf_test_params)), \
+  (std::cout << "Running " << #PT_PERF_TEST << " ..." << " done" << std::endl) \
+)
 
-template<typename T>
-class SerialQuickSort {
-public:
-  explicit SerialQuickSort(const embb::base::perf::CallArgs & args);
-  ~SerialQuickSort();
-  void Pre() { }
-  void Run();
-  void Post() { }
-private:
-  static int Greater(const void *a, const void *b);
-  const embb::base::perf::CallArgs & cargs;
-  const size_t vector_size;
-  T * v;
-  /* prohibit copy and assignment */
-  SerialQuickSort(const SerialQuickSort & other);
-  SerialQuickSort & operator=(const SerialQuickSort & other);
-};
-
-template<typename T>
-class ParallelQuickSort {
-public:
-  explicit ParallelQuickSort(const embb::base::perf::CallArgs & args);
-  ~ParallelQuickSort();
-  void Pre();
-  void Run(unsigned int numThreads);
-  void Post() { }
-
-private:
-  const embb::base::perf::CallArgs & cargs;
-  const size_t vector_size;
-  T * v;
-  /* prohibit copy and assignment */
-  ParallelQuickSort(const ParallelQuickSort & other);
-  ParallelQuickSort & operator=(const ParallelQuickSort & other);
-};
-
-} // namespace perf
-} // namespace algorithms
-} // namespace embb
-
-#include <quick_sort_perf-inl.h>
-
-#endif  // EMBB_ALGORITHMS_PERF_QUICK_SORT_PERF_H_
-
+#endif  // EMBB_BASE_CPP_PERF_PERF_H_

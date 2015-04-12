@@ -59,7 +59,7 @@ class ParallelMergeSort {
 public:
   explicit ParallelMergeSort(const embb::base::perf::CallArgs & args);
   ~ParallelMergeSort();
-  void Pre() { }
+  void Pre();
   void Run(unsigned int numThreads);
   void Post() { }
 

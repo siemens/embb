@@ -93,9 +93,6 @@ ParallelReduce<T>::ParallelReduce(
     v = static_cast<T*>(
       embb::base::Allocation::AllocateCacheAligned(
       vector_size * sizeof(T)));
-    for (size_t i = 0; i < vector_size; i++) {
-      v[i] = (T)i;
-    }
   }
   else {
     v = 0;
@@ -106,6 +103,16 @@ template<typename T>
 ParallelReduce<T>::~ParallelReduce() {
   if (v != 0) {
     embb::base::Allocation::FreeAligned(v);
+  }
+}
+
+template<typename T>
+void ParallelReduce<T>::Pre() {
+  if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+    // Initialize input vector with incrementing values:
+    for (size_t i = 0; i < vector_size; i++) {
+      v[i] = (T)i;
+    }
   }
 }
 
