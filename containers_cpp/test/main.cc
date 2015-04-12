@@ -26,10 +26,11 @@
 
 #include <embb/containers/lock_free_tree_value_pool.h>
 #include <embb/containers/wait_free_array_value_pool.h>
-#include <embb/containers/wait_free_spsc_queue.h>
 #include <embb/containers/object_pool.h>
 #include <embb/containers/lock_free_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
+#include <embb/containers/wait_free_spsc_queue.h>
+#include <embb/containers/wait_free_mpmc_queue.h>
 #include <embb/base/c/memory_allocation.h>
 
 #include <partest/partest.h>
@@ -47,6 +48,7 @@ using embb::containers::WaitFreeArrayValuePool;
 using embb::containers::LockFreeTreeValuePool;
 using embb::containers::WaitFreeSPSCQueue;
 using embb::containers::LockFreeMPMCQueue;
+using embb::containers::WaitFreeMPMCQueue;
 using embb::containers::LockFreeStack;
 using embb::containers::LockFreeTreeValuePool;
 using embb::containers::WaitFreeArrayValuePool;
@@ -60,16 +62,20 @@ PT_MAIN("Data Structures C++") {
   unsigned int max_threads = static_cast<unsigned int>(
     2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
-
+#if 0
   PT_RUN(PoolTest< WaitFreeArrayValuePool<int COMMA -1> >);
   PT_RUN(PoolTest< LockFreeTreeValuePool<int COMMA -1> >);
   PT_RUN(HazardPointerTest);
   PT_RUN(QueueTest< WaitFreeSPSCQueue< ::std::pair<size_t COMMA int> > >);
   PT_RUN(QueueTest< LockFreeMPMCQueue< ::std::pair<size_t COMMA int> >
     COMMA true COMMA true >);
+#endif
+  PT_RUN(QueueTest< WaitFreeMPMCQueue< ::std::pair<size_t COMMA int> >
+    COMMA true COMMA true >);
+#if 0
   PT_RUN(StackTest< LockFreeStack<int> >);
   PT_RUN(ObjectPoolTest< LockFreeTreeValuePool<bool COMMA false > >);
   PT_RUN(ObjectPoolTest< WaitFreeArrayValuePool<bool COMMA false> >);
-
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
+#endif
+  PT_EXPECT_EQ(embb_get_bytes_allocated(), static_cast<size_t>(0));
 }

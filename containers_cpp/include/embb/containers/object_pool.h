@@ -79,32 +79,6 @@ class ObjectPool {
    */
   ValuePool p;
 
-  /**
-   * Helper providing a virtual iterator that just returns true in each
-   * iteration step. Used for filling the value pool. Implements the normal
-   * C++ iterator concept. Not further documented here.
-   */
-  class ReturningTrueIterator {
-   public:
-    typedef ReturningTrueIterator self_type;
-    typedef bool value_type;
-    typedef bool& reference;
-    typedef bool* pointer;
-    typedef std::forward_iterator_tag iterator_category;
-    typedef int difference_type;
-    explicit ReturningTrueIterator(size_t count_value);
-    self_type operator++();
-    self_type operator++(int);
-    reference operator*();
-    pointer operator->();
-    bool operator==(const self_type& rhs);
-    bool operator!=(const self_type& rhs);
-
-   private:
-    size_t count_value;
-    bool ret_value;
-  };
-
   bool IsContained(const Type &obj) const;
   int GetIndexOfObject(const Type &obj) const;
   Type* AllocateRaw();

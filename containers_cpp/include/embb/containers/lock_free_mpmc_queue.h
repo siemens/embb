@@ -29,13 +29,10 @@
 
 #include <embb/base/atomic.h>
 #include <embb/base/function.h>
-
 #include <embb/containers/lock_free_tree_value_pool.h>
 #include <embb/containers/object_pool.h>
 #include <embb/containers/internal/hazard_pointer.h>
-
 #include <limits>
-#include <stdexcept>
 
 namespace embb {
 namespace containers {
@@ -98,6 +95,7 @@ class LockFreeMPMCQueueNode {
  * \ingroup CPP_CONTAINERS_QUEUES
  *
  * \see WaitFreeSPSCQueue
+ * \see WaitFreeMPMCQueue
  *
  * \tparam Type Type of the queue elements
  * \tparam ValuePool Type of the value pool used as basis for the ObjectPool

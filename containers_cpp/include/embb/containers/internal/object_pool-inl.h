@@ -27,58 +27,10 @@
 #ifndef EMBB_CONTAINERS_INTERNAL_OBJECT_POOL_INL_H_
 #define EMBB_CONTAINERS_INTERNAL_OBJECT_POOL_INL_H_
 
+#include <embb/containers/internal/returning_true_iterator.h>
+
 namespace embb {
 namespace containers {
-template<class Type, typename ValuePool, class ObjectAllocator>
-ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::ReturningTrueIterator(size_t count_value) :
-count_value(count_value),
-  ret_value(true)
-{}
-
-template<class Type, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::self_type
-ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::operator++() {
-  self_type i = *this;
-  count_value++;
-  return i;
-}
-
-template<class Type, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::self_type ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::operator++(int) {
-  count_value++;
-  return *this;
-}
-
-template<class Type, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::reference ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::operator*() {
-  return ret_value;
-}
-
-template<class Type, typename ValuePool, class ObjectAllocator>
-typename ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::pointer ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::operator->() {
-  return &ret_value;
-}
-
-template<class Type, typename ValuePool, class ObjectAllocator>
-bool ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::operator==(const self_type& rhs) {
-  return count_value == rhs.count_value;
-}
-
-template<class Type, typename ValuePool, class ObjectAllocator>
-bool ObjectPool<Type, ValuePool, ObjectAllocator>::
-ReturningTrueIterator::operator!=(const self_type& rhs) {
-  return count_value != rhs.count_value;
-}
 
 template<class Type, typename ValuePool, class ObjectAllocator>
 bool ObjectPool<Type, ValuePool, ObjectAllocator>::
@@ -118,7 +70,8 @@ size_t ObjectPool<Type, ValuePool, ObjectAllocator>::GetCapacity() {
 template<class Type, typename ValuePool, class ObjectAllocator>
 ObjectPool<Type, ValuePool, ObjectAllocator>::ObjectPool(size_t capacity) :
 capacity(capacity),
-  p(ReturningTrueIterator(0), ReturningTrueIterator(capacity)) {
+  p(internal::ReturningTrueIterator(0),
+    internal::ReturningTrueIterator(capacity)) {
   // Allocate the objects (without construction, just get the memory)
   objects = objectAllocator.allocate(capacity);
 }

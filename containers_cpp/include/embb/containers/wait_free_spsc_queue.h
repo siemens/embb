@@ -113,6 +113,7 @@ namespace containers {
  * \ingroup CPP_CONTAINERS_QUEUES
  *
  * \see LockFreeMPMCQueue
+ * \see WaitFreeMPMCQueue
  *
  * \tparam Type Type of the queue elements
  * \tparam Allocator Allocator type for allocating queue elements.
