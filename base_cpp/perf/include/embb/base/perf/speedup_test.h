@@ -75,23 +75,27 @@ class SpeedupTest : public partest::TestCase {
    * Prints the durations of all units in comma separated format.
    */
   void PrintReport(std::ostream & ostr) {
-    double serial_duration = ser_unit_->GetDuration();
+    double base_serial_duration = ser_unit_->GetDuration();
     // print sample row for sequential run (degree 0):
     ostr << "0," 
          << std::fixed << std::setprecision(2) 
-         << serial_duration << ","
+         << base_serial_duration << ","
+         << std::fixed << 1.0 << ","
          << std::fixed << 1.0
          << std::endl;
     // print sample rows for parallel runs (degree > 0):
     std::vector < std::pair< unsigned int, double > > durations =
       par_unit_->GetDurations();
+    double base_parallel_duration = durations[0].second;
     for (unsigned int i = 0; i < durations.size(); ++i) {
       ostr << std::fixed << durations[i].first
            << "," 
            << std::fixed << std::setprecision(2) 
            << durations[i].second
            << ","
-           << std::fixed << serial_duration / durations[i].second
+           << std::fixed << base_serial_duration / durations[i].second
+           << ","
+           << std::fixed << base_parallel_duration / durations[i].second
            << std::endl;
     }
   }

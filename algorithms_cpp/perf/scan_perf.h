@@ -96,7 +96,7 @@ public:
 private:
   const embb::base::perf::CallArgs & cargs;
   const size_t vector_size;
-  unsigned int load_factor;
+  size_t load_factor;
   T * in;
   T * out;
   T result;
