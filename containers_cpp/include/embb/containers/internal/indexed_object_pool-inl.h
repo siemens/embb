@@ -33,9 +33,9 @@ namespace embb {
 namespace containers {
 namespace internal {
 
-template<typename T, class IndexPool, class Allocator>
+template<typename Type, class IndexPool, class Allocator>
 template<typename RAI>
-IndexedObjectPool<T, IndexPool, Allocator>::
+IndexedObjectPool<Type, IndexPool, Allocator>::
 IndexedObjectPool(RAI first, RAI last) :
   size_(static_cast<size_t>(std::distance(first, last))),
   indexPool(internal::ReturningTrueIterator(0),
@@ -50,9 +50,9 @@ IndexedObjectPool(RAI first, RAI last) :
   }
 }
 
-template<typename T, class IndexPool, class Allocator>
-IndexedObjectPool<T, IndexPool, Allocator >::
-IndexedObjectPool(size_t size, const T & defaultInstance) :
+template<typename Type, class IndexPool, class Allocator>
+IndexedObjectPool<Type, IndexPool, Allocator >::
+IndexedObjectPool(size_t size, const Type & defaultInstance) :
   size_(size),
   indexPool(internal::ReturningTrueIterator(0),
             internal::ReturningTrueIterator(size_)) {
@@ -66,40 +66,101 @@ IndexedObjectPool(size_t size, const T & defaultInstance) :
   }
 }
 
-template<typename T, class IndexPool, class Allocator>
-IndexedObjectPool<T, IndexPool, Allocator >::
+template<typename Type, class IndexPool, class Allocator>
+IndexedObjectPool<Type, IndexPool, Allocator >::
 ~IndexedObjectPool() {
   allocator.deallocate(elements, size_);
 }
 
-template<typename T, class IndexPool, class Allocator>
-int IndexedObjectPool<T, IndexPool, Allocator >::
-Allocate(T & element) {
-  // Reserve a pool index:
-  bool reservedFlag;
-  int index = indexPool.Allocate(reservedFlag);
-  // Assign element to be allocated at pool index.
-  // Index returned from index pool is -1 if no index
-  // is available.
-  if (index >= 0) {
-    element = elements[index];
-  }
-  return index;
-}
-
-template<typename T, class IndexPool, class Allocator>
-void IndexedObjectPool<T, IndexPool, Allocator >::
+template<typename Type, class IndexPool, class Allocator>
+void IndexedObjectPool<Type, IndexPool, Allocator >::
 Free(int elementIndex) {
   // Call the referenced element's destructor:
-  elements[elementIndex].~T();
+  elements[elementIndex].~Type();
   // Release index of the element for reuse:
   indexPool.Free(true, elementIndex);
 }
 
-template<typename T, class IndexPool, class Allocator>
-T & IndexedObjectPool<T, IndexPool, Allocator >::
-operator[](size_t elementIndex) {
+template<typename Type, class IndexPool, class Allocator>
+Type & IndexedObjectPool<Type, IndexPool, Allocator >::
+operator[](int elementIndex) {
   return elements[elementIndex];
+}
+
+template<class Type, typename ValuePool, class ObjectAllocator>
+int IndexedObjectPool<Type, ValuePool, ObjectAllocator>::AllocateRaw(
+  Type * & newElement) {
+  newElement = NULL;
+  // Reserve a pool index:
+  bool val;
+  int allocated_index = indexPool.Allocate(val);
+  if (allocated_index >= 0) {
+    // Return pointer to reserved element:
+    Type * ret_pointer = &(elements[allocated_index]);
+    newElement = ret_pointer;
+  }
+  return allocated_index;
+}
+
+template<typename Type, class IndexPool, class Allocator>
+int IndexedObjectPool<Type, IndexPool, Allocator >::
+Allocate() {
+  Type * raw_object = NULL;
+  int element_index = AllocateRaw(raw_object);
+  if (element_index >= 0 && raw_object != NULL) {
+    new (raw_object)Type();
+  }
+  return element_index;
+}
+
+template<typename Type, class IndexPool, class Allocator>
+template<typename Param1>
+int IndexedObjectPool<Type, IndexPool, Allocator >::Allocate(
+  Param1 const & param1) {
+  Type * raw_object = NULL;
+  int element_index = AllocateRaw(raw_object);
+  if (element_index >= 0 && raw_object != NULL) {
+    new (raw_object)Type(param1);
+  }
+  return element_index;
+}
+
+template<typename Type, class IndexPool, class Allocator>
+template<typename Param1, typename Param2>
+int IndexedObjectPool<Type, IndexPool, Allocator >::Allocate(
+  Param1 const & param1, Param2 const & param2) {
+  Type * raw_object = NULL;
+  int element_index = AllocateRaw(raw_object);
+  if (element_index >= 0 && raw_object != NULL) {
+    new (raw_object)Type(param1, param2);
+  }
+  return element_index;
+}
+
+template<typename Type, class IndexPool, class Allocator>
+template<typename Param1, typename Param2, typename Param3>
+int IndexedObjectPool<Type, IndexPool, Allocator >::Allocate(
+  Param1 const & param1, Param2 const & param2,
+  Param3 const & param3) {
+  Type * raw_object = NULL;
+  int element_index = AllocateRaw(raw_object);
+  if (element_index >= 0 && raw_object != NULL) {
+    new (raw_object)Type(param1, param2, param3);
+  }
+  return element_index;
+}
+
+template<typename Type, class IndexPool, class Allocator>
+template<typename Param1, typename Param2, typename Param3, typename Param4>
+int IndexedObjectPool<Type, IndexPool, Allocator >::Allocate(
+  Param1 const & param1, Param2 const & param2,
+  Param3 const & param3, Param4 const & param4) {
+  Type * raw_object = NULL;
+  int element_index = AllocateRaw(raw_object);
+  if (element_index >= 0 && raw_object != NULL) {
+    new (raw_object)Type(param1, param2, param3, param4);
+  }
+  return element_index;
 }
 
 } // namespace internal

@@ -90,7 +90,7 @@ bool WaitFreeMPMCQueueNode<Type>::CASNext(
 }
 
 template<typename Type>
-bool WaitFreeMPMCQueueNode<Type>::Next_IsNull() const {
+bool WaitFreeMPMCQueueNode<Type>::NextIsNull() const {
   return next_idx.Load() == UndefinedIndex;
 }
 
@@ -112,8 +112,8 @@ const uint32_t WaitFreeMPMCQueueNode<Type>::UndefinedIndex = 0x3fffffff;
 }  // namespace internal
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::OperationDesc::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::OperationDesc::
 OperationDesc(
   bool pending,
   bool enqueue,
@@ -133,8 +133,8 @@ OperationDesc(
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::OperationDesc::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::OperationDesc::
 OperationDesc(index_t raw) : Raw(raw) {
   Pending   = (raw & PENDING_FLAG_MASK) ? true : false;
   Enqueue   = (raw & ENQUEUE_FLAG_MASK) ? true : false;
@@ -142,8 +142,8 @@ OperationDesc(index_t raw) : Raw(raw) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 WaitFreeMPMCQueue(size_t capacity)
 : max_size_(capacity),
 //  Disable "this is used in base member initializer" warning.
@@ -178,9 +178,10 @@ WaitFreeMPMCQueue(size_t capacity)
       "Maximum size of queue exceeded");
   }
   // Allocate sentinel node:
-  Node_t sentinelNode;
-  assert(sentinelNode.NextPoolIdx() == Node_t::UndefinedIndex);
-  int sentinelNodePoolIndex = nodePool.Allocate(sentinelNode);
+  int sentinelNodePoolIndex = nodePool.Allocate();
+  assert(
+    nodePool[sentinelNodePoolIndex].NextPoolIdx() ==
+    Node_t::UndefinedIndex);
   if (sentinelNodePoolIndex < 0) {
     EMBB_THROW(embb::base::NoMemoryException,
       "Allocation of sentinel node failed");
@@ -209,8 +210,8 @@ WaitFreeMPMCQueue(size_t capacity)
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 ~WaitFreeMPMCQueue() {
   // Dequeue until queue is empty:
   Type val;
@@ -221,8 +222,8 @@ WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-inline bool WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+inline bool WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 LoadAccessorThreadIndex(index_t & retIndexValue) {
   unsigned int tmpIndexValue; // For conversion size32_t <-> unsigned int
   if (embb_internal_thread_index(&tmpIndexValue) == EMBB_SUCCESS) {
@@ -238,8 +239,8 @@ LoadAccessorThreadIndex(index_t & retIndexValue) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-inline size_t WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+inline size_t WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 RetiredListMaxSize(size_t nThreads) {
   return static_cast<size_t>(
     1.25 *
@@ -247,8 +248,8 @@ RetiredListMaxSize(size_t nThreads) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-bool WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+bool WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 TryEnqueue(Type const & element) {
   index_t accessorId = Node_t::UndefinedIndex;
   if (!LoadAccessorThreadIndex(accessorId)) {
@@ -256,14 +257,10 @@ TryEnqueue(Type const & element) {
       "Invalid thread ID.");
   }
   // Register new node in pool:
-  Node_t poolNode;
-  int nodeIndex = nodePool.Allocate(poolNode);
+  int nodeIndex = nodePool.Allocate(element, accessorId);
   if (nodeIndex < 0) {
     return false; // Queue is at capacity
   }
-  // Initialize node in pool:
-  Node_t newNode(element, accessorId);
-  nodePool[static_cast<index_t>(nodeIndex)] = newNode;
   OperationDesc enqOp(
     true,    // pending
     true,    // enqueue
@@ -276,8 +273,8 @@ TryEnqueue(Type const & element) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-bool WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+bool WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 TryDequeue(Type & retElement) {
   index_t accessorId = static_cast<index_t>(-1);
   if (!LoadAccessorThreadIndex(accessorId)) {
@@ -313,11 +310,11 @@ TryDequeue(Type & retElement) {
     retElement = Type();
     return false;
   }
-  Node_t & node = nodePool[nodeIdx];
+  Node_t & node = nodePool[static_cast<int>(nodeIdx)];
   assert(node.DequeueAID().Load() == accessorId);
   // Return value of node next to node dequeued in this operation:
   index_t nextNodeIdx = node.NextPoolIdx();
-  retElement = nodePool[nextNodeIdx].Value();
+  retElement = nodePool[static_cast<int>(nextNodeIdx)].Value();
   // Value is safe. Mark node as non-pending and available for reclamation by
   // setting this operation's node index to UndefinedIndex:
   OperationDesc noOp(
@@ -338,14 +335,14 @@ TryDequeue(Type & retElement) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-void WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+void WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 HelpEnqueue(unsigned int accessorId) {
   while (IsPending(accessorId)) {
     index_t lastIdx = tailIdx.Load();
     // Guard tail:
     hp.GuardPointer(0, lastIdx);
-    Node_t & lastNode = nodePool[lastIdx];
+    Node_t & lastNode = nodePool[static_cast<int>(lastIdx)];
     index_t nextIdx = lastNode.NextPoolIdx();
     if (lastIdx == tailIdx.Load()) {
       // Last node still is tail
@@ -369,17 +366,17 @@ HelpEnqueue(unsigned int accessorId) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-void WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+void WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 HelpFinishEnqueue() {
   // Load node pointed at by tail:
   index_t lastIdx = tailIdx.Load();
   // Guard tail:
   hp.GuardPointer(0, lastIdx);
   // Load tail->next:
-  Node_t & lastNode = nodePool[lastIdx];
+  Node_t & lastNode = nodePool[static_cast<int>(lastIdx)];
   index_t nextIdx   = lastNode.NextPoolIdx();
-  Node_t & nextNode = nodePool[nextIdx];
+  Node_t & nextNode = nodePool[static_cast<int>(nextIdx)];
   // tail->next not undefined => unfinished ENQ
   if (nextIdx != Node_t::UndefinedIndex) {
     // Load accessor id from last (non-tail) element in list:
@@ -408,15 +405,15 @@ HelpFinishEnqueue() {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-void WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+void WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 HelpDequeue(index_t accessorId) {
   while (IsPending(accessorId)) {
     index_t firstIdx = headIdx.Load();
     // Guard head:
     hp.GuardPointer(0, firstIdx);
     // Order matters for these assignments:
-    Node_t & first  = nodePool[firstIdx];
+    Node_t & first  = nodePool[static_cast<int>(firstIdx)];
     index_t lastIdx = tailIdx.Load();
     index_t nextIdx = first.NextPoolIdx();
     // Guard head->next:
@@ -499,19 +496,19 @@ HelpDequeue(index_t accessorId) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-void WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+void WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 HelpFinishDequeue() {
   index_t firstIdx = headIdx.Load();
   // Guard head:
   hp.GuardPointer(0, firstIdx);
-  Node_t & first = nodePool[firstIdx];
+  Node_t & first = nodePool[static_cast<int>(firstIdx)];
   index_t nextIdx = first.NextPoolIdx();
   // Guard and head->next
   // Actually not necessary, as head->next will only change from Undefined
   // to a node index value, but not back to Undefined.
   hp.GuardPointer(1, nextIdx);
-  if (nextIdx != nodePool[firstIdx].NextPoolIdx()) {
+  if (nextIdx != nodePool[static_cast<int>(firstIdx)].NextPoolIdx()) {
     return;
   }
   index_t accessorId = first.DequeueAID().Load();
@@ -542,8 +539,8 @@ HelpFinishDequeue() {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-void WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+void WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 Help() {
   // Fairness guarantee in every thread: 
   // "Every other thread will help my operation before helping its
@@ -572,8 +569,8 @@ Help() {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-void WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+void WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 DeleteNodeCallback(index_t releasedNodeIndex) {
   if (!NodeIsPending(releasedNodeIndex)) {
     nodePool.Free(static_cast<int>(releasedNodeIndex));
@@ -581,16 +578,16 @@ DeleteNodeCallback(index_t releasedNodeIndex) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-inline size_t WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+inline size_t WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 GetCapacity() {
   return max_size_;
 }
 
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-inline bool WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+inline bool WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 NodeIsPending(index_t nodeIdx) {
   for (unsigned int accessorId = 0; accessorId < num_states; ++accessorId) {
     if (OperationDesc(operationDescriptions[accessorId].Load()).NodeIndex ==
@@ -602,8 +599,8 @@ NodeIsPending(index_t nodeIdx) {
 }
 
 template<
-  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
-inline bool WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+  typename Type, class ValuePool, class NodeAllocator, class OpAllocator >
+inline bool WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator>::
 IsPending(unsigned int accessorId) {
   OperationDesc opDesc(operationDescriptions[accessorId].Load());
   return opDesc.Pending;

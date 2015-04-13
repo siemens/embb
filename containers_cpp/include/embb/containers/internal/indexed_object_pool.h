@@ -38,14 +38,14 @@ namespace containers {
 namespace internal {
 
 template<
-  typename T,
+  typename Type,
   class IndexPool = LockFreeTreeValuePool<bool, false>,
   class Allocator = embb::base::Allocator<T>
 >
 class IndexedObjectPool {
  private:
   const size_t size_;
-  T *          elements;
+  Type *       elements;
   Allocator    allocator;
   IndexPool    indexPool;
   IndexedObjectPool();
@@ -53,10 +53,13 @@ class IndexedObjectPool {
   IndexedObjectPool(const IndexedObjectPool&);
   // Prevent assignment
   IndexedObjectPool& operator=(const IndexedObjectPool&);
+  // Allocates pool index and resolves pointer to reserved element
+  int AllocateRaw(Type * & newElement);
 
  public:
   /**
-   * \see value_pool_concept
+   * Creates an indexed object pool, initializing all pool elements
+   * with elements from given range.
    *
    * \notthreadsafe
    *
@@ -73,8 +76,9 @@ class IndexedObjectPool {
     );
 
   /**
-   * \see value_pool_concept
-   *
+   * Creates an indexed object pool of size \c capacity, initializing
+   * all pool elements with given default instance.
+   * 
    * \notthreadsafe
    *
    * \memory dynamically allocates
@@ -84,7 +88,7 @@ class IndexedObjectPool {
   IndexedObjectPool(
     size_t size,
      /**< [IN] Number of elements the pool is filled with */
-    const T & defaultInstance
+    const Type & defaultInstance
      /**< [IN] Default instance to initialize pool elements with */
     );
 
@@ -92,16 +96,6 @@ class IndexedObjectPool {
    * Destructor, deallocating memory
    */
   ~IndexedObjectPool();
-
-  /**
-   * Request element and index from pool.
-   *
-   * \return index of element
-   *
-   * \see object_pool_concept
-   *
-   */
-  int Allocate(T & element);
 
   /**
    * Return element and index to the pool.
@@ -117,7 +111,38 @@ class IndexedObjectPool {
    * \see object_pool_concept
    *
    */
-  T & operator[](size_t elementIndex);
+  Type & operator[](int elementIndex);
+
+
+#ifdef DOXYGEN
+  /**
+  * Allocates an element from the pool.
+  *
+  * If the underlying value pool is wait-free/lock-free, this operation is
+  * also wait-free/lock-free, respectively.
+  *
+  * \return Index of the allocated object if successful, otherwise \c -1.
+  *
+  * \param ... Arguments of arbitrary type, passed to the object's constructor
+  */
+  int Allocate(...);
+#else
+  int Allocate();
+
+  template<typename Param1>
+  int Allocate(Param1 const& param1);
+
+  template<typename Param1, typename Param2>
+  int Allocate(Param1 const& param1, Param2 const& param2);
+
+  template<typename Param1, typename Param2, typename Param3>
+  int Allocate(Param1 const& param1, Param2 const& param2,
+    Param3 const& param3);
+
+  template<typename Param1, typename Param2, typename Param3, typename Param4>
+  int Allocate(Param1 const& param1, Param2 const& param2,
+    Param3 const& param3, Param4 const& param4);
+#endif
 };
 
 }  // namespace internal

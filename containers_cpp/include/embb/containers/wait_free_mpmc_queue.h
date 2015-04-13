@@ -127,7 +127,7 @@ class WaitFreeMPMCQueueNode {
     /**< [IN] New pointer value to set */
   );
 
-  inline bool Next_IsNull() const;
+  inline bool NextIsNull() const;
 
   inline uint32_t EnqueueAID() const;
 
@@ -155,18 +155,18 @@ class WaitFreeMPMCQueueNode {
  */
 template<
   typename Type,
+  class ValuePool =
+    WaitFreeArrayValuePool<bool, false>,
   class NodeAllocator =
     embb::base::AllocatorCacheAligned<internal::WaitFreeMPMCQueueNode<Type> >,
   class OpAllocator =
-    embb::base::AllocatorCacheAligned<embb::base::Atomic<uint32_t> >,
-  class ValuePool =
-    WaitFreeArrayValuePool<bool, false>
+    embb::base::AllocatorCacheAligned<embb::base::Atomic<uint32_t> >
 >
 class WaitFreeMPMCQueue {
  private:
   typedef internal::WaitFreeMPMCQueueNode<Type> Node_t;
   typedef typename internal::WaitFreeMPMCQueueNode<Type>::index_t index_t;
-  typedef WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool> self_t;
+  typedef WaitFreeMPMCQueue<Type, ValuePool, NodeAllocator, OpAllocator> self_t;
   typedef internal::IndexedObjectPool<
     internal::WaitFreeMPMCQueueNode<Type>, ValuePool, NodeAllocator> NodePool_t;
 
