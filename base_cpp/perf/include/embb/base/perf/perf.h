@@ -34,11 +34,6 @@
 #include <iomanip>
 
 #define PT_PERF_MAIN(component) \
-template <class Test> \
-void PartestRunPerformanceTest(Test & test) { \
-  test.Run(); \
-  test.PrintReport(std::cout); \
-} \
 void PartestRunPerformanceTests( \
   embb::base::perf::CallArgs & perf_test_params); \
 int main(int argc, char** argv) { \
@@ -59,7 +54,11 @@ void PartestRunPerformanceTests( \
 #define PT_PERF_RUN(PT_PERF_TEST) \
 ( \
   (std::cout << "Running " << #PT_PERF_TEST << " ..." << std::endl), \
-  PartestRunPerformanceTest<PT_PERF_TEST>(PT_PERF_TEST(perf_test_params)), \
+  ({ \
+    PT_PERF_TEST perf_test(perf_test_params); \
+    perf_test.Run(); \
+    perf_test.PrintReport(std::cout); \
+  }), \
   (std::cout << "Running " << #PT_PERF_TEST << " ..." << " done" << std::endl) \
 )
 

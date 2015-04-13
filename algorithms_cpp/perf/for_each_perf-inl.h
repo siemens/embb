@@ -41,7 +41,7 @@ namespace perf {
 template<typename T>
 SerialForEach<T>::SerialForEach(const embb::base::perf::CallArgs & args)
 : cargs(args), op(args), vector_size(args.VectorSize()) {
-  if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+  if (cargs.StressMode() == embb::base::perf::CallArgs::RAM_STRESS) {
     v = static_cast<T *>(embb::base::Allocation::AllocateCacheAligned(
       vector_size * sizeof(T)));
     for (size_t i = 0; i < vector_size; i++) {
@@ -54,19 +54,19 @@ SerialForEach<T>::SerialForEach(const embb::base::perf::CallArgs & args)
 
 template<typename T>
 SerialForEach<T>::~SerialForEach() {
-  if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+  if (cargs.StressMode() == embb::base::perf::CallArgs::RAM_STRESS) {
     embb::base::Allocation::FreeAligned(v);
   }
 }
 
 template<typename T>
 void SerialForEach<T>::Run() {
-  if (cargs.StressMode() == CallArgs::CPU_STRESS) {
+  if (cargs.StressMode() == embb::base::perf::CallArgs::CPU_STRESS) {
     for (size_t i = 0; i < vector_size; i++) {
       T v = static_cast<T>(i);
       op(v);
     }
-  } else if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+  } else if (cargs.StressMode() == embb::base::perf::CallArgs::RAM_STRESS) {
     for (size_t i = 0; i < vector_size; i++) {
       op(v[i]);
     }
@@ -76,7 +76,7 @@ void SerialForEach<T>::Run() {
 template<typename T>
 ParallelForEach<T>::ParallelForEach(const embb::base::perf::CallArgs & args)
 : cargs(args), vector_size(args.VectorSize()) {
-  if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+  if (cargs.StressMode() == embb::base::perf::CallArgs::RAM_STRESS) {
     v = static_cast<T *>(embb::base::Allocation::AllocateCacheAligned(
       vector_size * sizeof(T)));
   } else {
@@ -93,7 +93,7 @@ ParallelForEach<T>::~ParallelForEach() {
 
 template<typename T>
 void ParallelForEach<T>::Pre() {
-  if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+  if (cargs.StressMode() == embb::base::perf::CallArgs::RAM_STRESS) {
     // Initialize input vector with incrementing values:
     for (size_t i = 0; i < vector_size; i++) {
       v[i] = static_cast<T>(i);
@@ -103,7 +103,7 @@ void ParallelForEach<T>::Pre() {
 
 template<typename T>
 void ParallelForEach<T>::Run(unsigned int numThreads) {
-  if (cargs.StressMode() == CallArgs::CPU_STRESS) {
+  if (cargs.StressMode() == embb::base::perf::CallArgs::CPU_STRESS) {
     // Computing input values, no memory access
     ForEachFunctor<T> op(cargs);
     embb::algorithms::ForEach(
@@ -114,7 +114,7 @@ void ParallelForEach<T>::Run(unsigned int numThreads) {
       op,
       embb::tasks::ExecutionPolicy(),
       vector_size / numThreads);
-  } else if (cargs.StressMode() == CallArgs::RAM_STRESS) {
+  } else if (cargs.StressMode() == embb::base::perf::CallArgs::RAM_STRESS) {
     // Reading input values from memory
     ForEachFunctor<T> op(cargs);
     embb::algorithms::ForEach(
