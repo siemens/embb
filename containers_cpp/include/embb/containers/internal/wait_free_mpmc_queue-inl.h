@@ -163,9 +163,12 @@ WaitFreeMPMCQueue(size_t capacity)
   // Node pool size, with respect to the maximum number of
   // retired nodes not eligible for reuse due to hazard pointers:
   node_pool_size(
-    // numThreads caused trouble here
+    // Nodes in hazard pointers' retired lists
     (hp.GetRetiredListMaxSize() *
      embb::base::Thread::GetThreadsMaxCount()) +
+    // Nodes guarded in operation descriptions
+    embb::base::Thread::GetThreadsMaxCount() +
+    // Actual capacity + 1 sentinel node
     max_size_ + 1),
   nodePool(node_pool_size, nullNode) {
   // Assert width of binary representation of operation description
@@ -504,17 +507,19 @@ HelpFinishDequeue() {
   hp.GuardPointer(0, firstIdx);
   Node_t & first = nodePool[firstIdx];
   index_t nextIdx = first.NextPoolIdx();
-  // Guard and head->next:
+  // Guard and head->next
+  // Actually not necessary, as head->next will only change from Undefined
+  // to a node index value, but not back to Undefined.
   hp.GuardPointer(1, nextIdx);
+  if (nextIdx != nodePool[firstIdx].NextPoolIdx()) {
+    return;
+  }
   index_t accessorId = first.DequeueAID().Load();
   if (accessorId != Node_t::UndefinedIndex) {
     // head.DeqeueueAID is set to the accessor id that won the last CAS
     // in HelpDequeue
     OperationDesc curOp(operationDescriptions[accessorId].Load());
     if (firstIdx == headIdx.Load() &&
-        // This check is missing in the original publication but required
-        // to validate head->next:
-        nextIdx == first.NextPoolIdx() &&
         nextIdx != Node_t::UndefinedIndex) {
       // Set state of helped operation to NONPENDING:
       OperationDesc newOp(
@@ -570,7 +575,9 @@ template<
   typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
 void WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
 DeleteNodeCallback(index_t releasedNodeIndex) {
-  nodePool.Free(static_cast<int>(releasedNodeIndex));
+  if (!NodeIsPending(releasedNodeIndex)) {
+    nodePool.Free(static_cast<int>(releasedNodeIndex));
+  }
 }
 
 template<
@@ -578,6 +585,20 @@ template<
 inline size_t WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
 GetCapacity() {
   return max_size_;
+}
+
+
+template<
+  typename Type, class NodeAllocator, class OpAllocator, class ValuePool >
+inline bool WaitFreeMPMCQueue<Type, NodeAllocator, OpAllocator, ValuePool>::
+NodeIsPending(index_t nodeIdx) {
+  for (unsigned int accessorId = 0; accessorId < num_states; ++accessorId) {
+    if (OperationDesc(operationDescriptions[accessorId].Load()).NodeIndex ==
+        nodeIdx) {
+      return true;
+    }
+  }
+  return false;
 }
 
 template<
