@@ -176,7 +176,7 @@ class WaitFreeMPMCQueue {
    * OperationDesc::NodeIndex (15 bit) minus one element
    * required for sentinel node.
    */
-  static const index_t QUEUE_SIZE_MAX = static_cast<index_t>(32767 - 1);
+  static const index_t QUEUE_SIZE_MAX = static_cast<index_t>(0x3FFFFFFF - 1);
   
   /**
    *  Number of guards per thread
@@ -186,7 +186,7 @@ class WaitFreeMPMCQueue {
   /**
    *  Null-pointer for hazard pointers
    */
-  static const index_t UndefinedGuard = 0;
+  static const index_t UndefinedGuard = 0x3fffffff;
 
   /**
    * Helper class for operation descriptions.

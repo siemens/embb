@@ -125,7 +125,7 @@ QueueTestOrderMPMC_Post() {
   for (size_t t = 0;
        t < static_cast<size_t>(n_producers * n_producer_elements / 8);
        ++t) {
-    PT_ASSERT_EQ_MSG(total_tally[t], 0xff,
+    PT_ASSERT_EQ_MSG(static_cast<int>(total_tally[t]), 0xff,
       "missing dequeued elements");
   }
 }
