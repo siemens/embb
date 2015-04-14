@@ -34,6 +34,7 @@
 #include <embb/containers/object_pool.h>
 #include <embb/containers/lock_free_tree_value_pool.h>
 #include <embb/containers/internal/fixed_size_list.h>
+#include <embb/containers/internal/hazard_pointer.h>
 
 namespace embb { 
 namespace containers {
@@ -308,6 +309,7 @@ class LlxScx {
 
  private:
   typedef size_t cas_t;
+  typedef LlxScx<UserData, ValuePool> self_t;
   typedef LlxScxRecord< UserData > DataRecord_t;
   typedef internal::ScxRecord< LlxScxRecord<UserData> > ScxRecord_t;
   typedef typename ScxRecord_t::OperationState OperationState;
@@ -340,6 +342,12 @@ class LlxScx {
     bool & finalized
     /**< [OUT] Indicating whether requested fields have been finalized */
   );
+
+  /**
+   * Clears the calling thread's active links previously established using
+   * \c TryLoadLinked.
+   */
+  void ClearLinks();
 
   /**
    * Actual implementation of StoreConditional operating on unified fields/values
@@ -384,7 +392,7 @@ class LlxScx {
     ScxRecord_t * scx_record;
     UserData user_data;
   } LlxResult;
-
+  
   /**
    * Resolves the calling thread's Id.
    */
@@ -394,6 +402,12 @@ class LlxScx {
    * Help complete an SCX operation referenced by the given SCX record
    */
   bool Help(ScxRecord_t * scx);
+
+  /**
+   * The callback function, used to cleanup non-hazardous pointers.
+   * \see delete_pointer_callback
+   */
+  void DeleteOperationCallback(ScxRecord_t * scx_record);
 
   /**
    * Maximum number of active links created via TryLoadLinked per thread.
@@ -423,6 +437,17 @@ class LlxScx {
    */
   embb::containers::internal::FixedSizeList< LlxResult > **
     thread_llx_results_;
+  
+  /**
+   * Callback to the method that is called by hazard pointers if a pointer is
+   * not hazardous anymore, i.e., can safely be reused.
+   */
+  embb::base::Function < void, ScxRecord_t * > delete_operation_callback;
+
+  /**
+   * The hazard pointer object, used for memory management.
+   */
+  embb::containers::internal::HazardPointer< ScxRecord_t * > hp;
 
   /**
    * Prevent default construction.

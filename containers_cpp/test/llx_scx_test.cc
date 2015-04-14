@@ -48,8 +48,14 @@ LlxScxTest::LlxScxTest() :
   CreateUnit("SerialArrayTest")
     .Add(&LlxScxTest::SerialArrayTest, this);
   CreateUnit("ParallelTest")
-    .Add(&LlxScxTest::ParallelTest, this)
+    .Pre(&LlxScxTest::ParallelTestPre, this)
+    .Add(&LlxScxTest::ParallelTest, this,
+         static_cast<unsigned int>(num_threads_), 1)
     .Post(&LlxScxTest::ParallelTestPost, this);
+}
+
+void LlxScxTest::ParallelTestPre() {
+  embb_internal_thread_index_reset();
 }
 
 void LlxScxTest::ParallelTest() {
@@ -69,7 +75,9 @@ void LlxScxTest::ParallelTest() {
     Node n;
     bool finalized;
     // LLX on node the new element will be appended to:
-    llxscx_.TryLoadLinked(node, n, finalized);
+    if (!llxscx_.TryLoadLinked(node, n, finalized)) {
+      continue;
+    }
     if (n.next_ == next) {
       // Pointer still valid after LLX, try to append new node
       internal::FixedSizeList<LlxScxRecord<Node> *> linked_deps(1);
@@ -101,13 +109,18 @@ void LlxScxTest::ParallelTest() {
 }
 
 void LlxScxTest::ParallelTestPost() {
+  std::vector< std::pair<char, int> > values;
   internal::LlxScxRecord<Node> * node = &head_llx;
   internal::LlxScxRecord<Node> * next = head_llx.Data().next_;
   while (next != 0) {
-    delete node;
+    values.push_back(std::make_pair(
+      next->Data().value_,
+      next->Data().count_.Load()));
     node = next;
     next = next->Data().next_;
   }
+  PT_ASSERT_EQ_MSG(static_cast<size_t>(26 * num_threads_), values.size(),
+    "Unexpected size of result list");
 }
 
 void LlxScxTest::SerialArrayTest() {

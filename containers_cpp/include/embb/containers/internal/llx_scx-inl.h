@@ -49,8 +49,19 @@ template< typename UserData, typename ValuePool >
 LlxScx<UserData, ValuePool>::LlxScx(size_t max_links)
 : max_links_(max_links),
   max_threads_(embb::base::Thread::GetThreadsMaxCount()),
-  scx_record_list_pool_(max_threads_),
-  scx_record_pool_(max_threads_) {
+  scx_record_list_pool_(max_threads_ * max_threads_ * 2),
+  scx_record_pool_(max_threads_ * max_threads_ * 2),
+  // Disable "this is used in base member initializer" warning.
+  // We explicitly want this.
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4355)
+#endif
+  delete_operation_callback(*this, &self_t::DeleteOperationCallback),
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+  hp(delete_operation_callback, NULL, 2) {
   typedef embb::containers::internal::FixedSizeList<LlxResult>
     llx_result_list_t;
   typedef embb::containers::internal::FixedSizeList<ScxRecord_t>
@@ -86,9 +97,9 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
   finalized = false;
   unsigned int thread_id = ThreadId();
   // Order of initialization matters:
-  bool           marked_1   = data_record->IsMarkedForFinalize();
-  ScxRecord_t *  curr_scx   = data_record->ScxInfo().Load();
-  OperationState curr_state = curr_scx->State();
+  volatile bool marked_1 = data_record->IsMarkedForFinalize();
+  ScxRecord_t * curr_scx = data_record->ScxInfo().Load();
+  volatile OperationState curr_state = curr_scx->State();
   bool           marked_2   = data_record->IsMarkedForFinalize();
   if (curr_state == OperationState::Aborted ||
       (curr_state == OperationState::Comitted && !marked_2)) {
@@ -101,7 +112,7 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
       llx_result.data_record = data_record;
       llx_result.scx_record  = curr_scx;
       llx_result.user_data   = user_data_local;
-      thread_llx_results_[thread_id]->PushBack(llx_result);
+      assert(thread_llx_results_[thread_id]->PushBack(llx_result));
       // Set return value:
       user_data = user_data_local;
       return true;
@@ -119,6 +130,13 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
     Help(data_record->ScxInfo().Load());
   }
   return false;
+}
+
+template< typename UserData, typename ValuePool >
+void LlxScx<UserData, ValuePool>::ClearLinks() {
+  // Clear thread-local list of LLX results
+  unsigned int thread_id = ThreadId();
+  thread_llx_results_[thread_id]->clear();
 }
 
 template< typename UserData, typename ValuePool >
@@ -160,15 +178,15 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
          llx_result_it != llx_result_end &&
            llx_result_it->data_record != *it;
          ++llx_result_it);
-    if (llx_result_it == llx_result_end) {
+    if (llx_result_it->data_record != *it) {
       // Missing LLX result for given linked data record, user did not
       // load-link a data record this SCX depends on.
       EMBB_THROW(embb::base::ErrorException,
         "Missing preceding LLX on a data record used as SCX dependency");
     }
     // Copy SCX operation from LLX result of link dependency into list: 
-    info_fields->PushBack(
-      llx_result_it->data_record->ScxInfo().Load());
+    assert(info_fields->PushBack(
+      llx_result_it->data_record->ScxInfo().Load()));
   }
   // Clear thread-local list of LLX results
   thread_llx_results_[thread_id]->clear();
@@ -190,7 +208,12 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
     OperationState::InProgress);
   // Allocate from pool as this operation description is global:
   ScxRecord_t * scx = scx_record_pool_.Allocate(new_scx);
-  return Help(scx);
+  bool result = Help(scx);
+  hp.GuardPointer(0, NULL);
+  hp.GuardPointer(1, NULL);
+  ClearLinks();
+  hp.EnqueuePointerForDeletion(scx);
+  return result;
 }
 
 template< typename UserData, typename ValuePool >
@@ -204,6 +227,7 @@ bool LlxScx<UserData, ValuePool>::TryValidateLink(
 template< typename UserData, typename ValuePool >
 bool LlxScx<UserData, ValuePool>::Help(
   ScxRecord_t * scx) {
+  hp.GuardPointer(0, scx);
   // We ensure that an SCX S does not change a data record 
   // while it is frozen for another SCX S'. Instead, S uses 
   // the information in the SCX record of S' to help S'
@@ -221,13 +245,13 @@ bool LlxScx<UserData, ValuePool>::Help(
        ++linked_it, ++scx_op_it) {
     DataRecord_t * r = *linked_it;
     ScxRecord<DataRecord_t> * rinfo_old = *scx_op_it;
+    hp.GuardPointer(1, rinfo_old);
     // Try to freeze the data record by setting its SCX info field
     // to this SCX operation description:
     if (r->ScxInfo().CompareAndSwap(rinfo_old, scx)) {
       // Do not try to delete the sentinel scx record:
       if (rinfo_old != &DataRecord_t::DummyScx) {
-        scx_record_list_pool_.Free(rinfo_old->scx_ops_);
-        scx_record_pool_.Free(rinfo_old);
+        hp.EnqueuePointerForDeletion(rinfo_old);
       }
     } else {
       if (r->ScxInfo().Load() != scx) {
@@ -262,6 +286,13 @@ bool LlxScx<UserData, ValuePool>::Help(
   // Linearization point of this operation.
   scx->state_ = ScxRecord_t::Comitted;
   return true;
+}
+
+template< typename UserData, typename ValuePool >
+void LlxScx<UserData, ValuePool>::DeleteOperationCallback(
+  ScxRecord_t * scx_record) {
+  scx_record_list_pool_.Free(scx_record->scx_ops_);
+  scx_record_pool_.Free(scx_record);
 }
 
 // LlxScxRecord
