@@ -99,15 +99,23 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
   // Order of initialization matters:
   volatile bool marked_1 = data_record->IsMarkedForFinalize();
   ScxRecord_t * curr_scx = data_record->ScxInfo().Load();
+  // Guard active SCX record of this data record using guard 1.
+  // When calling help with this SCX record, it will be guarded
+  // using guard 0 again.
+  // This hazard pointer is validated in the nested if-block below.
+  hp.GuardPointer(1, curr_scx);
   volatile OperationState curr_state = curr_scx->State();
-  bool           marked_2   = data_record->IsMarkedForFinalize();
+  bool marked_2 = data_record->IsMarkedForFinalize();
   if (curr_state == OperationState::Aborted ||
       (curr_state == OperationState::Comitted && !marked_2)) {
     // read mutable fields into local variable:
     UserData user_data_local(data_record->Data());
     if (data_record->ScxInfo().Load() == curr_scx) {
-      // store <r, curr_scx, user_data_local> in
-      // the thread-specific table:
+      // Active SCX record of data record did not change.
+      // Store <r, curr_scx, user_data_local> in
+      // the thread-specific table.
+      // LLX results do not need to be guarded as they local to the
+      // thread.
       LlxResult llx_result;
       llx_result.data_record = data_record;
       llx_result.scx_record  = curr_scx;
@@ -118,16 +126,20 @@ bool LlxScx<UserData, ValuePool>::TryLoadLinked(
       return true;
     }
   }
+  // Active SCX record of data record has been changed in between
   if (marked_1 && 
       (curr_scx->State() == OperationState::Comitted ||
        (curr_scx->State() == OperationState::InProgress && Help(curr_scx)))) {
-    // Successfully completed active SCX:
+    // Successfully completed the data record's active SCX but failed to
+    // complete the LLX operation because the data record has been finalized:
     finalized = true;
     return false;
   }
   if (data_record->ScxInfo().Load()->State() == OperationState::InProgress) {
-    // Help active SCX:
-    Help(data_record->ScxInfo().Load());
+    // Help active SCX.
+    // This SCX record has been guarded above.
+    ScxRecord_t * data_record_scx = data_record->ScxInfo().Load();
+    Help(data_record_scx);
   }
   return false;
 }
@@ -157,6 +169,7 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
   // Let info_fields be a table in shared memory containing for each r in V,
   // a copy of r's info value in this threads local table of LLX results.
   // Will be freed in Help() once the SCX operation has been completed.
+  // In brief: A list of the SCX record of all linked deps.
   scx_op_list_t * info_fields = scx_record_list_pool_.Allocate(max_links_);
   if (info_fields == NULL) {    
     EMBB_THROW(embb::base::ErrorException,
@@ -173,7 +186,7 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
     llx_result_list::iterator llx_result_it;
     llx_result_list::iterator llx_result_end;
     llx_result_end = thread_llx_results_[thread_id]->end();
-    // Find LLX result of r in thread-local LLX results:
+    // Find LLX result of data_record (r) in thread-local LLX results:
     for (llx_result_it = thread_llx_results_[thread_id]->begin();
          llx_result_it != llx_result_end &&
            llx_result_it->data_record != *it;
@@ -193,6 +206,9 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
   // Announce SCX operation. Lists linked_deps and finalize_dep are 
   // guaranteed to remain on the stack until this announced operation
   // is completed, so no allocation/pool is necessary.
+  // The SCX operation description must be allocated from a pool as
+  // LLX data records might reference it after this operation has been
+  // completed.
   ScxRecord_t new_scx(
     linked_deps,
     finalize_deps,
@@ -202,17 +218,21 @@ bool LlxScx<UserData, ValuePool>::TryStoreConditional(
     cas_value,
     // old value:
     cas_field->Load(),
-    // linked SCX operations:
+    // list of the SCX record of all linked deps
     info_fields,
     // initial operation state:
     OperationState::InProgress);
   // Allocate from pool as this operation description is global:
   ScxRecord_t * scx = scx_record_pool_.Allocate(new_scx);
+  // Try to complete the operation. It will also be helped in failing
+  // TryLoadLinked operations.
   bool result = Help(scx);
-  hp.GuardPointer(0, NULL);
-  hp.GuardPointer(1, NULL);
+  // Release all load-links this SCX operation depended on
   ClearLinks();
-  hp.EnqueuePointerForDeletion(scx);
+  // Release guards, but do not enqueue instance scx for deletion as it
+  // is still referenced in data records.
+  hp.GuardPointer(0, NULL);
+  hp.GuardPointer(1, NULL);;
   return result;
 }
 
@@ -247,7 +267,9 @@ bool LlxScx<UserData, ValuePool>::Help(
     ScxRecord<DataRecord_t> * rinfo_old = *scx_op_it;
     hp.GuardPointer(1, rinfo_old);
     // Try to freeze the data record by setting its SCX info field
-    // to this SCX operation description:
+    // to this SCX operation description.
+    // r->ScxInfo() is not an ABA hazard as it is local to instance scx
+    // which is already guarded.
     if (r->ScxInfo().CompareAndSwap(rinfo_old, scx)) {
       // Do not try to delete the sentinel scx record:
       if (rinfo_old != &DataRecord_t::DummyScx) {
@@ -279,6 +301,8 @@ bool LlxScx<UserData, ValuePool>::Help(
   }
   // update CAS:
   cas_t expected_old_value = scx->old_value_;
+  // scx->old_value_ is not an ABA hazard as it is local to the instance
+  // scx which is already guarded.
   scx->field_->CompareAndSwap(expected_old_value, scx->new_value_);
   // Commit step.
   // Finalizes all r in data_records within finalize range and

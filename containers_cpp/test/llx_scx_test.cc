@@ -63,28 +63,30 @@ void LlxScxTest::ParallelTest() {
   int return_val = embb_internal_thread_index(&thread_index);
   if (return_val != EMBB_SUCCESS)
     EMBB_THROW(embb::base::ErrorException, "Could not get thread id!"); 
-  // Threads try to append n nodes to a linked list in parallel
-  for (char value = 'a'; value <= 'p';) {
+  // Every thread adds every character from 'a' to 'z' into an ordered
+  // linked list
+  for (char value = 'a'; value <= 'z';) {
     // Find node to append new element on:
-    internal::LlxScxRecord<Node> * node = &head_llx;
-    internal::LlxScxRecord<Node> * next = node->Data().next_;
-    while (next != 0 && next->Data().value_ < value) {
-      node = next;
-      next = next->Data().next_;
+    internal::LlxScxRecord<Node> * node_rec = &head_llx;
+    internal::LlxScxRecord<Node> * next_rec = node_rec->Data().next_;
+    while (next_rec != 0 && next_rec->Data().value_ < value) {
+      node_rec = next_rec;
+      next_rec = next_rec->Data().next_;
     }
-    Node n;
+    Node node;
     bool finalized;
     // LLX on node the new element will be appended to:
-    if (!llxscx_.TryLoadLinked(node, n, finalized)) {
+    if (!llxscx_.TryLoadLinked(node_rec, node, finalized)) {
       continue;
     }
-    if (n.next_ == next) {
+    PT_ASSERT_MSG(!finalized, "No node should be finalized");
+    if (node.next_ == next_rec) {
       // Pointer still valid after LLX, try to append new node
       internal::FixedSizeList<LlxScxRecord<Node> *> linked_deps(1);
       internal::FixedSizeList<LlxScxRecord<Node> *> finalize_deps(0);
-      linked_deps.PushBack(node);
+      linked_deps.PushBack(node_rec);
       // Create new node:
-      Node new_node(static_cast<int>(thread_index), value, next);
+      Node new_node(static_cast<int>(thread_index), value, next_rec);
       internal::LlxScxRecord<Node> * new_node_ptr =
         new internal::LlxScxRecord<Node>(new_node);
       // Convert node pointer to size_t:
@@ -92,7 +94,7 @@ void LlxScxTest::ParallelTest() {
       // Convert target field pointer to size_t*:
       embb::base::Atomic<size_t> * field_cas_ptr =
         reinterpret_cast< embb::base::Atomic<size_t> * >(
-          &(node->Data().next_));
+          &(node_rec->Data().next_));
       // Call SCX:
       bool element_inserted =
         llxscx_.TryStoreConditional(
@@ -119,7 +121,9 @@ void LlxScxTest::ParallelTestPost() {
     node = next;
     next = next->Data().next_;
   }
-  PT_ASSERT_EQ_MSG(static_cast<size_t>(16 * num_threads_), values.size(),
+  // Check if every character from 'a' to 'z' has been added to the
+  // linked list in the correct order
+  PT_ASSERT_EQ_MSG(static_cast<size_t>(26 * num_threads_), values.size(),
     "Unexpected size of result list");
 }
 
