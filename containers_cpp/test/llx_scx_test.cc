@@ -64,7 +64,7 @@ void LlxScxTest::ParallelTest() {
   if (return_val != EMBB_SUCCESS)
     EMBB_THROW(embb::base::ErrorException, "Could not get thread id!"); 
   // Threads try to append n nodes to a linked list in parallel
-  for (char value = 'a'; value <= 'z';) {
+  for (char value = 'a'; value <= 'p';) {
     // Find node to append new element on:
     internal::LlxScxRecord<Node> * node = &head_llx;
     internal::LlxScxRecord<Node> * next = node->Data().next_;
@@ -84,7 +84,7 @@ void LlxScxTest::ParallelTest() {
       internal::FixedSizeList<LlxScxRecord<Node> *> finalize_deps(0);
       linked_deps.PushBack(node);
       // Create new node:
-      Node new_node(static_cast<int>(thread_index), value);
+      Node new_node(static_cast<int>(thread_index), value, next);
       internal::LlxScxRecord<Node> * new_node_ptr =
         new internal::LlxScxRecord<Node>(new_node);
       // Convert node pointer to size_t:
@@ -119,7 +119,7 @@ void LlxScxTest::ParallelTestPost() {
     node = next;
     next = next->Data().next_;
   }
-  PT_ASSERT_EQ_MSG(static_cast<size_t>(26 * num_threads_), values.size(),
+  PT_ASSERT_EQ_MSG(static_cast<size_t>(16 * num_threads_), values.size(),
     "Unexpected size of result list");
 }
 
