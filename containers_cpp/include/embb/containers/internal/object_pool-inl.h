@@ -187,6 +187,20 @@ Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
 }
 
 template<class Type, typename ValuePool, class ObjectAllocator>
+template<typename Param1, typename Param2, typename Param3, typename Param4,
+    typename Param5>
+Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
+  Param1 const& param1, Param2 const& param2,
+  Param3 const& param3, Param4 const& param4,
+  Param5 const& param5) {
+  Type* rawObject = AllocateRaw();
+  if (rawObject != NULL)
+    new (rawObject)Type(param1, param2, param3, param4, param5);
+
+  return rawObject;
+}
+
+template<class Type, typename ValuePool, class ObjectAllocator>
 ObjectPool<Type, ValuePool, ObjectAllocator>::~ObjectPool() {
   // Deallocate the objects
   objectAllocator.deallocate(objects, capacity);

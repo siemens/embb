@@ -30,6 +30,7 @@
 #include <embb/containers/object_pool.h>
 #include <embb/containers/lock_free_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
+#include <embb/containers/lock_free_chromatic_tree.h>
 #include <embb/base/c/memory_allocation.h>
 
 #include <partest/partest.h>
@@ -40,6 +41,7 @@
 #include "./stack_test.h"
 #include "./hazard_pointer_test.h"
 #include "./object_pool_test.h"
+#include "./tree_test.h"
 
 #define COMMA ,
 
@@ -50,11 +52,13 @@ using embb::containers::LockFreeMPMCQueue;
 using embb::containers::LockFreeStack;
 using embb::containers::LockFreeTreeValuePool;
 using embb::containers::WaitFreeArrayValuePool;
+using embb::containers::ChromaticTree;
 using embb::containers::test::PoolTest;
 using embb::containers::test::HazardPointerTest;
 using embb::containers::test::QueueTest;
 using embb::containers::test::StackTest;
 using embb::containers::test::ObjectPoolTest;
+using embb::containers::test::TreeTest;
 
 PT_MAIN("Data Structures C++") {
   unsigned int max_threads = static_cast<unsigned int>(
@@ -70,6 +74,7 @@ PT_MAIN("Data Structures C++") {
   PT_RUN(StackTest< LockFreeStack<int> >);
   PT_RUN(ObjectPoolTest< LockFreeTreeValuePool<bool COMMA false > >);
   PT_RUN(ObjectPoolTest< WaitFreeArrayValuePool<bool COMMA false> >);
+  PT_RUN(TreeTest< ChromaticTree<size_t COMMA int> >);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

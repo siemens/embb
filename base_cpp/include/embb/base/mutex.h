@@ -29,6 +29,7 @@
 
 #include <embb/base/internal/platform.h>
 #include <embb/base/exceptions.h>
+#include <embb/base/c/counter.h>
 
 namespace embb {
 namespace base {
@@ -481,6 +482,71 @@ class UniqueLock {
    * For access to native implementation type.
    */
   friend class embb::base::ConditionVariable;
+};
+
+class ReadWriteLock {
+ public:
+  ReadWriteLock() : read_lock_(), write_lock_(),
+                    reader_(self()), writer_(self()) {
+    embb_counter_init(&active_readers_);
+  }
+  void ReadLock() {
+    LockGuard<Mutex> read_guard(read_lock_);
+    unsigned int me = embb_counter_increment(&active_readers_);
+    if (me == 0) {
+      write_lock_.Lock();
+    }
+  }
+  void ReadUnlock() {
+    unsigned int me = embb_counter_decrement(&active_readers_);
+    if (me == 1) {
+      write_lock_.Unlock();
+    }
+  }
+  void WriteLock() {
+    read_lock_.Lock();
+    write_lock_.Lock();
+  }
+  void WriteUnlock() {
+    write_lock_.Unlock();
+    read_lock_.Unlock();
+  }
+  ~ReadWriteLock() {
+    embb_counter_destroy(&active_readers_);
+  }
+
+  class Reader {
+   public:
+    explicit Reader(ReadWriteLock& rwlock) : readwrite_lock_(rwlock) {}
+    void Lock()   { readwrite_lock_.ReadLock(); }
+    void Unlock() { readwrite_lock_.ReadUnlock(); }
+
+   private:
+    ReadWriteLock& readwrite_lock_;
+  };
+  class Writer {
+   public:
+    explicit Writer(ReadWriteLock& rwlock) : readwrite_lock_(rwlock) {}
+    void Lock()   { readwrite_lock_.WriteLock(); }
+    void Unlock() { readwrite_lock_.WriteUnlock(); }
+
+   private:
+    ReadWriteLock& readwrite_lock_;
+  };
+  Reader& GetReader() { return reader_; }
+  Writer& GetWriter() { return writer_; }
+
+ private:
+  ReadWriteLock(const ReadWriteLock&);
+  ReadWriteLock& operator=(const ReadWriteLock&);
+
+  ReadWriteLock& self() { return *this; }
+
+  Mutex read_lock_;
+  Mutex write_lock_;
+  embb_counter_t  active_readers_;
+  Reader reader_;
+  Writer writer_;
 };
 
 } // namespace base

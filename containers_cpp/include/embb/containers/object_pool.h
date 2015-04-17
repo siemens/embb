@@ -180,6 +180,11 @@ class ObjectPool {
   Type* Allocate(Param1 const& param1, Param2 const& param2,
     Param3 const& param3, Param4 const& param4);
 
+  template<typename Param1, typename Param2, typename Param3, typename Param4,
+      typename Param5>
+  Type* Allocate(Param1 const& param1, Param2 const& param2,
+    Param3 const& param3, Param4 const& param4, Param5 const& param5);
+
 #endif
 };
 } // namespace containers
