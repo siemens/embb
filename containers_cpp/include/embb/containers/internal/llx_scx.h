@@ -68,14 +68,14 @@ class ScxRecord {
    * Default constructor, creates sentinel instance of ScxRecord.
    */
   ScxRecord()
-  : linked_data_records_(0),
-    finalize_data_records_(0),
-    new_value_(0),
-    old_value_(0),
-    scx_ops_(0),
-    state_(OperationState::Comitted),
-    all_frozen_(false) {
-    field_ = 0;
+  : linked_data_records(0),
+    finalize_data_records(0),
+    new_value(0),
+    old_value(0),
+    scx_ops(0),
+    state(OperationState::Comitted),
+    all_frozen(false) {
+    field = 0;
   }
 
   /**
@@ -86,76 +86,72 @@ class ScxRecord {
       linked_data_records,
     FixedSizeList<DataRecord *> &
       finalize_data_records,
-    embb::base::Atomic<cas_t> * field,
+    embb::base::Atomic<cas_t> * target_field,
     cas_t new_value,
     cas_t old_value,
     FixedSizeList<self_t *> * scx_ops,
     OperationState operation_state)
-  : linked_data_records_(&linked_data_records),
-    finalize_data_records_(&finalize_data_records),
-    new_value_(new_value),
-    old_value_(old_value),
-    scx_ops_(scx_ops),
-    state_(operation_state),
-    all_frozen_(false) {
-    field_ = field;
+  : linked_data_records(&linked_data_records),
+    finalize_data_records(&finalize_data_records),
+    new_value(new_value),
+    old_value(old_value),
+    scx_ops(scx_ops),
+    state(operation_state),
+    all_frozen(false) {
+    field = target_field;
   }
 
-  OperationState State() const {
-    return state_;
-  }
-  
  public:
   /**
    * Sequence of load-linked data records for this SCX operation.
    * Named 'V' in original publication.
    */
    const FixedSizeList<DataRecord *> *
-    linked_data_records_;
+    linked_data_records;
 
   /**
    * Sequence of data records to be finalized in this SCX operation.
    * Named 'R' in original publication.
    */
    const FixedSizeList<DataRecord *> *
-    finalize_data_records_;
+    finalize_data_records;
 
   /**
    * Pointer to a mutable field of a data record in data_records the
    * new value is to be stored.
    * Named 'fld' in original publication.
    */
-  embb::base::Atomic<cas_t> * field_;
+  embb::base::Atomic<cas_t> * field;
 
   /**
    * Value to be written in field referenced by field_index. 
    * Required to be compatible with atomic operations.
    */
-  cas_t new_value_;
+  cas_t new_value;
 
   /**
    * Value previously read from field referenced by field_index.
    * Required to be compatible with atomic operations.
    */
-  cas_t old_value_;
+  cas_t old_value;
 
   /**
    * List of SCX operation descriptions associated with data records
    * linked with this SCX operation.
    */
-  FixedSizeList<self_t *> * scx_ops_;
+  FixedSizeList<self_t *> * scx_ops;
 
   /**
    * Current state of this SCX record.
    */
-  OperationState state_;
+  OperationState state;
 
   /**
    * Whether all fields are currently frozen, initially false. 
    * Set to true after all data records in data_records V have 
    * been frozen for the SCX.
    */
-  bool all_frozen_;
+  bool all_frozen;
 
 }; /* class ScxRecord */
 
@@ -223,7 +219,7 @@ class LlxScxRecord {
   UserData & Data() {
     return user_data_;
   }
-
+/*
   UserData * operator*() {
     return &user_data_;
   }
@@ -231,7 +227,7 @@ class LlxScxRecord {
   UserData * operator->() {
     return &user_data_;
   }
-
+*/
   /**
    * A data record r is frozen for an SCX-record U if r.info points to
    * U and either U.state is InProgress, or U.state is Committed and r
@@ -369,17 +365,17 @@ class LlxScx {
   );
 
   /**
-   * Performs a VLX (extended validate link) operation on given LLX data
-   * record. 
-   * Before calling this method, the given LLX/SCX record must have been
+   * Performs a VLX (extended validate link) operation on list of given LLX
+   * data records.
+   * Before calling this method, the given LLX/SCX records must have been
    * linked via \c TryLoadLinked.
    *
-   * \returns True if the calling thread's link obtained by its most recent
-   *          invocation of SCX is still valid.
+   * \returns True if the calling thread's links obtained by its most recent
+   *          invocations of SCX is still valid.
    */
   bool TryValidateLink(
-    const DataRecord_t & data_record
-    /**< [IN] Linked data record to validate */
+    embb::containers::internal::FixedSizeList<DataRecord_t *> & linked_deps
+    /**< [IN] Linked data records to validate */
   );
   
  private:

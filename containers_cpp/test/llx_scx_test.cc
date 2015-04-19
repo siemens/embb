@@ -157,6 +157,8 @@ void LlxScxTest::SerialArrayTest() {
   links.PushBack(&r2);
   links.PushBack(&r3);
 
+  PT_ASSERT(llxscx.TryValidateLink(links));
+
   FixedSizeList< LlxScxRecord<Payload> * >
     finalize_links(1);
   finalize_links.PushBack(&r3);
@@ -169,6 +171,8 @@ void LlxScxTest::SerialArrayTest() {
     finalize_links));
   // New value should have been changed successfully:
   PT_ASSERT_EQ(field.Load(), a);
+
+  PT_ASSERT(!llxscx.TryValidateLink(links));
 }
 
 } // namespace test
