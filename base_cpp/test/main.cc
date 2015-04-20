@@ -34,6 +34,7 @@
 #include <thread_specific_storage_test.h>
 #include <atomic_test.h>
 #include <memory_allocation_test.h>
+#include <rwlock_test.h>
 
 #include <embb/base/c/memory_allocation.h>
 
@@ -45,6 +46,7 @@ using embb::base::test::ThreadSpecificStorageTest;
 using embb::base::test::AtomicTest;
 using embb::base::test::MemoryAllocationTest;
 using embb::base::test::ThreadTest;
+using embb::base::test::RWLockTest;
 
 PT_MAIN("Base C++") {
   unsigned int max_threads =
@@ -58,6 +60,7 @@ PT_MAIN("Base C++") {
   PT_RUN(AtomicTest);
   PT_RUN(MemoryAllocationTest);
   PT_RUN(ThreadTest);
+  PT_RUN(RWLockTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

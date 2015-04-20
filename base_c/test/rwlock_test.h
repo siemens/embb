@@ -24,52 +24,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_BASE_INTERNAL_PLATFORM_H_
-#define EMBB_BASE_INTERNAL_PLATFORM_H_
+#ifndef BASE_C_TEST_RWLOCK_TEST_H_
+#define BASE_C_TEST_RWLOCK_TEST_H_
 
-/**
- * \file Contains platform-specific includes, typedefs, and defines.
- */
-
-#include <embb/base/internal/config.h>
+#include <partest/partest.h>
 #include <embb/base/c/internal/platform.h>
+#include <embb/base/c/rwlock.h>
 
-#ifdef EMBB_PLATFORM_THREADING_WINTHREADS
-
-namespace embb {
-namespace base {
-namespace internal {
-
-typedef embb_thread_t ThreadType;
-typedef DWORD IDType;
-typedef embb_mutex_t MutexType;
-typedef embb_condition_t ConditionVariableType;
-typedef embb_rwlock_t RWLockType;
-
-} // namespace internal
-} // namespace base
-} // namespace embb
-
-#elif defined EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 namespace embb {
 namespace base {
-namespace internal {
+namespace test {
 
-typedef embb_thread_t ThreadType;
-typedef embb_thread_id_t IDType;
-typedef embb_mutex_t MutexType;
-typedef embb_condition_t ConditionVariableType;
-typedef embb_rwlock_t RWLockType;
+class RWLockTest : public partest::TestCase {
+ public:
+  RWLockTest();
 
-} // namespace internal
+ private:
+  void TestSharedRead_Pre();
+  void TestSharedRead_ThreadMethod();
+  void TestSharedRead_Post();
+
+  void TestExclusiveWrite_Pre();
+  void TestExclusiveWrite_ReaderMethod();
+  void TestExclusiveWrite_WriterMethod();
+  void TestExclusiveWrite_Post();
+
+  embb_rwlock_t rwlock_;
+  size_t counter_;
+  size_t num_threads_;
+  size_t num_iterations_;
+};
+
+} // namespace test
 } // namespace base
 } // namespace embb
 
-#else // EMBB_PLATFORM_THREADING_POSIXTHREADS
-
-#error "No threading platform defined!"
-
-#endif // else
-
-#endif // EMBB_BASE_INTERNAL_PLATFORM_H_
+#endif  // BASE_C_TEST_RWLOCK_TEST_H_
