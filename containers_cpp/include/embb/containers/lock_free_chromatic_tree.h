@@ -31,6 +31,7 @@
 #include <functional>
 
 #include <embb/base/mutex.h>
+#include <embb/containers/internal/hazard_pointer.h>
 
 namespace embb {
 namespace containers {
@@ -48,6 +49,9 @@ namespace internal {
 template<typename Key, typename Value>
 class ChromaticTreeNode {
  public:
+  typedef ChromaticTreeNode<Key, Value>*   ChildPointer;
+  typedef embb::base::Atomic<ChildPointer> AtomicChildPointer;
+
   /**
    * Creates a node with given parameters.
    * 
@@ -58,8 +62,7 @@ class ChromaticTreeNode {
    * \param[IN] right  Pointer to the right child node
    */
   ChromaticTreeNode(const Key& key, const Value& value, const int weight,
-                    ChromaticTreeNode<Key, Value>* const & left,
-                    ChromaticTreeNode<Key, Value>* const & right);
+                    const ChildPointer& left, const ChildPointer& right);
   
   /**
    * Creates a node given only a key-value pair. Node will have no child nodes
@@ -69,14 +72,6 @@ class ChromaticTreeNode {
    * \param[IN] value  Value of the new node
    */
   ChromaticTreeNode(const Key& key, const Value& value, const int weight = 1);
-  
-  /**
-   * Creates a copy of a given node.
-   * 
-   * \param[IN] other Node to be copied
-   */
-  ChromaticTreeNode(const ChromaticTreeNode& other);
-  
   
   /**
    * Accessor for the stored key.
@@ -104,21 +99,31 @@ class ChromaticTreeNode {
    * 
    * \return Reference to the left child pointer
    */
-  ChromaticTreeNode<Key, Value>*& GetLeft();
+  AtomicChildPointer& GetLeft();
   
   /**
    * Accessor for the right child pointer.
    * 
    * \return Reference to the right child pointer
    */
-  ChromaticTreeNode<Key, Value>*& GetRight();
+  AtomicChildPointer& GetRight();
+
+  void Retire() { retired_ = true; }
+  bool IsRetired() const { return retired_; }
+  embb::base::Mutex& GetMutex() { return mutex_; }
 
  private:
-  const Key   key_;                      /**< Stored key */
-  const Value value_;                    /**< Stored value */
-  const int   weight_;                   /**< Weight of the node */
-  ChromaticTreeNode<Key, Value>* left_;  /**< Pointer to left child node */
-  ChromaticTreeNode<Key, Value>* right_; /**< Pointer to right child node */
+  ChromaticTreeNode(const ChromaticTreeNode&);
+  ChromaticTreeNode& operator=(const ChromaticTreeNode&);
+  
+  const Key          key_;    /**< Stored key */
+  const Value        value_;  /**< Stored value */
+  const int          weight_; /**< Weight of the node */
+  AtomicChildPointer left_;   /**< Pointer to left child node */
+  AtomicChildPointer right_;  /**< Pointer to right child node */
+
+  embb::base::Atomic<bool> retired_;
+  embb::base::Mutex  mutex_;
 };
 
 } // namespace internal
@@ -215,7 +220,7 @@ class ChromaticTree {
    * \param[IN] value  New value to be inserted
    * 
    * \return \c true if the given key-value pair was successfully inserted into
-   *         the tree, \c false if tree has reached its capacity
+   *         the tree, \c false if the tree has reached its capacity
    */
   bool TryInsert(const Key& key, const Value& value);
   
@@ -232,7 +237,7 @@ class ChromaticTree {
    *                          tree for the given key
    * 
    * \return \c true if the given key-value pair was successfully inserted into
-   *         the tree, \c false if tree has reached its capacity
+   *         the tree, \c false if the tree has reached its capacity
    */
   bool TryInsert(const Key& key, const Value& value, Value& old_value);
   
@@ -242,7 +247,7 @@ class ChromaticTree {
    * \param[IN] key    Key to be removed
    * 
    * \return \c true if the given key-value pair was successfully deleted from
-   *         the tree, \c false if the given key was not stored in the tree
+   *         the tree, \c false if the tree is out of memory
    */
   bool TryDelete(const Key& key);
   
@@ -256,7 +261,7 @@ class ChromaticTree {
    *                          tree for the given key
    * 
    * \return \c true if the given key-value pair was successfully deleted from
-   *         the tree, \c false if the given key was not stored in the tree
+   *         the tree, \c false if the tree is out of memory
    */
   bool TryDelete(const Key& key, Value& old_value);
   
@@ -291,8 +296,14 @@ class ChromaticTree {
    * Typedef for a pointer to a node of the tree.
    */
   typedef internal::ChromaticTreeNode<Key, Value>*  NodePtr;
-  
-  
+  /**
+   * Typedef for an atomic pointer to a node of the tree.
+   */
+  typedef embb::base::Atomic<NodePtr>               AtomicNodePtr;
+
+  typedef embb::base::UniqueLock<embb::base::Mutex> UniqueLock;
+
+
   /**
    * Follows a path from the root of the tree to some leaf searching for the 
    * given key (the leaf found by this method may or may not contain the given
@@ -301,7 +312,7 @@ class ChromaticTree {
    * \param[IN]     key  Key to be searched for
    * \param[IN,OUT] leaf Reference to the reached leaf
    */
-  void Search(const Key& key, NodePtr& leaf) const;
+  void Search(const Key& key, NodePtr& leaf);
   
   /**
    * Follows a path from the root of the tree to some leaf searching for the 
@@ -312,7 +323,7 @@ class ChromaticTree {
    * \param[IN,OUT] leaf   Reference to the reached leaf
    * \param[IN,OUT] parent Reference to the parent of the reached leaf
    */
-  void Search(const Key& key, NodePtr& leaf, NodePtr& parent) const;
+  void Search(const Key& key, NodePtr& leaf, NodePtr& parent);
   
   /**
    * Follows a path from the root of the tree to some leaf searching for the 
@@ -325,7 +336,7 @@ class ChromaticTree {
    * \param[IN,OUT] grandparent Reference to the grandparent of the reached leaf
    */
   void Search(const Key& key, NodePtr& leaf, NodePtr& parent,
-              NodePtr& grandparent) const;
+              NodePtr& grandparent);
   
   /**
    * Checks whether the given node is a leaf.
@@ -376,7 +387,8 @@ class ChromaticTree {
    * \return Reference to a member pointer of the \c parent that points to
    *         the \c child
    */
-  NodePtr& GetPointerToChild(const NodePtr& parent, const NodePtr& child) const;
+  AtomicNodePtr& GetPointerToChild(const NodePtr& parent,
+                                   const NodePtr& child) const;
   
   /**
    * Destroys all the nodes of a subtree rooted at the given node, including the
@@ -387,13 +399,39 @@ class ChromaticTree {
    * \param node Root of the subtree to be destroyed
    */
   void Destruct(const NodePtr& node);
-  
+
+  /**
+   * Computes the hight of the subtree rooted at the given node.
+   *
+   * \notthreadsafe
+   *
+   * \param[IN] node Root of the subtree for which the height is requested
+   *
+   * \return The height of a subtree rooted at node \c node. (The height of a
+   *         leaf node is defined to be zero).
+   */
+  int GetHeight(const NodePtr& node) const;
+
+  bool IsBalanced() const;
+  bool IsBalanced(const NodePtr& node) const;
+
+  void RemoveNode(const NodePtr& node) {
+    node_hazard_manager_.EnqueuePointerForDeletion(node);
+  }
+
+  /**
+   * Free a tree node by returning it to the node pool.
+   *
+   * \param[IN] node A node to be freed.
+   */
+  void FreeNode(NodePtr node);
+
   /**
    * Follows the path from the root to some leaf (directed by the given key) and
    * checks for any tree balancing violations. If a violation is found, tries
    * to fix it by using a set of rebalancing rotations.
    * 
-   * \param key Key to be searched for
+   * \param[IN] key Key to be searched for
    * 
    * \return \c true if the tree was successfully rebalanced, \c false otherwise
    */
@@ -412,76 +450,16 @@ class ChromaticTree {
                        const NodePtr& uxl, const NodePtr& uxr,
                        const NodePtr& uxxl, const NodePtr& uxxr,
                        const bool& uxx_is_right);
-  bool BLK(const NodePtr& u, const NodePtr& ux,
-           const NodePtr& uxl, const NodePtr& uxr);
-  bool PUSH_L(const NodePtr& u, const NodePtr& ux,
-              const NodePtr& uxl, const NodePtr& uxr);
-  bool PUSH_R(const NodePtr& u, const NodePtr& ux,
-              const NodePtr& uxl, const NodePtr& uxr);
-  bool RB1_L(const NodePtr& u, const NodePtr& ux, const NodePtr& uxl);
-  bool RB1_R(const NodePtr& u, const NodePtr& ux, const NodePtr& uxr);
-  bool RB2_L(const NodePtr& u, const NodePtr& ux,
-             const NodePtr& uxl, const NodePtr& uxlr);
-  bool RB2_R(const NodePtr& u, const NodePtr& ux,
-             const NodePtr& uxr, const NodePtr& uxrl);
-  bool W1_L(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxrl);
-  bool W1_R(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxlr);
-  bool W2_L(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxrl);
-  bool W2_R(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxlr);
-  bool W3_L(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxrl, const NodePtr& uxrll);
-  bool W3_R(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxlr, const NodePtr& uxlrr);
-  bool W4_L(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxrl, const NodePtr& uxrlr);
-  bool W4_R(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxlr, const NodePtr& uxlrl);
-  bool W5_L(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxrr);
-  bool W5_R(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxll);
-  bool W6_L(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxrl);
-  bool W6_R(const NodePtr& u, const NodePtr& ux,
-            const NodePtr& uxl, const NodePtr& uxr,
-            const NodePtr& uxlr);
-  bool W7(const NodePtr& u, const NodePtr& ux,
-          const NodePtr& uxl, const NodePtr& uxr);
-  
-  /**
-   * Friending the test class for white-box testing
-   */
-  friend class test::TreeTest<ChromaticTree<Key, Value, Compare, NodePool> >;
 
-  /**
-   * Computes the hight of the subtree rooted at the given node.
-   *
-   * \notthreadsafe
-   * 
-   * \param[IN] node Root of the subtree for which the height is requested
-   * 
-   * \return The height of a subtree rooted at node \c node. (The height of a
-   *         leaf node is defined to be zero).
-   */
-  int GetHeight(const NodePtr& node) const;
-  
-  bool IsBalanced() const;
-  bool IsBalanced(const NodePtr& node) const;
+  // The following included header contains the class methods implementing
+  // tree rotations. It is generated automatically and must be included
+  // directly inside the class definition.
+# include <embb/containers/internal/lock_free_chromatic_tree-rebalance.h>
+
+  /** Callback functor for the hazard pointer that frees retired nodes */
+  embb::base::Function<void, NodePtr> free_node_callback_;
+  /** Hazard pointer instance for protection of node pointers */
+  embb::containers::internal::HazardPointer<NodePtr> node_hazard_manager_;
 
   const Key     undefined_key_;   /**< A dummy key used by the tree */
   const Value   undefined_value_; /**< A dummy value used by the tree */
@@ -491,11 +469,10 @@ class ChromaticTree {
   NodePtr       entry_;           /**< Pointer to the sentinel node used as
                                    *   the entry point into the tree */
 
-  typedef embb::base::ReadWriteLock::Reader ReadWriteLockReader;
-  typedef embb::base::ReadWriteLock::Writer ReadWriteLockWriter;
-  typedef embb::base::LockGuard<ReadWriteLockReader> ReaderLockGuard;
-  typedef embb::base::LockGuard<ReadWriteLockWriter> WriterLockGuard;
-  embb::base::ReadWriteLock readwrite_lock_;
+  /**
+   * Friending the test class for white-box testing
+   */
+  friend class test::TreeTest<ChromaticTree<Key, Value, Compare, NodePool> >;
 };
 
 } // namespace containers

@@ -66,11 +66,11 @@ TreeTest<Tree>::TreeTest()
       Add(&TreeTest::TreeTestConcurrentGet_ReaderMethod, this,
           NUM_TEST_THREADS / 2, NUM_ITERATIONS).
       Post(&TreeTest::TreeTestConcurrentGet_Post, this);
-  CreateUnit("TreeTestBalance").
-      Pre(&TreeTest::TreeTestBalance_Pre, this).
-      Add(&TreeTest::TreeTestBalance_ThreadMethod, this,
-          NUM_TEST_THREADS, 1).
-      Post(&TreeTest::TreeTestBalance_Post, this);
+//  CreateUnit("TreeTestBalance").
+//      Pre(&TreeTest::TreeTestBalance_Pre, this).
+//      Add(&TreeTest::TreeTestBalance_ThreadMethod, this,
+//          NUM_TEST_THREADS, 1).
+//      Post(&TreeTest::TreeTestBalance_Post, this);
 }
 
 template<typename Tree>
