@@ -105,7 +105,7 @@ ChromaticTree(size_t capacity, Key undefined_key, Value undefined_value,
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-      node_hazard_manager_(free_node_callback_, NULL, 8),
+      node_hazard_manager_(free_node_callback_, NULL, 10),
       undefined_key_(undefined_key),
       undefined_value_(undefined_value),
       compare_(compare),
@@ -128,8 +128,9 @@ ChromaticTree<Key, Value, Compare, NodePool>::
 template<typename Key, typename Value, typename Compare, typename NodePool>
 bool ChromaticTree<Key, Value, Compare, NodePool>::
 Get(const Key& key, Value& value) {
-  NodePtr leaf;
-  Search(key, leaf);
+  HazardNodePtr parent(node_hazard_manager_.GetGuardedPointer(0), NULL);
+  HazardNodePtr leaf  (node_hazard_manager_.GetGuardedPointer(1), NULL);
+  Search(key, leaf, parent);
 
   bool keys_are_equal = !IsSentinel(leaf) &&
                         !(compare_(key, leaf->GetKey()) ||
@@ -138,8 +139,6 @@ Get(const Key& key, Value& value) {
   if (keys_are_equal) {
     value = leaf->GetValue();
   }
-
-  node_hazard_manager_.GuardPointer(0, NULL);
 
   return keys_are_equal;
 }
@@ -158,9 +157,11 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
   NodePtr new_sibling = NULL;
   NodePtr new_parent = NULL;
   bool insertion_succeeded = false;
+  bool added_violation = false;
 
   while (!insertion_succeeded) {
-    NodePtr leaf, parent;
+    HazardNodePtr parent(node_hazard_manager_.GetGuardedPointer(0), NULL);
+    HazardNodePtr leaf  (node_hazard_manager_.GetGuardedPointer(1), NULL);
     Search(key, leaf, parent);
 
     // Try to lock the parent
@@ -200,23 +201,21 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
       if (new_parent == NULL) break;
     }
 
-    GetPointerToChild(parent, leaf).CompareAndSwap(leaf, new_parent);
+    NodePtr expected = leaf;
+    insertion_succeeded = GetPointerToChild(parent, leaf)
+                              .CompareAndSwap(expected, new_parent);
+    assert(insertion_succeeded); // For now (FGL tree) this CAS may not fail
+    if (!insertion_succeeded) continue;
 
-    insertion_succeeded = true;
+    RetireHazardousNode(leaf, leaf_lock);
 
-    leaf->Retire();
-    leaf_lock.Unlock();
-    node_hazard_manager_.GuardPointer(1, NULL);
-    RemoveNode(leaf);
-
-//    if (parent->GetWeight() == 0 && new_parent->GetWeight() == 0) {
-//      CleanUp(key);
-//    }
+    added_violation = (parent->GetWeight() == 0 &&
+                       new_parent->GetWeight() == 0);
   }
-  node_hazard_manager_.GuardPointer(0, NULL);
-  node_hazard_manager_.GuardPointer(1, NULL);
 
-  if (!insertion_succeeded) {
+  if (insertion_succeeded) {
+    if (added_violation) CleanUp(key);
+  } else {
     if (new_leaf != NULL)    FreeNode(new_leaf);
     if (new_sibling != NULL) FreeNode(new_sibling);
     if (new_parent != NULL)  FreeNode(new_parent);
@@ -237,9 +236,12 @@ bool ChromaticTree<Key, Value, Compare, NodePool>::
 TryDelete(const Key& key, Value& old_value) {
   NodePtr new_leaf = NULL;
   bool deletion_succeeded = false;
+  bool added_violation = false;
 
   while (!deletion_succeeded) {
-    NodePtr leaf, parent, grandparent;
+    HazardNodePtr grandparent(node_hazard_manager_.GetGuardedPointer(0), NULL);
+    HazardNodePtr parent     (node_hazard_manager_.GetGuardedPointer(1), NULL);
+    HazardNodePtr leaf       (node_hazard_manager_.GetGuardedPointer(2), NULL);
     Search(key, leaf, parent, grandparent);
 
     // Reached leaf has a different key - nothing to delete
@@ -259,15 +261,16 @@ TryDelete(const Key& key, Value& old_value) {
     // Try to lock the parent
     UniqueLock parent_lock(parent->GetMutex(), embb::base::try_lock);
     if (!parent_lock.OwnsLock() || parent->IsRetired()) continue;
+
+    // Get the sibling (and protect it with hazard pointer)
+    HazardNodePtr sibling(node_hazard_manager_.GetGuardedPointer(3), NULL);
+    sibling.ProtectHazard((parent->GetLeft() == leaf) ?
+                          parent->GetRight() : parent->GetLeft());
+    if (parent->IsRetired() || !sibling.IsActive()) continue;
+    VERIFY_ADDRESS(static_cast<NodePtr>(sibling));
+
     // Verify that the leaf is still the parent's child
     if (!HasChild(parent, leaf)) continue;
-
-    AtomicNodePtr& other_child = ((parent->GetLeft() == leaf) ?
-                                  parent->GetRight() : parent->GetLeft());
-    NodePtr sibling = other_child;
-    node_hazard_manager_.GuardPointer(3, sibling);
-    if (sibling != other_child) continue;
-    VERIFY_ADDRESS(sibling);
 
     // Try to lock the sibling
     UniqueLock sibling_lock(sibling->GetMutex(), embb::base::try_lock);
@@ -287,33 +290,22 @@ TryDelete(const Key& key, Value& old_value) {
 
     old_value = leaf->GetValue();
 
-    GetPointerToChild(grandparent, parent).CompareAndSwap(parent, new_leaf);
+    NodePtr expected = parent;
+    deletion_succeeded = GetPointerToChild(grandparent, parent)
+                             .CompareAndSwap(expected, new_leaf);
+    assert(deletion_succeeded); // For now (FGL tree) this CAS may not fail
+    if (!deletion_succeeded) continue;
 
-    deletion_succeeded = true;
+    RetireHazardousNode(parent, parent_lock);
+    RetireHazardousNode(leaf, leaf_lock);
+    RetireHazardousNode(sibling, sibling_lock);
 
-    parent->Retire();
-    parent_lock.Unlock();
-    node_hazard_manager_.GuardPointer(1, NULL);
-    RemoveNode(parent);
-    leaf->Retire();
-    leaf_lock.Unlock();
-    node_hazard_manager_.GuardPointer(2, NULL);
-    RemoveNode(leaf);
-    sibling->Retire();
-    sibling_lock.Unlock();
-    node_hazard_manager_.GuardPointer(3, NULL);
-    RemoveNode(sibling);
-
-//    if (new_weight > 1) {
-//      CleanUp(key);
-//    }
+    added_violation =  (new_weight > 1);
   }
-  node_hazard_manager_.GuardPointer(0, NULL);
-  node_hazard_manager_.GuardPointer(1, NULL);
-  node_hazard_manager_.GuardPointer(2, NULL);
-  node_hazard_manager_.GuardPointer(3, NULL);
 
-  if (!deletion_succeeded) {
+  if (deletion_succeeded) {
+    if (added_violation) CleanUp(key);
+  } else {
     if (new_leaf != NULL)    FreeNode(new_leaf);
   }
 
@@ -340,39 +332,22 @@ IsEmpty() {
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
 void ChromaticTree<Key, Value, Compare, NodePool>::
-Search(const Key& key, NodePtr& leaf) {
-  NodePtr parent;
-  Search(key, leaf, parent);
-  node_hazard_manager_.GuardPointer(0, leaf);
-  node_hazard_manager_.GuardPointer(1, NULL);
-}
-
-template<typename Key, typename Value, typename Compare, typename NodePool>
-void ChromaticTree<Key, Value, Compare, NodePool>::
-Search(const Key& key, NodePtr& leaf, NodePtr& parent) {
+Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent) {
   bool reached_leaf = false;
 
   while (!reached_leaf) {
-    parent = entry_;
-    node_hazard_manager_.GuardPointer(0, parent);
-
-    leaf = entry_->GetLeft();
-    node_hazard_manager_.GuardPointer(1, leaf);
-    if (leaf != entry_->GetLeft()) continue;
+    parent.ProtectHazard(entry_);
+    leaf.ProtectHazard(entry_->GetLeft());
+    if (parent->IsRetired() || !leaf.IsActive()) continue;
 
     reached_leaf = IsLeaf(leaf);
     while (!reached_leaf) {
-      parent = leaf;
-      node_hazard_manager_.GuardPointer(0, parent);
+      parent.AdoptGuard(leaf);
+      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+                         leaf->GetLeft() : leaf->GetRight());
+      if (parent->IsRetired() || !leaf.IsActive()) break;
+      VERIFY_ADDRESS(static_cast<NodePtr>(leaf));
 
-      AtomicNodePtr& next_leaf =
-          (IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
-          leaf->GetLeft() : leaf->GetRight();
-      leaf = next_leaf;
-      node_hazard_manager_.GuardPointer(1, leaf);
-      if (leaf != next_leaf || parent->IsRetired()) break;
-
-      VERIFY_ADDRESS(leaf);
       reached_leaf = IsLeaf(leaf);
     }
   }
@@ -380,35 +355,25 @@ Search(const Key& key, NodePtr& leaf, NodePtr& parent) {
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
 void ChromaticTree<Key, Value, Compare, NodePool>::
-Search(const Key& key, NodePtr& leaf, NodePtr& parent, NodePtr& grandparent) {
+Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
+       HazardNodePtr& grandparent) {
   bool reached_leaf = false;
 
   while (!reached_leaf) {
-    grandparent = NULL;
-
-    parent = entry_;
-    node_hazard_manager_.GuardPointer(1, parent);
-
-    leaf = entry_->GetLeft();
-    node_hazard_manager_.GuardPointer(2, leaf);
-    if (leaf != entry_->GetLeft()) continue;
+    grandparent.ProtectHazard(entry_);
+    parent.ProtectHazard(entry_);
+    leaf.ProtectHazard(entry_->GetLeft());
+    if (parent->IsRetired() || !leaf.IsActive()) continue;
 
     reached_leaf = IsLeaf(leaf);
     while (!reached_leaf) {
-      grandparent = parent;
-      node_hazard_manager_.GuardPointer(0, grandparent);
+      grandparent.AdoptGuard(parent);
+      parent.AdoptGuard(leaf);
+      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+                         leaf->GetLeft() : leaf->GetRight());
+      if (parent->IsRetired() || !leaf.IsActive()) break;
+      VERIFY_ADDRESS(static_cast<NodePtr>(leaf));
 
-      parent = leaf;
-      node_hazard_manager_.GuardPointer(1, parent);
-
-      AtomicNodePtr& next_leaf =
-          (IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
-          leaf->GetLeft() : leaf->GetRight();
-      leaf = next_leaf;
-      node_hazard_manager_.GuardPointer(2, leaf);
-      if (leaf != next_leaf || parent->IsRetired()) break;
-
-      VERIFY_ADDRESS(leaf);
       reached_leaf = IsLeaf(leaf);
     }
   }
@@ -423,13 +388,15 @@ IsLeaf(const NodePtr& node) const {
 template<typename Key, typename Value, typename Compare, typename NodePool>
 bool ChromaticTree<Key, Value, Compare, NodePool>::
 IsSentinel(const NodePtr& node) const {
-  return (node == entry_) || (node == entry_->GetLeft());
+  NodePtr entry = entry_; //Bug: "operator->()" is not const in AtomicPointer<>
+  return (node == entry) || (node == entry->GetLeft());
 }
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
 bool ChromaticTree<Key, Value, Compare, NodePool>::
 HasFixedWeight(const NodePtr& node) const {
-  return (IsSentinel(node)) || (node == entry_->GetLeft()->GetLeft());
+  NodePtr entry = entry_; //Bug: "operator->()" is not const in AtomicPointer<>
+  return (IsSentinel(node)) || (node == entry->GetLeft()->GetLeft());
 }
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
@@ -470,7 +437,8 @@ GetHeight(const NodePtr& node) const {
 template<typename Key, typename Value, typename Compare, typename NodePool>
 bool ChromaticTree<Key, Value, Compare, NodePool>::
 IsBalanced() const {
-  return IsBalanced(entry_->GetLeft());
+  NodePtr entry = entry_; //Bug: "operator->()" is not const in AtomicPointer<>
+  return IsBalanced(entry->GetLeft());
 }
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
@@ -509,92 +477,137 @@ FreeNode(NodePtr node) {
 template<typename Key, typename Value, typename Compare, typename NodePool>
 bool ChromaticTree<Key, Value, Compare, NodePool>::
 CleanUp(const Key& key) {
-  for (;;) {
-    NodePtr grandgrandparent = NULL;
-    NodePtr grandparent = NULL;
-    NodePtr parent = entry_;
-    NodePtr leaf = entry_->GetLeft();
+  HazardNodePtr grangranparent(node_hazard_manager_.GetGuardedPointer(0), NULL);
+  HazardNodePtr grandparent   (node_hazard_manager_.GetGuardedPointer(1), NULL);
+  HazardNodePtr parent        (node_hazard_manager_.GetGuardedPointer(2), NULL);
+  HazardNodePtr leaf          (node_hazard_manager_.GetGuardedPointer(3), NULL);
+  bool reached_leaf = false;
 
-    while (!IsLeaf(leaf) && (leaf->GetWeight() <= 1) &&
-           (leaf->GetWeight() != 0 || parent->GetWeight() != 0)) {
-      grandgrandparent = grandparent;
-      grandparent = parent;
-      parent = leaf;
-      leaf = (IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
-             leaf->GetLeft() : leaf->GetRight();
-      VERIFY_ADDRESS(leaf);
+  while (!reached_leaf) {
+    bool found_violation = false;
+
+    grangranparent.ProtectHazard(entry_);
+    grandparent.ProtectHazard(entry_);
+    parent.ProtectHazard(entry_);
+    leaf.ProtectHazard(entry_->GetLeft());
+    if (parent->IsRetired() || !leaf.IsActive()) continue;
+
+    reached_leaf = IsLeaf(leaf);
+    while (!reached_leaf && !found_violation) {
+      grangranparent.AdoptGuard(grandparent);
+      grandparent.AdoptGuard(parent);
+      parent.AdoptGuard(leaf);
+      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+                         leaf->GetLeft() : leaf->GetRight());
+      if (parent->IsRetired() || !leaf.IsActive()) break;
+      VERIFY_ADDRESS(static_cast<NodePtr>(leaf));
+
+      found_violation = (leaf->GetWeight() > 1) ||
+                        (leaf->GetWeight() == 0 && parent->GetWeight() == 0);
+
+      reached_leaf = IsLeaf(leaf);
     }
 
-    if (leaf->GetWeight() == 1) {
-      break;
-    }
+    if (found_violation) {
+      reached_leaf = false;
 
-    if (!Rebalance(grandgrandparent, grandparent, parent, leaf)) {
-      return false;
+      if (Rebalance(grangranparent, grandparent, parent, leaf) == EMBB_NOMEM) {
+        assert(false && "No memory for rebalancing!");
+        return false;
+      }
     }
   }
 
   return true;
 }
 
+#define PROTECT_NODE_WITH_LOCK(node, lock_name) \
+    UniqueLock lock_name(node->GetMutex(), embb::base::try_lock); \
+    if (!lock_name.OwnsLock() || node->IsRetired()) return EMBB_BUSY;
+
+#define DEFINE_NODE_WITH_HAZARD(h_num, node, parent, method) \
+    HazardNodePtr node(node_hazard_manager_.GetGuardedPointer(h_num), NULL); \
+    node.ProtectHazard(parent->method()); \
+    if (parent->IsRetired() || !node.IsActive()) return EMBB_BUSY; \
+    VERIFY_ADDRESS(static_cast<NodePtr>(node))
+
 template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
-Rebalance(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
-          const NodePtr& uxxx) {
-  //TODO: weakLLX(u);
-  if (!HasChild(u, ux)) return false;
+embb_errors_t ChromaticTree<Key, Value, Compare, NodePool>::
+Rebalance(HazardNodePtr& u, HazardNodePtr& ux, HazardNodePtr& uxx,
+          HazardNodePtr& uxxx) {
+  // Protect node 'u'
+  PROTECT_NODE_WITH_LOCK(u, u_lock);
+  // Verify that ux is still a child of u
+  if (!HasChild(u, ux)) return EMBB_BUSY;
 
-  //TODO: weakLLX(ux);
-  NodePtr uxl = ux->GetLeft(); VERIFY_ADDRESS(uxl);
-  NodePtr uxr = ux->GetRight(); VERIFY_ADDRESS(uxr);
-  bool uxx_is_left = (uxx == uxl);
-  if (!HasChild(ux, uxx)) return false;
+  // Protect node 'ux'
+  PROTECT_NODE_WITH_LOCK(ux, ux_lock);
+  // Get children of 'ux'
+  DEFINE_NODE_WITH_HAZARD(4, uxl, ux, GetLeft);
+  DEFINE_NODE_WITH_HAZARD(5, uxr, ux, GetRight);
+  // Verify that 'uxx' is still a child of 'ux'
+  bool uxx_is_left = (uxx == uxl); (void)uxx_is_left;
+  if (!HasChild(ux, uxx)) return EMBB_BUSY;
 
-  //TODO: weakLLX(uxx);
-  NodePtr uxxl = uxx->GetLeft(); VERIFY_ADDRESS(uxxl);
-  NodePtr uxxr = uxx->GetRight(); VERIFY_ADDRESS(uxxr);
+  // Protect node 'uxx'
+  PROTECT_NODE_WITH_LOCK(uxx, uxx_lock);
+  // Get children of 'uxx'
+  DEFINE_NODE_WITH_HAZARD(6, uxxl, uxx, GetLeft);
+  DEFINE_NODE_WITH_HAZARD(7, uxxr, uxx, GetRight);
+  // Verify that 'uxxx' is still a child of 'uxx'
   bool uxxx_is_left = (uxxx == uxxl);
-  if (!HasChild(uxx, uxxx)) return false;
+  if (!HasChild(uxx, uxxx)) return EMBB_BUSY;
 
   if (uxxx->GetWeight() > 1) {
     if (uxxx_is_left) {
-      //TODO: weakLLX(uxxl);
-      return OverweightLeft(u, ux, uxx, uxl, uxr, uxxl, uxxr, uxx_is_left);
+      // Protect node 'uxxl'
+      PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+      return OverweightLeft(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxl, uxr,
+                            uxxl, uxxl_lock, uxxr, uxx_is_left);
     } else {
-      //TODO: weakLLX(uxxr);
-      return OverweightRight(u, ux, uxx, uxl, uxr, uxxl, uxxr, !uxx_is_left);
+      // Protect node 'uxxr'
+      PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+      return OverweightRight(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxl, uxr,
+                             uxxl, uxxr, uxxr_lock, !uxx_is_left);
     }
   } else {
+    assert(uxxx->GetWeight() == 0 && uxx->GetWeight() == 0); //Red-red violation
     if (uxx_is_left) {
       if (uxr->GetWeight() == 0) {
-        //TODO: weakLLX(uxr);
-        return BLK(u, ux, uxx, uxr);
+        // Protect node 'uxr'
+        PROTECT_NODE_WITH_LOCK(uxr, uxr_lock);
+        return BLK(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxr, uxr_lock);
       } else if (uxxx_is_left) {
-        return RB1_L(u, ux, uxx);
+        return RB1_L(u, u_lock, ux, ux_lock, uxx, uxx_lock);
       } else {
-        //TODO: weakLLX(uxxr);
-        return RB2_L(u, ux, uxx, uxxr);
+        // Protect node 'uxxr'
+        PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+        return RB2_L(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxr, uxxr_lock);
       }
     } else {
       if (uxl->GetWeight() == 0) {
-        //TODO: weakLLX(uxl);
-        return BLK(u, ux, uxl, uxx);
+        // Protect node 'uxl'
+        PROTECT_NODE_WITH_LOCK(uxl, uxl_lock);
+        return BLK(u, u_lock, ux, ux_lock, uxl, uxl_lock, uxx, uxx_lock);
       } else if (!uxxx_is_left) {
-        return RB1_R(u, ux, uxx);
+        return RB1_R(u, u_lock, ux, ux_lock, uxx, uxx_lock);
       } else {
-        //TODO: weakLLX(uxxl);
-        return RB2_R(u, ux, uxx, uxxl);
+        // Protect node 'uxxl'
+        PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+        return RB2_R(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock);
       }
     }
   }
 }
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
-OverweightLeft(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
-               const NodePtr& uxl, const NodePtr& uxr,
-               const NodePtr& uxxl, const NodePtr& uxxr,
-               const bool& uxx_is_left) {
+embb_errors_t ChromaticTree<Key, Value, Compare, NodePool>::
+OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
+               HazardNodePtr& ux, UniqueLock& ux_lock,
+               HazardNodePtr& uxx, UniqueLock& uxx_lock,
+               HazardNodePtr& uxl, HazardNodePtr& uxr,
+               HazardNodePtr& uxxl, UniqueLock& uxxl_lock,
+               HazardNodePtr& uxxr, bool uxx_is_left) {
   // Let "Root" be the top of the overweight violation decision tree (see p.30)
   // Root -> Middle
   if (uxxr->GetWeight() == 0) {
@@ -604,14 +617,16 @@ OverweightLeft(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
       if (uxx_is_left) {
         // Root -> Middle -> Left -> Left -> Left
         if (uxr->GetWeight() == 0) {
-          //TODO: weakLLX(uxr);
-          return BLK(u, ux, uxx, uxr);
+          // Protect node 'uxr'
+          PROTECT_NODE_WITH_LOCK(uxr, uxr_lock);
+          return BLK(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxr, uxr_lock);
 
         // Root -> Middle -> Left -> Left -> Right
         } else {
           assert(uxr->GetWeight() > 0);
-          //TODO: weakLLX(uxxr);
-          return RB2_L(u, ux, uxx, uxxr);
+          // Protect node 'uxxr'
+          PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+          return RB2_L(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxr, uxxr_lock);
         }
 
       // Root -> Middle -> Left -> Right
@@ -619,102 +634,126 @@ OverweightLeft(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
         assert(!uxx_is_left);
         // Root -> Middle -> Left -> Right -> Left
         if (uxl->GetWeight() == 0) {
-          //TODO: weakLLX(uxl);
-          return BLK(u, ux, uxl, uxx);
+          // Protect node 'uxl'
+          PROTECT_NODE_WITH_LOCK(uxl, uxl_lock);
+          return BLK(u, u_lock, ux, ux_lock, uxl, uxl_lock, uxx, uxx_lock);
 
         // Root -> Middle -> Left -> Right -> Right
         } else {
           assert(uxl->GetWeight() > 0);
-          return RB1_R(u, ux, uxx);
+          return RB1_R(u, u_lock, ux, ux_lock, uxx, uxx_lock);
         }
       }
 
     // Root -> Middle -> Right
     } else {
       assert(uxx->GetWeight() > 0);
-      //TODO: weakLLX(uxxr);
+      // Protect node 'uxxr'
+      PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+
+      // Get left child of 'uxxr'
       // Note: we know that 'uxxr' is not a leaf because it has weight 0.
-      NodePtr uxxrl = uxxr->GetLeft(); VERIFY_ADDRESS(uxxrl);
-      //TODO: weakLLX(uxxrl);
+      DEFINE_NODE_WITH_HAZARD(8, uxxrl, uxxr, GetLeft);
+
+      // Protect node 'uxxrl'
+      PROTECT_NODE_WITH_LOCK(uxxrl, uxxrl_lock);
 
       // Root -> Middle -> Right -> Left
       if (uxxrl->GetWeight() == 0) {
-        return RB2_R(ux, uxx, uxxr, uxxrl);
+        return RB2_R(ux, ux_lock, uxx, uxx_lock,
+                     uxxr, uxxr_lock, uxxrl, uxxrl_lock);
 
       // Root -> Middle -> Right -> Middle
       } else if (uxxrl->GetWeight() == 1) {
-        NodePtr uxxrll = uxxrl->GetLeft(); VERIFY_ADDRESS(uxxrll);
-        NodePtr uxxrlr = uxxrl->GetRight(); VERIFY_ADDRESS(uxxrlr);
-        if (uxxrlr == NULL) return false;
+        DEFINE_NODE_WITH_HAZARD(9, uxxrlr, uxxrl, GetRight);
+        if (uxxrlr == NULL) return EMBB_BUSY;
 
         // Root -> Middle -> Right -> Middle -> Left
         if (uxxrlr->GetWeight() == 0) {
-          //TODO: weakLLX(uxxrlr);
-          return W4_L(ux, uxx, uxxl, uxxr, uxxrl, uxxrlr);
+          // Protect node 'uxxrlr'
+          PROTECT_NODE_WITH_LOCK(uxxrlr, uxxrlr_lock);
+          return W4_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                      uxxr, uxxr_lock, uxxrl, uxxrl_lock, uxxrlr, uxxrlr_lock);
 
         // Root -> Middle -> Right -> Middle -> Right
         } else {
           assert(uxxrlr->GetWeight() > 0);
           // Root -> Middle -> Right -> Middle -> Right -> Left
+          // Node: reusing hazard of node 'uxxrlr' as it is no longer used
+          DEFINE_NODE_WITH_HAZARD(9, uxxrll, uxxrl, GetLeft);
           if (uxxrll->GetWeight() == 0) {
-            //TODO: weakLLX(uxxrll);
-            return W3_L(ux, uxx, uxxl, uxxr, uxxrl, uxxrll);
+            // Protect node 'uxxrll'
+            PROTECT_NODE_WITH_LOCK(uxxrll, uxxrll_lock);
+            return W3_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr,
+                        uxxr_lock, uxxrl, uxxrl_lock, uxxrll, uxxrll_lock);
 
           // Root -> Middle -> Right -> Middle -> Right -> Right
           } else {
             assert(uxxrll->GetWeight() > 0);
-            return W2_L(ux, uxx, uxxl, uxxr, uxxrl);
+            return W2_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                        uxxr, uxxr_lock, uxxrl, uxxrl_lock);
           }
         }
 
       // Root -> Middle -> Right -> Right
       } else {
         assert(uxxrl->GetWeight() > 1);
-        return W1_L(ux, uxx, uxxl, uxxr, uxxrl);
+        return W1_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                    uxxr, uxxr_lock, uxxrl, uxxrl_lock);
       }
     }
 
   // Root -> Right
   } else if (uxxr->GetWeight() == 1) {
-    //TODO: weakLLX(uxxr);
-    NodePtr uxxrl = uxxr->GetLeft(); VERIFY_ADDRESS(uxxrl);
-    NodePtr uxxrr = uxxr->GetRight(); VERIFY_ADDRESS(uxxrr);
-    if (uxxrl == NULL) return false;
+    // Protect node 'uxxr'
+    PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+    // Get children of 'uxxr'
+    DEFINE_NODE_WITH_HAZARD(8, uxxrl, uxxr, GetLeft);
+    DEFINE_NODE_WITH_HAZARD(9, uxxrr, uxxr, GetRight);
+    if (uxxrl == NULL) return EMBB_BUSY;
 
     // Root -> Right -> Left
     if (uxxrr->GetWeight() == 0) {
-      //TODO: weakLLX(uxxrr);
-      return W5_L(ux, uxx, uxxl, uxxr, uxxrr);
+      // Protect node 'uxxrr'
+      PROTECT_NODE_WITH_LOCK(uxxrr, uxxrr_lock);
+      return W5_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                  uxxr, uxxr_lock, uxxrr, uxxrr_lock);
 
     // Root -> Right -> Right
     } else {
       assert(uxxrr->GetWeight() > 0);
       // Root -> Right -> Right -> Left
       if (uxxrl->GetWeight() == 0) {
-        //TODO: weakLLX(uxxrl);
-        return W6_L(ux, uxx, uxxl, uxxr, uxxrl);
+        // Protect node 'uxxrl'
+        PROTECT_NODE_WITH_LOCK(uxxrl, uxxrl_lock);
+        return W6_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                    uxxr, uxxr_lock, uxxrl, uxxrl_lock);
 
       // Root -> Right -> Right -> Right
       } else {
         assert(uxxrl->GetWeight() > 0);
-        return PUSH_L(ux, uxx, uxxl, uxxr);
+        return PUSH_L(ux, ux_lock, uxx, uxx_lock,
+                      uxxl, uxxl_lock, uxxr, uxxr_lock);
       }
     }
 
   // Root -> Left
   } else {
     assert(uxxr->GetWeight() > 1);
-    //TODO: weakLLX(uxxr);
-    return W7(ux, uxx, uxxl, uxxr);
+    // Protect node 'uxxr'
+    PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+    return W7(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr, uxxr_lock);
   }
 }
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
-OverweightRight(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
-                const NodePtr& uxl, const NodePtr& uxr,
-                const NodePtr& uxxl, const NodePtr& uxxr,
-                const bool& uxx_is_right) {
+embb_errors_t ChromaticTree<Key, Value, Compare, NodePool>::
+OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
+                HazardNodePtr& ux, UniqueLock& ux_lock,
+                HazardNodePtr& uxx, UniqueLock& uxx_lock,
+                HazardNodePtr& uxl, HazardNodePtr& uxr,
+                HazardNodePtr& uxxl, HazardNodePtr& uxxr,
+                UniqueLock& uxxr_lock, bool uxx_is_right) {
   // Let "Root" be the top of the overweight violation decision tree (see p.30)
   // Root -> Middle
   if (uxxl->GetWeight() == 0) {
@@ -724,14 +763,16 @@ OverweightRight(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
       if (uxx_is_right) {
         // Root -> Middle -> Left -> Left -> Left
         if (uxl->GetWeight() == 0) {
-          //TODO: weakLLX(uxl);
-          return BLK(u, ux, uxl, uxx);
+          // Protect node 'uxl'
+          PROTECT_NODE_WITH_LOCK(uxl, uxl_lock);
+          return BLK(u, u_lock, ux, ux_lock, uxl, uxl_lock, uxx, uxx_lock);
 
         // Root -> Middle -> Left -> Left -> Right
         } else {
           assert(uxl->GetWeight() > 0);
-          //TODO: weakLLX(uxxl);
-          return RB2_R(u, ux, uxx, uxxl);
+          // Protect node 'uxxl'
+          PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+          return RB2_R(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock);
         }
 
       // Root -> Middle -> Left -> Right
@@ -739,93 +780,115 @@ OverweightRight(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
         assert(!uxx_is_right);
         // Root -> Middle -> Left -> Right -> Left
         if (uxr->GetWeight() == 0) {
-          //TODO: weakLLX(uxr);
-          return BLK(u, ux, uxx, uxr);
+          // Protect node 'uxr'
+          PROTECT_NODE_WITH_LOCK(uxr, uxr_lock);
+          return BLK(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxr, uxr_lock);
 
         // Root -> Middle -> Left -> Right -> Right
         } else {
           assert(uxr->GetWeight() > 0);
-          return RB1_L(u, ux, uxx);
+          return RB1_L(u, u_lock, ux, ux_lock, uxx, uxx_lock);
         }
       }
 
     // Root -> Middle -> Right
     } else {
       assert(uxx->GetWeight() > 0);
-      //TODO: weakLLX(uxxl);
+      // Protect node 'uxxl'
+      PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+
+      // Get left child of 'uxxl'
       // Note: we know that 'uxxl' is not a leaf because it has weight 0.
-      NodePtr uxxlr = uxxl->GetRight(); VERIFY_ADDRESS(uxxlr);
-      //TODO: weakLLX(uxxlr);
+      DEFINE_NODE_WITH_HAZARD(8, uxxlr, uxxl, GetRight);
+
+      // Protect node 'uxxlr'
+      PROTECT_NODE_WITH_LOCK(uxxlr, uxxlr_lock);
 
       // Root -> Middle -> Right -> Left
       if (uxxlr->GetWeight() == 0) {
-        return RB2_L(ux, uxx, uxxl, uxxlr);
+        return RB2_L(ux, ux_lock, uxx, uxx_lock,
+                     uxxl, uxxl_lock, uxxlr, uxxlr_lock);
 
       // Root -> Middle -> Right -> Middle
       } else if (uxxlr->GetWeight() == 1) {
-        NodePtr uxxlrl = uxxlr->GetLeft(); VERIFY_ADDRESS(uxxlrl);
-        NodePtr uxxlrr = uxxlr->GetRight(); VERIFY_ADDRESS(uxxlrr);
-        if (uxxlrl == NULL) return false;
+        DEFINE_NODE_WITH_HAZARD(9, uxxlrl, uxxlr, GetLeft);
+        if (uxxlrl == NULL) return EMBB_BUSY;
 
         // Root -> Middle -> Right -> Middle -> Left
         if (uxxlrl->GetWeight() == 0) {
-          //TODO: weakLLX(uxxlrl);
-          return W4_R(ux, uxx, uxxl, uxxr, uxxlr, uxxlrl);
+          // Protect node 'uxxlrl'
+          PROTECT_NODE_WITH_LOCK(uxxlrl, uxxlrl_lock);
+          return W4_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                      uxxr, uxxr_lock, uxxlr, uxxlr_lock, uxxlrl, uxxlrl_lock);
 
         // Root -> Middle -> Right -> Middle -> Right
         } else {
           assert(uxxlrl->GetWeight() > 0);
           // Root -> Middle -> Right -> Middle -> Right -> Left
+          // Node: reusing hazard of node 'uxxlrl' as it is no longer used
+          DEFINE_NODE_WITH_HAZARD(9, uxxlrr, uxxlr, GetRight);
           if (uxxlrr->GetWeight() == 0) {
-            //TODO: weakLLX(uxxlrr);
-            return W3_R(ux, uxx, uxxl, uxxr, uxxlr, uxxlrr);
+            // Protect node 'uxxlrr'
+            PROTECT_NODE_WITH_LOCK(uxxlrr, uxxlrr_lock);
+            return W3_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr,
+                        uxxr_lock, uxxlr, uxxlr_lock, uxxlrr, uxxlrr_lock);
 
           // Root -> Middle -> Right -> Middle -> Right -> Right
           } else {
             assert(uxxlrr->GetWeight() > 0);
-            return W2_R(ux, uxx, uxxl, uxxr, uxxlr);
+            return W2_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                        uxxr, uxxr_lock, uxxlr, uxxlr_lock);
           }
         }
 
       // Root -> Middle -> Right -> Right
       } else {
         assert(uxxlr->GetWeight() > 1);
-        return W1_R(ux, uxx, uxxl, uxxr, uxxlr);
+        return W1_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                    uxxr, uxxr_lock, uxxlr, uxxlr_lock);
       }
     }
 
   // Root -> Right
   } else if (uxxl->GetWeight() == 1) {
-    //TODO: weakLLX(uxxl);
-    NodePtr uxxll = uxxl->GetLeft(); VERIFY_ADDRESS(uxxll);
-    NodePtr uxxlr = uxxl->GetRight(); VERIFY_ADDRESS(uxxlr);
-    if (uxxll == NULL) return false;
+    // Protect node 'uxxl'
+    PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+    // Get children of 'uxxl'
+    DEFINE_NODE_WITH_HAZARD(8, uxxll, uxxl, GetLeft);
+    DEFINE_NODE_WITH_HAZARD(9, uxxlr, uxxl, GetRight);
+    if (uxxll == NULL) return EMBB_BUSY;
 
     // Root -> Right -> Left
     if (uxxll->GetWeight() == 0) {
-      //TODO: weakLLX(uxxll);
-      return W5_R(ux, uxx, uxxl, uxxr, uxxll);
+      // Protect node 'uxxll'
+      PROTECT_NODE_WITH_LOCK(uxxll, uxxll_lock);
+      return W5_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                  uxxr, uxxr_lock, uxxll, uxxll_lock);
 
     // Root -> Right -> Right
     } else {
       assert(uxxll->GetWeight() > 0);
       // Root -> Right -> Right -> Left
       if (uxxlr->GetWeight() == 0) {
-        //TODO: weakLLX(uxxlr);
-        return W6_R(ux, uxx, uxxl, uxxr, uxxlr);
+        // Protect node 'uxxlr'
+        PROTECT_NODE_WITH_LOCK(uxxlr, uxxlr_lock);
+        return W6_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
+                    uxxr, uxxr_lock, uxxlr, uxxlr_lock);
 
       // Root -> Right -> Right -> Right
       } else {
         assert(uxxlr->GetWeight() > 0);
-        return PUSH_R(ux, uxx, uxxl, uxxr);
+        return PUSH_R(ux, ux_lock, uxx, uxx_lock,
+                      uxxl, uxxl_lock, uxxr, uxxr_lock);
       }
     }
 
   // Root -> Left
   } else {
     assert(uxxl->GetWeight() > 1);
-    //TODO: weakLLX(uxxl);
-    return W7(ux, uxx, uxxl, uxxr);
+    // Protect node 'uxxl'
+    PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+    return W7(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr, uxxr_lock);
   }
 }
 

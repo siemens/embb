@@ -30,6 +30,7 @@
 #include <stddef.h>
 #include <functional>
 
+#include <embb/base/c/errors.h>
 #include <embb/base/mutex.h>
 #include <embb/containers/internal/hazard_pointer.h>
 
@@ -70,6 +71,7 @@ class ChromaticTreeNode {
    * 
    * \param[IN] key    Key of the new node
    * \param[IN] value  Value of the new node
+   * \param[IN] weight Weight of the new node
    */
   ChromaticTreeNode(const Key& key, const Value& value, const int weight = 1);
   
@@ -124,6 +126,75 @@ class ChromaticTreeNode {
 
   embb::base::Atomic<bool> retired_;
   embb::base::Mutex  mutex_;
+};
+
+template<typename GuardedType>
+class UniqueHazardGuard {
+ public:
+  typedef embb::base::Atomic<GuardedType> AtomicGuard;
+
+  UniqueHazardGuard(AtomicGuard& guard, const GuardedType& undefined_guard)
+      : guard_(guard),
+        undefined_guard_(undefined_guard),
+        active_(guard_.Load() == undefined_guard_) {}
+
+  ~UniqueHazardGuard() {
+    if (active_) SetUndefinedGuard();
+  }
+
+  bool ProtectHazard(const AtomicGuard& hazard) {
+    // Read the hazard and store it into the guard
+    guard_ = hazard.Load();
+
+    // Check whether the guard is valid
+    active_ = (guard_.Load() == hazard.Load());
+
+    // Clear the guard if it is invalid
+    if (!active_) SetUndefinedGuard();
+
+    return active_;
+  }
+
+  bool IsActive() const {
+    return active_;
+  }
+
+  operator GuardedType () const {
+    assert(active_ == true);
+    return guard_.Load();
+  }
+
+  GuardedType operator->() const {
+    assert(active_ == true);
+    return guard_.Load();
+  }
+
+  void AdoptGuard(const UniqueHazardGuard<GuardedType>& other) {
+    guard_ = other.guard_.Load();
+    active_ = other.active_;
+  }
+
+  GuardedType ReleaseHazard() {
+    assert(active_ == true);
+    GuardedType released_hazard = guard_.Load();
+    SetUndefinedGuard();
+    active_ = false;
+    return released_hazard;
+  }
+
+ private:
+  void SetUndefinedGuard() {
+    guard_ = undefined_guard_;
+  }
+
+  // Non-copyable
+  UniqueHazardGuard(const UniqueHazardGuard<GuardedType>&);
+  UniqueHazardGuard<GuardedType>&
+  operator=(const UniqueHazardGuard<GuardedType>&);
+
+  AtomicGuard& guard_;
+  GuardedType  undefined_guard_;
+  bool         active_;
 };
 
 } // namespace internal
@@ -301,19 +372,10 @@ class ChromaticTree {
    */
   typedef embb::base::Atomic<NodePtr>               AtomicNodePtr;
 
+  typedef internal::UniqueHazardGuard<NodePtr>      HazardNodePtr;
   typedef embb::base::UniqueLock<embb::base::Mutex> UniqueLock;
 
 
-  /**
-   * Follows a path from the root of the tree to some leaf searching for the 
-   * given key (the leaf found by this method may or may not contain the given
-   * key). Returns the reached leaf.
-   * 
-   * \param[IN]     key  Key to be searched for
-   * \param[IN,OUT] leaf Reference to the reached leaf
-   */
-  void Search(const Key& key, NodePtr& leaf);
-  
   /**
    * Follows a path from the root of the tree to some leaf searching for the 
    * given key (the leaf found by this method may or may not contain the given
@@ -323,7 +385,7 @@ class ChromaticTree {
    * \param[IN,OUT] leaf   Reference to the reached leaf
    * \param[IN,OUT] parent Reference to the parent of the reached leaf
    */
-  void Search(const Key& key, NodePtr& leaf, NodePtr& parent);
+  void Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent);
   
   /**
    * Follows a path from the root of the tree to some leaf searching for the 
@@ -335,8 +397,8 @@ class ChromaticTree {
    * \param[IN,OUT] parent      Reference to the parent of the reached leaf
    * \param[IN,OUT] grandparent Reference to the grandparent of the reached leaf
    */
-  void Search(const Key& key, NodePtr& leaf, NodePtr& parent,
-              NodePtr& grandparent);
+  void Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
+              HazardNodePtr& grandparent);
   
   /**
    * Checks whether the given node is a leaf.
@@ -415,8 +477,11 @@ class ChromaticTree {
   bool IsBalanced() const;
   bool IsBalanced(const NodePtr& node) const;
 
-  void RemoveNode(const NodePtr& node) {
-    node_hazard_manager_.EnqueuePointerForDeletion(node);
+  void RetireHazardousNode(HazardNodePtr& node, UniqueLock& node_lock) {
+    node->Retire();
+    node_lock.Unlock();
+    NodePtr node_to_delete = node.ReleaseHazard();
+    node_hazard_manager_.EnqueuePointerForDeletion(node_to_delete);
   }
 
   /**
@@ -440,16 +505,22 @@ class ChromaticTree {
   /**
    * Next block of methods is used internally to keep the balance of the tree.
    */
-  bool Rebalance(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
-                 const NodePtr& uxxx);
-  bool OverweightLeft(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
-                      const NodePtr& uxl, const NodePtr& uxr,
-                      const NodePtr& uxxl, const NodePtr& uxxr,
-                      const bool& uxx_is_left);
-  bool OverweightRight(const NodePtr& u, const NodePtr& ux, const NodePtr& uxx,
-                       const NodePtr& uxl, const NodePtr& uxr,
-                       const NodePtr& uxxl, const NodePtr& uxxr,
-                       const bool& uxx_is_right);
+  embb_errors_t Rebalance(HazardNodePtr& u, HazardNodePtr& ux,
+                          HazardNodePtr& uxx, HazardNodePtr& uxxx);
+
+  embb_errors_t OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
+                               HazardNodePtr& ux, UniqueLock& ux_lock,
+                               HazardNodePtr& uxx, UniqueLock& uxx_lock,
+                               HazardNodePtr& uxl, HazardNodePtr& uxr,
+                               HazardNodePtr& uxxl, UniqueLock& uxxl_lock,
+                               HazardNodePtr& uxxr, bool uxx_is_left);
+
+  embb_errors_t OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
+                                HazardNodePtr& ux, UniqueLock& ux_lock,
+                                HazardNodePtr& uxx, UniqueLock& uxx_lock,
+                                HazardNodePtr& uxl, HazardNodePtr& uxr,
+                                HazardNodePtr& uxxl, HazardNodePtr& uxxr,
+                                UniqueLock& uxxr_lock, bool uxx_is_right);
 
   // The following included header contains the class methods implementing
   // tree rotations. It is generated automatically and must be included
@@ -466,7 +537,7 @@ class ChromaticTree {
   const Compare compare_;         /**< Comparator object for the keys */
   size_t        capacity_;        /**< User-requested capacity of the tree */
   NodePool      node_pool_;       /**< Comparator object for the keys */
-  NodePtr       entry_;           /**< Pointer to the sentinel node used as
+  AtomicNodePtr entry_;           /**< Pointer to the sentinel node used as
                                    *   the entry point into the tree */
 
   /**

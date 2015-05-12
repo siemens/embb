@@ -182,7 +182,9 @@ HazardPointerThreadEntry<GuardType>::~HazardPointerThreadEntry() {
 }
 
 template< typename GuardType >
-GuardType HazardPointerThreadEntry<GuardType>::GetGuard(int pos) const {
+typename HazardPointerThreadEntry<GuardType>::AtomicGuard&
+HazardPointerThreadEntry<GuardType>::GetGuard(int pos) const {
+  assert(pos >= 0 && pos < guards_per_thread);
   return guarded_pointers[pos];
 }
 
@@ -390,6 +392,12 @@ void HazardPointer< GuardType >::GuardPointer(int guardPosition,
   GuardType guardedElement) {
   GetHazardPointerElementForCurrentThread().GuardPointer(
     guardPosition, guardedElement);
+}
+
+template< typename GuardType >
+typename HazardPointer< GuardType >::AtomicGuard&
+HazardPointer< GuardType >::GetGuardedPointer(int guardPosition) {
+  return GetHazardPointerElementForCurrentThread().GetGuard(guardPosition);
 }
 
 template< typename GuardType >

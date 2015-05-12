@@ -238,6 +238,8 @@ class HazardPointerThreadEntry {
   HazardPointerThreadEntry & operator= (const HazardPointerThreadEntry&);
 
  public:
+  typedef embb::base::Atomic< GuardType > AtomicGuard;
+
   /**
    * Checks if current thread is active (with respect to participating in hazard
    * pointer management)
@@ -318,7 +320,7 @@ class HazardPointerThreadEntry {
    * Gets the guard at the specified position.
    * Positions are numbered, beginning with 0.
    */
-  GuardType GetGuard(
+  AtomicGuard& GetGuard(
     int pos
     /**< [IN] Position of the guard */) const;
 
@@ -467,6 +469,8 @@ class HazardPointer  {
              can be deleted*/);
 
  public:
+  typedef typename HazardPointerThreadEntry_t::AtomicGuard AtomicGuard;
+
   /**
    * Gets the capacity of one retired list
    *
@@ -516,6 +520,9 @@ class HazardPointer  {
    * Guards \c guardedElement with the guard at position \c guardPosition
    */
   void GuardPointer(int guardPosition, GuardType guardedElement);
+
+  AtomicGuard& GetGuardedPointer(int guardPosition);
+
   /**
    * Enqueue a pointer for deletion. It is added to the retired list and
    * deleted when no thread accesses it anymore.
