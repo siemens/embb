@@ -57,7 +57,7 @@ class ChromaticTreeNode {
    * \param[IN] left   Pointer to the left child node
    * \param[IN] right  Pointer to the right child node
    */
-  ChromaticTreeNode(const Key& key, const Value& value, const int& weight,
+  ChromaticTreeNode(const Key& key, const Value& value, const int weight,
                     ChromaticTreeNode<Key, Value>* const & left,
                     ChromaticTreeNode<Key, Value>* const & right);
   
@@ -68,7 +68,7 @@ class ChromaticTreeNode {
    * \param[IN] key    Key of the new node
    * \param[IN] value  Value of the new node
    */
-  ChromaticTreeNode(const Key& key, const Value& value);
+  ChromaticTreeNode(const Key& key, const Value& value, const int weight = 1);
   
   /**
    * Creates a copy of a given node.
@@ -97,7 +97,7 @@ class ChromaticTreeNode {
    * 
    * \return Weight of the node
    */
-  const int&   GetWeight() const;
+  int GetWeight() const;
   
   /**
    * Accessor for the left child pointer.
@@ -123,6 +123,14 @@ class ChromaticTreeNode {
 
 } // namespace internal
 
+namespace test {
+/**
+ * Forward declaration of the test class
+ */
+template<typename Tree>
+class TreeTest;
+
+} // namespace test
 
 /**
  * Chromatic balanced binary search tree
@@ -147,6 +155,15 @@ template<typename Key,
          >
 class ChromaticTree {
  public:
+  /**
+   * Exposing the \c Key template parameter back to the user
+   */
+  typedef Key   KeyType;
+  /**
+   * Exposing the \c Value template parameter back to the user
+   */
+  typedef Value ValueType;
+
   /**
    * Creates a new tree with given capacity.
    * 
@@ -447,7 +464,14 @@ class ChromaticTree {
           const NodePtr& uxl, const NodePtr& uxr);
   
   /**
+   * Friending the test class for white-box testing
+   */
+  friend class test::TreeTest<ChromaticTree<Key, Value, Compare, NodePool> >;
+
+  /**
    * Computes the hight of the subtree rooted at the given node.
+   *
+   * \notthreadsafe
    * 
    * \param[IN] node Root of the subtree for which the height is requested
    * 
@@ -456,6 +480,9 @@ class ChromaticTree {
    */
   int GetHeight(const NodePtr& node) const;
   
+  bool IsBalanced() const;
+  bool IsBalanced(const NodePtr& node) const;
+
   const Key     undefined_key_;   /**< A dummy key used by the tree */
   const Value   undefined_value_; /**< A dummy value used by the tree */
   const Compare compare_;         /**< Comparator object for the keys */

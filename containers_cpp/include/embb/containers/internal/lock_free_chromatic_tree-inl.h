@@ -36,7 +36,7 @@ namespace internal {
 
 template<typename Key, typename Value>
 ChromaticTreeNode<Key, Value>::
-ChromaticTreeNode(const Key& key, const Value& value, const int& weight,
+ChromaticTreeNode(const Key& key, const Value& value, const int weight,
                   ChromaticTreeNode<Key, Value>* const & left,
                   ChromaticTreeNode<Key, Value>* const & right)
     : key_(key),
@@ -47,10 +47,10 @@ ChromaticTreeNode(const Key& key, const Value& value, const int& weight,
 
 template<typename Key, typename Value>
 ChromaticTreeNode<Key, Value>::
-ChromaticTreeNode(const Key& key, const Value& value)
+ChromaticTreeNode(const Key& key, const Value& value, const int weight)
     : key_(key),
       value_(value),
-      weight_(1),
+      weight_(weight),
       left_(NULL),
       right_(NULL) {}
 
@@ -74,7 +74,7 @@ const Value& ChromaticTreeNode<Key, Value>::GetValue() const {
 }
 
 template<typename Key, typename Value>
-const int& ChromaticTreeNode<Key, Value>::GetWeight() const {
+int ChromaticTreeNode<Key, Value>::GetWeight() const {
   return weight_;
 }
 
@@ -150,19 +150,21 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
   NodePtr new_parent;
   bool added_violation = false;
 
-  NodePtr new_leaf = node_pool_.Allocate(key, value);
-  if (new_leaf == NULL) {
-    return false;
-  }
-
   bool keys_are_equal = !(compare_(key, leaf->GetKey()) ||
                           compare_(leaf->GetKey(), key));
   if (!IsSentinel(leaf) && keys_are_equal) {
     old_value = leaf->GetValue();
-    new_parent = new_leaf;
+    new_parent = node_pool_.Allocate(key, value, leaf->GetWeight());
+    if (new_parent == NULL) {
+      return false;
+    }
   } else {
     old_value = undefined_value_;
 
+    NodePtr new_leaf = node_pool_.Allocate(key, value);
+    if (new_leaf == NULL) {
+      return false;
+    }
     NodePtr new_sibling = node_pool_.Allocate(*leaf);
     if (new_sibling == NULL) {
       node_pool_.Free(new_leaf);
@@ -679,6 +681,34 @@ GetHeight(const NodePtr& node) const {
   return height;
 }
 
+template<typename Key, typename Value, typename Compare, typename NodePool>
+bool ChromaticTree<Key, Value, Compare, NodePool>::
+IsBalanced() const {
+  return IsBalanced(entry_->GetLeft());
+}
+
+template<typename Key, typename Value, typename Compare, typename NodePool>
+bool ChromaticTree<Key, Value, Compare, NodePool>::
+IsBalanced(const NodePtr& node) const {
+  // Overweight violation
+  bool has_violation = node->GetWeight() > 1;
+
+  if (!has_violation && !IsLeaf(node)) {
+    NodePtr left  = node->GetLeft();
+    NodePtr right = node->GetRight();
+
+    // Red-red violation
+    has_violation = node->GetWeight() == 0 &&
+                    (left->GetWeight() == 0 || right->GetWeight() == 0);
+
+    // Check children
+    if (!has_violation) {
+      has_violation = !IsBalanced(left) || !IsBalanced(right);
+    }
+  }
+
+  return !has_violation;
+}
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
 bool ChromaticTree<Key, Value, Compare, NodePool>::

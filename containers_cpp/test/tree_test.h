@@ -37,32 +37,52 @@ class TreeTest : public partest::TestCase {
   TreeTest();
 
  private:
+  typedef Tree*                             TreePtr;
+  typedef typename Tree::KeyType            Key;
+  typedef typename Tree::ValueType          Value;
+  typedef ::std::pair<Key, Value>           Element;
+  typedef ::std::vector<Element>            ElementVector;
+  typedef typename ElementVector::iterator  ElementIterator;
+
   class Worker {
    public:
-    Worker(Tree& tree, size_t thread_id, int num_elements);
-    void Run();
+    Worker(TreePtr tree, int thread_id);
+    void InsertReplaceDelete(int num_elements);
+    void PrepareElements(int num_elements);
+    void InsertAll();
+    void ReplaceHalf();
+    void DeleteAll();
+    void DeleteHalf();
 
    private:
-    Tree&  tree_;
-    size_t thread_id_;
-    int    num_elements_;
+    Worker(const Worker&);
+    Worker& operator=(const Worker&);
+
+    TreePtr       tree_;
+    int           thread_id_;
+    ElementVector elements_;
   };
 
-  typedef int Key;
-  typedef int Value;
-  typedef ::std::pair<Key, Value> Element;
-  typedef ::std::vector<Element>  ElementVector;
-  typedef ElementVector::iterator ElementIterator;
+  static const int TREE_CAPACITY = 100;
+  static const int NUM_TEST_THREADS = 4;
+  static const int NUM_ITERATIONS = 100;
 
-  static const int TREE_CAPACITY = 2000;
-  static const int NUM_TEST_THREADS = 3;
+  void TreeTestInsertDelete_Pre();
+  void TreeTestInsertDeleteSingleThread_ThreadMethod();
+  void TreeTestInsertDeleteMultiThread_ThreadMethod();
+  void TreeTestInsertDelete_Post();
+  void TreeTestConcurrentGet_Pre();
+  void TreeTestConcurrentGetMinimal_Pre();
+  void TreeTestConcurrentGet_WriterMethod();
+  void TreeTestConcurrentGet_ReaderMethod();
+  void TreeTestConcurrentGet_Post();
+  void TreeTestBalance_Pre();
+  void TreeTestBalance_ThreadMethod();
+  void TreeTestBalance_Post();
 
-  void TreeTestSingleThreadInsertDelete_Pre();
-  void TreeTestSingleThreadInsertDelete_ThreadMethod();
-  void TreeTestMultiThreadInsertDelete_ThreadMethod();
-  void TreeTestSingleThreadInsertDelete_Post();
-
-  Tree *tree_;
+  TreePtr tree_;
+  Key     bad_key_;
+  Value   bad_value_;
 };
 
 }  // namespace test
