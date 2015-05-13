@@ -66,7 +66,7 @@ typedef struct embb_thread_t {
 typedef DWORD embb_thread_id_t;
 typedef CRITICAL_SECTION embb_mutex_t;
 typedef CONDITION_VARIABLE embb_condition_t;
-typedef SRWLOCK embb_rwlock_t;
+typedef SRWLOCK embb_shared_mutex_t;
 
 #define EMBB_DURATION_MIN_NANOSECONDS 1000
 
@@ -91,7 +91,7 @@ typedef struct embb_thread_t {
 typedef pthread_t embb_thread_id_t;
 typedef pthread_mutex_t embb_mutex_t;
 typedef pthread_cond_t embb_condition_t;
-typedef pthread_rwlock_t embb_rwlock_t;
+typedef pthread_rwlock_t embb_shared_mutex_t;
 
 #define EMBB_DURATION_MIN_NANOSECONDS 1
 

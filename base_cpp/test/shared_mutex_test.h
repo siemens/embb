@@ -24,37 +24,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_BASE_C_BASE_H_
-#define EMBB_BASE_C_BASE_H_
+#ifndef BASE_CPP_TEST_SHARED_MUTEX_TEST_H_
+#define BASE_CPP_TEST_SHARED_MUTEX_TEST_H_
 
-/**
- * \defgroup C C Components
- * Components written in C.
- */
+#include <partest/partest.h>
+#include <embb/base/c/internal/platform.h>
+#include <embb/base/shared_mutex.h>
 
-/**
- * \defgroup C_BASE Base
- * \ingroup C
- * Platform-independent abstraction layer for multithreading and basic
- * operations.
- *
- * This component provides basic functionalities, mainly for creating and
- * synchronizing threads. Most of the functions are essentially wrappers for
- * functions specific to the underlying operating system.
- */
 
-#include <embb/base/c/atomic.h>
-#include <embb/base/c/condition_variable.h>
-#include <embb/base/c/core_set.h>
-#include <embb/base/c/counter.h>
-#include <embb/base/c/duration.h>
-#include <embb/base/c/errors.h>
-#include <embb/base/c/log.h>
-#include <embb/base/c/memory_allocation.h>
-#include <embb/base/c/mutex.h>
-#include <embb/base/c/thread.h>
-#include <embb/base/c/thread_specific_storage.h>
-#include <embb/base/c/time.h>
-#include <embb/base/c/shared_mutex.h>
+namespace embb {
+namespace base {
+namespace test {
 
-#endif /* EMBB_BASE_C_BASE_H_ */
+class SharedMutexTest : public partest::TestCase {
+ public:
+  SharedMutexTest();
+
+ private:
+  void TestSharedRead_ThreadMethod();
+
+  void TestExclusiveWrite_Pre();
+  void TestExclusiveWrite_ReaderMethod();
+  void TestExclusiveWrite_WriterMethod();
+  void TestExclusiveWrite_Post();
+
+  void TestSharedLock_ThreadMethod();
+
+  SharedMutex shared_mutex_;
+  size_t counter_;
+  size_t num_threads_;
+  size_t num_iterations_;
+};
+
+} // namespace test
+} // namespace base
+} // namespace embb
+
+#endif  // BASE_CPP_TEST_SHARED_MUTEX_TEST_H_

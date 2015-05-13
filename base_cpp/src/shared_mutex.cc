@@ -24,40 +24,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BASE_CPP_TEST_RWLOCK_TEST_H_
-#define BASE_CPP_TEST_RWLOCK_TEST_H_
-
-#include <partest/partest.h>
-#include <embb/base/c/internal/platform.h>
-#include <embb/base/rwlock.h>
-
+#include <embb/base/shared_mutex.h>
+#include <embb/base/c/shared_mutex.h>
 
 namespace embb {
 namespace base {
-namespace test {
 
-class RWLockTest : public partest::TestCase {
- public:
-  RWLockTest();
+SharedMutex::SharedMutex()
+    : shared_mutex_() {
+  embb_shared_mutex_init(&shared_mutex_);
+}
 
- private:
-  void TestSharedRead_Pre();
-  void TestSharedRead_ThreadMethod();
-  void TestSharedRead_Post();
+SharedMutex::~SharedMutex() {
+  embb_shared_mutex_destroy(&shared_mutex_);
+}
 
-  void TestExclusiveWrite_Pre();
-  void TestExclusiveWrite_ReaderMethod();
-  void TestExclusiveWrite_WriterMethod();
-  void TestExclusiveWrite_Post();
+void SharedMutex::Lock() {
+  embb_shared_mutex_lock(&shared_mutex_);
+}
 
-  RWLock rwlock_;
-  size_t counter_;
-  size_t num_threads_;
-  size_t num_iterations_;
-};
+bool SharedMutex::TryLock() {
+  int result = embb_shared_mutex_try_lock(&shared_mutex_);
+  return result == EMBB_SUCCESS;
+}
 
-} // namespace test
+void SharedMutex::Unlock() {
+  embb_shared_mutex_unlock(&shared_mutex_);
+}
+
+void SharedMutex::LockShared() {
+  embb_shared_mutex_lock_shared(&shared_mutex_);
+}
+
+bool SharedMutex::TryLockShared() {
+  int result = embb_shared_mutex_try_lock_shared(&shared_mutex_);
+  return result == EMBB_SUCCESS;
+}
+
+void SharedMutex::UnlockShared() {
+  embb_shared_mutex_unlock_shared(&shared_mutex_);
+}
+
 } // namespace base
 } // namespace embb
 
-#endif  // BASE_CPP_TEST_RWLOCK_TEST_H_
+
+
+

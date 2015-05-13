@@ -59,6 +59,6 @@
 #include <embb/base/thread.h>
 #include <embb/base/thread_specific_storage.h>
 #include <embb/base/time.h>
-#include <embb/base/rwlock.h>
+#include <embb/base/shared_mutex.h>
 
 #endif // EMBB_BASE_BASE_H_
