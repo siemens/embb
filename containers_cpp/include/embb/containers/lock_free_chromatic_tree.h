@@ -110,90 +110,206 @@ class ChromaticTreeNode {
    */
   AtomicChildPointer& GetRight();
 
-  void Retire() { retired_ = true; }
-  bool IsRetired() const { return retired_; }
-  embb::base::Mutex& GetMutex() { return mutex_; }
+  /**
+   * Marks node for deletion from the tree
+   */
+  void Retire();
+
+  /**
+   * Checks whether the node is marked for deletion from the tree
+   *
+   * \return \c true if node is retired, \c false otherwise
+   */
+  bool IsRetired() const;
+
+  /**
+   * Accessor for the FGL mutex
+   *
+   * \return Reference to this node's mutex
+   */
+  embb::base::Mutex& GetMutex();
 
  private:
+  /**
+   * Disable copy construction and assignment.
+   */
   ChromaticTreeNode(const ChromaticTreeNode&);
   ChromaticTreeNode& operator=(const ChromaticTreeNode&);
   
-  const Key          key_;    /**< Stored key */
-  const Value        value_;  /**< Stored value */
-  const int          weight_; /**< Weight of the node */
-  AtomicChildPointer left_;   /**< Pointer to left child node */
-  AtomicChildPointer right_;  /**< Pointer to right child node */
+  const Key                key_;    /**< Stored key */
+  const Value              value_;  /**< Stored value */
+  const int                weight_; /**< Weight of the node */
+  AtomicChildPointer       left_;   /**< Pointer to left child node */
+  AtomicChildPointer       right_;  /**< Pointer to right child node */
+  embb::base::Atomic<bool> retired_; /**< Retired (marked for deletion) flag */
 
-  embb::base::Atomic<bool> retired_;
-  embb::base::Mutex  mutex_;
+  embb::base::Mutex  mutex_; /**< Fine-grained locking tree: per node mutex */
 };
 
+/**
+ * Ownership wrapper for a hazard pointer
+ *
+ * Uses an entry of the hazard table to provide protection for a single
+ * hazardous pointer. While providing standard pointer dereference and member
+ * access operators, it requires special care for pointer assignment (realized
+ * via 'ProtectHazard' method).
+ * On destruction, it clears the wrapped hazard table entry, releasing the
+ * protected hazardous pointer (if any).
+ *
+ * \tparam GuardedType Type of the object to be protected by the hazard pointer
+ */
 template<typename GuardedType>
-class UniqueHazardGuard {
+class UniqueHazardPointer {
  public:
-  typedef embb::base::Atomic<GuardedType> AtomicGuard;
+  /**
+   * Typedef for a pointer to the guarded object.
+   */
+  typedef GuardedType*                   GuardedPtr;
+  /**
+   * Typedef for a atomic pointer to the guarded object.
+   */
+  typedef embb::base::Atomic<GuardedPtr> AtomicGuard;
 
-  UniqueHazardGuard(AtomicGuard& guard, const GuardedType& undefined_guard)
-      : guard_(guard),
-        undefined_guard_(undefined_guard),
-        active_(guard_.Load() == undefined_guard_) {}
+  /**
+   * Creates an uninitialized, empty wrapper.
+   *
+   * An uninitialized wrapper may only be swapped with another wrapper (using
+   * \c Swap() method) or checked for being active (using 'IsActive()' method,
+   * which should always return /c false for an uninitialized wrapper).
+   */
+  UniqueHazardPointer();
 
-  ~UniqueHazardGuard() {
-    if (active_) SetUndefinedGuard();
-  }
+  /**
+   * Creates a wrapper that uses the given hazard table entry (referred to as
+   * "guard") to protect hazardous pointers.
+   *
+   * \param[IN] hazard_guard Reference to a hazard table entry
+   * \param[IN] undefined_guard Dummy value used to clear the hazard table entry
+   */
+  explicit
+  UniqueHazardPointer(AtomicGuard& hazard_guard,
+                      GuardedPtr undefined_guard = NULL);
 
-  bool ProtectHazard(const AtomicGuard& hazard) {
-    // Read the hazard and store it into the guard
-    guard_ = hazard.Load();
+  /**
+   * If initialized and active, clears the hazard table entry.
+   */
+  ~UniqueHazardPointer();
 
-    // Check whether the guard is valid
-    active_ = (guard_.Load() == hazard.Load());
+  /**
+   * Tries to protect the given hazard using the wrapped hazard pointer (guard).
+   * If it succeeds, the hazard may be safely dereferenced as long as the guard
+   * is not destroyed or reset to protect another hazard.
+   *
+   * \param hazard The hazard to be protected
+   * \return \c true if the specified hazard is now protected by the guard,
+   *         \c false if the hazard was modified by a concurrent thread
+   */
+  bool ProtectHazard(const AtomicGuard& hazard);
 
-    // Clear the guard if it is invalid
-    if (!active_) SetUndefinedGuard();
+  /**
+   * Type cast operator.
+   *
+   * \return The hazardous pointer protected by this wrapper
+   */
+  operator GuardedPtr () const;
 
-    return active_;
-  }
+  /**
+   * Pointer member access operator.
+   *
+   * \return The hazardous pointer protected by this wrapper
+   */
+  GuardedPtr operator->() const;
 
-  bool IsActive() const {
-    return active_;
-  }
+  /**
+   * Pointer dereference operator.
+   *
+   * \return Reference to the object pointed to by the protected pointer
+   */
+  GuardedType& operator*() const;
 
-  operator GuardedType () const {
-    assert(active_ == true);
-    return guard_.Load();
-  }
+  /**
+   * Protects the hazard that is currently protected by another wrapper (so it
+   * becomes protected by two guards simultaneously). The other wrapper remains
+   * unmodified.
+   *
+   * \param other Another wrapper those protected pointer is to be protected by
+   *              the calling wrapper
+   */
+  void AdoptGuard(const UniqueHazardPointer<GuardedType>& other);
 
-  GuardedType operator->() const {
-    assert(active_ == true);
-    return guard_.Load();
-  }
+  /**
+   * Swaps the guard ownership with another wrapper. Swaps not just the
+   * protected hazards, but the hazard guards themselves.
+   * 
+   * \param other Another wrapper to swap guards with
+   */
+  void Swap(UniqueHazardPointer<GuardedType>& other);
 
-  void AdoptGuard(const UniqueHazardGuard<GuardedType>& other) {
-    guard_ = other.guard_.Load();
-    active_ = other.active_;
-  }
+  /**
+   * Clears the hazard guard and returns the hazard previously protected by that
+   * guard.
+   *
+   * \return The hazardous pointer previously protected by this wrapper
+   */
+  GuardedPtr ReleaseHazard();
 
-  GuardedType ReleaseHazard() {
-    assert(active_ == true);
-    GuardedType released_hazard = guard_.Load();
-    SetUndefinedGuard();
-    active_ = false;
-    return released_hazard;
-  }
+  /**
+   * Check whether the wrapper is active.
+   *
+   * \return \c true if the wrapper is initialized and currently protecting some
+   *         hazard, \c false otherwise
+   */
+  bool IsActive() const;
 
  private:
-  void SetUndefinedGuard() {
-    guard_ = undefined_guard_;
-  }
+  /**
+   * Sets the 'active' flag of this wrapper.
+   *
+   * \param active The new value for the flag
+   */
+  void SetActive(bool active);
 
-  // Non-copyable
-  UniqueHazardGuard(const UniqueHazardGuard<GuardedType>&);
-  UniqueHazardGuard<GuardedType>&
-  operator=(const UniqueHazardGuard<GuardedType>&);
+  /**
+   * Reset the wrapped hazard guard to a state when it is not protecting any
+   * hazards.
+   */
+  void ClearHazard();
 
-  AtomicGuard& guard_;
-  GuardedType  undefined_guard_;
+  /**
+   * Retrieves the hazardous pointer currently protected by the wrapped guard.
+   *
+   * \return The hazardous pointer protected by this wrapper
+   */
+  GuardedPtr LoadGuardedPointer() const;
+
+  /**
+   * Updates the wrapped guard to protect the specified hazardous pointer.
+   *
+   * \param ptr Hazardous pointer to be protected
+   */
+  void StoreGuardedPointer(GuardedPtr ptr);
+
+  /**
+   * Check whether the wrapper is initialized (i.e. it wraps some hazard guard)
+   *
+   * \return \c true if this wrapper is initialized, \c false otherwise
+   */
+  bool OwnsHazardGuard() const;
+
+  /**
+   * Disable copy construction and assignment.
+   */
+  UniqueHazardPointer(const UniqueHazardPointer&);
+  UniqueHazardPointer& operator=(const UniqueHazardPointer&);
+
+  /**
+   * Pointer to a hazard table entry (the guard) that is used to store the
+   * hazardous pointers
+   */
+  AtomicGuard* hazard_guard_;
+  /** Dummy value used to clear the hazard guard from any hazards */
+  GuardedPtr   undefined_guard_;
+  /** Flag set to true when the guard is protecting some hazardous pointer */
   bool         active_;
 };
 
@@ -318,7 +434,7 @@ class ChromaticTree {
    * \param[IN] key    Key to be removed
    * 
    * \return \c true if the given key-value pair was successfully deleted from
-   *         the tree, \c false if the tree is out of memory
+   *         the tree, \c false if there is not enough memory
    */
   bool TryDelete(const Key& key);
   
@@ -332,7 +448,7 @@ class ChromaticTree {
    *                          tree for the given key
    * 
    * \return \c true if the given key-value pair was successfully deleted from
-   *         the tree, \c false if the tree is out of memory
+   *         the tree, \c false if there is not enough memory
    */
   bool TryDelete(const Key& key, Value& old_value);
   
@@ -342,7 +458,7 @@ class ChromaticTree {
    * 
    * \return Number of key-value pairs the tree can store
    */
-  size_t       GetCapacity();
+  size_t GetCapacity() const;
   
   /**
    * Accessor for the dummy value used by the tree
@@ -356,7 +472,7 @@ class ChromaticTree {
    * 
    * \return \c true if the tree stores no key-value pairs, \c false otherwise
    */
-  bool         IsEmpty();
+  bool IsEmpty() const;
 
  private:
   /**
@@ -371,8 +487,13 @@ class ChromaticTree {
    * Typedef for an atomic pointer to a node of the tree.
    */
   typedef embb::base::Atomic<NodePtr>               AtomicNodePtr;
-
-  typedef internal::UniqueHazardGuard<NodePtr>      HazardNodePtr;
+  /**
+   * Typedef for an pointer to a node protected by a Hazard Pointer.
+   */
+  typedef internal::UniqueHazardPointer<Node>       HazardNodePtr;
+  /**
+   * Typedef for the UniqueLock class.
+   */
   typedef embb::base::UniqueLock<embb::base::Mutex> UniqueLock;
 
 
@@ -474,15 +595,30 @@ class ChromaticTree {
    */
   int GetHeight(const NodePtr& node) const;
 
+  /**
+   * Check whether the tree is currently in a balanced state (if it is a valid
+   * red-black tree).
+   *
+   * \return \c true if the tree is balanced, \c false otherwise
+   */
   bool IsBalanced() const;
+
+  /**
+   * Check whether a subtree rooted at the given node is balanced.
+   *
+   * \param[IN] node Root of the subtree for which the balance is checked
+   *
+   * \return \c true if the tree is balanced, \c false otherwise
+   */
   bool IsBalanced(const NodePtr& node) const;
 
-  void RetireHazardousNode(HazardNodePtr& node, UniqueLock& node_lock) {
-    node->Retire();
-    node_lock.Unlock();
-    NodePtr node_to_delete = node.ReleaseHazard();
-    node_hazard_manager_.EnqueuePointerForDeletion(node_to_delete);
-  }
+  /**
+   * Free a tree node using the Hazard Pointers memory reclamation routines.
+   *
+   * \param[IN] node A node to be freed.
+   * \param[IN] node_lock A lock holding the mutex of the \c node to be freed.
+   */
+  void RetireHazardousNode(HazardNodePtr& node, UniqueLock& node_lock);
 
   /**
    * Free a tree node by returning it to the node pool.

@@ -127,7 +127,8 @@ void TreeTest<Tree>::Worker::
 ReplaceHalf() {
   // Replace some of the elements that were inserted earlier
   ::std::random_shuffle(elements_.begin(), elements_.end());
-  ElementIterator elements_middle = elements_.begin() + elements_.size() / 2;
+  ElementIterator elements_middle = elements_.begin() +
+      static_cast<ptrdiff_t>(elements_.size() / 2);
   for (ElementIterator it = elements_.begin(); it != elements_middle; ++it) {
     Value old_value;
     Value expected = it->second;
@@ -166,7 +167,8 @@ void TreeTest<Tree>::Worker::
 DeleteHalf() {
   // Delete half of the elements from the tree
   ::std::random_shuffle(elements_.begin(), elements_.end());
-  ElementIterator elements_middle = elements_.begin() + elements_.size() / 2;
+  ElementIterator elements_middle = elements_.begin() +
+      static_cast<ptrdiff_t>(elements_.size() / 2);
   for (ElementIterator it = elements_.begin(); it != elements_middle; ++it) {
     Value old_value;
     Value expected = it->second;
@@ -179,6 +181,7 @@ DeleteHalf() {
 template<typename Tree>
 void TreeTest<Tree>::
 TreeTestInsertDelete_Pre() {
+  embb_internal_thread_index_reset();
   tree_ = new Tree(TREE_CAPACITY, bad_key_, bad_value_);
 }
 
@@ -220,6 +223,7 @@ TreeTestInsertDelete_Post() {
 template<typename Tree>
 void TreeTest<Tree>::
 TreeTestConcurrentGet_Pre() {
+  embb_internal_thread_index_reset();
   tree_ = new Tree(TREE_CAPACITY / 2, bad_key_, bad_value_);
 
   ElementVector elements;
@@ -242,6 +246,7 @@ TreeTestConcurrentGet_Pre() {
 template<typename Tree>
 void TreeTest<Tree>::
 TreeTestConcurrentGetMinimal_Pre() {
+  embb_internal_thread_index_reset();
   tree_ = new Tree(NUM_TEST_THREADS / 2, bad_key_, bad_value_);
 
   for (int i = 0; i < NUM_TEST_THREADS / 2; ++i) {
@@ -300,6 +305,7 @@ TreeTestConcurrentGet_Post() {
 template<typename Tree>
 void TreeTest<Tree>::
 TreeTestBalance_Pre() {
+  embb_internal_thread_index_reset();
   tree_ = new Tree(TREE_CAPACITY, bad_key_, bad_value_);
 }
 

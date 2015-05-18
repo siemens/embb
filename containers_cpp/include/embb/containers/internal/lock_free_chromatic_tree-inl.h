@@ -90,6 +90,132 @@ ChromaticTreeNode<Key, Value>::GetRight() {
   return right_;
 }
 
+template<typename Key, typename Value>
+void ChromaticTreeNode<Key, Value>::Retire() {
+  retired_ = true;
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeNode<Key, Value>::IsRetired() const {
+  return retired_;
+}
+
+template<typename Key, typename Value>
+embb::base::Mutex& ChromaticTreeNode<Key, Value>::GetMutex() {
+  return mutex_;
+}
+
+template<typename GuardedType>
+UniqueHazardPointer<GuardedType>::
+UniqueHazardPointer()
+    : hazard_guard_(NULL), undefined_guard_(NULL), active_(false) {}
+
+template<typename GuardedType>
+UniqueHazardPointer<GuardedType>::
+UniqueHazardPointer(AtomicGuard& hazard_guard, GuardedPtr undefined_guard)
+    : hazard_guard_(&hazard_guard),
+      undefined_guard_(undefined_guard),
+      active_(LoadGuardedPointer() == undefined_guard_) {}
+
+template<typename GuardedType>
+UniqueHazardPointer<GuardedType>::
+~UniqueHazardPointer() {
+  if (IsActive()) ClearHazard();
+}
+
+template<typename GuardedType>
+bool UniqueHazardPointer<GuardedType>::
+ProtectHazard(const AtomicGuard& hazard) {
+  assert(OwnsHazardGuard());
+
+  // Read the hazard and store it into the guard
+  StoreGuardedPointer(hazard.Load());
+
+  // Check whether the guard is valid
+  SetActive(LoadGuardedPointer() == hazard.Load());
+
+  // Clear the guard if it is invalid
+  if (!IsActive()) ClearHazard();
+
+  return IsActive();
+}
+
+template<typename GuardedType>
+UniqueHazardPointer<GuardedType>::operator GuardedPtr () const {
+  assert(IsActive());
+  return LoadGuardedPointer();
+}
+
+template<typename GuardedType>
+typename UniqueHazardPointer<GuardedType>::GuardedPtr
+UniqueHazardPointer<GuardedType>::operator->() const {
+  assert(IsActive());
+  return LoadGuardedPointer();
+}
+
+template<typename GuardedType>
+GuardedType& UniqueHazardPointer<GuardedType>::operator*() const {
+  assert(IsActive());
+  return *(LoadGuardedPointer());
+}
+
+template<typename GuardedType>
+void UniqueHazardPointer<GuardedType>::
+AdoptGuard(const UniqueHazardPointer<GuardedType>& other) {
+  assert(OwnsHazardGuard());
+  StoreGuardedPointer(other.LoadGuardedPointer());
+  SetActive(other.active_);
+}
+
+template<typename GuardedType>
+void UniqueHazardPointer<GuardedType>::
+Swap(UniqueHazardPointer<GuardedType>& other) {
+  std::swap(hazard_guard_, other.hazard_guard_);
+  std::swap(undefined_guard_, other.undefined_guard_);
+  std::swap(active_, other.active_);
+}
+
+template<typename GuardedType>
+typename UniqueHazardPointer<GuardedType>::GuardedPtr
+UniqueHazardPointer<GuardedType>::ReleaseHazard() {
+  assert(IsActive());
+  GuardedPtr released_hazard = LoadGuardedPointer();
+  ClearHazard();
+  SetActive(false);
+  return released_hazard;
+}
+
+template<typename GuardedType>
+bool UniqueHazardPointer<GuardedType>::IsActive() const {
+  return active_;
+}
+
+template<typename GuardedType>
+void UniqueHazardPointer<GuardedType>::SetActive(bool active) {
+  active_ = active;
+}
+
+template<typename GuardedType>
+void UniqueHazardPointer<GuardedType>::ClearHazard() {
+  StoreGuardedPointer(undefined_guard_);
+}
+
+template<typename GuardedType>
+typename UniqueHazardPointer<GuardedType>::GuardedPtr
+UniqueHazardPointer<GuardedType>::LoadGuardedPointer() const {
+  return hazard_guard_->Load();
+}
+
+template<typename GuardedType>
+void UniqueHazardPointer<GuardedType>::StoreGuardedPointer(GuardedPtr ptr) {
+  hazard_guard_->Store(ptr);
+}
+
+template<typename GuardedType>
+bool UniqueHazardPointer<GuardedType>::OwnsHazardGuard() const {
+  return hazard_guard_ != NULL;
+}
+
 } // namespace internal
 
 
@@ -314,7 +440,7 @@ TryDelete(const Key& key, Value& old_value) {
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
 size_t ChromaticTree<Key, Value, Compare, NodePool>::
-GetCapacity() {
+GetCapacity() const {
   return capacity_;
 }
 
@@ -326,8 +452,9 @@ GetUndefinedValue() {
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
 bool ChromaticTree<Key, Value, Compare, NodePool>::
-IsEmpty() {
-  return IsLeaf(entry_->GetLeft());
+IsEmpty() const {
+  NodePtr entry = entry_; //Bug: "operator->()" is not const in AtomicPointer<>
+  return IsLeaf(entry->GetLeft());
 }
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
@@ -462,6 +589,15 @@ IsBalanced(const NodePtr& node) const {
   }
 
   return !has_violation;
+}
+
+template<typename Key, typename Value, typename Compare, typename NodePool>
+void ChromaticTree<Key, Value, Compare, NodePool>::
+RetireHazardousNode(HazardNodePtr& node, UniqueLock& node_lock) {
+  node->Retire();
+  node_lock.Unlock();
+  NodePtr node_to_delete = node.ReleaseHazard();
+  node_hazard_manager_.EnqueuePointerForDeletion(node_to_delete);
 }
 
 template<typename Key, typename Value, typename Compare, typename NodePool>
