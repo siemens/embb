@@ -36,6 +36,7 @@ namespace test {
 
 TimeTest::TimeTest() {
   CreateUnit("Time in duration").Add(&TimeTest::TestTimeInDuration, this);
+  CreateUnit("Monotonicity").Add(&TimeTest::TestMonotonicity, this, 1, partest::TestSuite::GetDefaultNumIterations() * 10);
 }
 
 void TimeTest::TestTimeInDuration() {
@@ -46,6 +47,18 @@ void TimeTest::TestTimeInDuration() {
 
   status = embb_time_in(&time, embb_duration_max());
   PT_EXPECT_EQ(status, EMBB_SUCCESS);
+}
+
+void TimeTest::TestMonotonicity() {
+  embb_time_t first;
+  embb_time_t second;
+  int status1 = embb_time_in(&first, embb_duration_zero());
+  int status2 = embb_time_in(&second, embb_duration_zero());
+  PT_EXPECT_EQ(status1, EMBB_SUCCESS);
+  PT_EXPECT_EQ(status2, EMBB_SUCCESS);
+  unsigned long long first_abs = first.seconds * 1000 + first.nanoseconds / 1000000;
+  unsigned long long second_abs = second.seconds * 1000 + second.nanoseconds / 1000000;
+  PT_EXPECT_GE(second_abs, first_abs);
 }
 
 } // namespace test
