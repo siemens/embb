@@ -65,8 +65,8 @@ class AtomicPointer : public AtomicArithmetic<BaseType*, DifferenceType, S> {
   bool IsPointer() const;
 
   // The methods below are documented in atomic.h
-  BaseType* operator->();
-  BaseType& operator*();
+  BaseType* operator->() const;
+  BaseType& operator*() const;
 };
 
 template<typename BaseType, typename DifferenceType, size_t S>
@@ -93,13 +93,13 @@ inline bool AtomicPointer<BaseType, DifferenceType, S>::
 
 template<typename BaseType, typename DifferenceType, size_t S>
 inline BaseType* AtomicPointer<BaseType, DifferenceType, S>::
-  operator->() {
+  operator->() const {
   return this->Load();
 }
 
 template<typename BaseType, typename DifferenceType, size_t S>
 inline BaseType& AtomicPointer<BaseType, DifferenceType, S>::
-  operator*() {
+  operator*() const {
   return *(this->Load());
 }
 

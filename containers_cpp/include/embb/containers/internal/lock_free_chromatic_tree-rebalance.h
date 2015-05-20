@@ -29,8 +29,8 @@
 // Any direct changes will be lost after rebuild of the project.
 //
 
-#ifndef EMBB_CONTAINERS_LOCK_FREE_CHROMATIC_TREE_REBALANCE_H_
-#define EMBB_CONTAINERS_LOCK_FREE_CHROMATIC_TREE_REBALANCE_H_
+#ifndef EMBB_CONTAINERS_INTERNAL_LOCK_FREE_CHROMATIC_TREE_REBALANCE_H_
+#define EMBB_CONTAINERS_INTERNAL_LOCK_FREE_CHROMATIC_TREE_REBALANCE_H_
 
 embb_errors_t BLK(
     HazardNodePtr& u, UniqueLock& u_lock,
@@ -47,7 +47,7 @@ embb_errors_t BLK(
       uxr->GetLeft(), uxr->GetRight());
   NodePtr nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
-      HasFixedWeight(ux) ? 1 : ux->GetWeight() - 1,
+      IsSentinel(u) ? 1 : ux->GetWeight() - 1,
       nxl, nxr);
 
   if (nxl == NULL || 
@@ -88,7 +88,7 @@ embb_errors_t PUSH_L(
       uxr->GetLeft(), uxr->GetRight());
   NodePtr nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
-      HasFixedWeight(ux) ? 1 : ux->GetWeight() + 1,
+      IsSentinel(u) ? 1 : ux->GetWeight() + 1,
       nxl, nxr);
 
   if (nxl == NULL || 
@@ -129,7 +129,7 @@ embb_errors_t PUSH_R(
       uxl->GetLeft(), uxl->GetRight());
   NodePtr nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
-      HasFixedWeight(ux) ? 1 : ux->GetWeight() + 1,
+      IsSentinel(u) ? 1 : ux->GetWeight() + 1,
       nxl, nxr);
 
   if (nxr == NULL || 
@@ -938,7 +938,7 @@ embb_errors_t W7(
       uxr->GetLeft(), uxr->GetRight());
   NodePtr nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
-      HasFixedWeight(ux) ? 1 : ux->GetWeight() + 1,
+      IsSentinel(u) ? 1 : ux->GetWeight() + 1,
       nxl, nxr);
 
   if (nxl == NULL || 
@@ -964,4 +964,4 @@ embb_errors_t W7(
   return EMBB_SUCCESS;
 }
 
-#endif // EMBB_CONTAINERS_LOCK_FREE_CHROMATIC_TREE_REBALANCE_H_
+#endif // EMBB_CONTAINERS_INTERNAL_LOCK_FREE_CHROMATIC_TREE_REBALANCE_H_

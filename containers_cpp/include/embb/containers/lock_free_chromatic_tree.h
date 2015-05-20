@@ -540,15 +540,6 @@ class ChromaticTree {
   bool IsSentinel(const NodePtr& node) const;
   
   /**
-   * Checks whether the given node has to maintain the constant weight of \c 1.
-   * 
-   * \param[IN] node Node to be checked
-   * 
-   * \return \c true if the given node has constant weight, \c false otherwise
-   */
-  bool HasFixedWeight(const NodePtr& node) const;
-  
-  /**
    * Checks whether the given node has a specified child node.
    * 
    * \param[IN] parent Parent node
@@ -673,7 +664,7 @@ class ChromaticTree {
   const Compare compare_;         /**< Comparator object for the keys */
   size_t        capacity_;        /**< User-requested capacity of the tree */
   NodePool      node_pool_;       /**< Comparator object for the keys */
-  AtomicNodePtr entry_;           /**< Pointer to the sentinel node used as
+  const AtomicNodePtr entry_;     /**< Pointer to the sentinel node used as
                                    *   the entry point into the tree */
 
   /**
