@@ -439,11 +439,11 @@ class UniqueLock {
   void Unlock();
 
   /**
-   * Transfers ownership of a mutex to this lock.
+   * Exchanges ownership of the wrapped mutexes with another lock.
    */
   void Swap(
     UniqueLock<Mutex>& other
-    /**< [IN/OUT] Lock from which ownership shall be transferred */
+    /**< [IN/OUT] The lock to exchange ownership with */
     );
 
   /**
