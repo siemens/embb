@@ -439,7 +439,7 @@ class UniqueLock {
   void Unlock();
 
   /**
-   * Exchanges ownership of the wrapped mutexes with another lock.
+   * Exchanges ownership of the wrapped mutex with another lock.
    */
   void Swap(
     UniqueLock<Mutex>& other
