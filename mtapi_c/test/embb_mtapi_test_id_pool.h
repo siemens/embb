@@ -24,34 +24,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MTAPI_C_TEST_EMBB_MTAPI_TEST_ID_POOL_H_
+#define MTAPI_C_TEST_EMBB_MTAPI_TEST_ID_POOL_H_
+
 #include <partest/partest.h>
-#include <embb/base/c/thread.h>
+#include <embb_mtapi_id_pool_t.h>
 
-#include <stdio.h>
+// for shuffling a vector
+#include <algorithm>
 
-#include <embb_mtapi_log.h>
+#define ID_POOL_SIZE_1 100
+#define CONCURRENT_ACCESSORS_ID_POOL_2 10
+#define ID_ELEMENTS_PER_ACCESSOR 10
 
-#include <embb_mtapi_test_plugin.h>
-#include <embb_mtapi_test_init_finalize.h>
-#include <embb_mtapi_test_task.h>
-#include <embb_mtapi_test_group.h>
-#include <embb_mtapi_test_queue.h>
-#include <embb_mtapi_test_error.h>
-#include <embb_mtapi_test_id_pool.h>
+class IdPoolTest : public partest::TestCase {
+public:
+  embb_mtapi_id_pool_t id_pool;
+  embb_mtapi_id_pool_t id_pool_parallel;
 
-#include <embb/base/c/memory_allocation.h>
+  IdPoolTest();
 
-PT_MAIN("MTAPI C") {
-  embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
-  embb_thread_set_max_count(1024);
+private:
+  void TestParallel();
+  void TestParallelPre();
+  void TestParallelPost();
 
-  PT_RUN(TaskTest);
-  PT_RUN(PluginTest);
-  PT_RUN(ErrorTest);
-  PT_RUN(InitFinalizeTest);
-  PT_RUN(GroupTest);
-  PT_RUN(QueueTest);
-  PT_RUN(IdPoolTest);
-  
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
-}
+  void TestBasic();
+  void TestBasicPre();
+  void TestBasicPost();
+
+  static void TestAllocateDeallocateNElementsFromPool(
+    embb_mtapi_id_pool_t &pool,
+    int count_elements, 
+    bool empty_check = false);
+};
+
+#endif // MTAPI_C_TEST_EMBB_MTAPI_TEST_ID_POOL_H_
