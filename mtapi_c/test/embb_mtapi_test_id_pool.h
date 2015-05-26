@@ -33,22 +33,39 @@
 // for shuffling a vector
 #include <algorithm>
 
-#define ID_POOL_SIZE_1 100
-#define CONCURRENT_ACCESSORS_ID_POOL_2 10
-#define ID_ELEMENTS_PER_ACCESSOR 10
-
 class IdPoolTest : public partest::TestCase {
-public:
+ public:
   embb_mtapi_id_pool_t id_pool;
   embb_mtapi_id_pool_t id_pool_parallel;
 
   IdPoolTest();
 
-private:
+ private:
+
+  static const unsigned int id_pool_size_1 = 100;
+  static const unsigned int concurrent_accessors_id_pool_2 = 10;
+  static const unsigned int id_elements_per_accessor = 10;
+  
+  /**  
+   * We create a pool of size number_accessors*elements_per_accessor, so
+   * at each time we can guarantee each thread to be able to allocate 
+   * elements_per_accessor elements.
+   * We create number_accessor threads, where each thread iteratively 
+   * allocates and frees elements_per_accessor elements, which in each case
+   * has to be successful. Additionally, the sanity checks from the basic tests
+   * are repeated. The TestParallelPost function also repeats all
+   * sequential tests.
+   */
   void TestParallel();
   void TestParallelPre();
   void TestParallelPost();
 
+  /**
+   * Create a pool of size N. We repeatedly allocate and free N elements, check
+   * if the pool always returns disjunctive ids and check that the pool never
+   * returns the invalid element, if the pool is not empty. Check that the 
+   * invalid element is returned if the pool is empty.
+   */
   void TestBasic();
   void TestBasicPre();
   void TestBasicPost();
