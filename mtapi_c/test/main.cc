@@ -52,6 +52,6 @@ PT_MAIN("MTAPI C") {
   PT_RUN(GroupTest);
   PT_RUN(QueueTest);
   PT_RUN(IdPoolTest);
-  
+
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

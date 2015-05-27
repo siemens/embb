@@ -44,7 +44,7 @@ class IdPoolTest : public partest::TestCase {
   static const unsigned int id_pool_size_1 = 100;
   static const unsigned int concurrent_accessors_id_pool_2 = 10;
   static const unsigned int id_elements_per_accessor = 10;
- 
+
   /**  
    * We create a pool of size number_accessors*elements_per_accessor, so
    * at each time we can guarantee each thread to be able to allocate 

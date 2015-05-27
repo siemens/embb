@@ -59,7 +59,7 @@ void IdPoolTest::TestParallelPost() {
   // elements sequentially.
   TestAllocateDeallocateNElementsFromPool(id_pool_parallel,
     concurrent_accessors_id_pool_2*id_elements_per_accessor, true);
- 
+
   // finalize pool
   embb_mtapi_id_pool_finalize(&id_pool_parallel);
 }
