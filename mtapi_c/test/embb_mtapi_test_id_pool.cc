@@ -25,6 +25,7 @@
  */
 
 #include <embb_mtapi_test_id_pool.h>
+#include <vector>
 
 IdPoolTest::IdPoolTest() {
   CreateUnit("mtapi id pool test single threaded").
@@ -58,7 +59,7 @@ void IdPoolTest::TestParallelPost() {
   // elements sequentially.
   TestAllocateDeallocateNElementsFromPool(id_pool_parallel,
     concurrent_accessors_id_pool_2*id_elements_per_accessor, true);
-  
+ 
   // finalize pool
   embb_mtapi_id_pool_finalize(&id_pool_parallel);
 }
@@ -79,7 +80,7 @@ void IdPoolTest::TestBasicPost() {
 
 void IdPoolTest::TestAllocateDeallocateNElementsFromPool(
   embb_mtapi_id_pool_t &pool,
-  int count_elements, 
+  int count_elements,
   bool empty_check) {
   std::vector<unsigned int> allocated;
 
@@ -112,7 +113,7 @@ void IdPoolTest::TestAllocateDeallocateNElementsFromPool(
   ::std::random_shuffle(allocated.begin(), allocated.end());
 
   for (int i = 0; i != count_elements; ++i) {
-    embb_mtapi_id_pool_deallocate(&pool, 
+    embb_mtapi_id_pool_deallocate(&pool,
       allocated[static_cast<unsigned int>(i)]);
   }
 }
