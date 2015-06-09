@@ -97,7 +97,7 @@ void HazardPointerTest::HazardPointerTest1_ThreadMethod() {
 
     PT_ASSERT(success == true);
 
-    embb::base::Atomic<int>* allocated_object_from_different_thread(NULL);
+    embb::base::Atomic<int>* allocated_object_from_different_thread(0);
 
     int diff_count = 0;
 
