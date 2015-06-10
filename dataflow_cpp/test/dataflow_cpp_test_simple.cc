@@ -39,7 +39,7 @@
 #define NUM_SLICES 8
 #define TEST_COUNT 12
 
-typedef embb::dataflow::Network<8> MyNetwork;
+typedef embb::dataflow::Network<NUM_SLICES> MyNetwork;
 typedef MyNetwork::ConstantSource< int > MyConstantSource;
 typedef MyNetwork::Source< int > MySource;
 typedef MyNetwork::SerialProcess< MyNetwork::Inputs<int>::Type,
