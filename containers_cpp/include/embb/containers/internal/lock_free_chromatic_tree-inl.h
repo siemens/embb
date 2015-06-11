@@ -44,8 +44,8 @@ namespace internal {
 
 template<typename Key, typename Value>
 ChromaticTreeNode<Key, Value>::
-ChromaticTreeNode(const Key& key, const Value& value, const int weight,
-                  const ChildPointer& left, const ChildPointer& right)
+ChromaticTreeNode(const Key& key, const Value& value, int weight,
+                  Node* left, Node* right)
     : key_(key),
       value_(value),
       weight_(weight),
@@ -55,7 +55,7 @@ ChromaticTreeNode(const Key& key, const Value& value, const int weight,
 
 template<typename Key, typename Value>
 ChromaticTreeNode<Key, Value>::
-ChromaticTreeNode(const Key& key, const Value& value, const int weight)
+ChromaticTreeNode(const Key& key, const Value& value, int weight)
     : key_(key),
       value_(value),
       weight_(weight),
@@ -79,15 +79,41 @@ int ChromaticTreeNode<Key, Value>::GetWeight() const {
 }
 
 template<typename Key, typename Value>
-typename ChromaticTreeNode<Key, Value>::AtomicChildPointer&
+typename ChromaticTreeNode<Key, Value>::AtomicNodePtr&
 ChromaticTreeNode<Key, Value>::GetLeft() {
   return left_;
 }
 
 template<typename Key, typename Value>
-typename ChromaticTreeNode<Key, Value>::AtomicChildPointer&
+typename ChromaticTreeNode<Key, Value>::Node*
+ChromaticTreeNode<Key, Value>::GetLeft() const {
+  return left_.Load();
+}
+
+template<typename Key, typename Value>
+typename ChromaticTreeNode<Key, Value>::AtomicNodePtr&
 ChromaticTreeNode<Key, Value>::GetRight() {
   return right_;
+}
+
+template<typename Key, typename Value>
+typename ChromaticTreeNode<Key, Value>::Node*
+ChromaticTreeNode<Key, Value>::GetRight() const {
+  return right_.Load();
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeNode<Key, Value>::
+ReplaceChild(Node* old_child, Node* new_child) {
+  bool replaced = false;
+
+  if (left_ == old_child) {
+    replaced = left_.CompareAndSwap(old_child, new_child);
+  } else if (right_ == old_child) {
+    replaced = right_.CompareAndSwap(old_child, new_child);
+  }
+
+  return replaced;
 }
 
 template<typename Key, typename Value>
@@ -105,133 +131,23 @@ embb::base::Mutex& ChromaticTreeNode<Key, Value>::GetMutex() {
   return mutex_;
 }
 
-template<typename GuardedType>
-UniqueHazardPointer<GuardedType>::
-UniqueHazardPointer()
-    : hazard_guard_(NULL), undefined_guard_(NULL), active_(false) {}
-
-template<typename GuardedType>
-UniqueHazardPointer<GuardedType>::
-UniqueHazardPointer(AtomicGuard& hazard_guard, GuardedPtr undefined_guard)
-    : hazard_guard_(&hazard_guard),
-      undefined_guard_(undefined_guard),
-      active_(LoadGuardedPointer() == undefined_guard_) {}
-
-template<typename GuardedType>
-UniqueHazardPointer<GuardedType>::
-~UniqueHazardPointer() {
-  if (IsActive()) ClearHazard();
-}
-
-template<typename GuardedType>
-bool UniqueHazardPointer<GuardedType>::
-ProtectHazard(const AtomicGuard& hazard) {
-  assert(OwnsHazardGuard());
-
-  // Read the hazard and store it into the guard
-  StoreGuardedPointer(hazard.Load());
-
-  // Check whether the guard is valid
-  SetActive(LoadGuardedPointer() == hazard.Load());
-
-  // Clear the guard if it is invalid
-  if (!IsActive()) ClearHazard();
-
-  return IsActive();
-}
-
-template<typename GuardedType>
-UniqueHazardPointer<GuardedType>::operator GuardedPtr () const {
-  assert(IsActive());
-  return LoadGuardedPointer();
-}
-
-template<typename GuardedType>
-typename UniqueHazardPointer<GuardedType>::GuardedPtr
-UniqueHazardPointer<GuardedType>::operator->() const {
-  assert(IsActive());
-  return LoadGuardedPointer();
-}
-
-template<typename GuardedType>
-GuardedType& UniqueHazardPointer<GuardedType>::operator*() const {
-  assert(IsActive());
-  return *(LoadGuardedPointer());
-}
-
-template<typename GuardedType>
-void UniqueHazardPointer<GuardedType>::
-AdoptGuard(const UniqueHazardPointer<GuardedType>& other) {
-  assert(OwnsHazardGuard());
-  StoreGuardedPointer(other.LoadGuardedPointer());
-  SetActive(other.active_);
-}
-
-template<typename GuardedType>
-void UniqueHazardPointer<GuardedType>::
-Swap(UniqueHazardPointer<GuardedType>& other) {
-  std::swap(hazard_guard_, other.hazard_guard_);
-  std::swap(undefined_guard_, other.undefined_guard_);
-  std::swap(active_, other.active_);
-}
-
-template<typename GuardedType>
-typename UniqueHazardPointer<GuardedType>::GuardedPtr
-UniqueHazardPointer<GuardedType>::ReleaseHazard() {
-  assert(IsActive());
-  GuardedPtr released_hazard = LoadGuardedPointer();
-  ClearHazard();
-  SetActive(false);
-  return released_hazard;
-}
-
-template<typename GuardedType>
-bool UniqueHazardPointer<GuardedType>::IsActive() const {
-  return active_;
-}
-
-template<typename GuardedType>
-void UniqueHazardPointer<GuardedType>::SetActive(bool active) {
-  active_ = active;
-}
-
-template<typename GuardedType>
-void UniqueHazardPointer<GuardedType>::ClearHazard() {
-  StoreGuardedPointer(undefined_guard_);
-}
-
-template<typename GuardedType>
-typename UniqueHazardPointer<GuardedType>::GuardedPtr
-UniqueHazardPointer<GuardedType>::LoadGuardedPointer() const {
-  return hazard_guard_->Load();
-}
-
-template<typename GuardedType>
-void UniqueHazardPointer<GuardedType>::StoreGuardedPointer(GuardedPtr ptr) {
-  hazard_guard_->Store(ptr);
-}
-
-template<typename GuardedType>
-bool UniqueHazardPointer<GuardedType>::OwnsHazardGuard() const {
-  return hazard_guard_ != NULL;
-}
-
 } // namespace internal
 
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+ChromaticTree<Key, Value, Compare, ValuePool>::
 ChromaticTree(size_t capacity, Key undefined_key, Value undefined_value,
               Compare compare)
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
-    :  free_node_callback_(*this, &ChromaticTree::FreeNode),
+    : node_hazard_manager_(
+          embb::base::Function<void, Node*>(*this, &ChromaticTree::FreeNode),
+          NULL, 10),
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-      node_hazard_manager_(free_node_callback_, NULL, 10),
       undefined_key_(undefined_key),
       undefined_value_(undefined_value),
       compare_(compare),
@@ -242,20 +158,20 @@ ChromaticTree(size_t capacity, Key undefined_key, Value undefined_value,
       entry_(node_pool_.Allocate(undefined_key_, undefined_value_, 1,
                                  node_pool_.Allocate(undefined_key_,
                                                      undefined_value_),
-                                 static_cast<NodePtr>(NULL))) {
+                                 static_cast<Node*>(NULL))) {
   assert(entry_ != NULL);
-  assert(entry_->GetLeft().Load() != NULL);
+  assert(entry_->GetLeft() != NULL);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+ChromaticTree<Key, Value, Compare, ValuePool>::
 ~ChromaticTree() {
   Destruct(entry_->GetLeft());
   FreeNode(entry_);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 Get(const Key& key, Value& value) {
   HazardNodePtr parent(node_hazard_manager_.GetGuardedPointer(0));
   HazardNodePtr leaf  (node_hazard_manager_.GetGuardedPointer(1));
@@ -272,19 +188,19 @@ Get(const Key& key, Value& value) {
   return keys_are_equal;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 TryInsert(const Key& key, const Value& value) {
   Value old_value;
   return TryInsert(key, value, old_value);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 TryInsert(const Key& key, const Value& value, Value& old_value) {
-  NodePtr new_leaf = NULL;
-  NodePtr new_sibling = NULL;
-  NodePtr new_parent = NULL;
+  Node* new_leaf = NULL;
+  Node* new_sibling = NULL;
+  Node* new_parent = NULL;
   bool insertion_succeeded = false;
   bool added_violation = false;
 
@@ -330,9 +246,7 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
       if (new_parent == NULL) break;
     }
 
-    NodePtr expected = leaf;
-    insertion_succeeded = GetPointerToChild(parent, leaf)
-                              .CompareAndSwap(expected, new_parent);
+    insertion_succeeded = parent->ReplaceChild(leaf, new_parent);
     assert(insertion_succeeded); // For now (FGL tree) this CAS may not fail
     if (!insertion_succeeded) continue;
 
@@ -353,17 +267,17 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
   return insertion_succeeded;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 TryDelete(const Key& key) {
   Value old_value;
   return TryDelete(key, old_value);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 TryDelete(const Key& key, Value& old_value) {
-  NodePtr new_leaf = NULL;
+  Node* new_leaf = NULL;
   bool deletion_succeeded = false;
   bool added_violation = false;
 
@@ -396,7 +310,7 @@ TryDelete(const Key& key, Value& old_value) {
     sibling.ProtectHazard((parent->GetLeft() == leaf) ?
                           parent->GetRight() : parent->GetLeft());
     if (parent->IsRetired() || !sibling.IsActive()) continue;
-    VERIFY_ADDRESS(static_cast<NodePtr>(sibling));
+    VERIFY_ADDRESS(static_cast<Node*>(sibling));
 
     // Verify that the leaf is still the parent's child
     if (!HasChild(parent, leaf)) continue;
@@ -419,9 +333,7 @@ TryDelete(const Key& key, Value& old_value) {
 
     old_value = leaf->GetValue();
 
-    NodePtr expected = parent;
-    deletion_succeeded = GetPointerToChild(grandparent, parent)
-                             .CompareAndSwap(expected, new_leaf);
+    deletion_succeeded = grandparent->ReplaceChild(parent, new_leaf);
     assert(deletion_succeeded); // For now (FGL tree) this CAS may not fail
     if (!deletion_succeeded) continue;
 
@@ -441,31 +353,31 @@ TryDelete(const Key& key, Value& old_value) {
   return deletion_succeeded;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-size_t ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+size_t ChromaticTree<Key, Value, Compare, ValuePool>::
 GetCapacity() const {
   return capacity_;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-const Value& ChromaticTree<Key, Value, Compare, NodePool>::
-GetUndefinedValue() {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+const Value& ChromaticTree<Key, Value, Compare, ValuePool>::
+GetUndefinedValue() const {
   return undefined_value_;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 IsEmpty() const {
   return IsLeaf(entry_->GetLeft());
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-void ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+void ChromaticTree<Key, Value, Compare, ValuePool>::
 Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent) {
   bool reached_leaf = false;
 
   while (!reached_leaf) {
-    parent.ProtectHazard(entry_);
+    parent.ProtectSafe(entry_);
     leaf.ProtectHazard(entry_->GetLeft());
     if (parent->IsRetired() || !leaf.IsActive()) continue;
 
@@ -475,22 +387,22 @@ Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent) {
       leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
                          leaf->GetLeft() : leaf->GetRight());
       if (parent->IsRetired() || !leaf.IsActive()) break;
-      VERIFY_ADDRESS(static_cast<NodePtr>(leaf));
+      VERIFY_ADDRESS(static_cast<Node*>(leaf));
 
       reached_leaf = IsLeaf(leaf);
     }
   }
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-void ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+void ChromaticTree<Key, Value, Compare, ValuePool>::
 Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
        HazardNodePtr& grandparent) {
   bool reached_leaf = false;
 
   while (!reached_leaf) {
-    grandparent.ProtectHazard(entry_);
-    parent.ProtectHazard(entry_);
+    grandparent.ProtectSafe(entry_);
+    parent.ProtectSafe(entry_);
     leaf.ProtectHazard(entry_->GetLeft());
     if (parent->IsRetired() || !leaf.IsActive()) continue;
 
@@ -501,42 +413,34 @@ Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
       leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
                          leaf->GetLeft() : leaf->GetRight());
       if (parent->IsRetired() || !leaf.IsActive()) break;
-      VERIFY_ADDRESS(static_cast<NodePtr>(leaf));
+      VERIFY_ADDRESS(static_cast<Node*>(leaf));
 
       reached_leaf = IsLeaf(leaf);
     }
   }
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
-IsLeaf(const NodePtr& node) const {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
+IsLeaf(const Node* node) const {
   return node->GetLeft() == NULL;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
-IsSentinel(const NodePtr& node) const {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
+IsSentinel(const Node* node) const {
   return (node == entry_) || (node == entry_->GetLeft());
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
-HasChild(const NodePtr& parent, const NodePtr& child) const {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
+HasChild(const Node* parent, const Node* child) const {
   return (parent->GetLeft() == child || parent->GetRight() == child);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-typename ChromaticTree<Key, Value, Compare, NodePool>::AtomicNodePtr&
-ChromaticTree<Key, Value, Compare, NodePool>::
-GetPointerToChild(const NodePtr& parent, const NodePtr& child) const {
-  assert(HasChild(parent, child));
-  return (parent->GetLeft() == child) ? parent->GetLeft() : parent->GetRight();
-}
-
-template<typename Key, typename Value, typename Compare, typename NodePool>
-void ChromaticTree<Key, Value, Compare, NodePool>::
-Destruct(const NodePtr& node) {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+void ChromaticTree<Key, Value, Compare, ValuePool>::
+Destruct(Node* node) {
   if (!IsLeaf(node)) {
     Destruct(node->GetLeft());
     Destruct(node->GetRight());
@@ -544,9 +448,9 @@ Destruct(const NodePtr& node) {
   FreeNode(node);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-int ChromaticTree<Key, Value, Compare, NodePool>::
-GetHeight(const NodePtr& node) const {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+int ChromaticTree<Key, Value, Compare, ValuePool>::
+GetHeight(const Node* node) const {
   int height = 0;
   if (node != NULL) {
     height = 1 + ::std::max(GetHeight(node->GetLeft()),
@@ -555,21 +459,21 @@ GetHeight(const NodePtr& node) const {
   return height;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 IsBalanced() const {
   return IsBalanced(entry_->GetLeft());
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
-IsBalanced(const NodePtr& node) const {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
+IsBalanced(const Node* node) const {
   // Overweight violation
   bool has_violation = node->GetWeight() > 1;
 
   if (!has_violation && !IsLeaf(node)) {
-    NodePtr left  = node->GetLeft();
-    NodePtr right = node->GetRight();
+    const Node* left  = node->GetLeft();
+    const Node* right = node->GetRight();
 
     // Red-red violation
     has_violation = node->GetWeight() == 0 &&
@@ -584,27 +488,27 @@ IsBalanced(const NodePtr& node) const {
   return !has_violation;
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-void ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+void ChromaticTree<Key, Value, Compare, ValuePool>::
 RetireHazardousNode(HazardNodePtr& node, UniqueLock& node_lock) {
   node->Retire();
   node_lock.Unlock();
-  NodePtr node_to_delete = node.ReleaseHazard();
+  Node* node_to_delete = node.ReleaseHazard();
   node_hazard_manager_.EnqueuePointerForDeletion(node_to_delete);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-void ChromaticTree<Key, Value, Compare, NodePool>::
-FreeNode(NodePtr node) {
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+void ChromaticTree<Key, Value, Compare, ValuePool>::
+FreeNode(Node* node) {
 #ifdef EMBB_DEBUG
-  node->GetLeft()  = reinterpret_cast<NodePtr>(INVALID_POINTER);
-  node->GetRight() = reinterpret_cast<NodePtr>(INVALID_POINTER);
+  node->GetLeft()  = reinterpret_cast<Node*>(INVALID_POINTER);
+  node->GetRight() = reinterpret_cast<Node*>(INVALID_POINTER);
 #endif
   node_pool_.Free(node);
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-bool ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
 CleanUp(const Key& key) {
   HazardNodePtr grandgrandparent(node_hazard_manager_.GetGuardedPointer(0));
   HazardNodePtr grandparent     (node_hazard_manager_.GetGuardedPointer(1));
@@ -615,9 +519,9 @@ CleanUp(const Key& key) {
   while (!reached_leaf) {
     bool found_violation = false;
 
-    grandgrandparent.ProtectHazard(entry_);
-    grandparent.ProtectHazard(entry_);
-    parent.ProtectHazard(entry_);
+    grandgrandparent.ProtectSafe(entry_);
+    grandparent.ProtectSafe(entry_);
+    parent.ProtectSafe(entry_);
     leaf.ProtectHazard(entry_->GetLeft());
     if (parent->IsRetired() || !leaf.IsActive()) continue;
 
@@ -629,7 +533,7 @@ CleanUp(const Key& key) {
       leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
                          leaf->GetLeft() : leaf->GetRight());
       if (parent->IsRetired() || !leaf.IsActive()) break;
-      VERIFY_ADDRESS(static_cast<NodePtr>(leaf));
+      VERIFY_ADDRESS(static_cast<Node*>(leaf));
 
       found_violation = (leaf->GetWeight() > 1) ||
                         (leaf->GetWeight() == 0 && parent->GetWeight() == 0);
@@ -659,10 +563,10 @@ CleanUp(const Key& key) {
     HazardNodePtr node(node_hazard_manager_.GetGuardedPointer(h_num)); \
     node.ProtectHazard(parent->method()); \
     if (parent->IsRetired() || !node.IsActive()) return EMBB_BUSY; \
-    VERIFY_ADDRESS(static_cast<NodePtr>(node))
+    VERIFY_ADDRESS(static_cast<Node*>(node))
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-embb_errors_t ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+embb_errors_t ChromaticTree<Key, Value, Compare, ValuePool>::
 Rebalance(HazardNodePtr& u, HazardNodePtr& ux, HazardNodePtr& uxx,
           HazardNodePtr& uxxx) {
   // Protect node 'u'
@@ -730,8 +634,8 @@ Rebalance(HazardNodePtr& u, HazardNodePtr& ux, HazardNodePtr& uxx,
   }
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-embb_errors_t ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+embb_errors_t ChromaticTree<Key, Value, Compare, ValuePool>::
 OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
                HazardNodePtr& ux, UniqueLock& ux_lock,
                HazardNodePtr& uxx, UniqueLock& uxx_lock,
@@ -876,8 +780,8 @@ OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
   }
 }
 
-template<typename Key, typename Value, typename Compare, typename NodePool>
-embb_errors_t ChromaticTree<Key, Value, Compare, NodePool>::
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+embb_errors_t ChromaticTree<Key, Value, Compare, ValuePool>::
 OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
                 HazardNodePtr& ux, UniqueLock& ux_lock,
                 HazardNodePtr& uxx, UniqueLock& uxx_lock,

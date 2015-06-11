@@ -37,15 +37,15 @@ embb_errors_t BLK(
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock) {
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       IsSentinel(u) ? 1 : ux->GetWeight() - 1,
       nxl, nxr);
@@ -59,9 +59,7 @@ embb_errors_t BLK(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -78,15 +76,15 @@ embb_errors_t PUSH_L(
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock) {
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       0,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       IsSentinel(u) ? 1 : ux->GetWeight() + 1,
       nxl, nxr);
@@ -100,9 +98,7 @@ embb_errors_t PUSH_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -119,15 +115,15 @@ embb_errors_t PUSH_R(
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock) {
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       0,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       IsSentinel(u) ? 1 : ux->GetWeight() + 1,
       nxl, nxr);
@@ -141,9 +137,7 @@ embb_errors_t PUSH_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -159,11 +153,11 @@ embb_errors_t RB1_L(
     HazardNodePtr& u, UniqueLock& u_lock,
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxl, UniqueLock& uxl_lock) {
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       0,
       uxl->GetRight(), ux->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       ux->GetWeight(),
       uxl->GetLeft(), nxr);
@@ -175,9 +169,7 @@ embb_errors_t RB1_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -192,11 +184,11 @@ embb_errors_t RB1_R(
     HazardNodePtr& u, UniqueLock& u_lock,
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock) {
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       0,
       ux->GetLeft(), uxr->GetLeft());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       ux->GetWeight(),
       nxl, uxr->GetRight());
@@ -208,9 +200,7 @@ embb_errors_t RB1_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -226,15 +216,15 @@ embb_errors_t RB2_L(
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxlr, UniqueLock& uxlr_lock) {
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       0,
       uxl->GetLeft(), uxlr->GetLeft());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       0,
       uxlr->GetRight(), ux->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxlr->GetKey(), uxlr->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -248,9 +238,7 @@ embb_errors_t RB2_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -267,15 +255,15 @@ embb_errors_t RB2_R(
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxrl, UniqueLock& uxrl_lock) {
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       0,
       uxrl->GetRight(), uxr->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       0,
       ux->GetLeft(), uxrl->GetLeft());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxrl->GetKey(), uxrl->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -289,9 +277,7 @@ embb_errors_t RB2_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -309,19 +295,19 @@ embb_errors_t W1_L(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxrl, UniqueLock& uxrl_lock) {
-  NodePtr nxll = node_pool_.Allocate(
+  Node* nxll = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxlr = node_pool_.Allocate(
+  Node* nxlr = node_pool_.Allocate(
       uxrl->GetKey(), uxrl->GetValue(),
       uxrl->GetWeight() - 1,
       uxrl->GetLeft(), uxrl->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxll, nxlr);
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       ux->GetWeight(),
       nxl, uxr->GetRight());
@@ -337,9 +323,7 @@ embb_errors_t W1_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -358,19 +342,19 @@ embb_errors_t W1_R(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxlr, UniqueLock& uxlr_lock) {
-  NodePtr nxrr = node_pool_.Allocate(
+  Node* nxrr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nxrl = node_pool_.Allocate(
+  Node* nxrl = node_pool_.Allocate(
       uxlr->GetKey(), uxlr->GetValue(),
       uxlr->GetWeight() - 1,
       uxlr->GetLeft(), uxlr->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxrl, nxrr);
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       ux->GetWeight(),
       uxl->GetLeft(), nxr);
@@ -386,9 +370,7 @@ embb_errors_t W1_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -407,19 +389,19 @@ embb_errors_t W2_L(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxrl, UniqueLock& uxrl_lock) {
-  NodePtr nxll = node_pool_.Allocate(
+  Node* nxll = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxlr = node_pool_.Allocate(
+  Node* nxlr = node_pool_.Allocate(
       uxrl->GetKey(), uxrl->GetValue(),
       0,
       uxrl->GetLeft(), uxrl->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxll, nxlr);
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       ux->GetWeight(),
       nxl, uxr->GetRight());
@@ -435,9 +417,7 @@ embb_errors_t W2_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -456,19 +436,19 @@ embb_errors_t W2_R(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxlr, UniqueLock& uxlr_lock) {
-  NodePtr nxrr = node_pool_.Allocate(
+  Node* nxrr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nxrl = node_pool_.Allocate(
+  Node* nxrl = node_pool_.Allocate(
       uxlr->GetKey(), uxlr->GetValue(),
       0,
       uxlr->GetLeft(), uxlr->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxrl, nxrr);
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       ux->GetWeight(),
       uxl->GetLeft(), nxr);
@@ -484,9 +464,7 @@ embb_errors_t W2_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -506,23 +484,23 @@ embb_errors_t W3_L(
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxrl, UniqueLock& uxrl_lock,
     HazardNodePtr& uxrll, UniqueLock& uxrll_lock) {
-  NodePtr nxlll = node_pool_.Allocate(
+  Node* nxlll = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxll = node_pool_.Allocate(
+  Node* nxll = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxlll, uxrll->GetLeft());
-  NodePtr nxlr = node_pool_.Allocate(
+  Node* nxlr = node_pool_.Allocate(
       uxrl->GetKey(), uxrl->GetValue(),
       1,
       uxrll->GetRight(), uxrl->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxrll->GetKey(), uxrll->GetValue(),
       0,
       nxll, nxlr);
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       ux->GetWeight(),
       nxl, uxr->GetRight());
@@ -540,9 +518,7 @@ embb_errors_t W3_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -563,23 +539,23 @@ embb_errors_t W3_R(
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxlr, UniqueLock& uxlr_lock,
     HazardNodePtr& uxlrr, UniqueLock& uxlrr_lock) {
-  NodePtr nxrrr = node_pool_.Allocate(
+  Node* nxrrr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nxrr = node_pool_.Allocate(
+  Node* nxrr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       uxlrr->GetRight(), nxrrr);
-  NodePtr nxrl = node_pool_.Allocate(
+  Node* nxrl = node_pool_.Allocate(
       uxlr->GetKey(), uxlr->GetValue(),
       1,
       uxlr->GetLeft(), uxlrr->GetLeft());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxlrr->GetKey(), uxlrr->GetValue(),
       0,
       nxrl, nxrr);
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       ux->GetWeight(),
       uxl->GetLeft(), nxr);
@@ -597,9 +573,7 @@ embb_errors_t W3_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -620,23 +594,23 @@ embb_errors_t W4_L(
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxrl, UniqueLock& uxrl_lock,
     HazardNodePtr& uxrlr, UniqueLock& uxrlr_lock) {
-  NodePtr nxll = node_pool_.Allocate(
+  Node* nxll = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxrl = node_pool_.Allocate(
+  Node* nxrl = node_pool_.Allocate(
       uxrlr->GetKey(), uxrlr->GetValue(),
       1,
       uxrlr->GetLeft(), uxrlr->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxll, uxrl->GetLeft());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       0,
       nxrl, uxr->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxrl->GetKey(), uxrl->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -654,9 +628,7 @@ embb_errors_t W4_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -677,23 +649,23 @@ embb_errors_t W4_R(
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxlr, UniqueLock& uxlr_lock,
     HazardNodePtr& uxlrl, UniqueLock& uxlrl_lock) {
-  NodePtr nxrr = node_pool_.Allocate(
+  Node* nxrr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nxlr = node_pool_.Allocate(
+  Node* nxlr = node_pool_.Allocate(
       uxlrl->GetKey(), uxlrl->GetValue(),
       1,
       uxlrl->GetLeft(), uxlrl->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       uxlr->GetRight(), nxrr);
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       0,
       uxl->GetLeft(), nxlr);
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxlr->GetKey(), uxlr->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -711,9 +683,7 @@ embb_errors_t W4_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -733,19 +703,19 @@ embb_errors_t W5_L(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxrr, UniqueLock& uxrr_lock) {
-  NodePtr nxll = node_pool_.Allocate(
+  Node* nxll = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxll, uxr->GetLeft());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxrr->GetKey(), uxrr->GetValue(),
       1,
       uxrr->GetLeft(), uxrr->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -761,9 +731,7 @@ embb_errors_t W5_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -782,19 +750,19 @@ embb_errors_t W5_R(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxll, UniqueLock& uxll_lock) {
-  NodePtr nxrr = node_pool_.Allocate(
+  Node* nxrr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       uxl->GetRight(), nxrr);
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxll->GetKey(), uxll->GetValue(),
       1,
       uxll->GetLeft(), uxll->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -810,9 +778,7 @@ embb_errors_t W5_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -831,19 +797,19 @@ embb_errors_t W6_L(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxrl, UniqueLock& uxrl_lock) {
-  NodePtr nxll = node_pool_.Allocate(
+  Node* nxll = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       nxll, uxrl->GetLeft());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       1,
       uxrl->GetRight(), uxr->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxrl->GetKey(), uxrl->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -859,9 +825,7 @@ embb_errors_t W6_L(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -880,19 +844,19 @@ embb_errors_t W6_R(
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock,
     HazardNodePtr& uxlr, UniqueLock& uxlr_lock) {
-  NodePtr nxrr = node_pool_.Allocate(
+  Node* nxrr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       1,
       uxlr->GetRight(), nxrr);
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       1,
       uxl->GetLeft(), uxlr->GetLeft());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       uxlr->GetKey(), uxlr->GetValue(),
       ux->GetWeight(),
       nxl, nxr);
@@ -908,9 +872,7 @@ embb_errors_t W6_R(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 
@@ -928,15 +890,15 @@ embb_errors_t W7(
     HazardNodePtr& ux, UniqueLock& ux_lock,
     HazardNodePtr& uxl, UniqueLock& uxl_lock,
     HazardNodePtr& uxr, UniqueLock& uxr_lock) {
-  NodePtr nxl = node_pool_.Allocate(
+  Node* nxl = node_pool_.Allocate(
       uxl->GetKey(), uxl->GetValue(),
       uxl->GetWeight() - 1,
       uxl->GetLeft(), uxl->GetRight());
-  NodePtr nxr = node_pool_.Allocate(
+  Node* nxr = node_pool_.Allocate(
       uxr->GetKey(), uxr->GetValue(),
       uxr->GetWeight() - 1,
       uxr->GetLeft(), uxr->GetRight());
-  NodePtr nx = node_pool_.Allocate(
+  Node* nx = node_pool_.Allocate(
       ux->GetKey(), ux->GetValue(),
       IsSentinel(u) ? 1 : ux->GetWeight() + 1,
       nxl, nxr);
@@ -950,9 +912,7 @@ embb_errors_t W7(
     return EMBB_NOMEM;
   }
 
-  NodePtr expected = ux;
-  bool rotation_succeeded = GetPointerToChild(u, ux)
-                                .CompareAndSwap(expected, nx);
+  bool rotation_succeeded = u->ReplaceChild(ux, nx);
   assert(rotation_succeeded); // For now (FGL tree) this CAS may not fail
   if (!rotation_succeeded) return EMBB_BUSY;
 

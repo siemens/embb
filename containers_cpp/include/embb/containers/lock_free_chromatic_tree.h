@@ -50,8 +50,8 @@ namespace internal {
 template<typename Key, typename Value>
 class ChromaticTreeNode {
  public:
-  typedef ChromaticTreeNode<Key, Value>*   ChildPointer;
-  typedef embb::base::Atomic<ChildPointer> AtomicChildPointer;
+  typedef ChromaticTreeNode<Key, Value> Node;
+  typedef embb::base::Atomic<Node*>     AtomicNodePtr;
 
   /**
    * Creates a node with given parameters.
@@ -62,8 +62,8 @@ class ChromaticTreeNode {
    * \param[IN] left   Pointer to the left child node
    * \param[IN] right  Pointer to the right child node
    */
-  ChromaticTreeNode(const Key& key, const Value& value, const int weight,
-                    const ChildPointer& left, const ChildPointer& right);
+  ChromaticTreeNode(const Key& key, const Value& value, int weight,
+                    Node* left, Node* right);
   
   /**
    * Creates a node given only a key-value pair. Node will have no child nodes
@@ -73,7 +73,7 @@ class ChromaticTreeNode {
    * \param[IN] value  Value of the new node
    * \param[IN] weight Weight of the new node
    */
-  ChromaticTreeNode(const Key& key, const Value& value, const int weight = 1);
+  ChromaticTreeNode(const Key& key, const Value& value, int weight = 1);
   
   /**
    * Accessor for the stored key.
@@ -101,14 +101,30 @@ class ChromaticTreeNode {
    * 
    * \return Reference to the left child pointer
    */
-  AtomicChildPointer& GetLeft();
+  AtomicNodePtr& GetLeft();
+  Node* GetLeft() const;
   
   /**
    * Accessor for the right child pointer.
    * 
    * \return Reference to the right child pointer
    */
-  AtomicChildPointer& GetRight();
+  AtomicNodePtr& GetRight();
+  Node* GetRight() const;
+
+  /**
+   * Tries to replace one of the child pointers that compares equal to
+   * \c old_child with the \c new_child using an atomic compare-and-swap
+   * operation. If neither left nor right child pointer is pointing to
+   * \c old_child, returns \c false.
+   *
+   * \param old_child[IN] Pointer to an old child node to compare against
+   * \param new_child[IN] Pointer to the new child node
+   *
+   * \return \c true if one of the child pointers is now pointing to
+   *         \c new_child, \c false otherwise
+   */
+  bool ReplaceChild(Node* old_child, Node* new_child);
 
   /**
    * Marks node for deletion from the tree
@@ -136,181 +152,14 @@ class ChromaticTreeNode {
   ChromaticTreeNode(const ChromaticTreeNode&);
   ChromaticTreeNode& operator=(const ChromaticTreeNode&);
   
-  const Key                key_;    /**< Stored key */
-  const Value              value_;  /**< Stored value */
-  const int                weight_; /**< Weight of the node */
-  AtomicChildPointer       left_;   /**< Pointer to left child node */
-  AtomicChildPointer       right_;  /**< Pointer to right child node */
+  const Key     key_;    /**< Stored key */
+  const Value   value_;  /**< Stored value */
+  const int     weight_; /**< Weight of the node */
+  AtomicNodePtr left_;   /**< Pointer to left child node */
+  AtomicNodePtr right_;  /**< Pointer to right child node */
   embb::base::Atomic<bool> retired_; /**< Retired (marked for deletion) flag */
 
   embb::base::Mutex  mutex_; /**< Fine-grained locking tree: per node mutex */
-};
-
-/**
- * Ownership wrapper for a hazard pointer
- *
- * Uses an entry of the hazard table to provide protection for a single
- * hazardous pointer. While providing standard pointer dereference and member
- * access operators, it requires special care for pointer assignment (realized
- * via 'ProtectHazard' method).
- * On destruction, it clears the wrapped hazard table entry, releasing the
- * protected hazardous pointer (if any).
- *
- * \tparam GuardedType Type of the object to be protected by the hazard pointer
- */
-template<typename GuardedType>
-class UniqueHazardPointer {
- public:
-  /**
-   * Typedef for a pointer to the guarded object.
-   */
-  typedef GuardedType*                   GuardedPtr;
-  /**
-   * Typedef for a atomic pointer to the guarded object.
-   */
-  typedef embb::base::Atomic<GuardedPtr> AtomicGuard;
-
-  /**
-   * Creates an uninitialized, empty wrapper.
-   *
-   * An uninitialized wrapper may only be swapped with another wrapper (using
-   * \c Swap() method) or checked for being active (using 'IsActive()' method,
-   * which should always return /c false for an uninitialized wrapper).
-   */
-  UniqueHazardPointer();
-
-  /**
-   * Creates a wrapper that uses the given hazard table entry (referred to as
-   * "guard") to protect hazardous pointers.
-   *
-   * \param[IN] hazard_guard Reference to a hazard table entry
-   * \param[IN] undefined_guard Dummy value used to clear the hazard table entry
-   */
-  explicit
-  UniqueHazardPointer(AtomicGuard& hazard_guard,
-                      GuardedPtr undefined_guard = NULL);
-
-  /**
-   * If initialized and active, clears the hazard table entry.
-   */
-  ~UniqueHazardPointer();
-
-  /**
-   * Tries to protect the given hazard using the wrapped hazard pointer (guard).
-   * If it succeeds, the hazard may be safely dereferenced as long as the guard
-   * is not destroyed or reset to protect another hazard.
-   *
-   * \param hazard The hazard to be protected
-   * \return \c true if the specified hazard is now protected by the guard,
-   *         \c false if the hazard was modified by a concurrent thread
-   */
-  bool ProtectHazard(const AtomicGuard& hazard);
-
-  /**
-   * Type cast operator.
-   *
-   * \return The hazardous pointer protected by this wrapper
-   */
-  operator GuardedPtr () const;
-
-  /**
-   * Pointer member access operator.
-   *
-   * \return The hazardous pointer protected by this wrapper
-   */
-  GuardedPtr operator->() const;
-
-  /**
-   * Pointer dereference operator.
-   *
-   * \return Reference to the object pointed to by the protected pointer
-   */
-  GuardedType& operator*() const;
-
-  /**
-   * Protects the hazard that is currently protected by another wrapper (so it
-   * becomes protected by two guards simultaneously). The other wrapper remains
-   * unmodified.
-   *
-   * \param other Another wrapper those protected pointer is to be protected by
-   *              the calling wrapper
-   */
-  void AdoptGuard(const UniqueHazardPointer<GuardedType>& other);
-
-  /**
-   * Swaps the guard ownership with another wrapper. Swaps not just the
-   * protected hazards, but the hazard guards themselves.
-   * 
-   * \param other Another wrapper to swap guards with
-   */
-  void Swap(UniqueHazardPointer<GuardedType>& other);
-
-  /**
-   * Clears the hazard guard and returns the hazard previously protected by that
-   * guard.
-   *
-   * \return The hazardous pointer previously protected by this wrapper
-   */
-  GuardedPtr ReleaseHazard();
-
-  /**
-   * Check whether the wrapper is active.
-   *
-   * \return \c true if the wrapper is initialized and currently protecting some
-   *         hazard, \c false otherwise
-   */
-  bool IsActive() const;
-
- private:
-  /**
-   * Sets the 'active' flag of this wrapper.
-   *
-   * \param active The new value for the flag
-   */
-  void SetActive(bool active);
-
-  /**
-   * Reset the wrapped hazard guard to a state when it is not protecting any
-   * hazards.
-   */
-  void ClearHazard();
-
-  /**
-   * Retrieves the hazardous pointer currently protected by the wrapped guard.
-   *
-   * \return The hazardous pointer protected by this wrapper
-   */
-  GuardedPtr LoadGuardedPointer() const;
-
-  /**
-   * Updates the wrapped guard to protect the specified hazardous pointer.
-   *
-   * \param ptr Hazardous pointer to be protected
-   */
-  void StoreGuardedPointer(GuardedPtr ptr);
-
-  /**
-   * Check whether the wrapper is initialized (i.e. it wraps some hazard guard)
-   *
-   * \return \c true if this wrapper is initialized, \c false otherwise
-   */
-  bool OwnsHazardGuard() const;
-
-  /**
-   * Disable copy construction and assignment.
-   */
-  UniqueHazardPointer(const UniqueHazardPointer&);
-  UniqueHazardPointer& operator=(const UniqueHazardPointer&);
-
-  /**
-   * Pointer to a hazard table entry (the guard) that is used to store the
-   * hazardous pointers
-   */
-  AtomicGuard* hazard_guard_;
-  /** Dummy value used to clear the hazard guard from any hazards */
-  GuardedPtr   undefined_guard_;
-  /** Flag set to true when the guard is protecting some hazardous pointer */
-  bool         active_;
 };
 
 } // namespace internal
@@ -330,20 +179,19 @@ class TreeTest;
  * Implements a balanced BST with support for \c Get, \c Insert and \c Delete
  * operations.
  * 
- * \tparam Key      Key type
- * \tparam Value    Value type
- * \tparam Compare  Custom comparator type for the keys. An object of the
- *                  type \c Compare must must be a functor taking two
- *                  arguments \c rhs and \c lhs of type \c Key and
- *                  returning \c true if and only if <tt>(rhs < lhs)</tt> holds
- * \tparam NodePool The object pool type used for allocation/deallocation
- *                  of tree nodes.
+ * \tparam Key       Key type
+ * \tparam Value     Value type
+ * \tparam Compare   Custom comparator type for the keys. An object of the
+ *                   type \c Compare must must be a functor taking two
+ *                   arguments \c rhs and \c lhs of type \c Key and
+ *                   returning \c true if and only if <tt>(rhs < lhs)</tt> holds
+ * \tparam ValuePool Type of the value pool to be used inside object pools for
+ *                   tree nodes and operation objects.
  */
 template<typename Key,
          typename Value,
          typename Compare = ::std::less<Key>,
-         typename NodePool = ObjectPool<internal::ChromaticTreeNode<Key, Value>,
-                                        LockFreeTreeValuePool<bool, false> >
+         typename ValuePool = LockFreeTreeValuePool<bool, false>
          >
 class ChromaticTree {
  public:
@@ -465,7 +313,7 @@ class ChromaticTree {
    * 
    * \return Object of type \c Value that is used by the tree as a dummy value
    */
-  const Value& GetUndefinedValue();
+  const Value& GetUndefinedValue() const;
   
   /**
    * Checks whether the tree is currently empty.
@@ -475,26 +323,16 @@ class ChromaticTree {
   bool IsEmpty() const;
 
  private:
-  /**
-   * Typedef for a node of the tree.
-   */
+  /** Typedef for a node of the tree. */
   typedef internal::ChromaticTreeNode<Key, Value>   Node;
-  /**
-   * Typedef for a pointer to a node of the tree.
-   */
-  typedef internal::ChromaticTreeNode<Key, Value>*  NodePtr;
-  /**
-   * Typedef for an atomic pointer to a node of the tree.
-   */
-  typedef embb::base::Atomic<NodePtr>               AtomicNodePtr;
-  /**
-   * Typedef for an pointer to a node protected by a Hazard Pointer.
-   */
+  /** Typedef for an atomic pointer to a node of the tree. */
+  typedef embb::base::Atomic<Node*>                 AtomicNodePtr;
+  /** Typedef for an pointer to a node protected by a Hazard Pointer. */
   typedef internal::UniqueHazardPointer<Node>       HazardNodePtr;
-  /**
-   * Typedef for the UniqueLock class.
-   */
+  /** Typedef for the UniqueLock class. */
   typedef embb::base::UniqueLock<embb::base::Mutex> UniqueLock;
+  /** Typedef for an object pool for tree nodes. */
+  typedef ObjectPool<Node, ValuePool>               NodePool;
 
 
   /**
@@ -528,7 +366,7 @@ class ChromaticTree {
    * 
    * \return \c true if the given node is a leaf, \c false otherwise
    */
-  bool IsLeaf(const NodePtr& node) const;
+  bool IsLeaf(const Node* node) const;
   
   /**
    * Checks whether the given node is a sentinel node.
@@ -537,7 +375,7 @@ class ChromaticTree {
    * 
    * \return \c true if the given node is a sentinel node, \c false otherwise
    */
-  bool IsSentinel(const NodePtr& node) const;
+  bool IsSentinel(const Node* node) const;
   
   /**
    * Checks whether the given node has a specified child node.
@@ -548,22 +386,8 @@ class ChromaticTree {
    * \return \c true if \c child is a child node of \c parent, \c false
    *         otherwise
    */
-  bool HasChild(const NodePtr& parent, const NodePtr& child) const;
-  
-  /**
-   * Accessor for the child pointer of a given parent to the specified child.
-   * 
-   * \pre The \c child has to be an actual child of the \c parent.
-   * 
-   * \param[IN] parent Parent node
-   * \param[IN] child  Child node of the \c parent
-   * 
-   * \return Reference to a member pointer of the \c parent that points to
-   *         the \c child
-   */
-  AtomicNodePtr& GetPointerToChild(const NodePtr& parent,
-                                   const NodePtr& child) const;
-  
+  bool HasChild(const Node* parent, const Node* child) const;
+
   /**
    * Destroys all the nodes of a subtree rooted at the given node, including the
    * node itself.
@@ -572,7 +396,7 @@ class ChromaticTree {
    * 
    * \param node Root of the subtree to be destroyed
    */
-  void Destruct(const NodePtr& node);
+  void Destruct(Node* node);
 
   /**
    * Computes the hight of the subtree rooted at the given node.
@@ -584,7 +408,7 @@ class ChromaticTree {
    * \return The height of a subtree rooted at node \c node. (The height of a
    *         leaf node is defined to be zero).
    */
-  int GetHeight(const NodePtr& node) const;
+  int GetHeight(const Node* node) const;
 
   /**
    * Check whether the tree is currently in a balanced state (if it is a valid
@@ -601,7 +425,7 @@ class ChromaticTree {
    *
    * \return \c true if the tree is balanced, \c false otherwise
    */
-  bool IsBalanced(const NodePtr& node) const;
+  bool IsBalanced(const Node* node) const;
 
   /**
    * Free a tree node using the Hazard Pointers memory reclamation routines.
@@ -616,7 +440,7 @@ class ChromaticTree {
    *
    * \param[IN] node A node to be freed.
    */
-  void FreeNode(NodePtr node);
+  void FreeNode(Node* node);
 
   /**
    * Follows the path from the root to some leaf (directed by the given key) and
@@ -654,23 +478,21 @@ class ChromaticTree {
   // directly inside the class definition.
 # include <embb/containers/internal/lock_free_chromatic_tree-rebalance.h>
 
-  /** Callback functor for the hazard pointer that frees retired nodes */
-  embb::base::Function<void, NodePtr> free_node_callback_;
   /** Hazard pointer instance for protection of node pointers */
-  embb::containers::internal::HazardPointer<NodePtr> node_hazard_manager_;
+  internal::HazardPointer<Node*> node_hazard_manager_;
 
   const Key     undefined_key_;   /**< A dummy key used by the tree */
   const Value   undefined_value_; /**< A dummy value used by the tree */
   const Compare compare_;         /**< Comparator object for the keys */
   size_t        capacity_;        /**< User-requested capacity of the tree */
   NodePool      node_pool_;       /**< Comparator object for the keys */
-  const AtomicNodePtr entry_;     /**< Pointer to the sentinel node used as
+  Node* const   entry_;           /**< Pointer to the sentinel node used as
                                    *   the entry point into the tree */
 
   /**
    * Friending the test class for white-box testing
    */
-  friend class test::TreeTest<ChromaticTree<Key, Value, Compare, NodePool> >;
+  friend class test::TreeTest<ChromaticTree>;
 };
 
 } // namespace containers
