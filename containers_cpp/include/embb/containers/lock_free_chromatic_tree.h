@@ -201,10 +201,19 @@ class ChromaticTreeOperation {
     root_operation_ = root_operation;
   }
 
-  void SetOldNodes(Node* node, Operation* operation) {
+  void SetOldNodes(Node* node1, Operation* operation1) {
     num_old_nodes_ = 1;
-    old_nodes_[0]      = node;
-    old_operations_[0] = operation;
+    old_nodes_[0]      = node1;
+    old_operations_[0] = operation1;
+  }
+
+  void SetOldNodes(Node* node1, Operation* operation1,
+                   Node* node2, Operation* operation2) {
+    num_old_nodes_ = 2;
+    old_nodes_[0]      = node1;
+    old_operations_[0] = operation1;
+    old_nodes_[1]      = node2;
+    old_operations_[1] = operation2;
   }
 
   void SetOldNodes(Node* node1, Operation* operation1,
@@ -217,6 +226,39 @@ class ChromaticTreeOperation {
     old_operations_[1] = operation2;
     old_nodes_[2]      = node3;
     old_operations_[2] = operation3;
+  }
+
+  void SetOldNodes(Node* node1, Operation* operation1,
+                   Node* node2, Operation* operation2,
+                   Node* node3, Operation* operation3,
+                   Node* node4, Operation* operation4) {
+    num_old_nodes_ = 4;
+    old_nodes_[0]      = node1;
+    old_operations_[0] = operation1;
+    old_nodes_[1]      = node2;
+    old_operations_[1] = operation2;
+    old_nodes_[2]      = node3;
+    old_operations_[2] = operation3;
+    old_nodes_[3]      = node4;
+    old_operations_[3] = operation4;
+  }
+
+  void SetOldNodes(Node* node1, Operation* operation1,
+                   Node* node2, Operation* operation2,
+                   Node* node3, Operation* operation3,
+                   Node* node4, Operation* operation4,
+                   Node* node5, Operation* operation5) {
+    num_old_nodes_ = 5;
+    old_nodes_[0]      = node1;
+    old_operations_[0] = operation1;
+    old_nodes_[1]      = node2;
+    old_operations_[1] = operation2;
+    old_nodes_[2]      = node3;
+    old_operations_[2] = operation3;
+    old_nodes_[3]      = node4;
+    old_operations_[3] = operation4;
+    old_nodes_[4]      = node5;
+    old_operations_[4] = operation5;
   }
 
   void SetNewChild(Node* new_child) {
@@ -639,8 +681,6 @@ class ChromaticTree {
   typedef embb::base::Atomic<Operation*>               AtomicOperationPtr;
   /** Typedef for an pointer to a node protected by a Hazard Pointer. */
   typedef internal::UniqueHazardPointer<Operation>     HazardOperationPtr;
-  /** Typedef for the UniqueLock class. */
-  typedef embb::base::UniqueLock<embb::base::Mutex> UniqueLock;
   /** Typedef for an object pool for tree nodes. */
   typedef ObjectPool<Node, ValuePool>               NodePool;
   /** Typedef for an object pool for tree operations. */
@@ -648,11 +688,33 @@ class ChromaticTree {
 
   typedef enum {
     HIDX_HELPING = 0,
-    HIDX_LEAF,
-    HIDX_PARENT,
+    // Common shared nodes
+    HIDX_GRANDGRANDPARENT,
     HIDX_GRANDPARENT,
-    HIDX_SIBLING,
-    HIDX_CURRENT_OP,
+    HIDX_PARENT,
+    HIDX_LEAF,
+    HIDX_SIBLING = HIDX_GRANDGRANDPARENT, // Never occur in the same scope
+    // Rebalancing nodes
+    HIDX_U    = HIDX_GRANDGRANDPARENT, // Renamed when passed to "Rebalance"
+    HIDX_UX   = HIDX_GRANDPARENT,      // Renamed when passed to "Rebalance"
+    HIDX_UXX  = HIDX_PARENT,           // Renamed when passed to "Rebalance"
+    HIDX_UXXX = HIDX_LEAF,             // Renamed when passed to "Rebalance"
+    HIDX_UXL = HIDX_LEAF + 1, // Restoring sequence
+    HIDX_UXR,
+    HIDX_UXXL,
+    HIDX_UXXR,
+    // Left overweight
+    HIDX_UXXRL  = HIDX_U,   // Reusing hazard guard that is no longer used
+    HIDX_UXXRR  = HIDX_UXR, // Reusing hazard guard that is no longer used
+    HIDX_UXXRLR = HIDX_UXR, // Reusing hazard guard that is no longer used
+    HIDX_UXXRLL = HIDX_UXL, // Reusing hazard guard that is no longer used
+    // Right overweight
+    HIDX_UXXLR  = HIDX_UXXRL,  // Symmetric rotation
+    HIDX_UXXLL  = HIDX_UXXRR,  // Symmetric rotation
+    HIDX_UXXLRL = HIDX_UXXRLR, // Symmetric rotation
+    HIDX_UXXLRR = HIDX_UXXRLL, // Symmetric rotation
+    // Current operation object
+    HIDX_CURRENT_OP = HIDX_UXXR + 1, // Restoring sequence
     HIDX_MAX
   } HazardIndex;
 
@@ -773,19 +835,19 @@ class ChromaticTree {
   embb_errors_t Rebalance(HazardNodePtr& u, HazardNodePtr& ux,
                           HazardNodePtr& uxx, HazardNodePtr& uxxx);
 
-  embb_errors_t OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
-                               HazardNodePtr& ux, UniqueLock& ux_lock,
-                               HazardNodePtr& uxx, UniqueLock& uxx_lock,
+  embb_errors_t OverweightLeft(HazardNodePtr& u, HazardOperationPtr& u_op,
+                               HazardNodePtr& ux, HazardOperationPtr& ux_op,
+                               HazardNodePtr& uxx, HazardOperationPtr& uxx_op,
                                HazardNodePtr& uxl, HazardNodePtr& uxr,
-                               HazardNodePtr& uxxl, UniqueLock& uxxl_lock,
+                               HazardNodePtr& uxxl, HazardOperationPtr& uxxl_op,
                                HazardNodePtr& uxxr, bool uxx_is_left);
 
-  embb_errors_t OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
-                                HazardNodePtr& ux, UniqueLock& ux_lock,
-                                HazardNodePtr& uxx, UniqueLock& uxx_lock,
+  embb_errors_t OverweightRight(HazardNodePtr& u, HazardOperationPtr& u_op,
+                                HazardNodePtr& ux, HazardOperationPtr& ux_op,
+                                HazardNodePtr& uxx, HazardOperationPtr& uxx_op,
                                 HazardNodePtr& uxl, HazardNodePtr& uxr,
                                 HazardNodePtr& uxxl, HazardNodePtr& uxxr,
-                                UniqueLock& uxxr_lock, bool uxx_is_right);
+                                HazardOperationPtr& uxxr_op, bool uxx_is_right);
 
   // The following included header contains the class methods implementing
   // tree rotations. It is generated automatically and must be included

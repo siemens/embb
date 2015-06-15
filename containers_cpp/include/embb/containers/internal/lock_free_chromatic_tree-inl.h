@@ -626,59 +626,69 @@ FreeOperation(Operation* operation) {
 template<typename Key, typename Value, typename Compare, typename ValuePool>
 bool ChromaticTree<Key, Value, Compare, ValuePool>::
 CleanUp(const Key& key) {
-  (void)(key);
+  HazardNodePtr grandgrandparent(GetNodeGuard(HIDX_GRANDGRANDPARENT));
+  HazardNodePtr grandparent(GetNodeGuard(HIDX_GRANDPARENT));
+  HazardNodePtr parent(GetNodeGuard(HIDX_PARENT));
+  HazardNodePtr leaf(GetNodeGuard(HIDX_LEAF));
+  bool reached_leaf = false;
+
+  while (!reached_leaf) {
+    bool found_violation = false;
+
+    grandgrandparent.ProtectSafe(entry_);
+    grandparent.ProtectSafe(entry_);
+    parent.ProtectSafe(entry_);
+    leaf.ProtectSafe(entry_);
+
+    reached_leaf = IsLeaf(leaf);
+    while (!reached_leaf && !found_violation) {
+      grandgrandparent.AdoptHazard(grandparent);
+      grandparent.AdoptHazard(parent);
+      parent.AdoptHazard(leaf);
+
+      AtomicNodePtr& next_leaf =
+          (IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+            leaf->GetLeft() : leaf->GetRight();
+
+      // Parent is protected, so we can tolerate a changing child pointer
+      while(!leaf.ProtectHazard(next_leaf));
+
+      // Parent is retired - make sure it is actually removed from the tree
+      if (parent->IsRetired()) {
+        HazardOperationPtr op(GetOperationGuard(HIDX_HELPING));
+        if (op.ProtectHazard(parent->GetOperation())) {
+          op->HelpCommit(GetNodeGuard(HIDX_HELPING));
+        }
+        // Can't follow a child pointer in a retired node - restart from root
+        break;
+      }
+
+      VERIFY_ADDRESS(static_cast<Node*>(leaf));
+
+      // Check for violations
+      if ((leaf->GetWeight() > 1) || (leaf->GetWeight() == 0 &&
+                                      parent->GetWeight() == 0)) {
+        if (Rebalance(grandgrandparent, grandparent, parent, leaf) ==
+            EMBB_NOMEM) {
+          assert(false && "No memory for rebalancing!");
+          return false;
+        }
+        break;
+      }
+
+      reached_leaf = IsLeaf(leaf);
+    }
+  }
+
   return true;
-//  HazardNodePtr grandgrandparent(node_hazard_manager_.GetGuardedPointer(0));
-//  HazardNodePtr grandparent     (node_hazard_manager_.GetGuardedPointer(1));
-//  HazardNodePtr parent          (node_hazard_manager_.GetGuardedPointer(2));
-//  HazardNodePtr leaf            (node_hazard_manager_.GetGuardedPointer(3));
-//  bool reached_leaf = false;
-//
-//  while (!reached_leaf) {
-//    bool found_violation = false;
-//
-//    grandgrandparent.ProtectSafe(entry_);
-//    grandparent.ProtectSafe(entry_);
-//    parent.ProtectSafe(entry_);
-//    leaf.ProtectHazard(entry_->GetLeft());
-//    if (parent->IsRetired() || !leaf.IsActive()) continue;
-//
-//    reached_leaf = IsLeaf(leaf);
-//    while (!reached_leaf && !found_violation) {
-//      grandgrandparent.AdoptGuard(grandparent);
-//      grandparent.AdoptGuard(parent);
-//      parent.AdoptGuard(leaf);
-//      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
-//                         leaf->GetLeft() : leaf->GetRight());
-//      if (parent->IsRetired() || !leaf.IsActive()) break;
-//      VERIFY_ADDRESS(static_cast<Node*>(leaf));
-//
-//      found_violation = (leaf->GetWeight() > 1) ||
-//                        (leaf->GetWeight() == 0 && parent->GetWeight() == 0);
-//
-//      reached_leaf = IsLeaf(leaf);
-//    }
-//
-//    if (found_violation) {
-//      reached_leaf = false;
-//
-//      if (Rebalance(grandgrandparent, grandparent, parent, leaf) ==
-//          EMBB_NOMEM) {
-//        assert(false && "No memory for rebalancing!");
-//        return false;
-//      }
-//    }
-//  }
-//
-//  return true;
 }
 
-#define PROTECT_NODE_WITH_LOCK(node, lock_name) \
-    UniqueLock lock_name(node->GetMutex(), embb::base::try_lock); \
-    if (!lock_name.OwnsLock() || node->IsRetired()) return EMBB_BUSY;
+#define PROTECT_NODE_WITH_LLX(h_idx, node, op_name) \
+    HazardOperationPtr op_name(GetOperationGuard(h_idx)); \
+    if (!WeakLLX(node, op_name)) return EMBB_BUSY
 
-#define DEFINE_NODE_WITH_HAZARD(h_num, node, parent, method) \
-    HazardNodePtr node(node_hazard_manager_.GetGuardedPointer(h_num)); \
+#define DEFINE_HAZARDOUS_NODE(h_idx, node, parent, method) \
+    HazardNodePtr node(GetNodeGuard(h_idx)); \
     node.ProtectHazard(parent->method()); \
     if (parent->IsRetired() || !node.IsActive()) return EMBB_BUSY; \
     VERIFY_ADDRESS(static_cast<Node*>(node))
@@ -688,24 +698,24 @@ embb_errors_t ChromaticTree<Key, Value, Compare, ValuePool>::
 Rebalance(HazardNodePtr& u, HazardNodePtr& ux, HazardNodePtr& uxx,
           HazardNodePtr& uxxx) {
   // Protect node 'u'
-  PROTECT_NODE_WITH_LOCK(u, u_lock);
+  PROTECT_NODE_WITH_LLX(HIDX_U, u, u_op);
   // Verify that ux is still a child of u
   if (!HasChild(u, ux)) return EMBB_BUSY;
 
   // Protect node 'ux'
-  PROTECT_NODE_WITH_LOCK(ux, ux_lock);
+  PROTECT_NODE_WITH_LLX(HIDX_UX, ux, ux_op);
   // Get children of 'ux'
-  DEFINE_NODE_WITH_HAZARD(4, uxl, ux, GetLeft);
-  DEFINE_NODE_WITH_HAZARD(5, uxr, ux, GetRight);
+  DEFINE_HAZARDOUS_NODE(HIDX_UXL, uxl, ux, GetLeft);
+  DEFINE_HAZARDOUS_NODE(HIDX_UXR, uxr, ux, GetRight);
   // Verify that 'uxx' is still a child of 'ux'
   bool uxx_is_left = (uxx == uxl); (void)uxx_is_left;
   if (!HasChild(ux, uxx)) return EMBB_BUSY;
 
   // Protect node 'uxx'
-  PROTECT_NODE_WITH_LOCK(uxx, uxx_lock);
+  PROTECT_NODE_WITH_LLX(HIDX_UXX, uxx, uxx_op);
   // Get children of 'uxx'
-  DEFINE_NODE_WITH_HAZARD(6, uxxl, uxx, GetLeft);
-  DEFINE_NODE_WITH_HAZARD(7, uxxr, uxx, GetRight);
+  DEFINE_HAZARDOUS_NODE(HIDX_UXXL, uxxl, uxx, GetLeft);
+  DEFINE_HAZARDOUS_NODE(HIDX_UXXR, uxxr, uxx, GetRight);
   // Verify that 'uxxx' is still a child of 'uxx'
   bool uxxx_is_left = (uxxx == uxxl);
   if (!HasChild(uxx, uxxx)) return EMBB_BUSY;
@@ -713,40 +723,40 @@ Rebalance(HazardNodePtr& u, HazardNodePtr& ux, HazardNodePtr& uxx,
   if (uxxx->GetWeight() > 1) {
     if (uxxx_is_left) {
       // Protect node 'uxxl'
-      PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
-      return OverweightLeft(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxl, uxr,
-                            uxxl, uxxl_lock, uxxr, uxx_is_left);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXL, uxxl, uxxl_op);
+      return OverweightLeft(u, u_op, ux, ux_op, uxx, uxx_op, uxl, uxr,
+                            uxxl, uxxl_op, uxxr, uxx_is_left);
     } else {
       // Protect node 'uxxr'
-      PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
-      return OverweightRight(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxl, uxr,
-                             uxxl, uxxr, uxxr_lock, !uxx_is_left);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXR, uxxr, uxxr_op);
+      return OverweightRight(u, u_op, ux, ux_op, uxx, uxx_op, uxl, uxr,
+                             uxxl, uxxr, uxxr_op, !uxx_is_left);
     }
   } else {
     assert(uxxx->GetWeight() == 0 && uxx->GetWeight() == 0); //Red-red violation
     if (uxx_is_left) {
       if (uxr->GetWeight() == 0) {
         // Protect node 'uxr'
-        PROTECT_NODE_WITH_LOCK(uxr, uxr_lock);
-        return BLK(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxr, uxr_lock);
+        PROTECT_NODE_WITH_LLX(HIDX_UXR, uxr, uxr_op);
+        return BLK(u, u_op, ux, ux_op, uxx, uxx_op, uxr, uxr_op);
       } else if (uxxx_is_left) {
-        return RB1_L(u, u_lock, ux, ux_lock, uxx, uxx_lock);
+        return RB1_L(u, u_op, ux, ux_op, uxx, uxx_op);
       } else {
         // Protect node 'uxxr'
-        PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
-        return RB2_L(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxr, uxxr_lock);
+        PROTECT_NODE_WITH_LLX(HIDX_UXXR, uxxr, uxxr_op);
+        return RB2_L(u, u_op, ux, ux_op, uxx, uxx_op, uxxr, uxxr_op);
       }
     } else {
       if (uxl->GetWeight() == 0) {
         // Protect node 'uxl'
-        PROTECT_NODE_WITH_LOCK(uxl, uxl_lock);
-        return BLK(u, u_lock, ux, ux_lock, uxl, uxl_lock, uxx, uxx_lock);
+        PROTECT_NODE_WITH_LLX(HIDX_UXL, uxl, uxl_op);
+        return BLK(u, u_op, ux, ux_op, uxl, uxl_op, uxx, uxx_op);
       } else if (!uxxx_is_left) {
-        return RB1_R(u, u_lock, ux, ux_lock, uxx, uxx_lock);
+        return RB1_R(u, u_op, ux, ux_op, uxx, uxx_op);
       } else {
         // Protect node 'uxxl'
-        PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
-        return RB2_R(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock);
+        PROTECT_NODE_WITH_LLX(HIDX_UXXL, uxxl, uxxl_op);
+        return RB2_R(u, u_op, ux, ux_op, uxx, uxx_op, uxxl, uxxl_op);
       }
     }
   }
@@ -754,11 +764,11 @@ Rebalance(HazardNodePtr& u, HazardNodePtr& ux, HazardNodePtr& uxx,
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
 embb_errors_t ChromaticTree<Key, Value, Compare, ValuePool>::
-OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
-               HazardNodePtr& ux, UniqueLock& ux_lock,
-               HazardNodePtr& uxx, UniqueLock& uxx_lock,
+OverweightLeft(HazardNodePtr& u, HazardOperationPtr& u_op,
+               HazardNodePtr& ux, HazardOperationPtr& ux_op,
+               HazardNodePtr& uxx, HazardOperationPtr& uxx_op,
                HazardNodePtr& uxl, HazardNodePtr& uxr,
-               HazardNodePtr& uxxl, UniqueLock& uxxl_lock,
+               HazardNodePtr& uxxl, HazardOperationPtr& uxxl_op,
                HazardNodePtr& uxxr, bool uxx_is_left) {
   // Let "Root" be the top of the overweight violation decision tree (see p.30)
   // Root -> Middle
@@ -770,15 +780,15 @@ OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
         // Root -> Middle -> Left -> Left -> Left
         if (uxr->GetWeight() == 0) {
           // Protect node 'uxr'
-          PROTECT_NODE_WITH_LOCK(uxr, uxr_lock);
-          return BLK(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxr, uxr_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXR, uxr, uxr_op);
+          return BLK(u, u_op, ux, ux_op, uxx, uxx_op, uxr, uxr_op);
 
         // Root -> Middle -> Left -> Left -> Right
         } else {
           assert(uxr->GetWeight() > 0);
           // Protect node 'uxxr'
-          PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
-          return RB2_L(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxr, uxxr_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXXR, uxxr, uxxr_op);
+          return RB2_L(u, u_op, ux, ux_op, uxx, uxx_op, uxxr, uxxr_op);
         }
 
       // Root -> Middle -> Left -> Right
@@ -787,13 +797,13 @@ OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
         // Root -> Middle -> Left -> Right -> Left
         if (uxl->GetWeight() == 0) {
           // Protect node 'uxl'
-          PROTECT_NODE_WITH_LOCK(uxl, uxl_lock);
-          return BLK(u, u_lock, ux, ux_lock, uxl, uxl_lock, uxx, uxx_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXL, uxl, uxl_op);
+          return BLK(u, u_op, ux, ux_op, uxl, uxl_op, uxx, uxx_op);
 
         // Root -> Middle -> Left -> Right -> Right
         } else {
           assert(uxl->GetWeight() > 0);
-          return RB1_R(u, u_lock, ux, ux_lock, uxx, uxx_lock);
+          return RB1_R(u, u_op, ux, ux_op, uxx, uxx_op);
         }
       }
 
@@ -801,75 +811,75 @@ OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
     } else {
       assert(uxx->GetWeight() > 0);
       // Protect node 'uxxr'
-      PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXR, uxxr, uxxr_op);
 
       // Get left child of 'uxxr'
       // Note: we know that 'uxxr' is not a leaf because it has weight 0.
-      DEFINE_NODE_WITH_HAZARD(8, uxxrl, uxxr, GetLeft);
+      DEFINE_HAZARDOUS_NODE(HIDX_UXXRL, uxxrl, uxxr, GetLeft);
 
       // Protect node 'uxxrl'
-      PROTECT_NODE_WITH_LOCK(uxxrl, uxxrl_lock);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXRL, uxxrl, uxxrl_op);
 
       // Root -> Middle -> Right -> Left
       if (uxxrl->GetWeight() == 0) {
-        return RB2_R(ux, ux_lock, uxx, uxx_lock,
-                     uxxr, uxxr_lock, uxxrl, uxxrl_lock);
+        return RB2_R(ux, ux_op, uxx, uxx_op,
+                     uxxr, uxxr_op, uxxrl, uxxrl_op);
 
       // Root -> Middle -> Right -> Middle
       } else if (uxxrl->GetWeight() == 1) {
-        DEFINE_NODE_WITH_HAZARD(9, uxxrlr, uxxrl, GetRight);
+        DEFINE_HAZARDOUS_NODE(HIDX_UXXRLR, uxxrlr, uxxrl, GetRight);
         if (uxxrlr == NULL) return EMBB_BUSY;
 
         // Root -> Middle -> Right -> Middle -> Left
         if (uxxrlr->GetWeight() == 0) {
           // Protect node 'uxxrlr'
-          PROTECT_NODE_WITH_LOCK(uxxrlr, uxxrlr_lock);
-          return W4_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                      uxxr, uxxr_lock, uxxrl, uxxrl_lock, uxxrlr, uxxrlr_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXXRLR, uxxrlr, uxxrlr_op);
+          return W4_L(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                      uxxr, uxxr_op, uxxrl, uxxrl_op, uxxrlr, uxxrlr_op);
 
         // Root -> Middle -> Right -> Middle -> Right
         } else {
           assert(uxxrlr->GetWeight() > 0);
           // Root -> Middle -> Right -> Middle -> Right -> Left
           // Node: reusing hazard of node 'uxxrlr' as it is no longer used
-          DEFINE_NODE_WITH_HAZARD(9, uxxrll, uxxrl, GetLeft);
+          DEFINE_HAZARDOUS_NODE(HIDX_UXXRLL, uxxrll, uxxrl, GetLeft);
           if (uxxrll->GetWeight() == 0) {
             // Protect node 'uxxrll'
-            PROTECT_NODE_WITH_LOCK(uxxrll, uxxrll_lock);
-            return W3_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr,
-                        uxxr_lock, uxxrl, uxxrl_lock, uxxrll, uxxrll_lock);
+            PROTECT_NODE_WITH_LLX(HIDX_UXXRLL, uxxrll, uxxrll_op);
+            return W3_L(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op, uxxr,
+                        uxxr_op, uxxrl, uxxrl_op, uxxrll, uxxrll_op);
 
           // Root -> Middle -> Right -> Middle -> Right -> Right
           } else {
             assert(uxxrll->GetWeight() > 0);
-            return W2_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                        uxxr, uxxr_lock, uxxrl, uxxrl_lock);
+            return W2_L(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                        uxxr, uxxr_op, uxxrl, uxxrl_op);
           }
         }
 
       // Root -> Middle -> Right -> Right
       } else {
         assert(uxxrl->GetWeight() > 1);
-        return W1_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                    uxxr, uxxr_lock, uxxrl, uxxrl_lock);
+        return W1_L(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                    uxxr, uxxr_op, uxxrl, uxxrl_op);
       }
     }
 
   // Root -> Right
   } else if (uxxr->GetWeight() == 1) {
     // Protect node 'uxxr'
-    PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
+    PROTECT_NODE_WITH_LLX(HIDX_UXXR, uxxr, uxxr_op);
     // Get children of 'uxxr'
-    DEFINE_NODE_WITH_HAZARD(8, uxxrl, uxxr, GetLeft);
-    DEFINE_NODE_WITH_HAZARD(9, uxxrr, uxxr, GetRight);
+    DEFINE_HAZARDOUS_NODE(HIDX_UXXRL, uxxrl, uxxr, GetLeft);
+    DEFINE_HAZARDOUS_NODE(HIDX_UXXRR, uxxrr, uxxr, GetRight);
     if (uxxrl == NULL) return EMBB_BUSY;
 
     // Root -> Right -> Left
     if (uxxrr->GetWeight() == 0) {
       // Protect node 'uxxrr'
-      PROTECT_NODE_WITH_LOCK(uxxrr, uxxrr_lock);
-      return W5_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                  uxxr, uxxr_lock, uxxrr, uxxrr_lock);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXRR, uxxrr, uxxrr_op);
+      return W5_L(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                  uxxr, uxxr_op, uxxrr, uxxrr_op);
 
     // Root -> Right -> Right
     } else {
@@ -877,15 +887,15 @@ OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
       // Root -> Right -> Right -> Left
       if (uxxrl->GetWeight() == 0) {
         // Protect node 'uxxrl'
-        PROTECT_NODE_WITH_LOCK(uxxrl, uxxrl_lock);
-        return W6_L(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                    uxxr, uxxr_lock, uxxrl, uxxrl_lock);
+        PROTECT_NODE_WITH_LLX(HIDX_UXXRL, uxxrl, uxxrl_op);
+        return W6_L(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                    uxxr, uxxr_op, uxxrl, uxxrl_op);
 
       // Root -> Right -> Right -> Right
       } else {
         assert(uxxrl->GetWeight() > 0);
-        return PUSH_L(ux, ux_lock, uxx, uxx_lock,
-                      uxxl, uxxl_lock, uxxr, uxxr_lock);
+        return PUSH_L(ux, ux_op, uxx, uxx_op,
+                      uxxl, uxxl_op, uxxr, uxxr_op);
       }
     }
 
@@ -893,19 +903,19 @@ OverweightLeft(HazardNodePtr& u, UniqueLock& u_lock,
   } else {
     assert(uxxr->GetWeight() > 1);
     // Protect node 'uxxr'
-    PROTECT_NODE_WITH_LOCK(uxxr, uxxr_lock);
-    return W7(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr, uxxr_lock);
+    PROTECT_NODE_WITH_LLX(HIDX_UXXR, uxxr, uxxr_op);
+    return W7(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op, uxxr, uxxr_op);
   }
 }
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
 embb_errors_t ChromaticTree<Key, Value, Compare, ValuePool>::
-OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
-                HazardNodePtr& ux, UniqueLock& ux_lock,
-                HazardNodePtr& uxx, UniqueLock& uxx_lock,
+OverweightRight(HazardNodePtr& u, HazardOperationPtr& u_op,
+                HazardNodePtr& ux, HazardOperationPtr& ux_op,
+                HazardNodePtr& uxx, HazardOperationPtr& uxx_op,
                 HazardNodePtr& uxl, HazardNodePtr& uxr,
                 HazardNodePtr& uxxl, HazardNodePtr& uxxr,
-                UniqueLock& uxxr_lock, bool uxx_is_right) {
+                HazardOperationPtr& uxxr_op, bool uxx_is_right) {
   // Let "Root" be the top of the overweight violation decision tree (see p.30)
   // Root -> Middle
   if (uxxl->GetWeight() == 0) {
@@ -916,15 +926,15 @@ OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
         // Root -> Middle -> Left -> Left -> Left
         if (uxl->GetWeight() == 0) {
           // Protect node 'uxl'
-          PROTECT_NODE_WITH_LOCK(uxl, uxl_lock);
-          return BLK(u, u_lock, ux, ux_lock, uxl, uxl_lock, uxx, uxx_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXL, uxl, uxl_op);
+          return BLK(u, u_op, ux, ux_op, uxl, uxl_op, uxx, uxx_op);
 
         // Root -> Middle -> Left -> Left -> Right
         } else {
           assert(uxl->GetWeight() > 0);
           // Protect node 'uxxl'
-          PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
-          return RB2_R(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXXL, uxxl, uxxl_op);
+          return RB2_R(u, u_op, ux, ux_op, uxx, uxx_op, uxxl, uxxl_op);
         }
 
       // Root -> Middle -> Left -> Right
@@ -933,13 +943,13 @@ OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
         // Root -> Middle -> Left -> Right -> Left
         if (uxr->GetWeight() == 0) {
           // Protect node 'uxr'
-          PROTECT_NODE_WITH_LOCK(uxr, uxr_lock);
-          return BLK(u, u_lock, ux, ux_lock, uxx, uxx_lock, uxr, uxr_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXR, uxr, uxr_op);
+          return BLK(u, u_op, ux, ux_op, uxx, uxx_op, uxr, uxr_op);
 
         // Root -> Middle -> Left -> Right -> Right
         } else {
           assert(uxr->GetWeight() > 0);
-          return RB1_L(u, u_lock, ux, ux_lock, uxx, uxx_lock);
+          return RB1_L(u, u_op, ux, ux_op, uxx, uxx_op);
         }
       }
 
@@ -947,75 +957,75 @@ OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
     } else {
       assert(uxx->GetWeight() > 0);
       // Protect node 'uxxl'
-      PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXL, uxxl, uxxl_op);
 
       // Get left child of 'uxxl'
       // Note: we know that 'uxxl' is not a leaf because it has weight 0.
-      DEFINE_NODE_WITH_HAZARD(8, uxxlr, uxxl, GetRight);
+      DEFINE_HAZARDOUS_NODE(HIDX_UXXLR, uxxlr, uxxl, GetRight);
 
       // Protect node 'uxxlr'
-      PROTECT_NODE_WITH_LOCK(uxxlr, uxxlr_lock);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXLR, uxxlr, uxxlr_op);
 
       // Root -> Middle -> Right -> Left
       if (uxxlr->GetWeight() == 0) {
-        return RB2_L(ux, ux_lock, uxx, uxx_lock,
-                     uxxl, uxxl_lock, uxxlr, uxxlr_lock);
+        return RB2_L(ux, ux_op, uxx, uxx_op,
+                     uxxl, uxxl_op, uxxlr, uxxlr_op);
 
       // Root -> Middle -> Right -> Middle
       } else if (uxxlr->GetWeight() == 1) {
-        DEFINE_NODE_WITH_HAZARD(9, uxxlrl, uxxlr, GetLeft);
+        DEFINE_HAZARDOUS_NODE(HIDX_UXXLRL, uxxlrl, uxxlr, GetLeft);
         if (uxxlrl == NULL) return EMBB_BUSY;
 
         // Root -> Middle -> Right -> Middle -> Left
         if (uxxlrl->GetWeight() == 0) {
           // Protect node 'uxxlrl'
-          PROTECT_NODE_WITH_LOCK(uxxlrl, uxxlrl_lock);
-          return W4_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                      uxxr, uxxr_lock, uxxlr, uxxlr_lock, uxxlrl, uxxlrl_lock);
+          PROTECT_NODE_WITH_LLX(HIDX_UXXLRL, uxxlrl, uxxlrl_op);
+          return W4_R(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                      uxxr, uxxr_op, uxxlr, uxxlr_op, uxxlrl, uxxlrl_op);
 
         // Root -> Middle -> Right -> Middle -> Right
         } else {
           assert(uxxlrl->GetWeight() > 0);
           // Root -> Middle -> Right -> Middle -> Right -> Left
           // Node: reusing hazard of node 'uxxlrl' as it is no longer used
-          DEFINE_NODE_WITH_HAZARD(9, uxxlrr, uxxlr, GetRight);
+          DEFINE_HAZARDOUS_NODE(HIDX_UXXLRR, uxxlrr, uxxlr, GetRight);
           if (uxxlrr->GetWeight() == 0) {
             // Protect node 'uxxlrr'
-            PROTECT_NODE_WITH_LOCK(uxxlrr, uxxlrr_lock);
-            return W3_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr,
-                        uxxr_lock, uxxlr, uxxlr_lock, uxxlrr, uxxlrr_lock);
+            PROTECT_NODE_WITH_LLX(HIDX_UXXLRR, uxxlrr, uxxlrr_op);
+            return W3_R(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op, uxxr,
+                        uxxr_op, uxxlr, uxxlr_op, uxxlrr, uxxlrr_op);
 
           // Root -> Middle -> Right -> Middle -> Right -> Right
           } else {
             assert(uxxlrr->GetWeight() > 0);
-            return W2_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                        uxxr, uxxr_lock, uxxlr, uxxlr_lock);
+            return W2_R(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                        uxxr, uxxr_op, uxxlr, uxxlr_op);
           }
         }
 
       // Root -> Middle -> Right -> Right
       } else {
         assert(uxxlr->GetWeight() > 1);
-        return W1_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                    uxxr, uxxr_lock, uxxlr, uxxlr_lock);
+        return W1_R(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                    uxxr, uxxr_op, uxxlr, uxxlr_op);
       }
     }
 
   // Root -> Right
   } else if (uxxl->GetWeight() == 1) {
     // Protect node 'uxxl'
-    PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
+    PROTECT_NODE_WITH_LLX(HIDX_UXXL, uxxl, uxxl_op);
     // Get children of 'uxxl'
-    DEFINE_NODE_WITH_HAZARD(8, uxxll, uxxl, GetLeft);
-    DEFINE_NODE_WITH_HAZARD(9, uxxlr, uxxl, GetRight);
+    DEFINE_HAZARDOUS_NODE(HIDX_UXXLL, uxxll, uxxl, GetLeft);
+    DEFINE_HAZARDOUS_NODE(HIDX_UXXLR, uxxlr, uxxl, GetRight);
     if (uxxll == NULL) return EMBB_BUSY;
 
     // Root -> Right -> Left
     if (uxxll->GetWeight() == 0) {
       // Protect node 'uxxll'
-      PROTECT_NODE_WITH_LOCK(uxxll, uxxll_lock);
-      return W5_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                  uxxr, uxxr_lock, uxxll, uxxll_lock);
+      PROTECT_NODE_WITH_LLX(HIDX_UXXLL, uxxll, uxxll_op);
+      return W5_R(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                  uxxr, uxxr_op, uxxll, uxxll_op);
 
     // Root -> Right -> Right
     } else {
@@ -1023,15 +1033,15 @@ OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
       // Root -> Right -> Right -> Left
       if (uxxlr->GetWeight() == 0) {
         // Protect node 'uxxlr'
-        PROTECT_NODE_WITH_LOCK(uxxlr, uxxlr_lock);
-        return W6_R(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock,
-                    uxxr, uxxr_lock, uxxlr, uxxlr_lock);
+        PROTECT_NODE_WITH_LLX(HIDX_UXXLR, uxxlr, uxxlr_op);
+        return W6_R(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op,
+                    uxxr, uxxr_op, uxxlr, uxxlr_op);
 
       // Root -> Right -> Right -> Right
       } else {
         assert(uxxlr->GetWeight() > 0);
-        return PUSH_R(ux, ux_lock, uxx, uxx_lock,
-                      uxxl, uxxl_lock, uxxr, uxxr_lock);
+        return PUSH_R(ux, ux_op, uxx, uxx_op,
+                      uxxl, uxxl_op, uxxr, uxxr_op);
       }
     }
 
@@ -1039,8 +1049,8 @@ OverweightRight(HazardNodePtr& u, UniqueLock& u_lock,
   } else {
     assert(uxxl->GetWeight() > 1);
     // Protect node 'uxxl'
-    PROTECT_NODE_WITH_LOCK(uxxl, uxxl_lock);
-    return W7(ux, ux_lock, uxx, uxx_lock, uxxl, uxxl_lock, uxxr, uxxr_lock);
+    PROTECT_NODE_WITH_LLX(HIDX_UXXL, uxxl, uxxl_op);
+    return W7(ux, ux_op, uxx, uxx_op, uxxl, uxxl_op, uxxr, uxxr_op);
   }
 }
 
