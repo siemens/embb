@@ -45,23 +45,26 @@ namespace internal {
 template<typename Key, typename Value>
 ChromaticTreeNode<Key, Value>::
 ChromaticTreeNode(const Key& key, const Value& value, int weight,
-                  Node* left, Node* right)
+                  Node* left, Node* right, Operation* operation)
     : key_(key),
       value_(value),
       weight_(weight),
       left_(left),
       right_(right),
-      retired_(false) {}
+      retired_(false),
+      operation_(operation) {}
 
 template<typename Key, typename Value>
 ChromaticTreeNode<Key, Value>::
-ChromaticTreeNode(const Key& key, const Value& value, int weight)
+ChromaticTreeNode(const Key& key, const Value& value, int weight,
+                  Operation* operation)
     : key_(key),
       value_(value),
       weight_(weight),
       left_(NULL),
       right_(NULL),
-      retired_(false)  {}
+      retired_(false),
+      operation_(operation) {}
 
 template<typename Key, typename Value>
 const Key& ChromaticTreeNode<Key, Value>::GetKey() const {
@@ -126,11 +129,6 @@ bool ChromaticTreeNode<Key, Value>::IsRetired() const {
   return retired_;
 }
 
-template<typename Key, typename Value>
-embb::base::Mutex& ChromaticTreeNode<Key, Value>::GetMutex() {
-  return mutex_;
-}
-
 } // namespace internal
 
 
@@ -144,7 +142,11 @@ ChromaticTree(size_t capacity, Key undefined_key, Value undefined_value,
 #endif
     : node_hazard_manager_(
           embb::base::Function<void, Node*>(*this, &ChromaticTree::FreeNode),
-          NULL, 10),
+          NULL, HIDX_MAX),
+      operation_hazard_manager_(
+          embb::base::Function<void, Operation*>(*this,
+                                                 &ChromaticTree::FreeOperation),
+          NULL, HIDX_MAX),
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -155,10 +157,16 @@ ChromaticTree(size_t capacity, Key undefined_key, Value undefined_value,
       node_pool_(2 + 5 + 2 * capacity_ +
                  node_hazard_manager_.GetRetiredListMaxSize() *
                  embb::base::Thread::GetThreadsMaxCount()),
+      operation_pool_(2 + 5 + 2 * capacity_ +
+                      operation_hazard_manager_.GetRetiredListMaxSize() *
+                      embb::base::Thread::GetThreadsMaxCount()),
       entry_(node_pool_.Allocate(undefined_key_, undefined_value_, 1,
                                  node_pool_.Allocate(undefined_key_,
-                                                     undefined_value_),
-                                 static_cast<Node*>(NULL))) {
+                                                     undefined_value_,
+                                                     1,
+                                                     Operation::INITIAL_DUMMY),
+                                 static_cast<Node*>(NULL),
+                                 Operation::INITIAL_DUMMY)) {
   assert(entry_ != NULL);
   assert(entry_->GetLeft() != NULL);
 }
@@ -173,9 +181,10 @@ ChromaticTree<Key, Value, Compare, ValuePool>::
 template<typename Key, typename Value, typename Compare, typename ValuePool>
 bool ChromaticTree<Key, Value, Compare, ValuePool>::
 Get(const Key& key, Value& value) {
-  HazardNodePtr parent(node_hazard_manager_.GetGuardedPointer(0));
-  HazardNodePtr leaf  (node_hazard_manager_.GetGuardedPointer(1));
-  Search(key, leaf, parent);
+  HazardNodePtr grandparent(GetNodeGuard(HIDX_GRANDPARENT));
+  HazardNodePtr parent(GetNodeGuard(HIDX_PARENT));
+  HazardNodePtr leaf(GetNodeGuard(HIDX_LEAF));
+  Search(key, leaf, parent, grandparent);
 
   bool keys_are_equal = !IsSentinel(leaf) &&
                         !(compare_(key, leaf->GetKey()) ||
@@ -205,52 +214,87 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
   bool added_violation = false;
 
   while (!insertion_succeeded) {
-    HazardNodePtr parent(node_hazard_manager_.GetGuardedPointer(0));
-    HazardNodePtr leaf  (node_hazard_manager_.GetGuardedPointer(1));
-    Search(key, leaf, parent);
+    HazardNodePtr grandparent(GetNodeGuard(HIDX_GRANDPARENT));
+    HazardNodePtr parent(GetNodeGuard(HIDX_PARENT));
+    HazardNodePtr leaf(GetNodeGuard(HIDX_LEAF));
+    Search(key, leaf, parent, grandparent);
 
-    // Try to lock the parent
-    UniqueLock parent_lock(parent->GetMutex(), embb::base::try_lock);
-    if (!parent_lock.OwnsLock() || parent->IsRetired()) continue;
+    // Protect the parent
+    HazardOperationPtr parent_op(GetOperationGuard(HIDX_PARENT));
+    if (!WeakLLX(parent, parent_op)) continue;
     // Verify that the leaf is still the parent's child
     if (!HasChild(parent, leaf)) continue;
 
-    // Try to lock the leaf
-    UniqueLock leaf_lock(leaf->GetMutex(), embb::base::try_lock);
-    if (!leaf_lock.OwnsLock() || leaf->IsRetired()) continue;
+    // Protect the leaf
+    HazardOperationPtr leaf_op(GetOperationGuard(HIDX_LEAF));
+    if (!WeakLLX(leaf, leaf_op)) continue;
 
-    // Reached leaf has a matching key: replace it with a new copy
-    if (!IsSentinel(leaf) && !(compare_(key, leaf->GetKey()) ||
-                               compare_(leaf->GetKey(), key))) {
+    bool keys_are_equal = !IsSentinel(leaf) &&
+                          !(compare_(key, leaf->GetKey()) ||
+                            compare_(leaf->GetKey(), key));
+    if (keys_are_equal) {
+      // Reached leaf has a matching key: replace it with a new copy
       old_value = leaf->GetValue();
-      new_parent = node_pool_.Allocate(key, value, leaf->GetWeight());
+      new_parent = node_pool_.Allocate(key, value, leaf->GetWeight(),
+                                       Operation::INITIAL_DUMMY);
       if (new_parent == NULL) break;
 
     // Reached leaf has a different key: add a new leaf
     } else {
       old_value = undefined_value_;
 
-      new_leaf = node_pool_.Allocate(key, value);
+      new_leaf = node_pool_.Allocate(key, value, 1,
+                                     Operation::INITIAL_DUMMY);
       if (new_leaf == NULL) break;
-      new_sibling = node_pool_.Allocate(leaf->GetKey(), leaf->GetValue());
+      new_sibling = node_pool_.Allocate(leaf->GetKey(), leaf->GetValue(), 1,
+                                        Operation::INITIAL_DUMMY);
       if (new_sibling == NULL) break;
 
       int new_weight = (IsSentinel(parent)) ? 1 : (leaf->GetWeight() - 1);
       if (IsSentinel(leaf) || compare_(key, leaf->GetKey())) {
         new_parent = node_pool_.Allocate(leaf->GetKey(), undefined_value_,
-                                         new_weight, new_leaf, new_sibling);
+                                         new_weight, new_leaf, new_sibling,
+                                         Operation::INITIAL_DUMMY);
       } else {
         new_parent = node_pool_.Allocate(key, undefined_value_,
-                                         new_weight, new_sibling, new_leaf);
+                                         new_weight, new_sibling, new_leaf,
+                                         Operation::INITIAL_DUMMY);
       }
       if (new_parent == NULL) break;
     }
 
-    insertion_succeeded = parent->ReplaceChild(leaf, new_parent);
-    assert(insertion_succeeded); // For now (FGL tree) this CAS may not fail
-    if (!insertion_succeeded) continue;
+    // Create and fill the operation object
+    HazardOperationPtr insert_op(GetOperationGuard(HIDX_CURRENT_OP));
+    insert_op.ProtectSafe(operation_pool_.Allocate());
+    if (insert_op == NULL) break;
+    insert_op->SetRoot(parent, parent_op);
+    insert_op->SetOldNodes(leaf, leaf_op);
+    insert_op->SetNewChild(new_parent);
 
-    RetireHazardousNode(leaf, leaf_lock);
+    // Execute operation
+    insertion_succeeded = insert_op->Help(GetNodeGuard(HIDX_HELPING),
+                                          GetOperationGuard(HIDX_HELPING));
+    insert_op->CleanUp();
+
+    // If operation failed
+    if (!insertion_succeeded) {
+      // Retire failed operation
+      RetireOperation(insert_op);
+      // Delete new nodes
+      FreeNode(new_parent); new_parent = NULL;
+      if (!keys_are_equal) {
+        FreeNode(new_leaf); new_leaf = NULL;
+        FreeNode(new_sibling); new_sibling = NULL;
+      }
+      // Restart from scratch
+      continue;
+    }
+
+    // Retire old operation objects
+    RetireOperation(parent_op);
+    RetireOperation(leaf_op);
+    // Retire old nodes
+    RetireNode(leaf);
 
     added_violation = (parent->GetWeight() == 0 &&
                        new_parent->GetWeight() == 0);
@@ -282,9 +326,9 @@ TryDelete(const Key& key, Value& old_value) {
   bool added_violation = false;
 
   while (!deletion_succeeded) {
-    HazardNodePtr grandparent(node_hazard_manager_.GetGuardedPointer(0));
-    HazardNodePtr parent     (node_hazard_manager_.GetGuardedPointer(1));
-    HazardNodePtr leaf       (node_hazard_manager_.GetGuardedPointer(2));
+    HazardNodePtr grandparent(GetNodeGuard(HIDX_GRANDPARENT));
+    HazardNodePtr parent(GetNodeGuard(HIDX_PARENT));
+    HazardNodePtr leaf(GetNodeGuard(HIDX_LEAF));
     Search(key, leaf, parent, grandparent);
 
     // Reached leaf has a different key - nothing to delete
@@ -295,18 +339,18 @@ TryDelete(const Key& key, Value& old_value) {
       break;
     }
 
-    // Try to lock the grandparent
-    UniqueLock grandparent_lock(grandparent->GetMutex(), embb::base::try_lock);
-    if (!grandparent_lock.OwnsLock() || grandparent->IsRetired()) continue;
-    // Verify that the parent is still the grandparent's child
+    // Protect the grandparent
+    HazardOperationPtr grandparent_op(GetOperationGuard(HIDX_GRANDPARENT));
+    if (!WeakLLX(grandparent, grandparent_op)) continue;
+    // Verify that the parent is still the child of grandparent
     if (!HasChild(grandparent, parent)) continue;
 
-    // Try to lock the parent
-    UniqueLock parent_lock(parent->GetMutex(), embb::base::try_lock);
-    if (!parent_lock.OwnsLock() || parent->IsRetired()) continue;
+    // Protect the parent
+    HazardOperationPtr parent_op(GetOperationGuard(HIDX_PARENT));
+    if (!WeakLLX(parent, parent_op)) continue;
 
     // Get the sibling (and protect it with hazard pointer)
-    HazardNodePtr sibling(node_hazard_manager_.GetGuardedPointer(3));
+    HazardNodePtr sibling(GetNodeGuard(HIDX_SIBLING));
     sibling.ProtectHazard((parent->GetLeft() == leaf) ?
                           parent->GetRight() : parent->GetLeft());
     if (parent->IsRetired() || !sibling.IsActive()) continue;
@@ -315,31 +359,56 @@ TryDelete(const Key& key, Value& old_value) {
     // Verify that the leaf is still the parent's child
     if (!HasChild(parent, leaf)) continue;
 
-    // Try to lock the sibling
-    UniqueLock sibling_lock(sibling->GetMutex(), embb::base::try_lock);
-    if (!sibling_lock.OwnsLock() || sibling->IsRetired()) continue;
+    // Protect the sibling
+    HazardOperationPtr sibling_op(GetOperationGuard(HIDX_SIBLING));
+    if (!WeakLLX(sibling, sibling_op)) continue;
 
-    // Try to lock the leaf
-    UniqueLock leaf_lock(leaf->GetMutex(), embb::base::try_lock);
-    if (!leaf_lock.OwnsLock() || leaf->IsRetired()) continue;
+    // Protect the leaf
+    HazardOperationPtr leaf_op(GetOperationGuard(HIDX_LEAF));
+    if (!WeakLLX(leaf, leaf_op)) continue;
 
     int new_weight = (IsSentinel(grandparent)) ?
                   1 : (parent->GetWeight() + sibling->GetWeight());
 
     new_leaf = node_pool_.Allocate(
         sibling->GetKey(), sibling->GetValue(), new_weight,
-        sibling->GetLeft(), sibling->GetRight());
+        sibling->GetLeft(), sibling->GetRight(), Operation::INITIAL_DUMMY);
     if (new_leaf == NULL) break;
 
     old_value = leaf->GetValue();
 
-    deletion_succeeded = grandparent->ReplaceChild(parent, new_leaf);
-    assert(deletion_succeeded); // For now (FGL tree) this CAS may not fail
-    if (!deletion_succeeded) continue;
+    // Create and fill the operation object
+    HazardOperationPtr delete_op(GetOperationGuard(HIDX_CURRENT_OP));
+    delete_op.ProtectSafe(operation_pool_.Allocate());
+    if (delete_op == NULL) break;
+    delete_op->SetRoot(grandparent, grandparent_op);
+    delete_op->SetOldNodes(parent, parent_op, leaf, leaf_op, sibling, sibling_op);
+    delete_op->SetNewChild(new_leaf);
 
-    RetireHazardousNode(parent, parent_lock);
-    RetireHazardousNode(leaf, leaf_lock);
-    RetireHazardousNode(sibling, sibling_lock);
+    // Execute operation
+    deletion_succeeded = delete_op->Help(GetNodeGuard(HIDX_HELPING),
+                                         GetOperationGuard(HIDX_HELPING));
+    delete_op->CleanUp();
+
+    // If operation failed
+    if (!deletion_succeeded) {
+      // Retire failed operation
+      RetireOperation(delete_op);
+      // Delete new nodes
+      FreeNode(new_leaf);
+      // Restart from scratch
+      continue;
+    }
+
+    // Retire old operation objects
+    RetireOperation(grandparent_op);
+    RetireOperation(parent_op);
+    RetireOperation(leaf_op);
+    RetireOperation(sibling_op);
+    // Retire old nodes
+    RetireNode(parent);
+    RetireNode(leaf);
+    RetireNode(sibling);
 
     added_violation =  (new_weight > 1);
   }
@@ -373,29 +442,6 @@ IsEmpty() const {
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
 void ChromaticTree<Key, Value, Compare, ValuePool>::
-Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent) {
-  bool reached_leaf = false;
-
-  while (!reached_leaf) {
-    parent.ProtectSafe(entry_);
-    leaf.ProtectHazard(entry_->GetLeft());
-    if (parent->IsRetired() || !leaf.IsActive()) continue;
-
-    reached_leaf = IsLeaf(leaf);
-    while (!reached_leaf) {
-      parent.AdoptGuard(leaf);
-      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
-                         leaf->GetLeft() : leaf->GetRight());
-      if (parent->IsRetired() || !leaf.IsActive()) break;
-      VERIFY_ADDRESS(static_cast<Node*>(leaf));
-
-      reached_leaf = IsLeaf(leaf);
-    }
-  }
-}
-
-template<typename Key, typename Value, typename Compare, typename ValuePool>
-void ChromaticTree<Key, Value, Compare, ValuePool>::
 Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
        HazardNodePtr& grandparent) {
   bool reached_leaf = false;
@@ -403,16 +449,30 @@ Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
   while (!reached_leaf) {
     grandparent.ProtectSafe(entry_);
     parent.ProtectSafe(entry_);
-    leaf.ProtectHazard(entry_->GetLeft());
-    if (parent->IsRetired() || !leaf.IsActive()) continue;
+    leaf.ProtectSafe(entry_);
 
     reached_leaf = IsLeaf(leaf);
     while (!reached_leaf) {
-      grandparent.AdoptGuard(parent);
-      parent.AdoptGuard(leaf);
-      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
-                         leaf->GetLeft() : leaf->GetRight());
-      if (parent->IsRetired() || !leaf.IsActive()) break;
+      grandparent.AdoptHazard(parent);
+      parent.AdoptHazard(leaf);
+
+      AtomicNodePtr& next_leaf =
+          (IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+            leaf->GetLeft() : leaf->GetRight();
+
+      // Parent is protected, so we can tolerate a changing child pointer
+      while(!leaf.ProtectHazard(next_leaf));
+
+      // Parent is retired - make sure it is actually removed from the tree
+      if (parent->IsRetired()) {
+        HazardOperationPtr op(GetOperationGuard(HIDX_HELPING));
+        if (op.ProtectHazard(parent->GetOperation())) {
+          op->HelpCommit(GetNodeGuard(HIDX_HELPING));
+        }
+        // Can't follow a child pointer in a retired node - restart from root
+        break;
+      }
+
       VERIFY_ADDRESS(static_cast<Node*>(leaf));
 
       reached_leaf = IsLeaf(leaf);
@@ -490,11 +550,58 @@ IsBalanced(const Node* node) const {
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
 void ChromaticTree<Key, Value, Compare, ValuePool>::
-RetireHazardousNode(HazardNodePtr& node, UniqueLock& node_lock) {
-  node->Retire();
-  node_lock.Unlock();
-  Node* node_to_delete = node.ReleaseHazard();
-  node_hazard_manager_.EnqueuePointerForDeletion(node_to_delete);
+RetireNode(HazardNodePtr& node) {
+  node_hazard_manager_.EnqueuePointerForDeletion(node.ReleaseHazard());
+}
+
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+void ChromaticTree<Key, Value, Compare, ValuePool>::
+RetireOperation(HazardOperationPtr& operation) {
+  Operation* op = operation.ReleaseHazard();
+  if (op != Operation::INITIAL_DUMMY && op != Operation::RETIRED_DUMMY) {
+    operation_hazard_manager_.EnqueuePointerForDeletion(op);
+  }
+}
+
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+typename ChromaticTree<Key, Value, Compare, ValuePool>::AtomicNodePtr&
+ChromaticTree<Key, Value, Compare, ValuePool>::
+GetNodeGuard(HazardIndex index) {
+  return node_hazard_manager_.GetGuardedPointer(static_cast<int>(index));
+}
+
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+typename ChromaticTree<Key, Value, Compare, ValuePool>::AtomicOperationPtr&
+ChromaticTree<Key, Value, Compare, ValuePool>::
+GetOperationGuard(HazardIndex index) {
+  return operation_hazard_manager_.GetGuardedPointer(static_cast<int>(index));
+}
+
+template<typename Key, typename Value, typename Compare, typename ValuePool>
+bool ChromaticTree<Key, Value, Compare, ValuePool>::
+WeakLLX(HazardNodePtr& node, HazardOperationPtr& operation) {
+  // Make sure we have a protected operation pointer
+  while (!operation.ProtectHazard(node->GetOperation()));
+
+  // Node is not retired and operation is committed - node is available
+  if (!node->IsRetired() && operation->IsCommitted()) {
+    return true;
+  }
+
+  if (operation->IsAborted()) {
+    // Operation is aborted, but the node is still frozen - unfreeze it
+    operation->HelpAbort(node);
+
+  } else if (operation->IsInProgress()) {
+    // Operation is still in progress - help it
+    operation->Help(GetNodeGuard(HIDX_HELPING),
+                    GetOperationGuard(HIDX_HELPING));
+  }
+
+  // LLX failed - operation pointer should not be exposed
+  operation.ReleaseHazard();
+
+  return false;
 }
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
@@ -508,51 +615,62 @@ FreeNode(Node* node) {
 }
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
+void ChromaticTree<Key, Value, Compare, ValuePool>::
+FreeOperation(Operation* operation) {
+#ifdef EMBB_DEBUG
+  operation->SetDeleted();
+#endif
+  operation_pool_.Free(operation);
+}
+
+template<typename Key, typename Value, typename Compare, typename ValuePool>
 bool ChromaticTree<Key, Value, Compare, ValuePool>::
 CleanUp(const Key& key) {
-  HazardNodePtr grandgrandparent(node_hazard_manager_.GetGuardedPointer(0));
-  HazardNodePtr grandparent     (node_hazard_manager_.GetGuardedPointer(1));
-  HazardNodePtr parent          (node_hazard_manager_.GetGuardedPointer(2));
-  HazardNodePtr leaf            (node_hazard_manager_.GetGuardedPointer(3));
-  bool reached_leaf = false;
-
-  while (!reached_leaf) {
-    bool found_violation = false;
-
-    grandgrandparent.ProtectSafe(entry_);
-    grandparent.ProtectSafe(entry_);
-    parent.ProtectSafe(entry_);
-    leaf.ProtectHazard(entry_->GetLeft());
-    if (parent->IsRetired() || !leaf.IsActive()) continue;
-
-    reached_leaf = IsLeaf(leaf);
-    while (!reached_leaf && !found_violation) {
-      grandgrandparent.AdoptGuard(grandparent);
-      grandparent.AdoptGuard(parent);
-      parent.AdoptGuard(leaf);
-      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
-                         leaf->GetLeft() : leaf->GetRight());
-      if (parent->IsRetired() || !leaf.IsActive()) break;
-      VERIFY_ADDRESS(static_cast<Node*>(leaf));
-
-      found_violation = (leaf->GetWeight() > 1) ||
-                        (leaf->GetWeight() == 0 && parent->GetWeight() == 0);
-
-      reached_leaf = IsLeaf(leaf);
-    }
-
-    if (found_violation) {
-      reached_leaf = false;
-
-      if (Rebalance(grandgrandparent, grandparent, parent, leaf) ==
-          EMBB_NOMEM) {
-        assert(false && "No memory for rebalancing!");
-        return false;
-      }
-    }
-  }
-
+  (void)(key);
   return true;
+//  HazardNodePtr grandgrandparent(node_hazard_manager_.GetGuardedPointer(0));
+//  HazardNodePtr grandparent     (node_hazard_manager_.GetGuardedPointer(1));
+//  HazardNodePtr parent          (node_hazard_manager_.GetGuardedPointer(2));
+//  HazardNodePtr leaf            (node_hazard_manager_.GetGuardedPointer(3));
+//  bool reached_leaf = false;
+//
+//  while (!reached_leaf) {
+//    bool found_violation = false;
+//
+//    grandgrandparent.ProtectSafe(entry_);
+//    grandparent.ProtectSafe(entry_);
+//    parent.ProtectSafe(entry_);
+//    leaf.ProtectHazard(entry_->GetLeft());
+//    if (parent->IsRetired() || !leaf.IsActive()) continue;
+//
+//    reached_leaf = IsLeaf(leaf);
+//    while (!reached_leaf && !found_violation) {
+//      grandgrandparent.AdoptGuard(grandparent);
+//      grandparent.AdoptGuard(parent);
+//      parent.AdoptGuard(leaf);
+//      leaf.ProtectHazard((IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+//                         leaf->GetLeft() : leaf->GetRight());
+//      if (parent->IsRetired() || !leaf.IsActive()) break;
+//      VERIFY_ADDRESS(static_cast<Node*>(leaf));
+//
+//      found_violation = (leaf->GetWeight() > 1) ||
+//                        (leaf->GetWeight() == 0 && parent->GetWeight() == 0);
+//
+//      reached_leaf = IsLeaf(leaf);
+//    }
+//
+//    if (found_violation) {
+//      reached_leaf = false;
+//
+//      if (Rebalance(grandgrandparent, grandparent, parent, leaf) ==
+//          EMBB_NOMEM) {
+//        assert(false && "No memory for rebalancing!");
+//        return false;
+//      }
+//    }
+//  }
+//
+//  return true;
 }
 
 #define PROTECT_NODE_WITH_LOCK(node, lock_name) \

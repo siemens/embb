@@ -478,7 +478,7 @@ Type& UniqueHazardPointer<Type>::operator*() const {
 }
 
 template<typename Type>
-void UniqueHazardPointer<Type>::AdoptGuard(const UniqueHazardPointer& other) {
+void UniqueHazardPointer<Type>::AdoptHazard(const UniqueHazardPointer& other) {
   assert(OwnsHazardGuard());
   StoreGuardedPointer(other.LoadGuardedPointer());
   SetActive(other.active_);

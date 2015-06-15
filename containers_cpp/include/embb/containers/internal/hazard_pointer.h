@@ -620,7 +620,7 @@ class UniqueHazardPointer {
    * \param other Another wrapper those protected pointer is to be protected by
    *              the calling wrapper
    */
-  void AdoptGuard(const UniqueHazardPointer& other);
+  void AdoptHazard(const UniqueHazardPointer& other);
 
   /**
    * Swaps the guard ownership with another wrapper. Swaps not just the
