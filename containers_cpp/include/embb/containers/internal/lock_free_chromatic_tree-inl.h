@@ -129,6 +129,359 @@ bool ChromaticTreeNode<Key, Value>::IsRetired() const {
   return retired_;
 }
 
+template<typename Key, typename Value>
+typename ChromaticTreeNode<Key, Value>::AtomicOperationPtr&
+ChromaticTreeNode<Key, Value>::GetOperation() {
+  return operation_;
+}
+
+
+
+template<typename Key, typename Value>
+ChromaticTreeOperation<Key, Value>::ChromaticTreeOperation()
+    : state_(STATE_FREEZING),
+      root_(NULL),
+      root_operation_(NULL),
+      num_old_nodes_(0),
+      old_nodes_(),
+      old_operations_(),
+      new_child_(NULL)
+#ifdef EMBB_DEBUG
+      , deleted_(false)
+#endif
+{}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+SetRoot(Node* root, Operation* root_operation) {
+  root_ = root;
+  root_operation_ = root_operation;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+SetOldNodes(Node* node1, Operation* operation1) {
+  num_old_nodes_ = 1;
+  old_nodes_[0]      = node1;
+  old_operations_[0] = operation1;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+SetOldNodes(Node* node1, Operation* operation1,
+            Node* node2, Operation* operation2) {
+  num_old_nodes_ = 2;
+  old_nodes_[0]      = node1;
+  old_operations_[0] = operation1;
+  old_nodes_[1]      = node2;
+  old_operations_[1] = operation2;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+SetOldNodes(Node* node1, Operation* operation1,
+            Node* node2, Operation* operation2,
+            Node* node3, Operation* operation3) {
+  num_old_nodes_ = 3;
+  old_nodes_[0]      = node1;
+  old_operations_[0] = operation1;
+  old_nodes_[1]      = node2;
+  old_operations_[1] = operation2;
+  old_nodes_[2]      = node3;
+  old_operations_[2] = operation3;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+SetOldNodes(Node* node1, Operation* operation1,
+            Node* node2, Operation* operation2,
+            Node* node3, Operation* operation3,
+            Node* node4, Operation* operation4) {
+  num_old_nodes_ = 4;
+  old_nodes_[0]      = node1;
+  old_operations_[0] = operation1;
+  old_nodes_[1]      = node2;
+  old_operations_[1] = operation2;
+  old_nodes_[2]      = node3;
+  old_operations_[2] = operation3;
+  old_nodes_[3]      = node4;
+  old_operations_[3] = operation4;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+SetOldNodes(Node* node1, Operation* operation1,
+            Node* node2, Operation* operation2,
+            Node* node3, Operation* operation3,
+            Node* node4, Operation* operation4,
+            Node* node5, Operation* operation5) {
+  num_old_nodes_ = 5;
+  old_nodes_[0]      = node1;
+  old_operations_[0] = operation1;
+  old_nodes_[1]      = node2;
+  old_operations_[1] = operation2;
+  old_nodes_[2]      = node3;
+  old_operations_[2] = operation3;
+  old_nodes_[3]      = node4;
+  old_operations_[3] = operation4;
+  old_nodes_[4]      = node5;
+  old_operations_[4] = operation5;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::SetNewChild(Node* new_child) {
+  new_child_ = new_child;
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::
+Help(AtomicNodePtr& node_guard, AtomicOperationPtr& oper_guard) {
+#ifdef EMBB_DEBUG
+  assert(!deleted_);
+#endif
+  // Freezing step
+  if (!FreezeAll(node_guard, oper_guard)) {
+    return IsCommitted();
+  }
+
+  // All frozen step
+  if (!SwitchState(STATE_FREEZING, STATE_ALL_FROZEN)) {
+    return IsCommitted();
+  }
+
+  // At this point operation may no longer fail - complete it
+  HelpCommit(node_guard);
+
+  return true;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::HelpCommit(AtomicNodePtr& node_guard) {
+#ifdef EMBB_DEBUG
+  assert(!deleted_);
+#endif
+  HazardNodePtr node_hp(node_guard);
+
+  // Mark step (retire old nodes)
+  for (size_t i = 0; i < num_old_nodes_; ++i) {
+    node_hp.ProtectSafe(old_nodes_[i]);
+    if (IsCommitted()) return;
+    old_nodes_[i]->Retire();
+  }
+
+  // Update step
+  node_hp.ProtectSafe(root_);
+  if (IsCommitted()) return;
+  root_->ReplaceChild(old_nodes_[0], new_child_);
+
+  // Commit step
+  SwitchState(STATE_ALL_FROZEN, STATE_COMMITTED);
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::HelpAbort(Node* node) {
+#ifdef EMBB_DEBUG
+  assert(!deleted_);
+#endif
+  for (size_t i = 0; i < num_old_nodes_; ++i) {
+    if (old_nodes_[i] == node) {
+      Unfreeze(old_nodes_[i], old_operations_[i]);
+      break;
+    }
+  }
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::IsAborted() {
+#ifdef EMBB_DEBUG
+  assert(!deleted_);
+#endif
+  return state_ == STATE_ABORTED;
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::IsInProgress() {
+#ifdef EMBB_DEBUG
+  assert(!deleted_);
+#endif
+  State state = state_.Load();
+  return (state != STATE_ABORTED && state != STATE_COMMITTED);
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::IsCommitted() {
+#ifdef EMBB_DEBUG
+  assert(!deleted_);
+#endif
+  return state_ == STATE_COMMITTED;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::CleanUp() {
+#ifdef EMBB_DEBUG
+  assert(!deleted_);
+#endif
+  assert(!IsInProgress());
+
+  if (IsCommitted()) {
+    for (size_t i = 0; i < num_old_nodes_; ++i) {
+      assert(old_nodes_[i]->GetOperation() == this);
+      old_nodes_[i]->GetOperation() = RETIRED_DUMMY;
+    }
+  }
+}
+
+#ifdef EMBB_DEBUG
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::SetDeleted() {
+  deleted_ = true;
+}
+#endif
+
+template<typename Key, typename Value>
+typename ChromaticTreeOperation<Key, Value>::Operation*
+ChromaticTreeOperation<Key, Value>::GetInitialDummmy() {
+  static ChromaticTreeOperation initial_dummy;
+
+  initial_dummy.state_ = STATE_COMMITTED;
+
+  return &initial_dummy;
+}
+
+template<typename Key, typename Value>
+typename ChromaticTreeOperation<Key, Value>::Operation*
+ChromaticTreeOperation<Key, Value>::GetRetiredDummmy() {
+  static ChromaticTreeOperation retired_dummy;
+
+  retired_dummy.state_ = STATE_COMMITTED;
+
+  return &retired_dummy;
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::IsRollingBack() {
+  State state = state_.Load();
+  return (state == STATE_ROLLBACK || state == STATE_ABORTED);
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::IsFreezing() {
+  return state_ == STATE_FREEZING;
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::IsAllFrozen() {
+  State state = state_.Load();
+  return (state == STATE_ALL_FROZEN || state == STATE_COMMITTED);
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::
+FreezeAll(AtomicNodePtr& node_guard, AtomicOperationPtr& oper_guard) {
+  if (IsFreezing()) {
+    HazardNodePtr      node_hp(node_guard);
+    HazardOperationPtr oper_hp(oper_guard);
+
+    node_hp.ProtectSafe(root_);
+    oper_hp.ProtectSafe(root_operation_);
+
+    if (IsFreezing()) {
+      Freeze(root_, root_operation_);
+    }
+
+    for (size_t i = 0; i < num_old_nodes_; ++i) {
+      node_hp.ProtectSafe(old_nodes_[i]);
+      oper_hp.ProtectSafe(old_operations_[i]);
+      if (!IsFreezing()) break;
+
+      Freeze(old_nodes_[i], old_operations_[i]);
+    }
+  }
+
+  if (IsRollingBack()) {
+    UnfreezeAll(node_guard);
+    return false;
+  }
+
+  return true;
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::
+Freeze(Node* node, Operation* operation) {
+  bool freezed = node->GetOperation().CompareAndSwap(operation, this);
+
+  if (!freezed && operation != this && !IsAllFrozen()) {
+    // Node is frozen for another operation - abort "this"
+    SwitchState(STATE_FREEZING, STATE_ROLLBACK);
+
+    // If the "operation" was aborted and rolled back, some other thread could
+    // have helped "this" to freeze all nodes, and the previous "SwitchState"
+    // would fail
+    return IsAllFrozen();
+  }
+
+  if (freezed && IsRollingBack()) {
+    // "False-positive" CAS: "this" was aborted and the "operation" might have
+    // been rolled back; While "node" is hazard protected, unfreeze it again
+    Unfreeze(node, operation);
+    return false;
+  }
+
+  return true;
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+UnfreezeAll(AtomicNodePtr& node_guard) {
+  HazardNodePtr node_hp(node_guard);
+
+  node_hp.ProtectSafe(root_);
+  if (IsAborted()) return;
+
+  Unfreeze(root_, root_operation_);
+
+  for (size_t i = 0; i < num_old_nodes_; ++i) {
+    node_hp.ProtectSafe(old_nodes_[i]);
+    if (IsAborted()) return;
+
+    Unfreeze(old_nodes_[i], old_operations_[i]);
+  }
+
+  SwitchState(STATE_ROLLBACK, STATE_ABORTED);
+}
+
+template<typename Key, typename Value>
+void ChromaticTreeOperation<Key, Value>::
+Unfreeze(Node* node, Operation* operation) {
+  Operation* expected = this;
+  node->GetOperation().CompareAndSwap(expected, operation);
+}
+
+template<typename Key, typename Value>
+bool ChromaticTreeOperation<Key, Value>::
+SwitchState(State old_state, State new_state) {
+  if (state_ != new_state) {
+    bool switched = state_.CompareAndSwap(old_state, new_state);
+
+    if (!switched && old_state != new_state) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+template<typename Key, typename Value>
+typename ChromaticTreeOperation<Key, Value>::Operation* const
+    ChromaticTreeOperation<Key, Value>::INITIAL_DUMMY =
+        ChromaticTreeOperation::GetInitialDummmy();
+
+template<typename Key, typename Value>
+typename ChromaticTreeOperation<Key, Value>::Operation* const
+    ChromaticTreeOperation<Key, Value>::RETIRED_DUMMY =
+        ChromaticTreeOperation::GetRetiredDummmy();
+
 } // namespace internal
 
 
@@ -558,6 +911,7 @@ template<typename Key, typename Value, typename Compare, typename ValuePool>
 void ChromaticTree<Key, Value, Compare, ValuePool>::
 RetireOperation(HazardOperationPtr& operation) {
   Operation* op = operation.ReleaseHazard();
+  // Make sure we don't return the static dummy-operations to the pool
   if (op != Operation::INITIAL_DUMMY && op != Operation::RETIRED_DUMMY) {
     operation_hazard_manager_.EnqueuePointerForDeletion(op);
   }

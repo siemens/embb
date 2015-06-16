@@ -42,7 +42,7 @@ template<typename Key, typename Value>
 class ChromaticTreeOperation;
 
 /**
- * Tree node
+ * Chromatic tree node.
  * 
  * Stores the key-value pair, as well as the weight value (used for rebalancing)
  * and two pointers to child nodes (left and right).
@@ -53,19 +53,24 @@ class ChromaticTreeOperation;
 template<typename Key, typename Value>
 class ChromaticTreeNode {
  public:
+  /** Node of the tree (self type). */
   typedef ChromaticTreeNode         Node;
+  /** Atomic pointer to a node. */
   typedef embb::base::Atomic<Node*> AtomicNodePtr;
+  /** Chromatic tree operation. */
   typedef ChromaticTreeOperation<Key, Value> Operation;
+  /** Atomic pointer to a tree operation. */
   typedef embb::base::Atomic<Operation*>     AtomicOperationPtr;
 
   /**
    * Creates a node with given parameters.
    * 
-   * \param[IN] key    Key of the new node
-   * \param[IN] value  Value of the new node
-   * \param[IN] weight Weight of the new node
-   * \param[IN] left   Pointer to the left child node
-   * \param[IN] right  Pointer to the right child node
+   * \param[IN] key       Key of the new node
+   * \param[IN] value     Value of the new node
+   * \param[IN] weight    Weight of the new node
+   * \param[IN] left      Pointer to the left child node
+   * \param[IN] right     Pointer to the right child node
+   * \param[IN] operation Pointer to an operation object
    */
   ChromaticTreeNode(const Key& key, const Value& value, int weight,
                     Node* left, Node* right, Operation* operation);
@@ -73,9 +78,10 @@ class ChromaticTreeNode {
   /**
    * Creates a node with given parameters and no child nodes.
    * 
-   * \param[IN] key    Key of the new node
-   * \param[IN] value  Value of the new node
-   * \param[IN] weight Weight of the new node
+   * \param[IN] key       Key of the new node
+   * \param[IN] value     Value of the new node
+   * \param[IN] weight    Weight of the new node
+   * \param[IN] operation Pointer to an operation object
    */
   ChromaticTreeNode(const Key& key, const Value& value, int weight,
                     Operation* operation);
@@ -137,22 +143,21 @@ class ChromaticTreeNode {
   void Retire();
 
   /**
-   * Checks whether the node is marked for deletion from the tree
+   * Checks whether the node is marked for deletion from the tree.
    *
    * \return \c true if node is retired, \c false otherwise
    */
   bool IsRetired() const;
 
   /**
-   * Accessor for the operation pointer of the node
+   * Accessor for the operation pointer of the node.
    *
    * \return Reference to this node's operation pointer
    */
-  AtomicOperationPtr& GetOperation() {
-    return operation_;
-  }
+  AtomicOperationPtr& GetOperation();
 
  private:
+  /** Atomic boolean flag. */
   typedef embb::base::Atomic<bool> AtomicFlag;
 
   /**
@@ -161,201 +166,167 @@ class ChromaticTreeNode {
   ChromaticTreeNode(const ChromaticTreeNode&);
   ChromaticTreeNode& operator=(const ChromaticTreeNode&);
   
-  const Key          key_;       /**< Stored key */
-  const Value        value_;     /**< Stored value */
-  const int          weight_;    /**< Weight of the node */
-  AtomicNodePtr      left_;      /**< Pointer to left child node */
-  AtomicNodePtr      right_;     /**< Pointer to right child node */
-  AtomicFlag         retired_;   /**< Retired (marked for deletion) flag */
-  AtomicOperationPtr operation_; /**< Pointer to a tree operation object */
+  const Key          key_;       /**< Stored key. */
+  const Value        value_;     /**< Stored value. */
+  const int          weight_;    /**< Weight of the node. */
+  AtomicNodePtr      left_;      /**< Pointer to left child node. */
+  AtomicNodePtr      right_;     /**< Pointer to right child node. */
+  AtomicFlag         retired_;   /**< Retired (marked for deletion) flag. */
+  AtomicOperationPtr operation_; /**< Pointer to a tree operation object. */
 };
 
+/**
+ * Tree operation
+ *
+ * Describes a chromatic tree operation (insertion, deletion or rotation).
+ * Contains pointers to the root node of the operation, nodes that are part of
+ * the operation window, and the newly created node to become a new child of the
+ * root node. For all existing nodes, the original operation pointers acquired
+ * through a previous WeakLLXs are stored. Methods for initialization, helping
+ * and status enquiries are provided.
+ *
+ * \tparam Key   Key type
+ * \tparam Value Value type
+ */
 template<typename Key, typename Value>
 class ChromaticTreeOperation {
  public:
+  /** Node of the tree. */
   typedef ChromaticTreeNode<Key, Value>  Node;
+  /** Atomic pointer to a node. */
   typedef embb::base::Atomic<Node*>      AtomicNodePtr;
+  /** Hazard-protected pointer to a node. */
   typedef UniqueHazardPointer<Node>      HazardNodePtr;
+  /** Chromatic tree operation (self type). */
   typedef ChromaticTreeOperation         Operation;
+  /** Atomic pointer to a tree operation. */
   typedef embb::base::Atomic<Operation*> AtomicOperationPtr;
+  /** Hazard-protected pointer to a tree operation. */
   typedef UniqueHazardPointer<Operation> HazardOperationPtr;
 
+  /** Dummy operation used for newly created nodes. */
   static Operation* const INITIAL_DUMMY;
+  /** Dummy operation used for nodes removed from the tree after
+   * an operation commits. */
   static Operation* const RETIRED_DUMMY;
 
-  ChromaticTreeOperation()
-      : state_(STATE_FREEZING),
-        root_(NULL),
-        root_operation_(NULL),
-        num_old_nodes_(0),
-        old_nodes_(),
-        old_operations_(),
-        new_child_(NULL)
-#ifdef EMBB_DEBUG
-        , deleted_(false)
-#endif
-  {}
+  /**
+   * Creates an empty operation object with an "in progress" state.
+   */
+  ChromaticTreeOperation();
 
-  void SetRoot(Node* root, Operation* root_operation) {
-    root_ = root;
-    root_operation_ = root_operation;
-  }
+  /**
+   * Set the root node of this operation together with its original operation
+   * pointer.
+   *
+   * \param root           The root node of the operation
+   * \param root_operation The original operation pointer of the root node
+   */
+  void SetRoot(Node* root, Operation* root_operation);
 
-  void SetOldNodes(Node* node1, Operation* operation1) {
-    num_old_nodes_ = 1;
-    old_nodes_[0]      = node1;
-    old_operations_[0] = operation1;
-  }
+  /**
+   * Sets the nodes of this operation window together with their original
+   * operation pointers.
+   *
+   * \param node1      The node from the operation window
+   * \param operation1 The original operation pointer of \c node1
+   */
+  void SetOldNodes(Node* node1, Operation* operation1);
 
   void SetOldNodes(Node* node1, Operation* operation1,
-                   Node* node2, Operation* operation2) {
-    num_old_nodes_ = 2;
-    old_nodes_[0]      = node1;
-    old_operations_[0] = operation1;
-    old_nodes_[1]      = node2;
-    old_operations_[1] = operation2;
-  }
+                   Node* node2, Operation* operation2);
 
   void SetOldNodes(Node* node1, Operation* operation1,
                    Node* node2, Operation* operation2,
-                   Node* node3, Operation* operation3) {
-    num_old_nodes_ = 3;
-    old_nodes_[0]      = node1;
-    old_operations_[0] = operation1;
-    old_nodes_[1]      = node2;
-    old_operations_[1] = operation2;
-    old_nodes_[2]      = node3;
-    old_operations_[2] = operation3;
-  }
+                   Node* node3, Operation* operation3);
 
   void SetOldNodes(Node* node1, Operation* operation1,
                    Node* node2, Operation* operation2,
                    Node* node3, Operation* operation3,
-                   Node* node4, Operation* operation4) {
-    num_old_nodes_ = 4;
-    old_nodes_[0]      = node1;
-    old_operations_[0] = operation1;
-    old_nodes_[1]      = node2;
-    old_operations_[1] = operation2;
-    old_nodes_[2]      = node3;
-    old_operations_[2] = operation3;
-    old_nodes_[3]      = node4;
-    old_operations_[3] = operation4;
-  }
+                   Node* node4, Operation* operation4);
 
   void SetOldNodes(Node* node1, Operation* operation1,
                    Node* node2, Operation* operation2,
                    Node* node3, Operation* operation3,
                    Node* node4, Operation* operation4,
-                   Node* node5, Operation* operation5) {
-    num_old_nodes_ = 5;
-    old_nodes_[0]      = node1;
-    old_operations_[0] = operation1;
-    old_nodes_[1]      = node2;
-    old_operations_[1] = operation2;
-    old_nodes_[2]      = node3;
-    old_operations_[2] = operation3;
-    old_nodes_[3]      = node4;
-    old_operations_[3] = operation4;
-    old_nodes_[4]      = node5;
-    old_operations_[4] = operation5;
-  }
+                   Node* node5, Operation* operation5);
 
-  void SetNewChild(Node* new_child) {
-    new_child_ = new_child;
-  }
+  /**
+   * Set the node that is to become the new child of the operation root.
+   *
+   * \param new_child Node to become the new child of the operation root
+   */
+  void SetNewChild(Node* new_child);
 
-  bool Help(AtomicNodePtr& node_guard, AtomicOperationPtr& oper_guard) {
-#ifdef EMBB_DEBUG
-    assert(!deleted_);
-#endif
-    // Freezing step
-    if (!FreezeAll(node_guard, oper_guard)) {
-      return IsCommitted();
-    }
+  /**
+   * Help execute the operation. First tries to freeze all the nodes in the
+   * operation window, and if succeeds - retires those nodes and injects the new
+   * window into the tree. If the freezing step fails, rolls back the operation
+   * by unfreezing all the nodes of the original window.
+   *
+   * \param node_guard Node hazard guard used to protect the helped nodes
+   * \param oper_guard Operation hazard guard to protect the original operation
+   *                   pointers of the helped nodes
+   *
+   * \return \c true is the operation successfully commits, \c false if it
+   *         aborts
+   */
+  bool Help(AtomicNodePtr& node_guard, AtomicOperationPtr& oper_guard);
 
-    // All frozen step
-    if (!SwitchState(STATE_FREEZING, STATE_ALL_FROZEN)) {
-      return IsCommitted();
-    }
+  /**
+   * Help an operation that has successfully frozen all the nodes in its window
+   * to complete. This operation may no longer fail or abort.
+   *
+   * \param node_guard Node hazard guard used to protect the helped nodes
+   */
+  void HelpCommit(AtomicNodePtr& node_guard);
 
-    // At this point operation may no longer fail - complete it
-    HelpCommit(node_guard);
+  /**
+   * Help an aborted operation by unfreezing the given \c node.
+   *
+   * \param node The node to be unfrozen
+   */
+  void HelpAbort(Node* node);
 
-    return true;
-  }
+  /**
+   * Check whether the operation is aborted.
+   *
+   * \return \c true if operation is aborted, \c false otherwise
+   */
+  bool IsAborted();
 
-  void HelpCommit(AtomicNodePtr& node_guard) {
-    HazardNodePtr node_hp(node_guard);
+  /**
+   * Check whether the operation is in progress.
+   *
+   * \return \c true if operation is in progress, \c false otherwise
+   */
+  bool IsInProgress();
 
-    // Mark step (retire old nodes)
-    for (size_t i = 0; i < num_old_nodes_; ++i) {
-      node_hp.ProtectSafe(old_nodes_[i]);
-      if (IsCommitted()) return;
-      old_nodes_[i]->Retire();
-    }
+  /**
+   * Check whether the operation is committed.
+   *
+   * \return \c true if operation is committed, \c false otherwise
+   */
+  bool IsCommitted();
 
-    // Update step
-    node_hp.ProtectSafe(root_);
-    if (IsCommitted()) return;
-    root_->ReplaceChild(old_nodes_[0], new_child_);
-
-    // Commit step
-    SwitchState(STATE_ALL_FROZEN, STATE_COMMITTED);
-  }
-
-  void HelpAbort(Node* node) {
-    for (size_t i = 0; i < num_old_nodes_; ++i) {
-      if (old_nodes_[i] == node) {
-        Unfreeze(old_nodes_[i], old_operations_[i]);
-        break;
-      }
-    }
-  }
-
-  bool IsAborted() {
-#ifdef EMBB_DEBUG
-    assert(!deleted_);
-#endif
-    return state_ == STATE_ABORTED;
-  }
-
-  bool IsInProgress() {
-#ifdef EMBB_DEBUG
-    assert(!deleted_);
-#endif
-    State state = state_.Load();
-    return (state != STATE_ABORTED && state != STATE_COMMITTED);
-  }
-
-  bool IsCommitted() {
-#ifdef EMBB_DEBUG
-    assert(!deleted_);
-#endif
-    return state_ == STATE_COMMITTED;
-  }
-
-  void CleanUp() {
-#ifdef EMBB_DEBUG
-    assert(!deleted_);
-#endif
-    assert(!IsInProgress());
-
-    if (IsCommitted()) {
-      for (size_t i = 0; i < num_old_nodes_; ++i) {
-        assert(old_nodes_[i]->GetOperation() == this);
-        old_nodes_[i]->GetOperation() = RETIRED_DUMMY;
-      }
-    }
-  }
+  /**
+   * Performs the necessary post-processing steps for the operation, i.e. if the
+   * operation commits, resets all the operation pointers of the nodes of the
+   * removed operation window to point to the retired dummy-operation. Must be
+   * called only once after the operation either commits or aborts.
+   */
+  void CleanUp();
 
 #ifdef EMBB_DEBUG
-  void SetDeleted() {
-    deleted_ = true;
-  }
+  /**
+   * Set the deleted flag for this operation. No other method of this operation
+   * is allowed to be called after this method returns.
+   */
+  void SetDeleted();
 #endif
 
  private:
+  /** Enumeration of possible operation states. */
   typedef enum {
     STATE_ABORTED,
     STATE_ROLLBACK,
@@ -363,156 +334,143 @@ class ChromaticTreeOperation {
     STATE_ALL_FROZEN,
     STATE_COMMITTED
   } State;
+  /** Atomic wrapper for the operation state. */
   typedef embb::base::Atomic<State> AtomicState;
 
+  /** Maximal possible number of nodes in an operation window. */
   static const size_t MAX_NODES = 5;
 
-  static Operation* GetInitialDummmy() {
-    static ChromaticTreeOperation initial_dummy;
+  /**
+   * Initializes and returns the initial dummy operation.
+   *
+   * \return Pointer to the INITIAL_DUMMY operation
+   *
+   * \see INITIAL_DUMMY
+   */
+  static Operation* GetInitialDummmy();
 
-    initial_dummy.state_ = STATE_COMMITTED;
+  /**
+   * Initializes and returns the retired dummy operation.
+   *
+   * \return Pointer to the RETIRED_DUMMY operation
+   *
+   * \see RETIRED_DUMMY
+   */
+  static Operation* GetRetiredDummmy();
 
-    return &initial_dummy;
-  }
+  /**
+   * Check whether the operation is rolling back.
+   *
+   * \return \c true if operation is rolling back, \c false otherwise
+   */
+  bool IsRollingBack();
 
-  static Operation* GetRetiredDummmy() {
-    static ChromaticTreeOperation retired_dummy;
+  /**
+   * Check whether the operation is freezing.
+   *
+   * \return \c true if operation is freezing, \c false otherwise
+   */
+  bool IsFreezing();
 
-    retired_dummy.state_ = STATE_COMMITTED;
+  /**
+   * Check whether all the nodes from the operation window were successfully
+   * frozen for this operation.
+   *
+   * \return \c true if all nodes of the window were frozen, \c false otherwise
+   */
+  bool IsAllFrozen();
 
-    return &retired_dummy;
-  }
+  /**
+   * Tries to freeze all the nodes from the operation window for this operation.
+   * If the current operation encounters a conflict and fails, this method helps
+   * to roll back the operation by unfreezing all the nodes.
+   *
+   * \param node_guard Node hazard guard used to protect the freezing nodes
+   * \param oper_guard Operation hazard guard to protect the original operation
+   *                   pointers of the freezing nodes
+   *
+   * \return \c true if all nodes of this operation window were successfully
+   *         frozen, \c false otherwise
+   */
+  bool FreezeAll(AtomicNodePtr& node_guard, AtomicOperationPtr& oper_guard);
 
-  bool IsRollingBack() {
-    State state = state_.Load();
-    return (state == STATE_ROLLBACK || state == STATE_ABORTED);
-  }
+  /**
+   * Tries to freeze the given \c node for the current operation by using a CAS
+   * to set the node's operation pointer to point to this operation. If the CAS
+   * fails and the node is not frozen for this operation, tries to switch to the
+   * "rolling back" state.
+   *
+   * \param node      The node to be frozen
+   * \param operation The original operation pointer of the \c node
+   *
+   * \return \c true if \c node was successfully frozen, \c false otherwise
+   */
+  bool Freeze(Node* node, Operation* operation);
 
-  bool IsFreezing() {
-    return state_ == STATE_FREEZING;
-  }
+  /**
+   * Rolls back the current operation by unfreezing all the nodes of the
+   * operation window, i.e. changing the operation pointers of those nodes to
+   * their original values.
+   *
+   * \param node_guard Node hazard guard used to protect the nodes being
+   *                   unfrozen
+   */
+  void UnfreezeAll(AtomicNodePtr& node_guard);
 
-  bool IsAllFrozen() {
-    State state = state_.Load();
-    return (state == STATE_ALL_FROZEN || state == STATE_COMMITTED);
-  }
-  
-  bool FreezeAll(AtomicNodePtr& node_guard, AtomicOperationPtr& oper_guard) {
-    if (IsFreezing()) {
-      HazardNodePtr      node_hp(node_guard);
-      HazardOperationPtr oper_hp(oper_guard);
+  /**
+   * Unfreezes the given \c node by changing its operation pointer back to the
+   * original value.
+   *
+   * \param node      The node to be unfrozen
+   * \param operation The original operation pointer of the \c node
+   */
+  void Unfreeze(Node* node, Operation* operation);
 
-      node_hp.ProtectSafe(root_);
-      oper_hp.ProtectSafe(root_operation_);
+  /**
+   * Tries to switch from one operation state to another. If current state is
+   * already equal to \c new_state, returns \c true. Otherwise, tries to switch
+   * from \c old_state to \c new_state atomically using a CAS operation, and
+   * returns \c true if this CAS succeeds.
+   * 
+   * \param old_state Currently expected state of the operation
+   * \param new_state New desired state of the operation
+   *
+   * \return \c true is state was successfully changed to \c new_state, \c false
+   *         otherwise
+   */
+  bool SwitchState(State old_state, State new_state);
 
-      if (IsFreezing()) {
-        Freeze(root_, root_operation_);
-      }
-
-      for (size_t i = 0; i < num_old_nodes_; ++i) {
-        node_hp.ProtectSafe(old_nodes_[i]);
-        oper_hp.ProtectSafe(old_operations_[i]);
-        if (!IsFreezing()) break;
-
-        Freeze(old_nodes_[i], old_operations_[i]);
-      }
-    }
-
-    if (IsRollingBack()) {
-      UnfreezeAll(node_guard);
-      return false;
-    }
-
-    return true;
-  }
-
-  bool Freeze(Node* node, Operation* operation) {
-    bool freezed = node->GetOperation().CompareAndSwap(operation, this);
-
-    if (!freezed && operation != this && !IsAllFrozen()) {
-      // Node is frozen for another operation - abort "this"
-      SwitchState(STATE_FREEZING, STATE_ROLLBACK);
-
-      // If the "operation" was aborted and rolled back, some other thread could
-      // have helped "this" to freeze all nodes, and the previous "SwitchState"
-      // would fail
-      return IsAllFrozen();
-    }
-
-    if (freezed && IsRollingBack()) {
-      // "False-positive" CAS: "this" was aborted and the "operation" might have
-      // been rolled back; While "node" is hazard protected, unfreeze it again
-      Unfreeze(node, operation);
-      return false;
-    }
-
-    return true;
-  }
-
-  void UnfreezeAll(AtomicNodePtr& node_guard) {
-    HazardNodePtr node_hp(node_guard);
-
-    node_hp.ProtectSafe(root_);
-    if (IsAborted()) return;
-
-    Unfreeze(root_, root_operation_);
-    
-    for (size_t i = 0; i < num_old_nodes_; ++i) {
-      node_hp.ProtectSafe(old_nodes_[i]);
-      if (IsAborted()) return;
-
-      Unfreeze(old_nodes_[i], old_operations_[i]);
-    }
-
-    SwitchState(STATE_ROLLBACK, STATE_ABORTED);
-  }
-  
-  void Unfreeze(Node* node, Operation* operation) {
-    Operation* expected = this;
-    node->GetOperation().CompareAndSwap(expected, operation);
-  }
-  
-  bool SwitchState(State old_state, State new_state) {
-    if (state_ != new_state) {
-      bool switched = state_.CompareAndSwap(old_state, new_state);
-
-      if (!switched && old_state != new_state) {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-
+  /**
+   * Disable copy construction and assignment.
+   */
   ChromaticTreeOperation(const ChromaticTreeOperation&);
   ChromaticTreeOperation& operator=(const ChromaticTreeOperation&);
 
+  /** Current state of the operation. */
   AtomicState state_;
+  /** Root node of the operation. */
   Node*       root_;
+  /** Original operation pointer of the root node. */
   Operation*  root_operation_;
+  /** Number of nodes in the operation window. */
   size_t      num_old_nodes_;
+  /** Nodes of the operation window. */
   Node*       old_nodes_[MAX_NODES];
+  /** Original operation pointers for the nodes of the window. */
   Operation*  old_operations_[MAX_NODES];
+  /** Pointer to the new node to become the new child of the root. */
   Node*       new_child_;
 #ifdef EMBB_DEBUG
+  /** Debug flag for memory management control (is set when node is deleted). */
   embb::base::Atomic<bool> deleted_;
 #endif
 };
-
-template<typename Key, typename Value>
-typename ChromaticTreeOperation<Key, Value>::Operation* const
-    ChromaticTreeOperation<Key, Value>::INITIAL_DUMMY =
-        ChromaticTreeOperation::GetInitialDummmy();
-template<typename Key, typename Value>
-typename ChromaticTreeOperation<Key, Value>::Operation* const
-    ChromaticTreeOperation<Key, Value>::RETIRED_DUMMY =
-        ChromaticTreeOperation::GetRetiredDummmy();
 
 } // namespace internal
 
 namespace test {
 /**
- * Forward declaration of the test class
+ * Forward declaration of the test class.
  */
 template<typename Tree>
 class TreeTest;
@@ -520,7 +478,7 @@ class TreeTest;
 } // namespace test
 
 /**
- * Chromatic balanced binary search tree
+ * Chromatic balanced binary search tree.
  * 
  * Implements a balanced BST with support for \c Get, \c Insert and \c Delete
  * operations.
@@ -532,7 +490,7 @@ class TreeTest;
  *                   arguments \c rhs and \c lhs of type \c Key and
  *                   returning \c true if and only if <tt>(rhs < lhs)</tt> holds
  * \tparam ValuePool Type of the value pool to be used inside object pools for
- *                   tree nodes and operation objects.
+ *                   tree nodes and operation objects
  */
 template<typename Key,
          typename Value,
@@ -542,11 +500,11 @@ template<typename Key,
 class ChromaticTree {
  public:
   /**
-   * Exposing the \c Key template parameter back to the user
+   * Exposing the \c Key template parameter back to the user.
    */
   typedef Key   KeyType;
   /**
-   * Exposing the \c Value template parameter back to the user
+   * Exposing the \c Value template parameter back to the user.
    */
   typedef Value ValueType;
 
@@ -669,32 +627,34 @@ class ChromaticTree {
   bool IsEmpty() const;
 
  private:
-  /** Typedef for a node of the tree. */
+  /** Node of the tree. */
   typedef internal::ChromaticTreeNode<Key, Value>   Node;
-  /** Typedef for an atomic pointer to a node of the tree. */
+  /** Atomic pointer to a node. */
   typedef embb::base::Atomic<Node*>                 AtomicNodePtr;
-  /** Typedef for an pointer to a node protected by a Hazard Pointer. */
+  /** Hazard-protected pointer to a node. */
   typedef internal::UniqueHazardPointer<Node>       HazardNodePtr;
-  /** Typedef for the chromatic tree operation. */
+  /** Chromatic tree operation. */
   typedef internal::ChromaticTreeOperation<Key, Value> Operation;
-  /** Typedef for an atomic pointer to a tree operation. */
+  /** Atomic pointer to a tree operation. */
   typedef embb::base::Atomic<Operation*>               AtomicOperationPtr;
-  /** Typedef for an pointer to a node protected by a Hazard Pointer. */
+  /** Hazard-protected pointer to a tree operation. */
   typedef internal::UniqueHazardPointer<Operation>     HazardOperationPtr;
-  /** Typedef for an object pool for tree nodes. */
+  /** Object pool for tree nodes. */
   typedef ObjectPool<Node, ValuePool>               NodePool;
-  /** Typedef for an object pool for tree operations. */
+  /** Object pool for tree operations. */
   typedef ObjectPool<Operation, ValuePool>          OperationPool;
 
+  /** Enumeration of used hazard pointer indexes. */
   typedef enum {
+    // Node/operation used for helping
     HIDX_HELPING = 0,
-    // Common shared nodes
+    // Common shared nodes/operations
     HIDX_GRANDGRANDPARENT,
     HIDX_GRANDPARENT,
     HIDX_PARENT,
     HIDX_LEAF,
     HIDX_SIBLING = HIDX_GRANDGRANDPARENT, // Never occur in the same scope
-    // Rebalancing nodes
+    // Rebalancing nodes/operations
     HIDX_U    = HIDX_GRANDGRANDPARENT, // Renamed when passed to "Rebalance"
     HIDX_UX   = HIDX_GRANDPARENT,      // Renamed when passed to "Rebalance"
     HIDX_UXX  = HIDX_PARENT,           // Renamed when passed to "Rebalance"
@@ -799,14 +759,55 @@ class ChromaticTree {
    */
   bool IsBalanced(const Node* node) const;
 
+  /**
+   * Retire a hazardous node using the node hazard manager.
+   *
+   * \param node A hazardous node to be retired
+   */
   void RetireNode(HazardNodePtr& node);
 
+  /**
+   * Retire a hazardous operation object using the operation hazard manager.
+   *
+   * \param operation A hazardous operation to be retired
+   */
   void RetireOperation(HazardOperationPtr& operation);
 
+  /**
+   * Get a node hazard guard with the specified \c index from the node hazard
+   * manager.
+   *
+   * \param index Index of requested guard
+   *
+   * \return Hazard guard with the specified index
+   */
   AtomicNodePtr& GetNodeGuard(HazardIndex index);
 
+  /**
+   * Get an operation hazard guard with the specified \c index from the
+   * operation hazard manager.
+   *
+   * \param index Index of requested guard
+   *
+   * \return Hazard guard with the specified index
+   */
   AtomicOperationPtr& GetOperationGuard(HazardIndex index);
 
+  /**
+   * Performs a WeakLLX operation according to the Tree Update template, i.e.
+   * reads the operation pointer of the given \c node and check whether this
+   * operation is completed or in progress. If it is completed and the \c node
+   * is not retired, returns \c true and sets the \c operation variable to point
+   * to the read operation. If the read operation is in progress, helps it and 
+   * returns \c false.
+   *
+   * \param node      The node
+   * \param operation Reference to the current operation pointer value of the
+   *                  \c node to be used in the following SCX
+   *
+   * \return \c true if the \c node is not reserved by another operation and the
+   *         \c operation was successfully read, \c false if the \c node is busy
+   */
   bool WeakLLX(HazardNodePtr& node, HazardOperationPtr& operation);
 
   /**
@@ -816,6 +817,11 @@ class ChromaticTree {
    */
   void FreeNode(Node* node);
 
+  /**
+   * Free a tree operation by returning it to the operation pool.
+   *
+   * \param[IN] operation An operation to be freed.
+   */
   void FreeOperation(Operation* operation);
 
   /**
@@ -854,18 +860,19 @@ class ChromaticTree {
   // directly inside the class definition.
 # include <embb/containers/internal/lock_free_chromatic_tree-rebalance.h>
 
-  /** Hazard pointer instance for protection of node pointers */
+  /** Hazard pointer manager for protecting node pointers. */
   internal::HazardPointer<Node*> node_hazard_manager_;
+  /** Hazard pointer manager for protecting operation pointers. */
   internal::HazardPointer<Operation*> operation_hazard_manager_;
 
-  const Key     undefined_key_;   /**< A dummy key used by the tree */
-  const Value   undefined_value_; /**< A dummy value used by the tree */
-  const Compare compare_;         /**< Comparator object for the keys */
-  size_t        capacity_;        /**< User-requested capacity of the tree */
-  NodePool      node_pool_;       /**< Pool of tree nodes */
-  OperationPool operation_pool_;  /**< Pool of operation objects */
+  const Key     undefined_key_;   /**< A dummy key used by the tree. */
+  const Value   undefined_value_; /**< A dummy value used by the tree. */
+  const Compare compare_;         /**< Comparator object for the keys. */
+  size_t        capacity_;        /**< User-requested capacity of the tree. */
+  NodePool      node_pool_;       /**< Pool of tree nodes. */
+  OperationPool operation_pool_;  /**< Pool of operation objects. */
   Node* const   entry_;           /**< Pointer to the sentinel node used as
-                                   *   the entry point into the tree */
+                                   *   the entry point into the tree. */
 
   /**
    * Friending the test class for white-box testing
