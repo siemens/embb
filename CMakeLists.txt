@@ -100,6 +100,13 @@ else()
 endif()
 message("   (set with command line option -DWARNINGS_ARE_ERRORS=ON/OFF)")
 
+if (USE_AUTOMATIC_INITIALIZATION STREQUAL ON)
+  message("-- MTAPI/Tasks automatic initialization enabled (default)")
+else()
+  message("-- MTAPI/Tasks automatic initialization disabled")
+endif()
+message("   (set with command line option -DUSE_AUTOMATIC_INITIALIZATION=ON/OFF)")
+
 include(CMakeCommon/SetCompilerFlags.cmake)
 SetGNUCompilerFlags(compiler_libs compiler_flags)
 SetVisualStudioCompilerFlags(compiler_libs compiler_flags)
