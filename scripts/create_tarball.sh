@@ -293,7 +293,7 @@ if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
 
         echo "---> Calling integrate script"
         redirect_cmd python insert_snippets.py 
-        
+
         if [ ! -d $EXAMPLES_TARGET_DIR ]; then
 		echo "---> Examples target dir does not exist. Creating..."
 		redirect_cmd mkdir $EXAMPLES_TARGET_DIR
