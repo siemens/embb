@@ -214,7 +214,7 @@ redirect_cmd rsync \
         --exclude "scripts/license.*" \
         --exclude "scripts/license_*" \
         --exclude "scripts/remove_license.sh" \
-	--exclude "scripts/merge_examples.sh" \
+        --exclude "scripts/merge_examples.sh" \
         --exclude "mtapi/MTAPI.mm" \
         --exclude ".cproject" \
         --exclude ".gitattributes" \
