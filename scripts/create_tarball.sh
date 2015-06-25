@@ -214,6 +214,7 @@ redirect_cmd rsync \
         --exclude "scripts/license.*" \
         --exclude "scripts/license_*" \
         --exclude "scripts/remove_license.sh" \
+        --exclude "scripts/merge_examples.sh" \
         --exclude "mtapi/MTAPI.mm" \
         --exclude ".cproject" \
         --exclude ".gitattributes" \
@@ -283,9 +284,9 @@ REFMAN_SOURCE="$MYTMPDIR_DOXY_BUILD/latex/refman.pdf"
 echo "--> Integrating Example Snippets"
 REMEMBER_CUR_DIR=$(pwd)
 
-EXAMPLES_DIR="$MYTMPDIR_BUILD/doc/examples"
+EXAMPLES_DIR="$MYTMPDIR_BUILD/doc/examples_raw"
 INTEGRATE_SNIPPETS_SCRIPT="insert_snippets.py"
-EXAMPLES_TARGET_DIR="$MYTMPDIR/${n}/doc/"
+EXAMPLES_TARGET_DIR="$MYTMPDIR/${n}/doc/examples"
 
 if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
         cd "$EXAMPLES_DIR"
@@ -294,10 +295,15 @@ if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
         echo "---> Calling integrate script"
         redirect_cmd python insert_snippets.py 
 
+        if [ ! -d $EXAMPLES_TARGET_DIR ]; then
+		echo "---> Examples target dir does not exist. Creating..."
+		redirect_cmd mkdir $EXAMPLES_TARGET_DIR
+	fi
+
         if [ -d $EXAMPLES_TARGET_DIR ]; then
                 echo "---> Copy integrated examples back"
                 #The examples have been integrated. Copy the integrated source files.
-                redirect_cmd rsync --archive --recursive $EXAMPLES_DIR $EXAMPLES_TARGET_DIR \
+                redirect_cmd rsync --archive --recursive "$EXAMPLES_DIR/" "$EXAMPLES_TARGET_DIR/" \
                         --exclude=*snippet.h \
                         --exclude=*fragmented.h \
                         --exclude=*snippet.cc \
