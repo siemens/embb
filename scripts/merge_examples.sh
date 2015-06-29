@@ -138,6 +138,12 @@ if [ -f "$EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT" ]; then
                         --exclude=*snippet.cc \
                         --exclude=*fragmented.cc \
                         --exclude="*$INTEGRATE_SNIPPETS_SCRIPT"
+                echo redirect_cmd rsync --delete --archive --recursive "$EXAMPLES_DIR/" "$EXAMPLES_TARGET_DIR/" \
+                        --exclude=*snippet.h \
+                        --exclude=*fragmented.h \
+                        --exclude=*snippet.cc \
+                        --exclude=*fragmented.cc \
+                        --exclude="*$INTEGRATE_SNIPPETS_SCRIPT"
 		# for commiting, we must be in the project dir
 		cd "$PROJECT_DIR_FULLPATH"
 	
