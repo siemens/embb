@@ -32,30 +32,30 @@ Throughout this tutorial, we will encounter C++ types which model the C++ concep
 
 Consider, for example, the transformation of an iterable range of data values. Specifically, consider a vector of integers initialized as follows:
 %
-\\\inputlisting{../examples_raw/stl_for_each/setup-snippet.h}
+\\\inputlisting{../examples/stl_for_each/setup-snippet.h}
 %
 The range consists of the values (\lstinline|1, 2, 3, 4, 5|) and we now want to double each of them. We could simply get an iterator from the container holding the range, iterate over every element, and multiply it by two:
 %
-\\\inputlisting{../examples_raw/stl_for_each/manual-snippet.h}
+\\\inputlisting{../examples/stl_for_each/manual-snippet.h}
 %
 The range then contains the values (\lstinline|2, 4, 6, 8, 10|). In order to demonstrate the concept of function objects, we are now going to use the \lstinline|std::for_each| function defined in the \lstinline|algorithm| header of the C++ Standard Library. This function accepts as argument a \lstinline|UnaryFunction|, that is, a function object which takes only one argument. In case of \lstinline|std::for_each|, the argument has to have the same type as the elements in the range, as these are passed to the unary function. In our example, the unary function's task is to double the incoming value. We could define a function for that purpose:
 %
-\\\inputlisting{../examples_raw/stl_for_each/function_define-snippet.h}
+\\\inputlisting{../examples/stl_for_each/function_define-snippet.h}
 %
 Since a function pointer models the concept of function objects, we can simply pass \lstinline|&DoubleFunction| to \lstinline|std::for_each|:
 %
-\\\inputlisting{../examples_raw/stl_for_each/function-snippet.h}
+\\\inputlisting{../examples/stl_for_each/function-snippet.h}
 %
 Another possibility is to define a functor
 %
-\\\inputlisting{../examples_raw/stl_for_each/functor_define-snippet.h}
+\\\inputlisting{../examples/stl_for_each/functor_define-snippet.h}
 %
 and to pass an instance of this class to \lstinline|std::for_each|:
 %
-\\\inputlisting{../examples_raw/stl_for_each/functor-snippet.h}
+\\\inputlisting{../examples/stl_for_each/functor-snippet.h}
 %
 Functors as well as the function pointers separate the actual implementation from its place of usage which can be useful if the functionality is needed at different places. In many cases, however, it is advantageous to have the implementation of the function object at the same place as it is used. C++11 provides lambda expressions for that purpose which make our example more concise:
 %
-\\\inputlisting{../examples_raw/stl_for_each/lambda-snippet.h}
+\\\inputlisting{../examples/stl_for_each/lambda-snippet.h}
 %
 Of course, this example is too simple to really benefit from function objects and the algorithms contained in the C++ Standard Library. However, in combination with the parallelization features provided by \embb, function objects are a helpful mechanism to boost productivity. Within this document, whenever a function object or one of its subtypes is required, one can use a function pointer, a functor, or a lambda. For simplicity, we will restrict ourselves to lambdas in subsequent examples, as they are most suitable for this kind of tutorial.

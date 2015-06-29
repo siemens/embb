@@ -100,21 +100,21 @@ To run this program on a multicore processor, we may execute the above steps in 
 
 This pipeline can be easily implemented using the Dataflow building block. As the first step, we have to include the \lstinline|dataflow.h| header file:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_include-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_include-snippet.h}
 %
 Then, we have to construct a \emph{network}. A network consists of a set of processes that are connected by communication channels.
 %\footnote{Pipelines belong to the most simple networks, where the processes are connected in string-like (linear) fashion.}
 \embb provides a class template \lstinline|Network| that can be customized to your needs. For the moment, we are using 2 as a template argument:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_network-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_network-snippet.h}
 %
 As the next step, we have to construct the processes shown in Figure~\ref{fig:replace_par}. The easiest way to construct a process is to wrap the user-defined code in a lambda function and to pass it to the network. The network constructs an object for that process and executes the lambda function whenever new data is available. There are several methods for constructing processes depending on their type. The process \textbf{read} is a \emph{source} process, since it produces data (by reading it from the specified file) but does not consume any data. Source processes are constructed from a function object
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_source_function-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_source_function-snippet.h}
 %
 like this:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_declare_source-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_declare_source-snippet.h}
 %
 %There are a couple of things to mention here. Firstly,
 Note the template argument \lstinline|string| to \lstinline|Source|. This tells \embb that the process has exactly one \emph{port} of type \lstinline|string| and that this port is used to transmit data to other processes. The user-defined code can access the ports via the parameters of the function. Thus, each parameter corresponds to exactly one port. In our example, the result of the process is stored in a variable \lstinline|str|, which is passed by reference.
@@ -122,21 +122,21 @@ Note the template argument \lstinline|string| to \lstinline|Source|. This tells 
 
 The replacement of the strings can be done by a \emph{parallel} process, which means that multiple invocations of the process may be executed simultaneously. In general, processes that neither have any side effects nor maintain a state can safely be executed in parallel. This helps to avoid bottlenecks that arise when some processes are faster than others. Suppose, for example, that \textbf{replace} requires up to 50 ms to execute, whereas \textbf{read} and \textbf{write} each requires 10 ms to execute. If only one invocation of \textbf{replace} could be executed at a time, the throughput would be at most 20 elements per second. Since \textbf{replace} is a parallel process, however, the network may start a new invocation every 10 ms. Hence, up to five invocations may be executed in parallel, yielding a throughput of 100 elements per second. To compensate for variations in the runtime of parallel stages, \embb may execute them \emph{out-of-order}. As a result, the order in which the elements of a stream enter and leave parallel stages is not necessarily preserved. In our example, the runtime of \textbf{replace} may vary significantly due to the fact that not all lines have the same length and that the number of replacements depends on the content. However, let us now return to our example. The \textbf{replace} process is constructed from the function
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_replace_function-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_replace_function-snippet.h}
 %
 like this:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_declare_replace-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_declare_replace-snippet.h}
 %
 The template parameter \lstinline|Network::Inputs<string>| specifies that the process has one port serving as input. Analogously, \lstinline|Network::Outputs<string>| specifies that there is one port serving as output.
 
 Since the last process (\textbf{write}) does not have any outputs, we make it a \emph{Sink}. Unlike parallel processes, sinks are always executed \emph{in-order}. \embb takes care that the elements are automatically reordered according to their original order in the stream. In this way, the externally visible behavior is preserved even if some parallel stages may be executed out-of-order. The function
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_sink_function-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_sink_function-snippet.h}
 %
 is used to construct the sink:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_declare_sink-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_declare_sink-snippet.h}
 %
 %In order to avoid that the received string is overwritten accidentally, the parameter \lstinline|str| corresponding to the input port of \lstinline|write| must be constant.\\
 
@@ -144,16 +144,16 @@ is used to construct the sink:
 
 The network needs to know about the source declared above, so we add it to our network:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_add-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_add-snippet.h}
 %
 
 As the last step, we have to connect the processes (ports). This is straightforward using the C++ stream operator:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_connect-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_connect-snippet.h}
 %
 Once all connections have been established, we can start the network:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_run-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_run-snippet.h}
 %
 The integer given as a template parameter to the network specifies the maximum number of elements that can be in the network at a time. The number of elements is limited to avoid that the network is flooded with new elements before the previous elements have been processed. In a linear pipeline, for example, this may happen if the source is faster than the sink. In our example, at most four elements may be processed simultaneously: one in the source, one in the sink, and two in the middle stage (see above). Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput.
 
@@ -295,7 +295,7 @@ Let us now consider the implementation of the sorting network using \embb. As in
 
 The following Listing shows the implementation of the source processes using classes instead of functions.\footnote{For the sake of brevity, we omit the functionality. A complete implementation can be found in the examples directory.}
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_producer-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_producer-snippet.h}
 %
 %In order to use an instance of a class as a process, it must be derived from one of the predfined base classes. 
 The class-based approach has several advantages besides the use of templates: Firstly, the creation of multiple processes is straightforward. Secondly, one can derive other processes from a given base class such as \lstinline|Producer|. Thirdly, it eases migration of existing code. For example, if you want to use an object of an existing class \lstinline|foo| as a process, you might derive a class \lstinline|bar| from \lstinline|foo|. The function operator of \lstinline|bar| then has access to the members provided by \lstinline|foo|.
@@ -305,13 +305,13 @@ Each instance of the class \lstinline|Network| maintains a list of source proces
 % When you create a source process using \lstinline|MakeSource|, it is automatically added to this list. Otherwise, you must explicitly add it by a call to \lstinline|Add|. For example, if we want to feed our sorting network \lstinline|nw| with streams of integer values, we may write:
 You must explicitly add all sources to the network by a call to \lstinline|AddSource|. For example, if we want to feed our sorting network \lstinline|nw| with four streams of integer values, we may write:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_declare_add_sources-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_declare_add_sources-snippet.h}
 %
 This is only necessary for source processes. All other processes are automatically found via a depth-first search starting from the source processes.
 
 The code for the comparators looks like this:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_comparator-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_comparator-snippet.h}
 %
 Since the comparators neither have any side effects nor maintain a state, we allow multiple invocations to be executed in parallel.
 % by deriving the class \lstinline|comparator| from the base class \lstinline|network<>::parallel|.
@@ -331,6 +331,6 @@ Since the comparators neither have any side effects nor maintain a state, we all
 
 To check whether the resulting values are sorted, we use a single sink with four inputs:
 %
-\\\inputlisting{../examples_raw/dataflow/dataflow_consumer-snippet.h}
+\\\inputlisting{../examples/dataflow/dataflow_consumer-snippet.h}
 %
 In general, however, we could also have a sink for each output of the sorting network. There is no restriction on the number of sources and sinks a network may have.

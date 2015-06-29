@@ -15,12 +15,12 @@ An object pool allocates a fixed number of objects at construction. Objects can 
 Listing~\ref{lst:object_pool_lst1} shows an example, where we create in Line~\ref{lst:object_pool_lst1:line_create} an object pool with five objects of type \lstinline|int|. If nothing else is specified, the object-pool uses a wait-free implementation. Then, we allocate five objects from the object pool and store the obtained pointers in a temporary array. The actual allocation takes place in Line~\ref{lst:object_pool_lst1:line_allocate}. After that, we deallocate them in the second loop be calling \lstinline|FreeObject| on each pointer (see Line~\ref{lst:object_pool_lst1:line_free}).
 
 \lstinputlisting[caption={Object pool -- initialization, allocation and
-deallocation},label={lst:object_pool_lst1}]{../examples_raw/containers/object_pool-snippet.h}
+deallocation},label={lst:object_pool_lst1}]{../examples/containers/object_pool-snippet.h}
 
 For actually allocating and deallocating objects, the object pool's implementation relies on a value pool which keeps track of the objects in use. If the value pool is implemented in a lock-free manner, the object pool is lock-free as well (analogously for wait-free pools). Currently, \embb provides two value pools: \lstinline|WaitFreeArrayValuePool| and \lstinline|LockFreeTreeValuePool|. Normally (if nothing is specified), the wait-free pool is used. For having a lock-free object pool instead, one has to specify the corresponding value pool to use as additional template parameter. If we replace Line~\ref{lst:object_pool_lst1:line_create} of the previous example with the following lines, the object pool is not wait-free anymore but lock-free (the values are of type
 \lstinline|int| and initialized to \lstinline|0|):
 %
-\lstinputlisting{../examples_raw/containers/object_pool_2-snippet.h}
+\lstinputlisting{../examples/containers/object_pool_2-snippet.h}
 %
 This will result in a speed-up for most applications, but progress guarantees are weaker.
 
@@ -30,7 +30,7 @@ This will result in a speed-up for most applications, but progress guarantees ar
 As the name indicates, the class template \lstinline|LockFreeStack| implements a lock-free stack which stores elements according to the LIFO (Last-In, First-Out) principle. Listing~\ref{lst:stack_lst1} shows a simple example. In Line~\ref{lst:stack_lst1:line_create}, we create a stack of integers with a capacity of 10 elements.\footnote{Due to the necessary over-provisioning of memory in thread-safe memory management, the stack might be able to hold more than 10 elements, but is guaranteed to be able to hold at least 10 elements.} The stack provides two methods, \lstinline|TryPush| and \lstinline|TryPop|, both returning a Boolean value indicating success of the operation: \lstinline|TryPop| returns \lstinline|false| if the stack is empty, and \lstinline|TryPush| returns false if the stack is full. \lstinline|TryPop| returns the element removed from the stack via reference.
 
 \lstinputlisting[caption={Stack -- initialization, push and
-pop},label={lst:stack_lst1}]{../examples_raw/containers/stack-snippet.h}
+pop},label={lst:stack_lst1}]{../examples/containers/stack-snippet.h}
 
 In Line~\ref{lst:stack_lst1:fail_pop} of Listing~\ref{lst:stack_lst1}, we try to pop an element from the empty stack, which has to fail. In the for-loop in Line \ref{lst:stack_lst1:loop1}, we fill the stack with \lstinline|int| values 0 $\ldots$ 4. Afterwards, in the loop in Line~\ref{lst:stack_lst1:loop2}, we pop five values (Line~\ref{lst:stack_lst1:pop}) from the stack into variable \lstinline|j|. According to the LIFO semantics, the values are popped in reverse order, i.e., we get the sequence 4 $\ldots$ 0. This is checked by the assertion in Line~\ref{lst:stack_lst1:assert}.
 
@@ -41,6 +41,6 @@ There are two FIFO (First-In, First-Out) queue implementations in \embb, \lstinl
 
 Listing~\ref{lst:queue_lst1} shows an example for the \lstinline|LockFreeMPMCQueue|. In Line~\ref{lst:queue_lst1:line_create}, we create a queue with element type \lstinline|int| and a capacity of 10 elements.\footnote{As in case of stacks, the queue may actually hold more than 10 elements.} The Boolean return value of the methods \lstinline|TryEnqueue| and \lstinline|TryDequeue| indicates success (\lstinline|false| if the queue is full or empty, respectively).
 
-\lstinputlisting[caption={Queue -- initialization, enqueue and dequeue},label={lst:queue_lst1}]{../examples_raw/containers/queues-snippet.h}
+\lstinputlisting[caption={Queue -- initialization, enqueue and dequeue},label={lst:queue_lst1}]{../examples/containers/queues-snippet.h}
 
 In Line~\ref{lst:queue_lst1:fail_pop} of Listing~\ref{lst:queue_lst1}, we try to dequeue an element from the empty queue, which has to fail. In the for-loop in Line~\ref{lst:queue_lst1:loop1}, we fill the queue with \lstinline|int| values 0 $\ldots$ 4. Afterwards, in the loop in Line~\ref{lst:queue_lst1:loop2}, we dequeue five values (Line~\ref{lst:queue_lst1:pop}) from the queue into variable \lstinline|j|. According to the FIFO semantics, the values are dequeued in the same order as they were enqueued, i.e., we get the sequence 0 $\ldots$ 4. This is checked by the assertion in Line~\ref{lst:queue_lst1:assert}.

@@ -100,53 +100,53 @@ void main(void) {
 
 This algorithm can be parallelized by spawning a task for one of the recursive calls (\lstinline|fib(n - 1)|, for example). When doing this with MTAPI, an action function that represents \lstinline|fib(int n)| is needed. It has the following signature: 
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_action_signature-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_action_signature-snippet.h}
 %
 Within the action function, the arguments should be checked, since the user might supply a buffer that is too small:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_validate_arguments-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_validate_arguments-snippet.h}
 %
 Here, \lstinline|mtapi_context_status_set()| is used to report errors. The error code will be returned by \lstinline|mtapi_task_wait()|. Also, care has to be taken when using the result buffer. The user might not want to use the result and supply a NULL pointer or accidentally a buffer that is too small:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_validate_result_buffer-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_validate_result_buffer-snippet.h}
 %
 At this point, calculation of the result can commence. First, the terminating condition of the recursion is checked:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_terminating_condition-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
 %
 After that, the first part of the computation is launched as a task using \lstinline|mtapi_task_start()| (the action function is registered with the job \lstinline|FIBONACCI_JOB| in the \lstinline|fibonacci()| function and the resulting handle is stored in the global variable \lstinline|mtapi_job_hndl_t fibonacciJob|):
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_calc_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_calc_task-snippet.h}
 %
 The second part can be executed directly:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_calc_direct-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_calc_direct-snippet.h}
 %
 Then, completion of the MTAPI task has to be waited for by calling \lstinline|mtapi_task_wait()|:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_wait_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_wait_task-snippet.h}
 %
 Finally, the results can be added and written into the result buffer:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_write_back-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_write_back-snippet.h}
 % 
 
 The \lstinline|fibonacci()| function gets a bit more complicated now. The MTAPI runtime has to be initialized first by (optionally) initializing node attributes and then calling \lstinline|mtapi_initialize()|:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_initialize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_initialize-snippet.h}
 %
 Then, the action function needs to be associated to a job. By calling \lstinline|mtapi_action_create()|, the action function is registered with the job \lstinline|FIBONACCI_JOB|. The job handle of this job is stored in the global variable \lstinline|mtapi_job_hndl_t fibonacciJob| so that it can be accessed by the action function later on:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_register_action-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_register_action-snippet.h}
 %
 Now that the action is registered with a job, the root task can be started with \lstinline|mtapi_task_start()|:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_start_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_start_task-snippet.h}
 %
 %The started task has to be waited for before the result can be returned.
 After everything is done, the action is deleted (\lstinline|mtapi_action_delete()|) and the runtime is shut down (\lstinline|mtapi_finalize()|):
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_finalize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_finalize-snippet.h}
 %
 
 \section{C++ Interface}
@@ -154,54 +154,54 @@ After everything is done, the action is deleted (\lstinline|mtapi_action_delete(
 
 \embb provides C++ wrappers for the MTAPI C interface. The signature of the action function for the C++ interface is the same as in the C interface:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_action_signature-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_action_signature-snippet.h}
 %
 Checking argument and result buffer sizes is the same as in the C example. Also, the terminating condition of the recursion still needs to be checked:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_terminating_condition-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_terminating_condition-snippet.h}
 %
 After that, the first part of the computation is launched as an MTAPI task using \lstinline|embb::mtapi::Node::Start()| (the action function is registered with the job \lstinline|FIBONACCI_JOB| in the \lstinline|fibonacci()| function and the resulting handle is stored in the global variable \lstinline|embb::mtapi::Job fibonacciJob|):
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_calc_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_calc_task-snippet.h}
 %
 The second part can be executed directly:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_calc_direct-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_calc_direct-snippet.h}
 %
 Then, completion of the MTAPI task has to be waited for using \lstinline|embb::mtapi::Task::Wait()|:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_wait_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_wait_task-snippet.h}
 %
 Finally, the two parts can be added and written into the result buffer:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_write_back-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_write_back-snippet.h}
 % 
 Note that there is no need to do error checking everywhere, since errors are reported as exceptions. In this example there is only a single try/catch block in the main function:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_main-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_main-snippet.h}
 %
 
 The \lstinline|fibonacci()| function is about the same as in the C version. The MTAPI runtime needs to be initialized first:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_initialize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_initialize-snippet.h}
 %
 Then the node instance can to be fetched:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_get_node-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_get_node-snippet.h}
 %
 After that, the action function needs to be associated to a job. By instancing an \lstinline|embb::mtap::Action| object, the action function is registered with the job \lstinline|FIBONACCI_JOB|. The job is stored in the global variable \lstinline|embb::mtapi::Job fibonacciJob| so that it can be accessed by the action function later on:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_register_action-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_register_action-snippet.h}
 %
 Not that the action is registered and the job is initialized, the root task can be started:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_start_task-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
 %
 Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task::Wait()|) before the result can be returned.
 
 The registered action will be unregistered when it goes out of scope.
 The runtime needs to be shut down by calling:
-\\\inputlisting{../examples_raw/mtapi/mtapi_cpp_finalize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_cpp_finalize-snippet.h}
 
 \section{Plugins}
 
@@ -234,32 +234,32 @@ The plugin action is implemented through 3 callbacks, task start, task cancel an
 
 For illustration our example plugin will provide a no-op action. The task start callback in that case looks like this:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_plugin_task_start_cb-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_start_cb-snippet.h}
 %
 The scheduling operation is responsible for bringing the task to execution, this might involve instructing some hardware to execute the task or pushing the task into a queue for execution by a separate worker thread. Here however, the task is executed directly:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_plugin_task_schedule-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_schedule-snippet.h}
 %
 Since the task gets executed right away, it cannot be canceled and the task cancel callback implementation is empty:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_plugin_task_cancel_cb-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_cancel_cb-snippet.h}
 %
 The plugin action did not acquire any resources so the action finalize callback is empty as well:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_plugin_action_finalize_cb-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_action_finalize_cb-snippet.h}
 %
 
 Now that the callbacks are in place, the action can be registered with a job after the node was initialized using \lstinline|mtapi_initialize()|:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_plugin_action_create-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_action_create-snippet.h}
 %
 The job handle can now be obtained the normal MTAPI way. The fact that there is a plugin working behind the scenes is transparent by now:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_plugin_get_job-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_get_job-snippet.h}
 %
 Using the job handle tasks can be started like normal MTAPI tasks:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_c_plugin_task_start-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_c_plugin_task_start-snippet.h}
 %
 This call will lead to the invocation of then \lstinline|plugin_task_start| callback function, where the plugin implementor is responsible for bringing the task to execution.
 
@@ -267,33 +267,33 @@ This call will lead to the invocation of then \lstinline|plugin_task_start| call
 
 The MTAPI network plugin provides a means to distribute tasks over a TCP/IP network. As an example the following vector addition action is used:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_network_c_action_function-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_network_c_action_function-snippet.h}
 %
 It adds two float vectors and a float from node local data and writes the result into the result float vector. In the example code the vectors will hold \lstinline|kElements| floats each.
 
 To use the network plugin, its header file needs to be included first:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_network_c_header-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_network_c_header-snippet.h}
 %
 After initializing the node using \lstinline|mtapi_initialize()|, the plugin itself needs to be initialized:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_network_c_plugin_initialize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_network_c_plugin_initialize-snippet.h}
 %
 This will set up a listening socket on the localhost interface (127.0.0.1) at port 12345. The socket will allow a maximum of 5 connections and have a maximum transfer buffer size of \lstinline|kElements * 4 * 3 + 32|. This buffer size needs to be big enough to fit at least the argument and result buffer sizes at once. The example uses 3 vectors of \lstinline|kElements| floats using \lstinline|kElements * sizeof(float) * 3| bytes.
 
 Since the example connects to itself on localhost, the "remote" action needs to be registered with the \lstinline|NETWORK_REMOTE_JOB|:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_network_c_remote_action_create-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_network_c_remote_action_create-snippet.h}
 %
 After that, the local network action is created, that maps \lstinline|NETWORK_LOCAL_JOB| to \lstinline|NETWORK_REMOTE_JOB| through the network:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_network_c_local_action_create-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_network_c_local_action_create-snippet.h}
 %
 Now, \lstinline|NETWORK_LOCAL_JOB| can be used to execute tasks by simply calling \lstinline|mtapi_task_start()|. Their parameters will be transmitted through a socket connection and are consumed by the network plugin worker thread. The thread will start a task using the \lstinline|NETWORK_REMOTE_JOB|. When this task is finished, the results will be collected and sent back through the network. Again the network plugin thread will receive the results, provide them to the \lstinline|NETWORK_LOCAL_JOB| task and mark that task as finished.
 
 When all work is done, the plugin needs to be finalized. This will stop the plugin worker thread and close the sockets:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_network_c_plugin_finalize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_network_c_plugin_finalize-snippet.h}
 %
 Then the node may be finalized by calling \lstinline|mtapi_finalize()|.
 
@@ -303,19 +303,19 @@ The MTAPI OpenCL plugin allows the user to incorporate the computational power o
 
 The vector addition example from the network plugin is used again. However, the action function is an OpenCL kernel now:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_opencl_c_kernel-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_kernel-snippet.h}
 %
 The OpenCL plugin header file needs to be included first:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_opencl_c_header-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_header-snippet.h}
 %
 As with the network plugin, the OpenCL plugin needs to be initialized after the node has been initialized:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_opencl_c_plugin_initialize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_plugin_initialize-snippet.h}
 %
 Then the plugin action can be registered with the \lstinline|OPENCL_JOB|:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_opencl_c_action_create-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_action_create-snippet.h}
 %
 The kernel source and the name of the kernel to use (AddVector) need to be specified while creating the action. The kernel will be compiled using the OpenCL runtime and the provided node local data transferred to accelerator memory. The local work size is the number of threads that will share OpenCL local memory, in this case 32. The element size instructs the OpenCL plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The OpenCL plugin will launch \lstinline|result_buffer_size/element_size| OpenCL threads to calculate the result.
 
@@ -323,5 +323,5 @@ Now the \lstinline|OPENCL_JOB| can be used like a normal MTAPI job to start task
 
 After all work is done, the plugin needs to be finalized. This will free all memory on the accelerator and delete the corresponding OpenCL context:
 %
-\\\inputlisting{../examples_raw/mtapi/mtapi_opencl_c_plugin_finalize-snippet.h}
+\\\inputlisting{../examples/mtapi/mtapi_opencl_c_plugin_finalize-snippet.h}
 %
