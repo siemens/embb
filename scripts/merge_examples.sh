@@ -110,7 +110,7 @@ EXAMPLES_DIR="$MYTMPDIR_BUILD/doc/examples_raw"
 INTEGRATE_SNIPPETS_SCRIPT="insert_snippets.py"
 EXAMPLES_TARGET_DIR="$PROJECT_DIR_FULLPATH/doc/examples"
 
-if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
+if [ -f "$EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT" ]; then
         cd "$EXAMPLES_DIR"
 
 
@@ -124,12 +124,12 @@ if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
 		exit 1
 	fi
  
-	if [ ! -d $EXAMPLES_TARGET_DIR ]; then
+	if [ ! -d "$EXAMPLES_TARGET_DIR" ]; then
 		echo "---> Examples target dir does not exist. Creating..."
-		redirect_cmd mkdir $EXAMPLES_TARGET_DIR
+		redirect_cmd mkdir "$EXAMPLES_TARGET_DIR"
 	fi
 
-        if [ -d $EXAMPLES_TARGET_DIR ]; then
+        if [ -d "$EXAMPLES_TARGET_DIR" ]; then
                 echo "---> Copy integrated examples back"
                 #The examples have been integrated. Copy the integrated source files back.
                 redirect_cmd rsync --delete --archive --recursive "$EXAMPLES_DIR/" "$EXAMPLES_TARGET_DIR/" \
@@ -137,12 +137,18 @@ if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
                         --exclude=*fragmented.h \
                         --exclude=*snippet.cc \
                         --exclude=*fragmented.cc \
-                        --exclude=*$INTEGRATE_SNIPPETS_SCRIPT
+                        --exclude="*$INTEGRATE_SNIPPETS_SCRIPT"
+                echo redirect_cmd rsync --delete --archive --recursive "$EXAMPLES_DIR/" "$EXAMPLES_TARGET_DIR/" \
+                        --exclude=*snippet.h \
+                        --exclude=*fragmented.h \
+                        --exclude=*snippet.cc \
+                        --exclude=*fragmented.cc \
+                        --exclude="*$INTEGRATE_SNIPPETS_SCRIPT"
 		# for commiting, we must be in the project dir
 		cd "$PROJECT_DIR_FULLPATH"
 	
-		redirect_cmd git add -u $EXAMPLES_TARGET_DIR
-		redirect_cmd git add $EXAMPLES_TARGET_DIR
+		redirect_cmd git add -u "$EXAMPLES_TARGET_DIR"
+		redirect_cmd git add "$EXAMPLES_TARGET_DIR"
 		redirect_cmd git commit -m 'Integrating examples_raw to examples using merge_examples.sh script.'
         fi
 fi
