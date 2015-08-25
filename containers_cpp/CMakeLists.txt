@@ -12,12 +12,25 @@ GroupSourcesMSVC(test)
 
 set (EMBB_CONTAINERS_CPP_INCLUDE_DIRS "include" "src" "test")
 include_directories(${EMBB_CONTAINERS_CPP_INCLUDE_DIRS}
+                    ${CMAKE_CURRENT_BINARY_DIR}/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/../base_c/include
                     ${CMAKE_CURRENT_BINARY_DIR}/../base_c/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/../base_cpp/include
                     ${CMAKE_CURRENT_BINARY_DIR}/../base_cpp/include)
 
-add_library (embb_containers_cpp ${EMBB_CONTAINERS_CPP_SOURCES} ${EMBB_CONTAINERS_CPP_HEADERS})
+add_subdirectory(generator)
+set(GENERATOR_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/embb/containers/internal)
+set(CHROMATIC_TREE_GENERATED_HEADER ${GENERATOR_OUTPUT_DIR}/lock_free_chromatic_tree-rebalance.h)
+
+file(MAKE_DIRECTORY ${GENERATOR_OUTPUT_DIR})
+add_custom_command (
+  OUTPUT ${CHROMATIC_TREE_GENERATED_HEADER}
+  COMMAND chromatic_tree_generator ${CHROMATIC_TREE_GENERATED_HEADER}
+  DEPENDS chromatic_tree_generator
+)
+
+add_library (embb_containers_cpp ${EMBB_CONTAINERS_CPP_SOURCES} ${EMBB_CONTAINERS_CPP_HEADERS}
+                                 ${CHROMATIC_TREE_GENERATED_HEADER})
 target_link_libraries(embb_containers_cpp embb_base_cpp)
 
 if (BUILD_TESTS STREQUAL ON)
@@ -30,4 +43,5 @@ endif()
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/embb
         DESTINATION include FILES_MATCHING PATTERN "*.h")
+install(FILES ${CHROMATIC_TREE_GENERATED_HEADER} DESTINATION include/embb/containers/internal)
 install(TARGETS embb_containers_cpp DESTINATION lib)
