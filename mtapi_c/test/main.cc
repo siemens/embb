@@ -37,6 +37,9 @@
 #include <embb_mtapi_test_group.h>
 #include <embb_mtapi_test_queue.h>
 #include <embb_mtapi_test_error.h>
+#include <embb_mtapi_test_id_pool.h>
+
+#include <embb/base/c/memory_allocation.h>
 
 PT_MAIN("MTAPI C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
@@ -48,4 +51,7 @@ PT_MAIN("MTAPI C") {
   PT_RUN(InitFinalizeTest);
   PT_RUN(GroupTest);
   PT_RUN(QueueTest);
+  PT_RUN(IdPoolTest);
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

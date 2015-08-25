@@ -323,6 +323,8 @@ Known Bugs and Limitations
   is bounded by a predefined but modifiable constant (see functions
   embb_thread_get_max_count() / embb_thread_set_max_count() and class
   embb::base::Thread).
+- While MTAPI fully supports heterogeneous systems, the algorithms and
+  dataflow components are currently limited to homogeneous systems.
 
 
 Development and Contribution
