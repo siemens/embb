@@ -692,6 +692,8 @@ class UniqueHazardPointer {
    * hazardous pointers
    */
   AtomicTypePtr* hazard_guard_;
+  /** Local copy of the guarded pointer value (used for optimization) */
+  Type*          local_ptr_value_;
   /** Dummy value used to clear the hazard guard from any hazards */
   Type*          undefined_guard_;
   /** Flag set to true when the guard is protecting some hazardous pointer */

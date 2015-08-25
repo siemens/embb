@@ -48,7 +48,9 @@ ChromaticTreeNode(const Key& key, const Value& value, int weight,
                   Node* left, Node* right, Operation* operation)
     : key_(key),
       value_(value),
-      weight_(weight),
+      weight_(weight < 0 ? -weight : weight),
+      is_leaf_(left == NULL),
+      is_sentinel_(weight < 0),
       left_(left),
       right_(right),
       retired_(false),
@@ -60,49 +62,61 @@ ChromaticTreeNode(const Key& key, const Value& value, int weight,
                   Operation* operation)
     : key_(key),
       value_(value),
-      weight_(weight),
+      weight_(weight < 0 ? -weight : weight),
+      is_leaf_(true),
+      is_sentinel_(weight < 0),
       left_(NULL),
       right_(NULL),
       retired_(false),
       operation_(operation) {}
 
 template<typename Key, typename Value>
-const Key& ChromaticTreeNode<Key, Value>::GetKey() const {
+inline const Key& ChromaticTreeNode<Key, Value>::GetKey() const {
   return key_;
 }
 
 template<typename Key, typename Value>
-const Value& ChromaticTreeNode<Key, Value>::GetValue() const {
+inline const Value& ChromaticTreeNode<Key, Value>::GetValue() const {
   return value_;
 }
 
 template<typename Key, typename Value>
-int ChromaticTreeNode<Key, Value>::GetWeight() const {
+inline int ChromaticTreeNode<Key, Value>::GetWeight() const {
   return weight_;
 }
 
 template<typename Key, typename Value>
-typename ChromaticTreeNode<Key, Value>::AtomicNodePtr&
+inline typename ChromaticTreeNode<Key, Value>::AtomicNodePtr&
 ChromaticTreeNode<Key, Value>::GetLeft() {
   return left_;
 }
 
 template<typename Key, typename Value>
-typename ChromaticTreeNode<Key, Value>::Node*
+inline typename ChromaticTreeNode<Key, Value>::Node*
 ChromaticTreeNode<Key, Value>::GetLeft() const {
   return left_.Load();
 }
 
 template<typename Key, typename Value>
-typename ChromaticTreeNode<Key, Value>::AtomicNodePtr&
+inline typename ChromaticTreeNode<Key, Value>::AtomicNodePtr&
 ChromaticTreeNode<Key, Value>::GetRight() {
   return right_;
 }
 
 template<typename Key, typename Value>
-typename ChromaticTreeNode<Key, Value>::Node*
+inline typename ChromaticTreeNode<Key, Value>::Node*
 ChromaticTreeNode<Key, Value>::GetRight() const {
   return right_.Load();
+}
+
+template<typename Key, typename Value>
+inline bool ChromaticTreeNode<Key, Value>::IsLeaf() const {
+  return is_leaf_;
+}
+
+template<typename Key, typename Value>
+inline bool ChromaticTreeNode<Key, Value>::IsSentinel() const {
+  return is_sentinel_;
 }
 
 template<typename Key, typename Value>
@@ -120,17 +134,17 @@ ReplaceChild(Node* old_child, Node* new_child) {
 }
 
 template<typename Key, typename Value>
-void ChromaticTreeNode<Key, Value>::Retire() {
+inline void ChromaticTreeNode<Key, Value>::Retire() {
   retired_ = true;
 }
 
 template<typename Key, typename Value>
-bool ChromaticTreeNode<Key, Value>::IsRetired() const {
+inline bool ChromaticTreeNode<Key, Value>::IsRetired() const {
   return retired_;
 }
 
 template<typename Key, typename Value>
-typename ChromaticTreeNode<Key, Value>::AtomicOperationPtr&
+inline typename ChromaticTreeNode<Key, Value>::AtomicOperationPtr&
 ChromaticTreeNode<Key, Value>::GetOperation() {
   return operation_;
 }
@@ -143,13 +157,16 @@ ChromaticTreeOperation<Key, Value>::ChromaticTreeOperation()
       root_(NULL),
       root_operation_(NULL),
       num_old_nodes_(0),
-      old_nodes_(),
-      old_operations_(),
       new_child_(NULL)
 #ifdef EMBB_DEBUG
       , deleted_(false)
 #endif
-{}
+{
+  for (size_t i = 0; i < MAX_NODES; ++i) {
+    old_nodes_[i] = NULL;
+    old_operations_[i] = NULL;
+  }
+}
 
 template<typename Key, typename Value>
 void ChromaticTreeOperation<Key, Value>::
@@ -292,7 +309,7 @@ void ChromaticTreeOperation<Key, Value>::HelpAbort(Node* node) {
 }
 
 template<typename Key, typename Value>
-bool ChromaticTreeOperation<Key, Value>::IsAborted() {
+inline bool ChromaticTreeOperation<Key, Value>::IsAborted() {
 #ifdef EMBB_DEBUG
   assert(!deleted_);
 #endif
@@ -300,7 +317,7 @@ bool ChromaticTreeOperation<Key, Value>::IsAborted() {
 }
 
 template<typename Key, typename Value>
-bool ChromaticTreeOperation<Key, Value>::IsInProgress() {
+inline bool ChromaticTreeOperation<Key, Value>::IsInProgress() {
 #ifdef EMBB_DEBUG
   assert(!deleted_);
 #endif
@@ -309,7 +326,7 @@ bool ChromaticTreeOperation<Key, Value>::IsInProgress() {
 }
 
 template<typename Key, typename Value>
-bool ChromaticTreeOperation<Key, Value>::IsCommitted() {
+inline bool ChromaticTreeOperation<Key, Value>::IsCommitted() {
 #ifdef EMBB_DEBUG
   assert(!deleted_);
 #endif
@@ -341,7 +358,14 @@ void ChromaticTreeOperation<Key, Value>::SetDeleted() {
 template<typename Key, typename Value>
 typename ChromaticTreeOperation<Key, Value>::Operation*
 ChromaticTreeOperation<Key, Value>::GetInitialDummmy() {
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4640)
+#endif
   static ChromaticTreeOperation initial_dummy;
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
   initial_dummy.state_ = STATE_COMMITTED;
 
@@ -351,7 +375,14 @@ ChromaticTreeOperation<Key, Value>::GetInitialDummmy() {
 template<typename Key, typename Value>
 typename ChromaticTreeOperation<Key, Value>::Operation*
 ChromaticTreeOperation<Key, Value>::GetRetiredDummmy() {
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4640)
+#endif
   static ChromaticTreeOperation retired_dummy;
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
   retired_dummy.state_ = STATE_COMMITTED;
 
@@ -513,10 +544,10 @@ ChromaticTree(size_t capacity, Key undefined_key, Value undefined_value,
       operation_pool_(2 + 5 + 2 * capacity_ +
                       operation_hazard_manager_.GetRetiredListMaxSize() *
                       embb::base::Thread::GetThreadsMaxCount()),
-      entry_(node_pool_.Allocate(undefined_key_, undefined_value_, 1,
+      entry_(node_pool_.Allocate(undefined_key_, undefined_value_, -1,
                                  node_pool_.Allocate(undefined_key_,
                                                      undefined_value_,
-                                                     1,
+                                                     -1,
                                                      Operation::INITIAL_DUMMY),
                                  static_cast<Node*>(NULL),
                                  Operation::INITIAL_DUMMY)) {
@@ -539,7 +570,7 @@ Get(const Key& key, Value& value) {
   HazardNodePtr leaf(GetNodeGuard(HIDX_LEAF));
   Search(key, leaf, parent, grandparent);
 
-  bool keys_are_equal = !IsSentinel(leaf) &&
+  bool keys_are_equal = !leaf->IsSentinel() &&
                         !(compare_(key, leaf->GetKey()) ||
                           compare_(leaf->GetKey(), key));
 
@@ -582,7 +613,7 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
     HazardOperationPtr leaf_op(GetOperationGuard(HIDX_LEAF));
     if (!WeakLLX(leaf, leaf_op)) continue;
 
-    bool keys_are_equal = !IsSentinel(leaf) &&
+    bool keys_are_equal = !leaf->IsSentinel() &&
                           !(compare_(key, leaf->GetKey()) ||
                             compare_(leaf->GetKey(), key));
     if (keys_are_equal) {
@@ -603,8 +634,11 @@ TryInsert(const Key& key, const Value& value, Value& old_value) {
                                         Operation::INITIAL_DUMMY);
       if (new_sibling == NULL) break;
 
-      int new_weight = (IsSentinel(parent)) ? 1 : (leaf->GetWeight() - 1);
-      if (IsSentinel(leaf) || compare_(key, leaf->GetKey())) {
+      int new_weight =
+          leaf->IsSentinel() ? -1 :
+            parent->IsSentinel() ? 1 :
+              (leaf->GetWeight() - 1);
+      if (leaf->IsSentinel() || compare_(key, leaf->GetKey())) {
         new_parent = node_pool_.Allocate(leaf->GetKey(), undefined_value_,
                                          new_weight, new_leaf, new_sibling,
                                          Operation::INITIAL_DUMMY);
@@ -685,7 +719,7 @@ TryDelete(const Key& key, Value& old_value) {
     Search(key, leaf, parent, grandparent);
 
     // Reached leaf has a different key - nothing to delete
-    if (IsSentinel(leaf) || (compare_(key, leaf->GetKey()) ||
+    if (leaf->IsSentinel() || (compare_(key, leaf->GetKey()) ||
                              compare_(leaf->GetKey(), key))) {
       old_value = undefined_value_;
       deletion_succeeded = true;
@@ -720,8 +754,10 @@ TryDelete(const Key& key, Value& old_value) {
     HazardOperationPtr leaf_op(GetOperationGuard(HIDX_LEAF));
     if (!WeakLLX(leaf, leaf_op)) continue;
 
-    int new_weight = (IsSentinel(grandparent)) ?
-                  1 : (parent->GetWeight() + sibling->GetWeight());
+    int new_weight =
+        parent->IsSentinel() ? -1 :
+          grandparent->IsSentinel() ? 1 :
+            (parent->GetWeight() + sibling->GetWeight());
 
     new_leaf = node_pool_.Allocate(
         sibling->GetKey(), sibling->GetValue(), new_weight,
@@ -788,9 +824,9 @@ GetUndefinedValue() const {
 }
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
-bool ChromaticTree<Key, Value, Compare, ValuePool>::
+inline bool ChromaticTree<Key, Value, Compare, ValuePool>::
 IsEmpty() const {
-  return IsLeaf(entry_->GetLeft());
+  return entry_->GetLeft()->IsLeaf();
 }
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
@@ -804,13 +840,13 @@ Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
     parent.ProtectSafe(entry_);
     leaf.ProtectSafe(entry_);
 
-    reached_leaf = IsLeaf(leaf);
+    reached_leaf = leaf->IsLeaf();
     while (!reached_leaf) {
       grandparent.AdoptHazard(parent);
       parent.AdoptHazard(leaf);
 
       AtomicNodePtr& next_leaf =
-          (IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+          (leaf->IsSentinel() || compare_(key, leaf->GetKey())) ?
             leaf->GetLeft() : leaf->GetRight();
 
       // Parent is protected, so we can tolerate a changing child pointer
@@ -828,25 +864,13 @@ Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
 
       VERIFY_ADDRESS(static_cast<Node*>(leaf));
 
-      reached_leaf = IsLeaf(leaf);
+      reached_leaf = leaf->IsLeaf();
     }
   }
 }
 
 template<typename Key, typename Value, typename Compare, typename ValuePool>
-bool ChromaticTree<Key, Value, Compare, ValuePool>::
-IsLeaf(const Node* node) const {
-  return node->GetLeft() == NULL;
-}
-
-template<typename Key, typename Value, typename Compare, typename ValuePool>
-bool ChromaticTree<Key, Value, Compare, ValuePool>::
-IsSentinel(const Node* node) const {
-  return (node == entry_) || (node == entry_->GetLeft());
-}
-
-template<typename Key, typename Value, typename Compare, typename ValuePool>
-bool ChromaticTree<Key, Value, Compare, ValuePool>::
+inline bool ChromaticTree<Key, Value, Compare, ValuePool>::
 HasChild(const Node* parent, const Node* child) const {
   return (parent->GetLeft() == child || parent->GetRight() == child);
 }
@@ -854,7 +878,7 @@ HasChild(const Node* parent, const Node* child) const {
 template<typename Key, typename Value, typename Compare, typename ValuePool>
 void ChromaticTree<Key, Value, Compare, ValuePool>::
 Destruct(Node* node) {
-  if (!IsLeaf(node)) {
+  if (!node->IsLeaf()) {
     Destruct(node->GetLeft());
     Destruct(node->GetRight());
   }
@@ -884,7 +908,7 @@ IsBalanced(const Node* node) const {
   // Overweight violation
   bool has_violation = node->GetWeight() > 1;
 
-  if (!has_violation && !IsLeaf(node)) {
+  if (!has_violation && !node->IsLeaf()) {
     const Node* left  = node->GetLeft();
     const Node* right = node->GetRight();
 
@@ -994,14 +1018,14 @@ CleanUp(const Key& key) {
     parent.ProtectSafe(entry_);
     leaf.ProtectSafe(entry_);
 
-    reached_leaf = IsLeaf(leaf);
+    reached_leaf = leaf->IsLeaf();
     while (!reached_leaf && !found_violation) {
       grandgrandparent.AdoptHazard(grandparent);
       grandparent.AdoptHazard(parent);
       parent.AdoptHazard(leaf);
 
       AtomicNodePtr& next_leaf =
-          (IsSentinel(leaf) || compare_(key, leaf->GetKey())) ?
+          (leaf->IsSentinel() || compare_(key, leaf->GetKey())) ?
             leaf->GetLeft() : leaf->GetRight();
 
       // Parent is protected, so we can tolerate a changing child pointer
@@ -1030,7 +1054,7 @@ CleanUp(const Key& key) {
         break;
       }
 
-      reached_leaf = IsLeaf(leaf);
+      reached_leaf = leaf->IsLeaf();
     }
   }
 

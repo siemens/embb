@@ -422,12 +422,16 @@ const double embb::containers::internal::HazardPointer<GuardType>::
 template<typename Type>
 UniqueHazardPointer<Type>::
 UniqueHazardPointer()
-    : hazard_guard_(NULL), undefined_guard_(NULL), active_(false) {}
+    : hazard_guard_(NULL),
+      local_ptr_value_(NULL),
+      undefined_guard_(NULL),
+      active_(false) {}
 
 template<typename Type>
 UniqueHazardPointer<Type>::
 UniqueHazardPointer(AtomicTypePtr& hazard_guard, Type* undefined_guard)
     : hazard_guard_(&hazard_guard),
+      local_ptr_value_(hazard_guard_->Load()),
       undefined_guard_(undefined_guard),
       active_(LoadGuardedPointer() == undefined_guard_) {}
 
@@ -487,6 +491,7 @@ void UniqueHazardPointer<Type>::AdoptHazard(const UniqueHazardPointer& other) {
 template<typename Type>
 void UniqueHazardPointer<Type>::Swap(UniqueHazardPointer& other) {
   std::swap(hazard_guard_, other.hazard_guard_);
+  std::swap(local_ptr_value_, other.local_ptr_value_);
   std::swap(undefined_guard_, other.undefined_guard_);
   std::swap(active_, other.active_);
 }
@@ -517,12 +522,13 @@ void UniqueHazardPointer<Type>::ClearHazard() {
 
 template<typename Type>
 Type* UniqueHazardPointer<Type>::LoadGuardedPointer() const {
-  return hazard_guard_->Load();
+  return local_ptr_value_;
 }
 
 template<typename Type>
 void UniqueHazardPointer<Type>::StoreGuardedPointer(Type* ptr) {
   hazard_guard_->Store(ptr);
+  local_ptr_value_ = ptr;
 }
 
 template<typename Type>

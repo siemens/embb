@@ -33,6 +33,8 @@
 #include <embb/base/c/errors.h>
 #include <embb/base/mutex.h>
 #include <embb/containers/internal/hazard_pointer.h>
+#include <embb/containers/lock_free_tree_value_pool.h>
+#include <embb/containers/object_pool.h>
 
 namespace embb {
 namespace containers {
@@ -124,6 +126,20 @@ class ChromaticTreeNode {
   Node* GetRight() const;
 
   /**
+   * Checks if the node is a leaf.
+   * 
+   * @return \c true if node is a leaf, \c false otherwise
+   */
+  bool IsLeaf() const;
+
+  /**
+   * Checks if the node is a sentinel.
+   *
+   * @return \c true if node is a sentinel, \c false otherwise
+   */
+  bool IsSentinel() const;
+
+  /**
    * Tries to replace one of the child pointers that compares equal to
    * \c old_child with the \c new_child using an atomic compare-and-swap
    * operation. If neither left nor right child pointer is pointing to
@@ -166,13 +182,15 @@ class ChromaticTreeNode {
   ChromaticTreeNode(const ChromaticTreeNode&);
   ChromaticTreeNode& operator=(const ChromaticTreeNode&);
   
-  const Key          key_;       /**< Stored key. */
-  const Value        value_;     /**< Stored value. */
-  const int          weight_;    /**< Weight of the node. */
-  AtomicNodePtr      left_;      /**< Pointer to left child node. */
-  AtomicNodePtr      right_;     /**< Pointer to right child node. */
-  AtomicFlag         retired_;   /**< Retired (marked for deletion) flag. */
-  AtomicOperationPtr operation_; /**< Pointer to a tree operation object. */
+  const Key          key_;         /**< Stored key. */
+  const Value        value_;       /**< Stored value. */
+  const int          weight_;      /**< Weight of the node. */
+  const bool         is_leaf_;     /**< True if node is a leaf. */
+  const bool         is_sentinel_; /**< True if node is a sentinel. */
+  AtomicNodePtr      left_;        /**< Pointer to left child node. */
+  AtomicNodePtr      right_;       /**< Pointer to right child node. */
+  AtomicFlag         retired_;     /**< Retired (marked for deletion) flag. */
+  AtomicOperationPtr operation_;   /**< Pointer to a tree operation object. */
 };
 
 /**
@@ -690,24 +708,6 @@ class ChromaticTree {
    */
   void Search(const Key& key, HazardNodePtr& leaf, HazardNodePtr& parent,
               HazardNodePtr& grandparent);
-  
-  /**
-   * Checks whether the given node is a leaf.
-   * 
-   * \param[IN] node Node to be checked
-   * 
-   * \return \c true if the given node is a leaf, \c false otherwise
-   */
-  bool IsLeaf(const Node* node) const;
-  
-  /**
-   * Checks whether the given node is a sentinel node.
-   * 
-   * \param[IN] node Node to be checked
-   * 
-   * \return \c true if the given node is a sentinel node, \c false otherwise
-   */
-  bool IsSentinel(const Node* node) const;
   
   /**
    * Checks whether the given node has a specified child node.
