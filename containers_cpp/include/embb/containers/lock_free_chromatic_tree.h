@@ -222,16 +222,13 @@ class ChromaticTreeOperation {
   /** Hazard-protected pointer to a tree operation. */
   typedef UniqueHazardPointer<Operation> HazardOperationPtr;
 
-  /** Dummy operation used for newly created nodes. */
-  static Operation* const INITIAL_DUMMY;
-  /** Dummy operation used for nodes removed from the tree after
-   * an operation commits. */
-  static Operation* const RETIRED_DUMMY;
-
   /**
    * Creates an empty operation object with an "in progress" state.
+   *
+   * \param is_dummy Boolean flag for creation of dummy operation objects.
+   *
    */
-  ChromaticTreeOperation();
+  ChromaticTreeOperation(bool is_dummy = false);
 
   /**
    * Set the root node of this operation together with its original operation
@@ -332,8 +329,11 @@ class ChromaticTreeOperation {
    * operation commits, resets all the operation pointers of the nodes of the
    * removed operation window to point to the retired dummy-operation. Must be
    * called only once after the operation either commits or aborts.
+   *
+   * \param retired_dummy Dummy operation object used to reset operation
+   *                      pointers in the retired nodes.
    */
-  void CleanUp();
+  void CleanUp(Operation* retired_dummy);
 
 #ifdef EMBB_DEBUG
   /**
@@ -357,24 +357,6 @@ class ChromaticTreeOperation {
 
   /** Maximal possible number of nodes in an operation window. */
   static const size_t MAX_NODES = 5;
-
-  /**
-   * Initializes and returns the initial dummy operation.
-   *
-   * \return Pointer to the INITIAL_DUMMY operation
-   *
-   * \see INITIAL_DUMMY
-   */
-  static Operation* GetInitialDummmy();
-
-  /**
-   * Initializes and returns the retired dummy operation.
-   *
-   * \return Pointer to the RETIRED_DUMMY operation
-   *
-   * \see RETIRED_DUMMY
-   */
-  static Operation* GetRetiredDummmy();
 
   /**
    * Check whether the operation is rolling back.
@@ -760,6 +742,15 @@ class ChromaticTree {
   bool IsBalanced(const Node* node) const;
 
   /**
+   * Checks whether a given operation is a dummy operation.
+   *
+   * \param[IN] operation Operation to be checked
+   *
+   * \return \c true if the given operation is a dummy, \c false otherwise
+   */
+  bool IsDummyOperation(const Operation* operation) const;
+
+  /**
    * Retire a hazardous node using the node hazard manager.
    *
    * \param node A hazardous node to be retired
@@ -865,14 +856,24 @@ class ChromaticTree {
   /** Hazard pointer manager for protecting operation pointers. */
   internal::HazardPointer<Operation*> operation_hazard_manager_;
 
-  const Key     undefined_key_;   /**< A dummy key used by the tree. */
-  const Value   undefined_value_; /**< A dummy value used by the tree. */
-  const Compare compare_;         /**< Comparator object for the keys. */
-  size_t        capacity_;        /**< User-requested capacity of the tree. */
-  NodePool      node_pool_;       /**< Pool of tree nodes. */
-  OperationPool operation_pool_;  /**< Pool of operation objects. */
-  Node* const   entry_;           /**< Pointer to the sentinel node used as
-                                   *   the entry point into the tree. */
+  /** A dummy key used by the tree. */
+  const Key     undefined_key_;   
+  /** A dummy value used by the tree. */
+  const Value   undefined_value_; 
+  /** Comparator object for the keys. */
+  const Compare compare_;         
+  /** User-requested capacity of the tree. */
+  size_t        capacity_;        
+  /** Pool of tree nodes. */
+  NodePool      node_pool_;       
+  /** Pool of operation objects. */
+  OperationPool operation_pool_;  
+  /** Dummy operation used in newly created nodes. */
+  Operation     initial_operation_dummy_;
+  /** Dummy operation used in retired nodes. */
+  Operation     retired_operation_dummy_;
+  /** Pointer to the sentinel node used as the entry point into the tree. */
+  Node* const   entry_;
 
   /**
    * Friending the test class for white-box testing

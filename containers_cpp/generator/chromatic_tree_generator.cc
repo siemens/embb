@@ -112,7 +112,7 @@ void PrintOperationSourceCode(FILE* file, const RebalancingOperation& op) {
   for (int i = 0; i < op.num_nodes; ++i) {
     fprintf(file, "    %s = node_pool_.Allocate(\n"
                   "        %s->GetKey(), %s->GetValue(), %s,\n"
-                  "        %s, %s, Operation::INITIAL_DUMMY);\n"
+                  "        %s, %s, &initial_operation_dummy_);\n"
                   "    if (%s == NULL) break;\n",
             op.new_nodes[i].name,
             op.new_nodes[i].orig_node, op.new_nodes[i].orig_node,
@@ -142,7 +142,7 @@ void PrintOperationSourceCode(FILE* file, const RebalancingOperation& op) {
   fprintf(file, "\n"
       "    bool succeeded = op->Help(GetNodeGuard(HIDX_HELPING),\n"
       "                              GetOperationGuard(HIDX_HELPING));\n"
-      "    op->CleanUp();\n"
+      "    op->CleanUp(&retired_operation_dummy_);\n"
       "    \n"
       "    if (!succeeded) {\n"
       "      RetireOperation(op);\n"
