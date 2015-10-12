@@ -113,8 +113,17 @@ class LockFreeMPMCQueue {
    * least as many elements, maybe more.
    */
   size_t capacity;
-  // Do not change the ordering of class local variables.
-  // Important for initialization.
+
+  /**
+   * The object pool, used for lock-free memory allocation.
+   *
+   * Warning: the objectPool has to be initialized before the hazardPointer
+   * object, to be sure that the hazardPointer object is destructed before the
+   * Pool as the hazardPointer object might return elements to the pool in its
+   * destructor. So the ordering of the members objectPool and hazardPointer is
+   * important here!
+   */
+  ObjectPool< internal::LockFreeMPMCQueueNode<Type>, ValuePool > objectPool;
 
   /**
    * Callback to the method that is called by hazard pointers if a pointer is
@@ -124,15 +133,17 @@ class LockFreeMPMCQueue {
     delete_pointer_callback;
 
   /**
-   * The hazard pointer object, used for memory management.
+   * Definition of the used hazard pointer type
    */
-  embb::containers::internal::HazardPointer
-    < internal::LockFreeMPMCQueueNode<Type>* > hazardPointer;
+  typedef embb::containers::internal::HazardPointer
+    < internal::LockFreeMPMCQueueNode<Type>* >
+    MPMCQueueNodeHazardPointer_t;
 
   /**
-   * The object pool, used for lock-free memory allocation.
+   * The hazard pointer object, used for memory management.
    */
-  ObjectPool< internal::LockFreeMPMCQueueNode<Type>, ValuePool > objectPool;
+  MPMCQueueNodeHazardPointer_t hazardPointer;
+
 
   /**
    * Atomic pointer to the head node of the queue

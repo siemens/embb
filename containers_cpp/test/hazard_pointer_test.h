@@ -36,33 +36,116 @@
 namespace embb {
 namespace containers {
 namespace test {
+
+/**
+ * @brief a very simple wait-free object pool implementation to have tests
+ * being independent of the EMBB object pool implementation.
+ */
+class IntObjectTestPool {
+ private:
+  int* simplePoolObjects;
+  embb::base::Atomic<int>* simplePool;
+
+ public:
+  static const int ALLOCATED_MARKER = 1;
+  static const int FREE_MARKER = 0;
+  unsigned int poolSize;
+
+  IntObjectTestPool(unsigned int poolSize);
+
+  ~IntObjectTestPool();
+
+  /**
+   * Allocate object from the pool
+   *
+   * @return the allocated object
+   */
+  int* Allocate();
+
+  /**
+   * Return an element to the pool
+   *
+   * @param objectPointer the object to be freed
+   */
+  void Release(int* objectPointer);
+};
+
 class HazardPointerTest : public partest::TestCase {
  private:
-  embb::base::Function<void, embb::base::Atomic<int>*> delete_pointer_callback;
+  embb::base::Function<void, embb::base::Atomic<int>*> deletePointerCallback;
 
   //used to allocate random stuff, we will just use the pointers, not the
   //contents
-  embb::containers::ObjectPool< embb::base::Atomic<int> >* object_pool;
+  embb::containers::ObjectPool< embb::base::Atomic<int> >* objectPool;
 
   //used to move pointer between threads
   embb::containers::LockFreeStack< embb::base::Atomic<int>* >* stack;
-  embb::base::Mutex vector_mutex;
-  embb::containers::internal::HazardPointer<embb::base::Atomic<int>*>* hp;
-  std::vector< embb::base::Atomic<int>* > deleted_vector;
-  int n_threads;
-  int n_elements_per_thread;
-  int n_elements;
+  embb::base::Mutex vectorMutex;
+  embb::containers::internal::HazardPointer<embb::base::Atomic<int>*>*
+    hazardPointer;
+  std::vector< embb::base::Atomic<int>* > deletedVector;
+  int nThreads;
+  int nElementsPerThread;
+  int nElements;
 
  public:
   /**
   * Adds test methods.
   */
   HazardPointerTest();
-  void HazardPointerTest1_Pre();
-  void HazardPointerTest1_Post();
-  void HazardPointerTest1_ThreadMethod();
-  void DeletePointerCallback(embb::base::Atomic<int>* to_delete);
+  void HazardPointerTest1Pre();
+  void HazardPointerTest1Post();
+  void HazardPointerTest1ThreadMethod();
+  void DeletePointerCallback(embb::base::Atomic<int>* toDelete);
 };
+
+class HazardPointerTest2 : public partest::TestCase {
+ private:
+  // number of threads, participating in that test
+  int nThreads;
+
+  embb::base::Function<void, int*> deletePointerCallback;
+  // the thread id of the master
+  embb::base::Atomic<unsigned int> currentMaster;
+
+  // variables, to synchronize threads. At each point in time, one master,
+  // the master changes each round until each thread was assigned master once.
+  embb::base::Atomic<int> sync1;
+  embb::base::Atomic<unsigned int> sync2;
+
+  unsigned int guardsPerThreadCount;
+  unsigned int guaranteedCapacityPool;
+  unsigned int poolSizeUsingHazardPointer;
+
+  // The threads write here, if they guarded an object successfully. Used to
+  // determine when all allocated objects were guarded successfully.
+  embb::base::Atomic<int*>* sharedGuarded;
+
+  // This array is used by the master, to communicate and share what he has
+  // allocated with the slaves.
+  embb::base::Atomic<int*>* sharedAllocated;
+
+  // Reference to the object pool
+  IntObjectTestPool* testPool;
+
+  embb::containers::internal::HazardPointer<int*>* hazardPointer;
+  static const int finishMarker = -1;
+
+ public:
+  void DeletePointerCallback(int* toDelete);
+  bool SetRelativeGuards();
+  void HazardPointerTest2Master();
+  void HazardPointerTest2Slave();
+
+  void HazardPointerTest2Pre();
+  void HazardPointerTest2Post();
+
+  void HazardPointerTest2ThreadMethod();
+
+  HazardPointerTest2();
+};
+
+
 } // namespace test
 } // namespace containers
 } // namespace embb

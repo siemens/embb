@@ -81,13 +81,13 @@ capacity(capacity),
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-  hazardPointer(delete_pointer_callback, NULL, 1),
   // Object pool, size with respect to the maximum number of retired nodes not
   // eligible for reuse:
   objectPool(
-  hazardPointer.GetRetiredListMaxSize()*
-  embb::base::Thread::GetThreadsMaxCount() +
-  capacity) {
+  StackNodeHazardPointer_t::ComputeMaximumRetiredObjectCount(1) +
+  capacity),
+  hazardPointer(delete_pointer_callback, NULL, 1)
+{
 }
 
 template< typename Type, typename ValuePool >
@@ -128,7 +128,7 @@ bool LockFreeStack< Type, ValuePool >::TryPop(Type & element) {
       return false;
 
     // Guard top_cached
-    hazardPointer.GuardPointer(0, top_cached);
+    hazardPointer.Guard(0, top_cached);
 
     // Check if top is still top. If this is the case, it has not been
     // retired yet (because before retiring that thing, the retiring thread
@@ -144,16 +144,16 @@ bool LockFreeStack< Type, ValuePool >::TryPop(Type & element) {
       break;
     } else {
       // We continue with the next and can unguard top_cached
-      hazardPointer.GuardPointer(0, NULL);
+      hazardPointer.Guard(0, NULL);
     }
   }
 
   Type data = top_cached->GetElement();
 
   // We don't need to read from this reference anymore, unguard it
-  hazardPointer.GuardPointer(0, NULL);
+  hazardPointer.Guard(0, NULL);
 
-  hazardPointer.EnqueuePointerForDeletion(top_cached);
+  hazardPointer.EnqueueForDeletion(top_cached);
 
   element = data;
   return true;
