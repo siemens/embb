@@ -31,23 +31,22 @@
 namespace embb {
 namespace containers {
 namespace test {
-
-IntObjectTestPool::IntObjectTestPool(unsigned int poolSize) :
-poolSize(poolSize)
+IntObjectTestPool::IntObjectTestPool(unsigned int pool_size) :
+poolSize(pool_size)
 {
   simplePoolObjects = static_cast<int*>(
-    embb::base::Allocation::Allocate(sizeof(int)*poolSize));
+    embb::base::Allocation::Allocate(sizeof(int)*pool_size));
 
   simplePool = static_cast<embb::base::Atomic<int>*> (
     embb::base::Allocation::Allocate(sizeof(embb::base::Atomic<int>)*
-    poolSize));
+    pool_size));
 
-  for (unsigned int i = 0; i != poolSize; ++i) {
+  for (unsigned int i = 0; i != pool_size; ++i) {
     //in-place new for each array cell
     new (&simplePool[i]) embb::base::Atomic<int>;
   }
 
-  for (unsigned int i = 0; i != poolSize; ++i) {
+  for (unsigned int i = 0; i != pool_size; ++i) {
     simplePool[i] = FREE_MARKER;
     simplePoolObjects[i] = 0;
   }
@@ -75,8 +74,8 @@ int* IntObjectTestPool::Allocate() {
   return 0;
 }
 
-void IntObjectTestPool::Release(int* objectPointer) {
-  int cell = objectPointer - simplePoolObjects;
+void IntObjectTestPool::Release(int* object_pointer) {
+  int cell = object_pointer - simplePoolObjects;
   simplePool[cell].Store(FREE_MARKER);
 }
 
@@ -85,17 +84,17 @@ HazardPointerTest::HazardPointerTest() :
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
-deletePointerCallback(*this, &HazardPointerTest::DeletePointerCallback),
+delete_pointer_callback_(*this, &HazardPointerTest::DeletePointerCallback),
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-  objectPool(NULL),
-  stack(NULL),
-  hazardPointer(NULL),
-  nThreads(static_cast<int>
+  object_pool_(NULL),
+  stack_(NULL),
+  hazard_pointer_(NULL),
+  n_threads_(static_cast<int>
   (partest::TestSuite::GetDefaultNumThreads())) {
-  nElementsPerThread = 100;
-  nElements = nThreads*nElementsPerThread;
+  n_elements_per_thread_ = 100;
+  n_elements_ = n_threads_*n_elements_per_thread_;
   embb::base::Function < void, embb::base::Atomic<int>* >
     deletePointerCallback(
     *this,
@@ -111,45 +110,45 @@ deletePointerCallback(*this, &HazardPointerTest::DeletePointerCallback),
     Pre(&HazardPointerTest::HazardPointerTest1Pre, this).
     Add(
     &HazardPointerTest::HazardPointerTest1ThreadMethod,
-    this, static_cast<size_t>(nThreads)).
+    this, static_cast<size_t>(n_threads_)).
     Post(&HazardPointerTest::HazardPointerTest1Post, this);
 }
 
 void HazardPointerTest::HazardPointerTest1Pre() {
   embb_internal_thread_index_reset();
 
-  objectPool =
+  object_pool_ =
      embb::base::Allocation::
      New<embb::containers::ObjectPool< embb::base::Atomic<int> > >
-     (static_cast<size_t>(nElements));
+     (static_cast<size_t>(n_elements_));
 
-  stack = embb::base::Allocation::
+  stack_ = embb::base::Allocation::
     New<embb::containers::LockFreeStack< embb::base::Atomic<int>* > >
-    (static_cast<size_t>(nElements));
+    (static_cast<size_t>(n_elements_));
 
-  hazardPointer = embb::base::Allocation::
+  hazard_pointer_ = embb::base::Allocation::
     New<embb::containers::internal::HazardPointer < embb::base::Atomic<int>* > >
-    (deletePointerCallback,
+    (delete_pointer_callback_,
     static_cast<embb::base::Atomic<int>*>(NULL),
     1);
 }
 
 void HazardPointerTest::HazardPointerTest1Post() {
-  embb::base::Allocation::Delete(hazardPointer);
-  embb::base::Allocation::Delete(objectPool);
-  embb::base::Allocation::Delete(stack);
+  embb::base::Allocation::Delete(hazard_pointer_);
+  embb::base::Allocation::Delete(object_pool_);
+  embb::base::Allocation::Delete(stack_);
 }
 
 void HazardPointerTest::HazardPointerTest1ThreadMethod() {
   unsigned int thread_index;
   embb_internal_thread_index(&thread_index);
 
-  for (int i = 0; i != nElementsPerThread; ++i) {
-    embb::base::Atomic<int>* allocated_object = objectPool->Allocate(0);
+  for (int i = 0; i != n_elements_per_thread_; ++i) {
+    embb::base::Atomic<int>* allocated_object = object_pool_->Allocate(0);
 
-    hazardPointer->Guard(0, allocated_object);
+    hazard_pointer_->Guard(0, allocated_object);
 
-    bool success = stack->TryPush(allocated_object);
+    bool success = stack_->TryPush(allocated_object);
 
     PT_ASSERT(success == true);
 
@@ -161,7 +160,7 @@ void HazardPointerTest::HazardPointerTest1ThreadMethod() {
     bool success_pop;
 
     while (
-      (success_pop = stack->TryPop(allocated_object_from_different_thread))
+      (success_pop = stack_->TryPop(allocated_object_from_different_thread))
       == true
       && allocated_object_from_different_thread == allocated_object
       ) {
@@ -171,99 +170,100 @@ void HazardPointerTest::HazardPointerTest1ThreadMethod() {
         same = true;
         break;
       }
-      bool success = stack->TryPush(allocated_object_from_different_thread);
+      bool success = stack_->TryPush(allocated_object_from_different_thread);
       PT_ASSERT(success == true);
     }
     PT_ASSERT(success_pop == true);
     allocated_object->Store(1);
-    hazardPointer->EnqueueForDeletion(allocated_object);
+    hazard_pointer_->EnqueueForDeletion(allocated_object);
 
     if (!same) {
-      hazardPointer->Guard(0, allocated_object_from_different_thread);
+      hazard_pointer_->Guard(0, allocated_object_from_different_thread);
 
       // if this holds, we were successful in guarding... otherwise we
       // were to late, because the pointer has already been added
       // to the retired list.
       if (*allocated_object_from_different_thread == 0) {
         // the pointer must not be deleted here!
-        vectorMutex.Lock();
+        vector_mutex_.Lock();
         for (std::vector< embb::base::Atomic<int>* >::iterator
-          it = deletedVector.begin();
-          it != deletedVector.end();
+          it = deleted_vector_.begin();
+          it != deleted_vector_.end();
         ++it) {
           PT_ASSERT(*it != allocated_object_from_different_thread);
         }
-        vectorMutex.Unlock();
+        vector_mutex_.Unlock();
       }
-      hazardPointer->Guard(0, NULL);
+      hazard_pointer_->Guard(0, NULL);
     }
   }
 }
 
 void HazardPointerTest::DeletePointerCallback
 (embb::base::Atomic<int>* to_delete) {
-  vectorMutex.Lock();
-  deletedVector.push_back(to_delete);
-  vectorMutex.Unlock();
+  vector_mutex_.Lock();
+  deleted_vector_.push_back(to_delete);
+  vector_mutex_.Unlock();
 }
 
-void HazardPointerTest2::DeletePointerCallback(int* toDelete) {
-  testPool->Release(toDelete);
+void HazardPointerTest2::DeletePointerCallback(int* to_delete) {
+  test_pool_->Release(to_delete);
 }
 
 bool HazardPointerTest2::SetRelativeGuards() {
-  unsigned int threadIndex;
-  embb_internal_thread_index(&threadIndex);
+  unsigned int thread_index;
+  embb_internal_thread_index(&thread_index);
 
-  unsigned int my_begin = guardsPerThreadCount*threadIndex;
-  int guardNumber = 0;
+  unsigned int my_begin = guards_per_phread_count_*thread_index;
+  int guard_number = 0;
   unsigned int alreadyGuarded = 0;
 
-  for (unsigned int i = my_begin; i != my_begin + guardsPerThreadCount; ++i){
-    if (sharedGuarded[i] != 0) {
+  for (unsigned int i = my_begin; i != my_begin + guards_per_phread_count_;
+    ++i){
+    if (shared_guarded_[i] != 0) {
       alreadyGuarded++;
-      guardNumber++;
+      guard_number++;
       continue;
     }
 
-    int * toGuard = sharedAllocated[i];
-    if (toGuard) {
-      hazardPointer->Guard(guardNumber, toGuard);
+    int * to_guard = shared_allocated_[i];
+    if (to_guard) {
+      hazard_pointer_->Guard(guard_number, to_guard);
 
       // changed in the meantime?
-      if (toGuard == sharedAllocated[i].Load()) {
+      if (to_guard == shared_allocated_[i].Load()) {
         // guard was successful. Communicate to other threads.
-        sharedGuarded[i] = toGuard;
+        shared_guarded_[i] = to_guard;
       }
       else {
         // reset the guard, couldn't guard...
-        hazardPointer->RemoveGuard(guardNumber);
+        hazard_pointer_->RemoveGuard(guard_number);
       }
     }
-    guardNumber++;
+    guard_number++;
   }
-  return(alreadyGuarded == guardsPerThreadCount);
+  return(alreadyGuarded == guards_per_phread_count_);
 }
 
 void HazardPointerTest2::HazardPointerTest2Master() {
   // while the hazard pointer guard array is not full
   int** allocatedLocal = static_cast<int**>(
-  embb::base::Allocation::Allocate(sizeof(int*)*guaranteedCapacityPool));
+  embb::base::Allocation::Allocate(sizeof(int*)*guaranteed_capacity_pool_));
 
   bool full = false;
   while (!full) {
     full = true;
-    for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
-      if (sharedGuarded[i] == 0) {
+    for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
+      if (shared_guarded_[i] == 0) {
         full = false;
         break;
       }
     }
 
     // not all guards set
-    for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
-      allocatedLocal[i] = testPool->Allocate();
-      sharedAllocated[i].Store(allocatedLocal[i]);
+    for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
+      allocatedLocal[i] = test_pool_->Allocate();
+      shared_allocated_[i].Store(allocatedLocal[i]);
     }
 
     // set my hazards. We do not have to check, this must be successful
@@ -271,9 +271,9 @@ void HazardPointerTest2::HazardPointerTest2Master() {
     SetRelativeGuards();
 
     // free
-    for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
-      sharedAllocated[i].Store(0);
-      hazardPointer->EnqueueForDeletion(allocatedLocal[i]);
+    for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
+      shared_allocated_[i].Store(0);
+      hazard_pointer_->EnqueueForDeletion(allocatedLocal[i]);
     }
   }
 
@@ -289,54 +289,54 @@ void HazardPointerTest2::HazardPointerTest2Slave() {
 
 void HazardPointerTest2::HazardPointerTest2Pre() {
   embb_internal_thread_index_reset();
-  currentMaster = 0;
-  sync1 = 0;
-  sync2 = 0;
+  current_master_ = 0;
+  sync1_ = 0;
+  sync2_ = 0;
 
   // first the test pool has to be created
-  testPool = embb::base::Allocation::New<IntObjectTestPool>(poolSizeUsingHazardPointer);
+  test_pool_ = embb::base::Allocation::New<IntObjectTestPool>
+    (pool_size_using_hazard_pointer_);
 
   // after the pool has been created, we create the hp class
-  hazardPointer = embb::base::Allocation::New <
+  hazard_pointer_ = embb::base::Allocation::New <
     embb::containers::internal::HazardPointer<int*> >
-    (deletePointerCallback, static_cast<int*>(NULL),
-    static_cast<int>(guardsPerThreadCount), nThreads);
+    (delete_pointer_callback_, static_cast<int*>(NULL),
+    static_cast<int>(guards_per_phread_count_), n_threads);
 
-  sharedGuarded = static_cast<embb::base::Atomic<int*>*>(
+  shared_guarded_ = static_cast<embb::base::Atomic<int*>*>(
     embb::base::Allocation::Allocate(sizeof(embb::base::Atomic<int*>)*
-    guaranteedCapacityPool)
+    guaranteed_capacity_pool_)
   );
 
   for (unsigned int i = 0; i !=
-  guaranteedCapacityPool; ++i) {
+  guaranteed_capacity_pool_; ++i) {
     //in-place new for each array cell
-    new (&sharedGuarded[i]) embb::base::Atomic < int* > ;
+    new (&shared_guarded_[i]) embb::base::Atomic < int* > ;
   }
 
-  sharedAllocated = static_cast<embb::base::Atomic<int*>*>(
+  shared_allocated_ = static_cast<embb::base::Atomic<int*>*>(
     embb::base::Allocation::Allocate(sizeof(embb::base::Atomic<int*>)*
-    guaranteedCapacityPool)
+    guaranteed_capacity_pool_)
   );
 
   for (unsigned int i = 0; i !=
-  guaranteedCapacityPool; ++i) {
+  guaranteed_capacity_pool_; ++i) {
     //in-place new for each array cell
-    new (&sharedAllocated[i]) embb::base::Atomic < int* > ;
+    new (&shared_allocated_[i]) embb::base::Atomic < int* > ;
   }
 
-  for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
-    sharedGuarded[i] = 0;
-    sharedAllocated[i] = 0;
+  for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
+    shared_guarded_[i] = 0;
+    shared_allocated_[i] = 0;
   }
 }
 
 void HazardPointerTest2::HazardPointerTest2Post() {
-
-  for (unsigned int i = 0; i != static_cast<unsigned int>(nThreads); ++i) {
-    for (unsigned int i2 = 0; i2 != static_cast<unsigned int>(nThreads)*
-      guardsPerThreadCount; ++i2) {
-      if (hazardPointer->threadLocalRetiredLists
-        [i2 + i*nThreads*guardsPerThreadCount] == NULL) {
+  for (unsigned int i = 0; i != static_cast<unsigned int>(n_threads); ++i) {
+    for (unsigned int i2 = 0; i2 != static_cast<unsigned int>(n_threads)*
+      guards_per_phread_count_; ++i2) {
+      if (hazard_pointer_->thread_local_retired_lists_
+        [i2 + i*n_threads*guards_per_phread_count_] == NULL) {
         // all retired lists must be completely filled
         PT_ASSERT(false);
       }
@@ -344,21 +344,21 @@ void HazardPointerTest2::HazardPointerTest2Post() {
   }
 
   unsigned int checks = 0;
-  for (unsigned int i = 0; i != static_cast<unsigned int>(nThreads); ++i) {
-    for (unsigned int i2 = 0; i2 != static_cast<unsigned int>(nThreads)*
-      guardsPerThreadCount; ++i2) {
-      for (unsigned int j = 0; j != static_cast<unsigned int>(nThreads); ++j) {
-        for (unsigned int j2 = 0; j2 != static_cast<unsigned int>(nThreads)*
-          guardsPerThreadCount; ++j2) {
+  for (unsigned int i = 0; i != static_cast<unsigned int>(n_threads); ++i) {
+    for (unsigned int i2 = 0; i2 != static_cast<unsigned int>(n_threads)*
+      guards_per_phread_count_; ++i2) {
+      for (unsigned int j = 0; j != static_cast<unsigned int>(n_threads); ++j) {
+        for (unsigned int j2 = 0; j2 != static_cast<unsigned int>(n_threads)*
+          guards_per_phread_count_; ++j2) {
           if (i2 == j2 && i == j)
             continue;
 
           // all retired elements have to be disjoint
           PT_ASSERT(
-            hazardPointer->threadLocalRetiredLists
-            [i2 + i*nThreads*guardsPerThreadCount] !=
-            hazardPointer->threadLocalRetiredLists
-            [j2 + j*nThreads*guardsPerThreadCount]
+            hazard_pointer_->thread_local_retired_lists_
+            [i2 + i*n_threads*guards_per_phread_count_] !=
+            hazard_pointer_->thread_local_retired_lists_
+            [j2 + j*n_threads*guards_per_phread_count_]
           );
 
           checks++;
@@ -370,16 +370,16 @@ void HazardPointerTest2::HazardPointerTest2Post() {
   // sanity check on the count of expected comparisons.
   PT_ASSERT(
     checks ==
-    nThreads*nThreads*guardsPerThreadCount *
-    (nThreads*nThreads*guardsPerThreadCount - 1)
+    n_threads*n_threads*guards_per_phread_count_ *
+    (n_threads*n_threads*guards_per_phread_count_ - 1)
     );
 
   std::vector< int* > additionallyAllocated;
 
   // we should be able to still allocate the guaranteed capacity of
   // elements from the pool.
-  for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
-    int* allocated = testPool->Allocate();
+  for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
+    int* allocated = test_pool_->Allocate();
 
     // allocated is not allowed to be zero
     PT_ASSERT(allocated != NULL);
@@ -390,11 +390,11 @@ void HazardPointerTest2::HazardPointerTest2Post() {
   }
 
   // the pool should now be empty
-  PT_ASSERT(testPool->Allocate() == NULL);
+  PT_ASSERT(test_pool_->Allocate() == NULL);
 
   // release allocated elements...
   for (unsigned int i = 0; i != additionallyAllocated.size(); ++i) {
-    testPool->Release(additionallyAllocated[i]);
+    test_pool_->Release(additionallyAllocated[i]);
   }
 
   // the additionallyAllocated elements shall be disjoint
@@ -409,39 +409,39 @@ void HazardPointerTest2::HazardPointerTest2Post() {
 
   // no allocated element should be in any retired list...
   for (unsigned int a = 0; a != additionallyAllocated.size(); ++a) {
-    for (unsigned int i = 0; i != static_cast<unsigned int>(nThreads); ++i) {
-      for (unsigned int i2 = 0; i2 != static_cast<unsigned int>(nThreads)*
-        guardsPerThreadCount; ++i2) {
+    for (unsigned int i = 0; i != static_cast<unsigned int>(n_threads); ++i) {
+      for (unsigned int i2 = 0; i2 != static_cast<unsigned int>(n_threads)*
+        guards_per_phread_count_; ++i2) {
         PT_ASSERT(
-          hazardPointer->threadLocalRetiredLists
-          [i2 + i*nThreads*guardsPerThreadCount] !=
+          hazard_pointer_->thread_local_retired_lists_
+          [i2 + i*n_threads*guards_per_phread_count_] !=
           additionallyAllocated[a]
           );
       }
     }
   }
 
-  for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
+  for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
     //in-place new for each array cell
-    sharedGuarded[i].~Atomic();
+    shared_guarded_[i].~Atomic();
   }
 
-  embb::base::Allocation::Free(sharedGuarded);
+  embb::base::Allocation::Free(shared_guarded_);
 
-  for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
+  for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
     //in-place new for each array cell
-    sharedAllocated[i].~Atomic();
+    shared_allocated_[i].~Atomic();
   }
 
-  embb::base::Allocation::Free(sharedAllocated);
-  embb::base::Allocation::Delete(hazardPointer);
+  embb::base::Allocation::Free(shared_allocated_);
+  embb::base::Allocation::Delete(hazard_pointer_);
 
   // after deleting the hazard pointer object, all retired pointers have
   // to be returned to the pool!
   std::vector<int*> elementsInPool;
 
   int* nextElement;
-  while ((nextElement = testPool->Allocate()) != NULL) {
+  while ((nextElement = test_pool_->Allocate()) != NULL) {
     for (unsigned int i = 0; i != elementsInPool.size(); ++i) {
       // all elements need to be disjoint
       PT_ASSERT(elementsInPool[i] != nextElement);
@@ -451,85 +451,83 @@ void HazardPointerTest2::HazardPointerTest2Post() {
 
   // all elements should have been returned by the hp object, so we should be
   // able to acquire all elements.
-  PT_ASSERT(elementsInPool.size() == poolSizeUsingHazardPointer);
+  PT_ASSERT(elementsInPool.size() == pool_size_using_hazard_pointer_);
 
-  embb::base::Allocation::Delete(testPool);
+  embb::base::Allocation::Delete(test_pool_);
 }
 
 void HazardPointerTest2::HazardPointerTest2ThreadMethod() {
   for (;;) {
-    unsigned int threadIndex;
-    embb_internal_thread_index(&threadIndex);
+    unsigned int thread_index;
+    embb_internal_thread_index(&thread_index);
 
-    if (threadIndex == currentMaster) {
+    if (thread_index == current_master_) {
       HazardPointerTest2Master();
     }
     else {
       HazardPointerTest2Slave();
     }
 
-    sync1.FetchAndAdd(1);
+    sync1_.FetchAndAdd(1);
 
     // wait until cleanup thread signals to be finished
-    while (sync1 != 0) {
-      int expected = nThreads;
-      int desired = finishMarker;
+    while (sync1_ != 0) {
+      int expected = n_threads;
+      int desired = FINISH_MARKER;
       // select thread, responsible for cleanup
-      if (sync1.CompareAndSwap(expected, desired)) {
-
+      if (sync1_.CompareAndSwap(expected, desired)) {
         //wipe arrays!
-        for (unsigned int i = 0; i != guaranteedCapacityPool; ++i) {
-          sharedGuarded[i] = 0;
-          sharedAllocated[i] = 0;
+        for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
+          shared_guarded_[i] = 0;
+          shared_allocated_[i] = 0;
         }
 
         // increase master
-        currentMaster.FetchAndAdd(1);
-        sync2 = 0;
-        sync1.Store(0);
+        current_master_.FetchAndAdd(1);
+        sync2_ = 0;
+        sync1_.Store(0);
       }
     }
 
     // wait for all threads to reach this position
-    sync2.FetchAndAdd(1);
-    while (sync2 != static_cast<unsigned int>(nThreads)) {}
+    sync2_.FetchAndAdd(1);
+    while (sync2_ != static_cast<unsigned int>(n_threads)) {}
 
     // if each thread was master once, terminate.
-    if (currentMaster == static_cast<unsigned int>(nThreads)) {
+    if (current_master_ == static_cast<unsigned int>(n_threads)) {
       return;
     }
   }
 }
 
 HazardPointerTest2::HazardPointerTest2() :
-nThreads(static_cast<int>
+n_threads(static_cast<int>
 (partest::TestSuite::GetDefaultNumThreads())),
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
-   deletePointerCallback(
+   delete_pointer_callback_(
    *this,
    &HazardPointerTest2::DeletePointerCallback)
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
 {
-  guardsPerThreadCount = 5;
-  guaranteedCapacityPool = guardsPerThreadCount*nThreads;
-  poolSizeUsingHazardPointer = guaranteedCapacityPool +
-    guardsPerThreadCount*nThreads*nThreads;
+  guards_per_phread_count_ = 5;
+  guaranteed_capacity_pool_ = guards_per_phread_count_*n_threads;
+  pool_size_using_hazard_pointer_ = guaranteed_capacity_pool_ +
+    guards_per_phread_count_*n_threads*n_threads;
 
   embb::base::Thread::GetThreadsMaxCount();
   CreateUnit("HazardPointerTestSimulateMemoryWorstCase").
     Pre(&HazardPointerTest2::HazardPointerTest2Pre, this).
     Add(
     &HazardPointerTest2::HazardPointerTest2ThreadMethod,
-    this, static_cast<size_t>(nThreads)).
+    this, static_cast<size_t>(n_threads)).
     Post(&HazardPointerTest2::HazardPointerTest2Post, this);
 }
-
 } // namespace test
 } // namespace containers
 } // namespace embb

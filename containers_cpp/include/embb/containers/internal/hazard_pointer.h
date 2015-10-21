@@ -53,7 +53,6 @@ class HazardPointerTest2;
 namespace embb {
 namespace containers {
 namespace internal {
-
 /**
  * This class contains a hazard pointer implementation following publication:
  *
@@ -61,7 +60,7 @@ namespace internal {
  * objects." IEEE Transactions on Parallel and Distributed Systems, 15.6 (2004)
  * : 491-504.
  *
- * Hazard pointer are a wait-free memory reclamation scheme for lock-free
+ * Hazard pointers are a wait-free memory reclamation scheme for lock-free
  * algorithms. Loosely speaking, they act as garbage collector. The release of
  * objects contained within the memory, managed by the hazard pointer class, is
  * intercepted and possibly delayed to avoid concurrency bugs.
@@ -107,111 +106,13 @@ namespace internal {
  * when objects shall be freed. In this implementation, we free whenever it is
  * possibly to do so, as we want to keep the memory footprint as low as
  * possible. We also don't see a performance drop in the current algorithms that
- * are using hazard pointer, when not using a threshold.
+ * are using hazard pointers, when not using a threshold.
  *
  * \tparam GuardType the type of the guards. Usually the pointer type of some
  *         object to protect.
  */
 template< typename GuardType >
 class HazardPointer  {
- private:
-  /**
-   * HazardPointerTest2 is a white-box test, needing access to private members
-   * of this class. So declaring it as friend.
-   */
-
-  friend class embb::containers::test::HazardPointerTest2;
-  /**
-   * The hazard pointer guards, represented as array. Each thread has a fixed
-   * set of slots (guardsPerThread) within this array.
-   */
-  embb::base::Atomic<GuardType>* guards;
-
-  /**
-   * \see threadLocalRetiredLists documentation
-   */
-  GuardType* threadLocalRetiredListsTemp;
-
-  /**
-   * A lists of lists, represented as single array. Each thread maintains a
-   * list of retired pointers, that are objects that are logically released
-   * but not released because some thread placed a guard on it.
-   */
-  GuardType* threadLocalRetiredLists;
-
-  /**
-   * This number determines the amount of maximal accessors (threads) that
-   * will access this hazard pointer instance. Note that a thread once
-   * accessing this object will be permanently count as accessor, even if not
-   * participating anymore. If too many threads access this object, an
-   * assertion is thrown.
-   */
-  unsigned int accessorCount;
-
-  /**
-   * The guard value denoting "not guarded"
-   */
-  GuardType undefinedGuard;
-
-  /**
-   * The count of guards that can be set per thread.
-   */
-  int guardsPerThread;
-
-  /**
-   * The functor that is called to release an object. This is called by this
-   * class, when it is safe to do so, i.e., no thread accesses this object
-   * anymore.
-   */
-  embb::base::Function<void, GuardType> freeGuardCallback;
-
-  /**
-   * Mapping from EMBB thread id to internal thread ids Internal thread ids
-   * are in range [0;accesor_count-1]. The position of a EMBB thread id in
-   * that array determines the respective internal thread id.
-   */
-  embb::base::Atomic<int>* threadIdMapping;
-
-  /**
-   * Each thread is assigned a thread index (starting with 0). Get the index of
-   * the current thread. Note that this is not the global index, but an internal
-   * one. The user is free to define less accessors than the amount of default
-   * threads. This is useful, as the number of accessors accounts quadratic for
-   * the memory consumption, so the user should have the possibility to avoid
-   * memory wastage, when only having a small, fixed size, number of accessors.
-   *
-   * @return current thread index
-   */
-  unsigned int GetCurrentThreadIndex();
-
-  /**
-   * Copy retired list \c sourceList to retired list \c targetList
-   */
-  static void CopyRetiredList(GuardType* sourceList,
-    /**<[IN] the source retired list*/
-    GuardType* targetList,
-    /**<[IN] the target retired list*/
-    unsigned int singleRetiredListSize,
-    /**<[IN] the size of a thread local retired list*/
-    GuardType undefinedGuard
-    /**<[IN] the undefined guard (usually the NULL pointer)*/
-    );
-
-  static void UpdateRetiredList(
-    GuardType* retiredList,
-    /**<[IN] the old retired list*/
-    GuardType* updatedRetiredList,
-    /**<[IN] the updated retired list*/
-    unsigned int retiredListSize,
-    /**<[IN] the size of a thread local retired list*/
-    GuardType toRetire,
-    /**<[IN] the element to retire*/
-    GuardType consideredHazard,
-    /**<[IN] the currently considered hazard*/
-    GuardType undefinedGuard
-    /**<[IN] the undefined guard (usually the NULL pointer)*/
-    );
-
  public:
 
   /**
@@ -221,7 +122,7 @@ class HazardPointer  {
    * guarantee at each point in time. More specific, on top of the guaranteed
    * count of objects, he has to provide the additional count of objects that
    * can be (worst-case) contained in the retired lists and therefore are not
-   * released yet. The size of all retired lists is guardsPerThread *
+   * released yet. The size sum of all retired lists is guardsPerThread *
    * accessorCount * accessorCount, which is computed using this function. So
    * the result of function denotes to the user, how many objects he has to
    * allocate additionally to the guaranteed count.
@@ -232,10 +133,10 @@ class HazardPointer  {
     size_t guardsPerThread,
       /**<[IN] the count of guards per thread*/
       int accessors = -1
-    /**<[IN] Number of accessors. Determines, how many threads will access
-              the hazard pointer object. Default value -1 will allow the
-              maximum amount of threads as defined with
-              \c embb::base::Thread::GetThreadsMaxCount()*/
+      /**<[IN] Number of accessors. Determines, how many threads will access
+               the hazard pointer object. Default value -1 will allow the
+               maximum amount of threads as defined with
+               \c embb::base::Thread::GetThreadsMaxCount()*/
       );
 
   /**
@@ -245,9 +146,9 @@ class HazardPointer  {
    *
    * \memory We dynamically allocate the following:
    *
-   * (sizeof(Atomic<int>) * accessorCount) + (sizeof(Atomic<GuardType>) *
-   * guards_per_thread * accessorCount) + (2*sizeof(GuardType) *
-   * guards_per_thread * accessorCount^2)
+   * (sizeof(Atomic<int>) * accessors) + (sizeof(Atomic<GuardType>) *
+   * guards_per_thread * accessors) + (2*sizeof(GuardType) *
+   * guards_per_thread * accessors^2)
    *
    * The last addend is the dominant one, as accessorCount accounts
    * quadratically for it.
@@ -277,29 +178,137 @@ class HazardPointer  {
   ~HazardPointer();
 
   /**
-   * Guards \c toGuard. If the guardedElement is passed to \c EnqueueForDeletion
+   * Guards \c to_guard. If the guarded_element is passed to \c EnqueueForDeletion
    * it is prevented from release from now on. The user must have a check, that
-   * EnqueueForDeletion has not been called on toGuard, before the guarding took
+   * EnqueueForDeletion has not been called on to_guard, before the guarding took
    * effect.
    *
    * \waitfree
    */
-  void Guard(int guardPosition, GuardType toGuard);
+  void Guard(
+    int guard_position,
+    /**<[IN] position to place guard*/
+    GuardType to_guard
+    /**<[IN] element to guard*/
+    );
 
   /**
-   * Enqueue a pointer for deletion. If not guarded, it is deleted immediately.
-   * If it is guarded, it is added to a thread local retired list, and deleted
-   * in a subsequent call to \c EnqueueForDeletion, when no guard is placed on
-   * it anymore.
+   * Enqueue guarded element for deletion. If not guarded, it is deleted
+   * immediately. If it is guarded, it is added to a thread local retired list,
+   * and deleted in a subsequent call to \c EnqueueForDeletion, when no guard is
+   * placed on it anymore.
    */
-  void EnqueueForDeletion(GuardType guardedElement);
+  void EnqueueForDeletion(
+    GuardType guarded_element
+    /**<[IN] element to logically delete*/
+    );
 
   /**
    * Explicitly remove guard from thread local slot.
    *
    * \waitfree
    */
-  void RemoveGuard(int guardPosition);
+  void RemoveGuard(int guard_position);
+
+ private:
+  /**
+   * HazardPointerTest2 is a white-box test, needing access to private members
+   * of this class. So declaring it as friend.
+   */
+  friend class embb::containers::test::HazardPointerTest2;
+
+  /**
+   * This number determines the amount of maximal accessors (threads) that
+   * will access this hazard pointer instance. Note that a thread once
+   * accessing this object will be permanently count as accessor, even if not
+   * participating anymore. If too many threads access this object, an
+   * exception is thrown.
+   */
+  unsigned int max_accessors_count_;
+
+  /**
+   * The guard value denoting "not guarded"
+   */
+  GuardType undefined_guard_;
+
+  /**
+   * The maximal count of guards that can be set per thread.
+   */
+  int max_guards_per_thread_;
+
+  /**
+   * The functor that is called to release an object. This is called by this
+   * class, when it is safe to do so, i.e., no thread accesses this object
+   * anymore.
+   */
+  embb::base::Function<void, GuardType> release_object_callback_;
+
+  /**
+   * Mapping from EMBB thread id to hazard pointer thread ids. Hazard pointer
+   * thread ids are in range [0;accesor_count-1]. The position of a EMBB thread
+   * id in that array determines the respective hazard pointer thread id.
+   */
+  embb::base::Atomic<int>* thread_id_mapping_;
+
+  /**
+   * The hazard pointer guards, represented as array. Each thread has a fixed
+   * set of slots (guardsPerThread) within this array.
+   */
+  embb::base::Atomic<GuardType>* guards_;
+
+  /**
+   * \see threadLocalRetiredLists documentation
+   */
+  GuardType* thread_local_retired_lists_temp_;
+
+  /**
+   * A list of lists, represented as single array. Each thread maintains a list
+   * of retired pointers, that are objects that are logically released but not
+   * released because some thread placed a guard on it.
+   */
+  GuardType* thread_local_retired_lists_;
+
+  /**
+   * Each thread is assigned a thread index (starting with 0). Get the index of
+   * the current thread. Note that this is not the global index, but an hazard
+   * pointer class internal one. The user is free to define less accessors than
+   * the amount of default threads. This is useful, as the number of accessors
+   * accounts quadratic for the memory consumption, so the user should have the
+   * possibility to avoid memory wastage when only having a small, fixed size,
+   * number of accessors.
+   *
+   * @return current (hazard pointer object local) thread index
+   */
+  unsigned int GetObjectLocalThreadIndex();
+
+  /**
+   * Copy retired list \c sourceList to retired list \c targetList
+   */
+  static void CopyRetiredList(
+    GuardType* source_list,
+    /**<[IN] the source retired list*/
+    GuardType* target_list,
+    /**<[IN] the target retired list*/
+    unsigned int single_retired_list_size,
+    /**<[IN] the size of a thread local retired list*/
+    GuardType undefined_guard
+    /**<[IN] the undefined guard (usually the NULL pointer)*/
+    );
+
+  static void UpdateRetiredList(
+    GuardType* retired_list,
+    /**<[IN] the old retired list*/
+    GuardType* updated_retired_list,
+    /**<[IN] the updated retired list*/
+    unsigned int retired_list_size,
+    /**<[IN] the size of a thread local retired list*/
+    GuardType to_retire,
+    /**<[IN] the element to retire*/
+    GuardType considered_hazard,
+    /**<[IN] the currently considered hazard*/
+    GuardType undefined_guard
+    /**<[IN] the undefined guard (usually the NULL pointer)*/
+    );
 };
 } // namespace internal
 } // namespace containers
