@@ -93,7 +93,7 @@ WaitFreeArrayValuePool<Type, Undefined, Allocator>::~WaitFreeArrayValuePool() {
   }
 
   // free memory
-  allocator.deallocate(pool, (size_t)size);
+  allocator.deallocate(pool, static_cast<size_t>(size));
 }
 } // namespace containers
 } // namespace embb
