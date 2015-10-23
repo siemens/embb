@@ -117,8 +117,9 @@ size_t ObjectPool<Type, ValuePool, ObjectAllocator>::GetCapacity() {
 
 template<class Type, typename ValuePool, class ObjectAllocator>
 ObjectPool<Type, ValuePool, ObjectAllocator>::ObjectPool(size_t capacity) :
-capacity(capacity),
-  p(ReturningTrueIterator(0), ReturningTrueIterator(capacity)) {
+  capacity(capacity),
+  p(ReturningTrueIterator(0), ReturningTrueIterator(
+  ValuePool::GetMinimumElementCountForGuaranteedCapacity(capacity))) {
   // Allocate the objects (without construction, just get the memory)
   objects = objectAllocator.allocate(capacity);
 }

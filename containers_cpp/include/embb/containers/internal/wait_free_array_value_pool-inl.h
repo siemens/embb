@@ -95,6 +95,14 @@ WaitFreeArrayValuePool<Type, Undefined, Allocator>::~WaitFreeArrayValuePool() {
   // free memory
   allocator.deallocate(pool, static_cast<size_t>(size));
 }
+
+template<typename Type, Type Undefined, class Allocator >
+size_t WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+GetMinimumElementCountForGuaranteedCapacity(size_t capacity) {
+  // for this value pool, this is just capacity...
+  return capacity;
+}
+
 } // namespace containers
 } // namespace embb
 

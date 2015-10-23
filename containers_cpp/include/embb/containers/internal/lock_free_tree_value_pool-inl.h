@@ -269,6 +269,14 @@ LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
   }
 }
 
+template<typename Type, Type Undefined, class PoolAllocator,
+class TreeAllocator >
+size_t LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+GetMinimumElementCountForGuaranteedCapacity(size_t capacity) {
+  // for this value pool, this is just capacity...
+  return capacity;
+}
+
 } // namespace containers
 } // namespace embb
 
