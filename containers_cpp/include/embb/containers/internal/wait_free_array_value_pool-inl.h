@@ -35,21 +35,21 @@ Free(Type element, int index) {
   assert(element != Undefined);
 
   // Just put back the element
-  pool[index].Store(element);
+  pool_array_[index].Store(element);
 }
 
 template<typename Type, Type Undefined, class Allocator >
 int WaitFreeArrayValuePool<Type, Undefined, Allocator>::
 Allocate(Type & element) {
-  for (int i = 0; i != size; ++i) {
+  for (int i = 0; i != size_; ++i) {
     Type expected;
 
     // If the memory cell is not available, go ahead
-    if (Undefined == (expected = pool[i].Load()))
+    if (Undefined == (expected = pool_array_[i].Load()))
       continue;
 
     // Try to get the memory cell
-    if (pool[i].CompareAndSwap(expected, Undefined)) {
+    if (pool_array_[i].CompareAndSwap(expected, Undefined)) {
       // When the CAS was successful, this element is ours
       element = expected;
       return i;
@@ -64,36 +64,36 @@ WaitFreeArrayValuePool<Type, Undefined, Allocator>::
 WaitFreeArrayValuePool(ForwardIterator first, ForwardIterator last) {
   size_t dist = static_cast<size_t>(std::distance(first, last));
 
-  size = static_cast<int>(dist);
+  size_ = static_cast<int>(dist);
 
   // conversion may result in negative number. check!
-  assert(size >= 0);
+  assert(size_ >= 0);
 
   // Use the allocator to allocate an array of size dist
-  pool = allocator.allocate(dist);
+  pool_array_ = allocator_.allocate(dist);
 
   // invoke inplace new for each pool element
   for ( size_t i = 0; i != dist; ++i ) {
-    new (&pool[i]) embb::base::Atomic<Type>();
+    new (&pool_array_[i]) embb::base::Atomic<Type>();
   }
 
   int i = 0;
 
   // Store the elements of the range
   for (ForwardIterator curIter(first); curIter != last; ++curIter) {
-    pool[i++] = *curIter;
+    pool_array_[i++] = *curIter;
   }
 }
 
 template<typename Type, Type Undefined, class Allocator >
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::~WaitFreeArrayValuePool() {
   // invoke destructor for each pool element
-  for (int i = 0; i != size; ++i) {
-    pool[i].~Atomic();
+  for (int i = 0; i != size_; ++i) {
+    pool_array_[i].~Atomic();
   }
 
   // free memory
-  allocator.deallocate(pool, static_cast<size_t>(size));
+  allocator_.deallocate(pool_array_, static_cast<size_t>(size_));
 }
 
 template<typename Type, Type Undefined, class Allocator >

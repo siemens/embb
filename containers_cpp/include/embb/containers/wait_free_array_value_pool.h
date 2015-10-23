@@ -116,10 +116,10 @@ template<typename Type,
   class Allocator = embb::base::Allocator< embb::base::Atomic<Type> > >
 class WaitFreeArrayValuePool {
  private:
-  int size;
-  embb::base::Atomic<Type>* pool;
+  int size_;
+  embb::base::Atomic<Type>* pool_array_;
   WaitFreeArrayValuePool();
-  Allocator allocator;
+  Allocator allocator_;
 
   // Prevent copy-construction
   WaitFreeArrayValuePool(const WaitFreeArrayValuePool&);

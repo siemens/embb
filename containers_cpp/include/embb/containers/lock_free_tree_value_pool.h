@@ -123,22 +123,25 @@ class LockFreeTreeValuePool {
   LockFreeTreeValuePool& operator=(const LockFreeTreeValuePool&);
 
   // See algorithm description above
-  int size;
+  int size_;
 
   // See algorithm description above
-  int tree_size;
+  int tree_size_;
 
   // See algorithm description above
-  int real_size;
+  int real_size_;
 
   // The tree above the pool
-  embb::base::Atomic<int>* tree;
+  embb::base::Atomic<int>* tree_;
 
   // The actual pool
-  embb::base::Atomic<Type>* pool;
+  embb::base::Atomic<Type>* pool_;
 
-  PoolAllocator poolAllocator;
-  TreeAllocator treeAllocator;
+  // respective allocator
+  PoolAllocator pool_allocator_;
+
+  // respective allocator
+  TreeAllocator tree_allocator_;
 
   /**
    * Computes smallest power of two fitting the specified value

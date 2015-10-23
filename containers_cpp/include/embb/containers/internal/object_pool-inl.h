@@ -83,7 +83,8 @@ ReturningTrueIterator::operator!=(const self_type& rhs) {
 template<class Type, typename ValuePool, class ObjectAllocator>
 bool ObjectPool<Type, ValuePool, ObjectAllocator>::
 IsContained(const Type &obj) const {
-  if ((&obj < &objects[0]) || (&obj > &objects[capacity - 1])) {
+  if ((&obj < &objects_array_[0]) || 
+    (&obj > &objects_array_[value_pool_size_ - 1])) {
     return false;
   } else {
     return true;
@@ -94,17 +95,17 @@ template<class Type, typename ValuePool, class ObjectAllocator>
 int ObjectPool<Type, ValuePool, ObjectAllocator>::
 GetIndexOfObject(const Type &obj) const {
   assert(IsContained(obj));
-  return(static_cast<int>(&obj - &objects[0]));
+  return(static_cast<int>(&obj - &objects_array_[0]));
 }
 
 template<class Type, typename ValuePool, class ObjectAllocator>
 Type* ObjectPool<Type, ValuePool, ObjectAllocator>::AllocateRaw() {
   bool val;
-  int allocated_index = p.Allocate(val);
+  int allocated_index = value_pool_.Allocate(val);
   if (allocated_index == -1) {
     return NULL;
   } else {
-    Type* ret_pointer = &(objects[allocated_index]);
+    Type* ret_pointer = &(objects_array_[allocated_index]);
 
     return ret_pointer;
   }
@@ -112,16 +113,17 @@ Type* ObjectPool<Type, ValuePool, ObjectAllocator>::AllocateRaw() {
 
 template<class Type, typename ValuePool, class ObjectAllocator>
 size_t ObjectPool<Type, ValuePool, ObjectAllocator>::GetCapacity() {
-  return capacity;
+  return capacity_;
 }
 
 template<class Type, typename ValuePool, class ObjectAllocator>
 ObjectPool<Type, ValuePool, ObjectAllocator>::ObjectPool(size_t capacity) :
-  capacity(capacity),
-  p(ReturningTrueIterator(0), ReturningTrueIterator(
-  ValuePool::GetMinimumElementCountForGuaranteedCapacity(capacity))) {
-  // Allocate the objects (without construction, just get the memory)
-  objects = objectAllocator.allocate(capacity);
+  capacity_(capacity),
+  value_pool_size_(
+  ValuePool::GetMinimumElementCountForGuaranteedCapacity(capacity)),
+  value_pool_(ReturningTrueIterator(0), ReturningTrueIterator(
+  value_pool_size_)),
+  objects_array_(object_allocator_.allocate(value_pool_size_)) {
 }
 
 template<class Type, typename ValuePool, class ObjectAllocator>
@@ -129,7 +131,7 @@ void ObjectPool<Type, ValuePool, ObjectAllocator>::Free(Type* obj) {
   int index = GetIndexOfObject(*obj);
   obj->~Type();
 
-  p.Free(true, index);
+  value_pool_.Free(true, index);
 }
 
 template<class Type, typename ValuePool, class ObjectAllocator>
@@ -190,7 +192,7 @@ Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
 template<class Type, typename ValuePool, class ObjectAllocator>
 ObjectPool<Type, ValuePool, ObjectAllocator>::~ObjectPool() {
   // Deallocate the objects
-  objectAllocator.deallocate(objects, capacity);
+  object_allocator_.deallocate(objects_array_, value_pool_size_);
 }
 } // namespace containers
 } // namespace embb
