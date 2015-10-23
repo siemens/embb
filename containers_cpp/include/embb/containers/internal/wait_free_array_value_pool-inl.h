@@ -66,8 +66,16 @@ WaitFreeArrayValuePool(ForwardIterator first, ForwardIterator last) {
 
   size = static_cast<int>(dist);
 
+  // conversion may result in negative number. check!
+  assert(size >= 0);
+
   // Use the allocator to allocate an array of size dist
   pool = allocator.allocate(dist);
+
+  // invoke inplace new for each pool element
+  for ( size_t i = 0; i != dist; ++i ) {
+    new (&pool[i]) embb::base::Atomic<Type>();
+  }
 
   int i = 0;
 
@@ -79,6 +87,12 @@ WaitFreeArrayValuePool(ForwardIterator first, ForwardIterator last) {
 
 template<typename Type, Type Undefined, class Allocator >
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::~WaitFreeArrayValuePool() {
+  // invoke destructor for each pool element
+  for (int i = 0; i != size; ++i) {
+    pool[i].~Atomic();
+  }
+
+  // free memory
   allocator.deallocate(pool, (size_t)size);
 }
 } // namespace containers

@@ -213,11 +213,28 @@ LockFreeTreeValuePool(ForwardIterator first, ForwardIterator last) {
   // Size of binary tree without the leaves
   tree_size = size - 1;
 
+  // make sure, signed values are not negative
+  assert(tree_size >= 0);
+  assert(real_size >= 0);
+
+  size_t tree_size_unsigned = static_cast<size_t>(tree_size);
+  size_t real_size_unsigned = static_cast<size_t>(real_size);
+
   // Pool stores elements of type T
-  pool = poolAllocator.allocate(static_cast<size_t>(real_size));
+  pool = poolAllocator.allocate(real_size_unsigned);
+
+  // invoke inplace new for each pool element
+  for (size_t i = 0; i != real_size_unsigned; ++i) {
+    new (&pool[i]) embb::base::Atomic<Type>();
+  }
 
   // Tree holds the counter of not allocated elements
-  tree = treeAllocator.allocate(static_cast<size_t>(tree_size));
+  tree = treeAllocator.allocate(tree_size_unsigned);
+
+  // invoke inplace new for each tree element
+  for (size_t i = 0; i != tree_size_unsigned; ++i) {
+    new (&tree[i]) embb::base::Atomic<int>();
+  }
 
   int i = 0;
 
@@ -234,8 +251,22 @@ template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 ~LockFreeTreeValuePool() {
-  poolAllocator.deallocate(pool, static_cast<size_t>(real_size));
-  treeAllocator.deallocate(tree, static_cast<size_t>(tree_size));
+  size_t tree_size_unsigned = static_cast<size_t>(tree_size);
+  size_t real_size_unsigned = static_cast<size_t>(real_size);
+
+  poolAllocator.deallocate(pool, real_size_unsigned);
+
+  // invoke destructor for each pool element
+  for (size_t i = 0; i != real_size_unsigned; ++i) {
+    pool[i].~Atomic();
+  }
+
+  treeAllocator.deallocate(tree, tree_size_unsigned);
+
+  // invoke destructor for each tree element
+  for (size_t i = 0; i != tree_size_unsigned; ++i) {
+    tree[i].~Atomic();
+  }
 }
 
 } // namespace containers
