@@ -102,6 +102,20 @@ void embb_atomic_init(
   );
 
 /**
+ * Destroys an atomic variable and frees its resources.
+ *
+ * \pre The atomic variable has been initialized.
+ * \post The atomic variable is uninitialized.
+ *
+ * \ingroup C_BASE_ATOMIC
+ * \notthreadsafe
+ */
+void embb_atomic_destroy(
+  emb_atomic_TYPE* variable
+  /**< [IN,OUT] Pointer to atomic variable to be destroyed. */
+  );
+
+/**
  * Computes the logical "and" of the value stored in \p variable and \c value.
  *
  * \pre The atomic variable has been initialized with \c embb_atomic_init
