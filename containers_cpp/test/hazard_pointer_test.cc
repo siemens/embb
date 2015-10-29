@@ -32,8 +32,7 @@ namespace embb {
 namespace containers {
 namespace test {
 IntObjectTestPool::IntObjectTestPool(unsigned int pool_size) :
-poolSize(pool_size)
-{
+poolSize(pool_size) {
   simplePoolObjects = static_cast<int*>(
     embb::base::Allocation::Allocate(sizeof(int)*pool_size));
 
@@ -42,7 +41,7 @@ poolSize(pool_size)
     pool_size));
 
   for (unsigned int i = 0; i != pool_size; ++i) {
-    //in-place new for each array cell
+    // in-place new for each array cell
     new (&simplePool[i]) embb::base::Atomic<int>;
   }
 
@@ -56,7 +55,7 @@ IntObjectTestPool::~IntObjectTestPool() {
   embb::base::Allocation::Free(simplePoolObjects);
 
   for (unsigned int i = 0; i != poolSize; ++i) {
-    //in-place new for each array cell
+    // in-place new for each array cell
     simplePool[i].~Atomic();
   }
 
@@ -164,8 +163,8 @@ void HazardPointerTest::HazardPointerTest1ThreadMethod() {
       == true
       && allocated_object_from_different_thread == allocated_object
       ) {
-      //try to make it probable to get an element from a different thread
-      //however, can be the same. Try 10000 times to get a different element.
+      // try to make it probable to get an element from a different thread
+      // however, can be the same. Try 10000 times to get a different element.
       if (diff_count++ > 10000) {
         same = true;
         break;
@@ -219,7 +218,7 @@ bool HazardPointerTest2::SetRelativeGuards() {
   unsigned int alreadyGuarded = 0;
 
   for (unsigned int i = my_begin; i != my_begin + guards_per_phread_count_;
-    ++i){
+    ++i) {
     if (shared_guarded_[i] != 0) {
       alreadyGuarded++;
       guard_number++;
@@ -234,8 +233,7 @@ bool HazardPointerTest2::SetRelativeGuards() {
       if (to_guard == shared_allocated_[i].Load()) {
         // guard was successful. Communicate to other threads.
         shared_guarded_[i] = to_guard;
-      }
-      else {
+      } else {
         // reset the guard, couldn't guard...
         hazard_pointer_->RemoveGuard(guard_number);
       }
@@ -284,7 +282,7 @@ void HazardPointerTest2::HazardPointerTest2Slave() {
   unsigned int thread_index;
   embb_internal_thread_index(&thread_index);
 
-  while (!SetRelativeGuards()) {};
+  while (!SetRelativeGuards()) {}
 }
 
 void HazardPointerTest2::HazardPointerTest2Pre() {
@@ -305,24 +303,21 @@ void HazardPointerTest2::HazardPointerTest2Pre() {
 
   shared_guarded_ = static_cast<embb::base::Atomic<int*>*>(
     embb::base::Allocation::Allocate(sizeof(embb::base::Atomic<int*>)*
-    guaranteed_capacity_pool_)
-  );
+    guaranteed_capacity_pool_));
 
-  for (unsigned int i = 0; i !=
-  guaranteed_capacity_pool_; ++i) {
-    //in-place new for each array cell
-    new (&shared_guarded_[i]) embb::base::Atomic < int* > ;
+  for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
+    // in-place new for each array cell
+    new (&shared_guarded_[i]) embb::base::Atomic < int* >;
   }
 
   shared_allocated_ = static_cast<embb::base::Atomic<int*>*>(
     embb::base::Allocation::Allocate(sizeof(embb::base::Atomic<int*>)*
-    guaranteed_capacity_pool_)
-  );
+    guaranteed_capacity_pool_));
 
   for (unsigned int i = 0; i !=
   guaranteed_capacity_pool_; ++i) {
-    //in-place new for each array cell
-    new (&shared_allocated_[i]) embb::base::Atomic < int* > ;
+    // in-place new for each array cell
+    new (&shared_allocated_[i]) embb::base::Atomic < int* >;
   }
 
   for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
@@ -358,8 +353,7 @@ void HazardPointerTest2::HazardPointerTest2Post() {
             hazard_pointer_->thread_local_retired_lists_
             [i2 + i*n_threads*guards_per_phread_count_] !=
             hazard_pointer_->thread_local_retired_lists_
-            [j2 + j*n_threads*guards_per_phread_count_]
-          );
+            [j2 + j*n_threads*guards_per_phread_count_]);
 
           checks++;
         }
@@ -371,8 +365,7 @@ void HazardPointerTest2::HazardPointerTest2Post() {
   PT_ASSERT(
     checks ==
     n_threads*n_threads*guards_per_phread_count_ *
-    (n_threads*n_threads*guards_per_phread_count_ - 1)
-    );
+    (n_threads*n_threads*guards_per_phread_count_ - 1));
 
   std::vector< int* > additionallyAllocated;
 
@@ -415,21 +408,20 @@ void HazardPointerTest2::HazardPointerTest2Post() {
         PT_ASSERT(
           hazard_pointer_->thread_local_retired_lists_
           [i2 + i*n_threads*guards_per_phread_count_] !=
-          additionallyAllocated[a]
-          );
+          additionallyAllocated[a]);
       }
     }
   }
 
   for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
-    //in-place new for each array cell
+    // in-place new for each array cell
     shared_guarded_[i].~Atomic();
   }
 
   embb::base::Allocation::Free(shared_guarded_);
 
   for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
-    //in-place new for each array cell
+    // in-place new for each array cell
     shared_allocated_[i].~Atomic();
   }
 
@@ -463,8 +455,7 @@ void HazardPointerTest2::HazardPointerTest2ThreadMethod() {
 
     if (thread_index == current_master_) {
       HazardPointerTest2Master();
-    }
-    else {
+    } else {
       HazardPointerTest2Slave();
     }
 
@@ -476,7 +467,7 @@ void HazardPointerTest2::HazardPointerTest2ThreadMethod() {
       int desired = FINISH_MARKER;
       // select thread, responsible for cleanup
       if (sync1_.CompareAndSwap(expected, desired)) {
-        //wipe arrays!
+        // wipe arrays!
         for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
           shared_guarded_[i] = 0;
           shared_allocated_[i] = 0;
@@ -508,9 +499,9 @@ n_threads(static_cast<int>
 #pragma warning(push)
 #pragma warning(disable:4355)
 #endif
-   delete_pointer_callback_(
-   *this,
-   &HazardPointerTest2::DeletePointerCallback)
+  delete_pointer_callback_(
+  *this,
+  &HazardPointerTest2::DeletePointerCallback)
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -528,6 +519,6 @@ n_threads(static_cast<int>
     this, static_cast<size_t>(n_threads)).
     Post(&HazardPointerTest2::HazardPointerTest2Post, this);
 }
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb

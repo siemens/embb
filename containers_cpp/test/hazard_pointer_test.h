@@ -50,7 +50,7 @@ class IntObjectTestPool {
   static const int FREE_MARKER = 0;
   unsigned int poolSize;
 
-  IntObjectTestPool(unsigned int pool_size);
+  explicit IntObjectTestPool(unsigned int pool_size);
 
   ~IntObjectTestPool();
 

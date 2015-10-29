@@ -79,7 +79,7 @@ namespace internal {
 #endif
 
   template< typename GuardType >
-  void HazardPointer< GuardType >::RemoveGuard(int guard_position){
+  void HazardPointer< GuardType >::RemoveGuard(int guard_position) {
     const unsigned int my_thread_id = GetObjectLocalThreadIndex();
 
     // check invariants...
@@ -240,15 +240,13 @@ namespace internal {
           }
         }
         targetList[ii] = guardToCopy;
-      }
-      else {
+      } else {
         // we copied the whole source list, remaining values in the target
         // have to be zeroed.
         if (targetList[ii] == undefinedGuard) {
           // end of target list
           break;
-        }
-        else {
+        } else {
           targetList[ii] = undefinedGuard;
         }
       }

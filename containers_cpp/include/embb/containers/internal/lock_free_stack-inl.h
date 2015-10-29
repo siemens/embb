@@ -86,8 +86,7 @@ capacity(capacity),
   objectPool(
   StackNodeHazardPointer_t::ComputeMaximumRetiredObjectCount(1) +
   capacity),
-  hazardPointer(delete_pointer_callback, NULL, 1)
-{
+  hazardPointer(delete_pointer_callback, NULL, 1) {
 }
 
 template< typename Type, typename ValuePool >

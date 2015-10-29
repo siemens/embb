@@ -82,7 +82,7 @@ LockFreeMPMCQueue<Type, ValuePool>::LockFreeMPMCQueue(size_t capacity) :
   // eligible for reuse. +1 for dummy node.
   objectPool(
   MPMCQueueNodeHazardPointer_t::ComputeMaximumRetiredObjectCount(2) +
-   capacity + 1),
+  capacity + 1),
 // Disable "this is used in base member initializer" warning.
 // We explicitly want this.
 #ifdef EMBB_PLATFORM_COMPILER_MSVC

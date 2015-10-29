@@ -43,7 +43,7 @@
 // forward declaration for white-box test, used in friend declaration of
 // HazardPointer class.
 namespace embb {
-namespace containers{
+namespace containers {
 namespace test {
 class HazardPointerTest2;
 }
@@ -114,7 +114,6 @@ namespace internal {
 template< typename GuardType >
 class HazardPointer  {
  public:
-
   /**
    * The user of the hazard pointer class has to provide the memory that is
    * managed here. The user has to take into account, that releasing of memory
