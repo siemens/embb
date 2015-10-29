@@ -94,7 +94,7 @@
  * \ingroup C_BASE_ATOMIC
  * \notthreadsafe
  */
-void embb_atomic_init(
+void embb_atomic_init_TYPE(
   emb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable to be initialized. */
   TYPE initial_value
@@ -110,7 +110,7 @@ void embb_atomic_init(
  * \ingroup C_BASE_ATOMIC
  * \notthreadsafe
  */
-void embb_atomic_destroy(
+void embb_atomic_destroy_TYPE(
   emb_atomic_TYPE* variable
   /**< [IN,OUT] Pointer to atomic variable to be destroyed. */
   );
@@ -118,7 +118,7 @@ void embb_atomic_destroy(
 /**
  * Computes the logical "and" of the value stored in \p variable and \c value.
  *
- * \pre The atomic variable has been initialized with \c embb_atomic_init
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
  * \post The result is stored in \p variable.
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
@@ -143,7 +143,7 @@ void embb_atomic_and_assign_TYPE(
  * to the value of \p expected. Otherwise, stores the value of \p variable in
  * \p expected.
  *
- * \pre The atomic variable has been initialized with \c embb_atomic_init
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
  *
  * \return != 0 if the values of \p variable and \p expected were equivalent \n
  *          0 otherwise
@@ -166,7 +166,7 @@ int embb_atomic_compare_and_swap_TYPE(
 /**
  * Adds \p value to \p variable and returns its old value.
  *
- * \pre The atomic variable has been initialized with \c embb_atomic_init
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
  *
  * \return The value before the operation
  *
@@ -186,7 +186,7 @@ TYPE embb_atomic_fetch_and_add_TYPE(
 /**
  * Loads the value of \p variable and returns it.
  *
- * \pre The atomic variable has been initialized with \c embb_atomic_init
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
  *
  * \return The value of the atomic variable.
  *
@@ -212,7 +212,7 @@ void embb_atomic_memory_barrier();
 /**
  * Computes the logical "or" of the value stored in \p variable and \c value.
  *
- * \pre The atomic variable has been initialized with \c embb_atomic_init
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
  * \post The result is stored in \p variable.
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
@@ -232,7 +232,7 @@ void embb_atomic_or_assign_TYPE(
 /**
  * Stores \p value in \p variable.
  *
- * \pre The atomic variable has been initialized with \c embb_atomic_init
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
  * information and the meaning of \b TYPE.
@@ -250,7 +250,7 @@ void embb_atomic_store_TYPE(
 /**
  * Swaps the current value of \p variable with \p value.
  *
- * \pre The atomic variable has been initialized with \c embb_atomic_init
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
  *
  * \return The old value of \p variable
  *
@@ -270,7 +270,7 @@ TYPE embb_atomic_swap_TYPE(
 /**
 * Computes the logical "xor" of the value stored in \p variable and \c value.
 *
-* \pre The atomic variable has been initialized with \c embb_atomic_init
+* \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
 * \post The result is stored in \p variable.
 *
 * \see \ref general_desc_atomic_base "Detailed description" for general
@@ -296,6 +296,7 @@ extern "C" {
 #include <embb/base/c/internal/atomic/atomic_sizes.h>
 #include <embb/base/c/internal/atomic/atomic_variables.h>
 #include <embb/base/c/internal/macro_helper.h>
+#include <embb/base/c/internal/atomic/init_destroy.h>
 #include <embb/base/c/internal/atomic/load.h>
 #include <embb/base/c/internal/atomic/and_assign.h>
 #include <embb/base/c/internal/atomic/store.h>
