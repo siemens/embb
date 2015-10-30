@@ -285,8 +285,13 @@ class LockFreeTreeValuePool {
    * by it. However, usually one wants to guarantee a minimal capacity. The
    * count of elements, that must be given to the pool when to guarantee \c
    * capacity elements is computed using this function.
+   *
+   * \return count of indices the pool has to be initialized with
    */
-  static size_t GetMinimumElementCountForGuaranteedCapacity(size_t capacity);
+  static size_t GetMinimumElementCountForGuaranteedCapacity(
+    size_t capacity
+    /**< [IN] count of indices that shall be guaranteed */);
+    );
 
   /**
    * Destructs the pool.

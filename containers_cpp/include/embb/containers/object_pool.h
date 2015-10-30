@@ -114,6 +114,7 @@ class ObjectPool {
   bool IsContained(const Type &obj) const;
   int GetIndexOfObject(const Type &obj) const;
   Type* AllocateRaw();
+
  public:
   /**
    * Constructs an object pool with capacity \c capacity.

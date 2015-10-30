@@ -83,7 +83,7 @@ ReturningTrueIterator::operator!=(const self_type& rhs) {
 template<class Type, typename ValuePool, class ObjectAllocator>
 bool ObjectPool<Type, ValuePool, ObjectAllocator>::
 IsContained(const Type &obj) const {
-  if ((&obj < &objects_array_[0]) || 
+  if ((&obj < &objects_array_[0]) ||
     (&obj > &objects_array_[value_pool_size_ - 1])) {
     return false;
   } else {
