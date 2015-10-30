@@ -59,7 +59,9 @@ IF(NOT OpenCL_FOUND)
   MESSAGE( STATUS "OpenCL is not there, will build without MTAPI OpenCL Plugin." )
 ENDIF()
 
-
+# give the user the possibility, to append compiler flags
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CMAKE_CXX_FLAGS}")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CMAKE_C_FLAGS}")
 
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
