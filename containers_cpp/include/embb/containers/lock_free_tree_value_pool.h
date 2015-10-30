@@ -291,7 +291,6 @@ class LockFreeTreeValuePool {
   static size_t GetMinimumElementCountForGuaranteedCapacity(
     size_t capacity
     /**< [IN] count of indices that shall be guaranteed */);
-    );
 
   /**
    * Destructs the pool.
