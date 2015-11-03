@@ -28,7 +28,7 @@ cmake_minimum_required (VERSION 2.8.9)
 # Version number
 set (EMBB_BASE_VERSION_MAJOR 0)
 set (EMBB_BASE_VERSION_MINOR 3)
-set (EMBB_BASE_VERSION_PATCH 0)
+set (EMBB_BASE_VERSION_PATCH 1)
 
 # Fix compilation for CMake versions >= 3.1
 #
@@ -59,7 +59,9 @@ IF(NOT OpenCL_FOUND)
   MESSAGE( STATUS "OpenCL is not there, will build without MTAPI OpenCL Plugin." )
 ENDIF()
 
-
+# give the user the possibility, to append compiler flags
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CMAKE_CXX_FLAGS}")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CMAKE_C_FLAGS}")
 
 if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
@@ -99,6 +101,13 @@ else()
   message("-- Warnings are not treated as errors (default)")
 endif()
 message("   (set with command line option -DWARNINGS_ARE_ERRORS=ON/OFF)")
+
+if (USE_AUTOMATIC_INITIALIZATION STREQUAL ON)
+  message("-- MTAPI/Tasks automatic initialization enabled (default)")
+else()
+  message("-- MTAPI/Tasks automatic initialization disabled")
+endif()
+message("   (set with command line option -DUSE_AUTOMATIC_INITIALIZATION=ON/OFF)")
 
 include(CMakeCommon/SetCompilerFlags.cmake)
 SetGNUCompilerFlags(compiler_libs compiler_flags)

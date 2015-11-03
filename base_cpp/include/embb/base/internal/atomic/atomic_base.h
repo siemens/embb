@@ -177,8 +177,7 @@ CompareAndSwap(BaseType& expected, BaseType desired) {
     compare_and_swap(&AtomicValue, &native_expected, native_desired)) !=0
     ? true : false;
 
-  if (!return_val)
-    expected = Load();
+  memcpy(&expected, &native_expected, sizeof(expected));
 
   return return_val;
 }

@@ -5,13 +5,10 @@ file(GLOB_RECURSE EMBB_TASKS_CPP_HEADERS "include/*.h")
 file(GLOB_RECURSE EMBB_TASKS_CPP_TEST_SOURCES "test/*.cc" "test/*.h")
 
 if (USE_AUTOMATIC_INITIALIZATION STREQUAL ON)
-  message("-- Automatic initialization enabled (default)")
   set(TASKS_CPP_AUTOMATIC_INITIALIZE 1)
 else()
   set(TASKS_CPP_AUTOMATIC_INITIALIZE 0)
-  message("-- Automatic initialization disabled")
 endif()
-message("   (set with command line option -DUSE_AUTOMATIC_INITIALIZATION=ON/OFF)")
 
 configure_file("include/embb/tasks/internal/cmake_config.h.in"
                "include/embb/tasks/internal/cmake_config.h")

@@ -42,7 +42,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 bool LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 IsLeaf(int node) {
-  if (node >= size - 1 && node <= 2 * size - 1) {
+  if (node >= size_ - 1 && node <= 2 * size_ - 1) {
     return true;
   }
   return false;
@@ -52,7 +52,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 bool LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 IsValid(int node) {
-  return (node >= 0 && node <= 2 * size - 1);
+  return (node >= 0 && node <= 2 * size_ - 1);
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
@@ -77,14 +77,14 @@ template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
 int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
 NodeIndexToPoolIndex(int node) {
   assert(IsLeaf(node));
-  return(node - (size - 1));
+  return(node - (size_ - 1));
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 PoolIndexToNodeIndex(int index) {
-  int node = index + (size - 1);
+  int node = index + (size_ - 1);
   assert(IsLeaf(node));
   return node;
 }
@@ -100,7 +100,7 @@ template<typename T, T Undefined, class PoolAllocator, class TreeAllocator >
 int LockFreeTreeValuePool<T, Undefined, PoolAllocator, TreeAllocator>::
 GetParentNode(int node) {
   int parent = (node - 1) / 2;
-  assert(parent >= 0 && parent < size - 1);
+  assert(parent >= 0 && parent < size_ - 1);
   return parent;
 }
 
@@ -112,11 +112,11 @@ allocate_rec(int node, Type& element) {
   if (IsLeaf(node)) {
     int pool_index = NodeIndexToPoolIndex(node);
 
-    Type expected = pool[pool_index];
+    Type expected = pool_[pool_index];
     if (expected == Undefined)
       return -1;
 
-    if (pool[pool_index].CompareAndSwap(expected, Undefined)) {
+    if (pool_[pool_index].CompareAndSwap(expected, Undefined)) {
       element = expected;
       return pool_index;
     }
@@ -131,11 +131,11 @@ allocate_rec(int node, Type& element) {
   // atomically decrement the value in the node if the result is greater than
   // or equal to zero. This cannot be done atomically.
   do {
-    current = tree[node];
+    current = tree_[node];
     desired = current - 1;
     if (desired < 0)
       return -1;
-  } while (!tree[node].CompareAndSwap(current, desired));
+  } while (!tree_[node].CompareAndSwap(current, desired));
 
   int leftResult = allocate_rec(GetLeftChildIndex(node), element);
   if (leftResult != -1) {
@@ -156,7 +156,7 @@ Fill(int node, int elementsToStore, int power2Value) {
   if (IsLeaf(node))
     return;
 
-  tree[node] = elementsToStore;
+  tree_[node] = elementsToStore;
 
   int postPower2Value = power2Value >> 1;
 
@@ -188,14 +188,14 @@ Free(Type element, int index) {
   assert(element != Undefined);
 
   // Put the element back
-  pool[index].Store(element);
+  pool_[index].Store(element);
 
-  assert(index >= 0 && index < size);
+  assert(index >= 0 && index < size_);
   int node = PoolIndexToNodeIndex(index);
 
   while (!IsRoot(node)) {
     node = GetParentNode(node);
-    tree[node].FetchAndAdd(1);
+    tree_[node].FetchAndAdd(1);
   }
 }
 
@@ -205,37 +205,76 @@ template< typename ForwardIterator >
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 LockFreeTreeValuePool(ForwardIterator first, ForwardIterator last) {
   // Number of elements to store
-  real_size = static_cast<int>(::std::distance(first, last));
+  real_size_ = static_cast<int>(::std::distance(first, last));
 
   // Let k be smallest number so that real_size <= 2^k, size = 2^k
-  size = GetSmallestPowerByTwoValue(real_size);
+  size_ = GetSmallestPowerByTwoValue(real_size_);
 
   // Size of binary tree without the leaves
-  tree_size = size - 1;
+  tree_size_ = size_ - 1;
+
+  // make sure, signed values are not negative
+  assert(tree_size_ >= 0);
+  assert(real_size_ >= 0);
+
+  size_t tree_size_unsigned = static_cast<size_t>(tree_size_);
+  size_t real_size_unsigned = static_cast<size_t>(real_size_);
 
   // Pool stores elements of type T
-  pool = poolAllocator.allocate(static_cast<size_t>(real_size));
+  pool_ = pool_allocator_.allocate(real_size_unsigned);
+
+  // invoke inplace new for each pool element
+  for (size_t i = 0; i != real_size_unsigned; ++i) {
+    new (&pool_[i]) embb::base::Atomic<Type>();
+  }
 
   // Tree holds the counter of not allocated elements
-  tree = treeAllocator.allocate(static_cast<size_t>(tree_size));
+  tree_ = tree_allocator_.allocate(tree_size_unsigned);
+
+  // invoke inplace new for each tree element
+  for (size_t i = 0; i != tree_size_unsigned; ++i) {
+    new (&tree_[i]) embb::base::Atomic<int>();
+  }
 
   int i = 0;
 
   // Store the elements from the range
   for (ForwardIterator curIter(first); curIter != last; ++curIter) {
-    pool[i++] = *curIter;
+    pool_[i++] = *curIter;
   }
 
   // Initialize the binary tree without leaves (counters)
-  Fill(0, static_cast<int>(::std::distance(first, last)), size);
+  Fill(0, static_cast<int>(::std::distance(first, last)), size_);
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 ~LockFreeTreeValuePool() {
-  poolAllocator.deallocate(pool, static_cast<size_t>(real_size));
-  treeAllocator.deallocate(tree, static_cast<size_t>(tree_size));
+  size_t tree_size_unsigned = static_cast<size_t>(tree_size_);
+  size_t real_size_unsigned = static_cast<size_t>(real_size_);
+
+  // invoke destructor for each pool element
+  for (size_t i = 0; i != real_size_unsigned; ++i) {
+    pool_[i].~Atomic();
+  }
+
+  pool_allocator_.deallocate(pool_, real_size_unsigned);
+
+  // invoke destructor for each tree element
+  for (size_t i = 0; i != tree_size_unsigned; ++i) {
+    tree_[i].~Atomic();
+  }
+
+  tree_allocator_.deallocate(tree_, tree_size_unsigned);
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+class TreeAllocator >
+size_t LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+GetMinimumElementCountForGuaranteedCapacity(size_t capacity) {
+  // for this value pool, this is just capacity...
+  return capacity;
 }
 
 } // namespace containers
