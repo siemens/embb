@@ -77,12 +77,7 @@ LockFreeMPMCQueue<Type, ValuePool>::~LockFreeMPMCQueue() {
 
 template< typename Type, typename ValuePool >
 LockFreeMPMCQueue<Type, ValuePool>::LockFreeMPMCQueue(size_t capacity) :
-  capacity(capacity),
-  // Object pool, size with respect to the maximum number of retired nodes not
-  // eligible for reuse. +1 for dummy node.
-  objectPool(
-  MPMCQueueNodeHazardPointer_t::ComputeMaximumRetiredObjectCount(2) +
-  capacity + 1),
+capacity(capacity),
 // Disable "this is used in base member initializer" warning.
 // We explicitly want this.
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
@@ -94,7 +89,13 @@ delete_pointer_callback(*this,
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-  hazardPointer(delete_pointer_callback, NULL, 2) {
+  hazardPointer(delete_pointer_callback, NULL, 2),
+  // Object pool, size with respect to the maximum number of retired nodes not
+  // eligible for reuse. +1 for dummy node.
+  objectPool(
+  hazardPointer.GetRetiredListMaxSize()*
+  embb::base::Thread::GetThreadsMaxCount() +
+  capacity + 1) {
   // Allocate dummy node to reduce the number of special cases to consider.
   internal::LockFreeMPMCQueueNode<Type>* dummyNode = objectPool.Allocate();
   // Initially, head and tail point to the dummy node.
@@ -119,7 +120,7 @@ bool LockFreeMPMCQueue<Type, ValuePool>::TryEnqueue(Type const& element) {
   for (;;) {
     my_tail = tail;
 
-    hazardPointer.Guard(0, my_tail);
+    hazardPointer.GuardPointer(0, my_tail);
 
     // Check if pointer is still valid after guarding.
     if (my_tail != tail) {
@@ -162,12 +163,12 @@ bool LockFreeMPMCQueue<Type, ValuePool>::TryDequeue(Type & element) {
   Type data;
   for (;;) {
     my_head = head;
-    hazardPointer.Guard(0, my_head);
+    hazardPointer.GuardPointer(0, my_head);
     if (my_head != head) continue;
 
     my_tail = tail;
     my_next = my_head->GetNext();
-    hazardPointer.Guard(1, my_next);
+    hazardPointer.GuardPointer(1, my_next);
     if (head != my_head) continue;
 
     if (my_next == NULL)
@@ -186,7 +187,7 @@ bool LockFreeMPMCQueue<Type, ValuePool>::TryDequeue(Type & element) {
       break;
   }
 
-  hazardPointer.EnqueueForDeletion(my_head);
+  hazardPointer.EnqueuePointerForDeletion(my_head);
   element = data;
   return true;
 }

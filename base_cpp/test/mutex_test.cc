@@ -191,21 +191,13 @@ void MutexTest::TestUniqueLock() {
   }
 
   { // Test lock swapping
-    UniqueLock<> lock1(mutex_);
+    UniqueLock<> lock1;
+    UniqueLock<> lock2(mutex_);
+    PT_EXPECT_EQ(lock1.OwnsLock(), false);
+    PT_EXPECT_EQ(lock2.OwnsLock(), true);
+    lock1.Swap(lock2);
     PT_EXPECT_EQ(lock1.OwnsLock(), true);
-
-    {
-      UniqueLock<> lock2;
-      PT_EXPECT_EQ(lock2.OwnsLock(), false);
-
-      lock1.Swap(lock2);
-      PT_EXPECT_EQ(lock1.OwnsLock(), false);
-      PT_EXPECT_EQ(lock2.OwnsLock(), true);
-    }
-
-    // At this point, "lock2" was destroyed and "mutex_" must be unlocked.
-    UniqueLock<> lock3(mutex_, embb::base::try_lock);
-    PT_EXPECT_EQ(lock3.OwnsLock(), true);
+    PT_EXPECT_EQ(lock2.OwnsLock(), false);
   }
 }
 

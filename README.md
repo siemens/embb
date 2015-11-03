@@ -270,8 +270,8 @@ If you want to use the C++ functionalities of EMB², you have to link the
 following libraries (names will be different on Windows and on Linux) in the
 given order:
 
-    embb_dataflow_cpp, embb_algorithms_cpp, embb_containers_cpp,
-    embb_mtapi_cpp, embb_mtapi_c, embb_base_cpp, embb_base_c
+    embb_base, embb_base_cpp, embb_mtapi_c, embb_mtapi_cpp, embb_containers_cpp,
+    embb_algorithms_cpp, embb_dataflow_cpp
 
 The C++ header files can be included as follows:
 
@@ -284,7 +284,7 @@ The C++ header files can be included as follows:
 
 The following libraries have to be linked in the given order:
 
-    embb_mtapi_c, embb_base_c
+    embb_base_c, mtapi_c
 
 The C header files can be included as follows:
 
@@ -323,8 +323,6 @@ Known Bugs and Limitations
   is bounded by a predefined but modifiable constant (see functions
   embb_thread_get_max_count() / embb_thread_set_max_count() and class
   embb::base::Thread).
-- While MTAPI fully supports heterogeneous systems, the algorithms and
-  dataflow components are currently limited to homogeneous systems.
 
 
 Development and Contribution

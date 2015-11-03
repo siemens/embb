@@ -478,7 +478,7 @@ class Atomic<BaseType*> : public embb::base::internal::atomic::
  public:
   Atomic() : embb::base::internal::atomic::
     AtomicPointer<BaseType, ptrdiff_t, sizeof(BaseType*)>() {}
-  explicit Atomic(BaseType* p) : embb::base::internal::atomic::
+  Atomic(BaseType* p) : embb::base::internal::atomic::
     AtomicPointer<BaseType, ptrdiff_t, sizeof(BaseType*)>(p) {}
 
   BaseType* operator=(BaseType* p) {

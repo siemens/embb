@@ -44,6 +44,7 @@ static void Invocable10() {}
 
 void InvokeTest::Test() {
   using embb::algorithms::Invoke;
+  Invoke(&Invocable1);
   Invoke(&Invocable1, &Invocable2);
   Invoke(&Invocable1, &Invocable2, &Invocable3);
   Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4);
@@ -60,24 +61,4 @@ void InvokeTest::Test() {
          &Invocable6, &Invocable7, &Invocable8, &Invocable9);
   Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
          &Invocable6, &Invocable7, &Invocable8, &Invocable9, &Invocable10);
-
-  embb::tasks::ExecutionPolicy policy;
-  Invoke(&Invocable1, &Invocable2, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
-         policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
-         &Invocable6, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
-         &Invocable6, &Invocable7, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
-         &Invocable6, &Invocable7, &Invocable8, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
-         &Invocable6, &Invocable7, &Invocable8, &Invocable9, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
-         &Invocable6, &Invocable7, &Invocable8, &Invocable9, policy);
-  Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
-         &Invocable6, &Invocable7, &Invocable8, &Invocable9, &Invocable10,
-         policy);
 }

@@ -49,37 +49,33 @@ typedef embb::base::Function<void> InvokeFunctionType;
 #ifdef DOXYGEN
 
 /**
- * Spawns two to ten function objects at once and runs them in parallel.
+ * Spawns one to ten function objects at once and runs them in parallel.
  *
  * Blocks until all of them are done.
  *
  * \ingroup CPP_ALGORITHMS_INVOKE
  */
-template<typename Function1, typename Function2, ...>
+template<typename Function1, ...>
 void Invoke(
   Function1 func1,
   /**< [in] First function object to invoke */
-  Function2 func2,
-  /**< [in] Second function object to invoke */
   ...);
 
 /**
-* Spawns two to ten function objects at once and runs them in parallel using the
+* Spawns one to ten function objects at once and runs them in parallel using the
 * given embb::mtapi::ExecutionPolicy.
 *
 * Blocks until all of them are done.
 *
 * \ingroup CPP_ALGORITHMS_INVOKE
 */
-template<typename Function1, typename Function2, ...>
+template<typename Function1, ...>
 void Invoke(
   Function1 func1,
   /**< [in] Function object to invoke */
-  Function2 func2,
-  /**< [in] Second function object to invoke */
   ...,
-  const embb::tasks::ExecutionPolicy & policy
-  /**< [in] embb::tasks::ExecutionPolicy to use */
+  const embb::mtapi::ExecutionPolicy & policy
+  /**< [in] embb::mtapi::ExecutionPolicy to use */
   );
 
 #else // DOXYGEN
@@ -121,6 +117,13 @@ class TaskWrapper {
   }
 };
 } // namespace internal
+
+template<typename Function1>
+void Invoke(
+  Function1 func1,
+  const embb::tasks::ExecutionPolicy& policy) {
+  internal::TaskWrapper<Function1> wrap1(func1, policy);
+}
 
 template<typename Function1, typename Function2>
 void Invoke(
@@ -285,6 +288,12 @@ template<typename Function1, typename Function2, typename Function3,
   internal::TaskWrapper<Function8> wrap8(func8, policy);
   internal::TaskWrapper<Function9> wrap9(func9, policy);
   internal::TaskWrapper<Function10> wrap10(func10, policy);
+}
+
+template<typename Function1>
+void Invoke(
+  Function1 func1) {
+  Invoke(func1, embb::tasks::ExecutionPolicy());
 }
 
 template<typename Function1, typename Function2>

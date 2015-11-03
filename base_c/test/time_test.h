@@ -42,14 +42,9 @@ class TimeTest : public partest::TestCase {
 
  private:
   /**
-   * Tests time-in-duration method.
+   * Tests time in duration method.
    */
   void TestTimeInDuration();
-
-  /**
-   * Tests that succeedingly taken times are monotonously increasing.
-   */
-  void TestMonotonicity();
 };
 
 } // namespace test

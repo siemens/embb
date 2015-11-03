@@ -83,8 +83,8 @@ int embb_condition_wait_until(embb_condition_t* condition_var,
   embb_time_t now;
   embb_time_now(&now);
   /* Check if absolute timepoint (in milliseconds) still is in the future */
-  if ((time->seconds * 1000 + time->nanoseconds / 1000000)
-      > (now.seconds * 1000 + now.nanoseconds / 1000000)) {
+  if (time->seconds * 1000 + time->nanoseconds / 1000000
+      - now.seconds * 1000 - now.nanoseconds / 1000000 > 0) {
     /* Convert to (unsigned type) milliseconds and round up */
     DWORD time_diff = (DWORD) (
         time->seconds * 1000 + time->nanoseconds / 1000000

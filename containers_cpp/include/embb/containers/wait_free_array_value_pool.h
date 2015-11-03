@@ -39,30 +39,12 @@ namespace containers {
  * \ingroup CPP_CONCEPT
  * \{
  * \par Description
- * A value pool is a multi-set of elements, where each element has a unique,
- * continuous (starting with 0) index. The elements cannot be modified and are
- * given at construction time by providing first/last iterators.
- *
- * \par
- * A value pool provides two primary operations: \c Allocate and \c Free. \c
- * Allocate allocates an element/index "pair" (index via return, element via
- * reference parameter) from the pool, and \c Free returns an element/index pair
- * to the pool. To guarantee linearizability, \c element is not allowed to be
- * modified between \c Allocate and \c Free. It is only allowed to free elements
- * that have previously been allocated. The \c Allocate function does not
- * guarantee an order on which indices are allocated. The count of elements that
- * can be allocated with \c Allocate might be smaller than the count of
- * elements, the pool is initialized with. This might be because of
- * implementation details and respective concurrency effects: for example, if
- * indices are managed within a queue, one has to protect queue elements from
- * concurrency effects (reuse and access). As long as a thread potentially
- * accesses a node (and with that an index), the respective index cannot not be
- * given out to the user, even if being logically not part of the pool anymore.
- * However, the user might want to guarantee a certain amount of indices to the
- * user. Therefore, the static \c GetMinimumElementCountForGuaranteedCapacity
- * method is used. The user passes the count of indices to this method, that
- * shall be guaranteed by the pool. The method returns the count on indices, the
- * pool has to be initialized with in order to guarantee this count on indices.
+ * A value pool is a fixed-size multiset of elements, where each element has a
+ * unique index. The elements cannot be modified and are given at construction
+ * time (by providing first/last iterators). A value pool provides two
+ * operations: \c Allocate and \c Free. \c Allocate removes an element from the
+ * pool, and \c Free returns an element to the pool. It is only allowed to
+ * free elements that have previously been allocated.
  *
  * \par Requirements
  * - Let \c Pool be the pool class
@@ -72,7 +54,6 @@ namespace containers {
  * - Let \c i, j be forward iterators supporting \c std::distance.
  * - Let \c c be an object of type \c Type&
  * - Let \c e be a value of type \c int
- * - Let \c f be a value of type \c int
  *
  * \par Valid Expressions
  *
@@ -91,7 +72,7 @@ namespace containers {
  *     the bottom element. The bottom element cannot be stored in the pool, it
  *     is exclusively used to mark empty cells. The pool initially contains
  *     \c std::distance(i, j) elements which are copied during construction from
- *     the range \c [i, j]. A concrete class satisfying the value pool concept
+ *     the range \c [i, j). A concrete class satisfying the value pool concept
  *     might provide additional template parameters for specifying allocators.
  *     </td>
  *   </tr>
@@ -99,10 +80,9 @@ namespace containers {
  *     <td>\code{.cpp} Allocate(c) \endcode</td>
  *     <td>\c int</td>
  *     <td>
- *     Allocates an element/index "pair" from the pool. Returns -1, if no
- *     element is available, i.e., the pool is empty. Otherwise, returns the
- *     index of the element in the pool. The value of the pool element is
- *     written into parameter reference \c c.
+ *     Gets an element from the pool. Returns -1, if no element is available,
+ *     i.e., the pool is empty. Otherwise, returns the index of the element in
+ *     the pool. The value of the pool element is written into reference \c c.
  *     </td>
  *   </tr>
  *   <tr>
@@ -112,15 +92,6 @@ namespace containers {
  *     values of \c d and \c e have to match the values of the previous call to
  *     \c Allocate. For each allocated element, \c Free must be called exactly
  *     once.</td>
- *   </tr>
- *   <tr>
- *     <td>\code{.cpp} GetMinimumElementCountForGuaranteedCapacity(f)
- *     \endcode</td>
- *     <td>\c void</td>
- *     <td>Static method, returns the count of indices, the user has to
- *     initialize the pool with in order to guarantee a count of \c f elements
- *     (irrespective of concurrency effects).
- *      </td>
  *   </tr>
  * </table>
  *
@@ -145,10 +116,10 @@ template<typename Type,
   class Allocator = embb::base::Allocator< embb::base::Atomic<Type> > >
 class WaitFreeArrayValuePool {
  private:
-  int size_;
-  embb::base::Atomic<Type>* pool_array_;
+  int size;
+  embb::base::Atomic<Type>* pool;
   WaitFreeArrayValuePool();
-  Allocator allocator_;
+  Allocator allocator;
 
   // Prevent copy-construction
   WaitFreeArrayValuePool(const WaitFreeArrayValuePool&);
@@ -179,18 +150,6 @@ class WaitFreeArrayValuePool {
   );
 
   /**
-   * Due to concurrency effects, a pool might provide less elements than managed
-   * by it. However, usually one wants to guarantee a minimal capacity. The
-   * count of elements, that must be given to the pool when to guarantee \c
-   * capacity elements is computed using this function.
-   *
-   * \return count of indices the pool has to be initialized with
-   */
-  static size_t GetMinimumElementCountForGuaranteedCapacity(
-    size_t capacity
-    /**< [IN] count of indices that shall be guaranteed */);
-
-  /**
    * Destructs the pool.
    *
    * \notthreadsafe
@@ -216,7 +175,7 @@ class WaitFreeArrayValuePool {
    * Returns an element to the pool.
    *
    * \note The element must have been allocated with Allocate().
-   *
+   * 
    * \waitfree
    *
    * \see CPP_CONCEPTS_VALUE_POOL

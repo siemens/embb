@@ -187,6 +187,11 @@ class LockFreeStack {
     delete_pointer_callback;
 
   /**
+   * The hazard pointer object, used for memory management.
+   */
+  internal::HazardPointer<internal::LockFreeStackNode<Type>*> hazardPointer;
+
+  /**
    * The callback function, used to cleanup non-hazardous pointers.
    * \see delete_pointer_callback
    */
@@ -194,25 +199,8 @@ class LockFreeStack {
 
   /**
    * The object pool, used for lock-free memory allocation.
-   *
-   * Warning: the objectPool has to be initialized before the hazardPointer
-   * object, to be sure that the hazardPointer object is destructed before the
-   * Pool as the hazardPointer object might return elements to the pool in its
-   * destructor. So the ordering of the members objectPool and hazardPointer is
-   * important here!
    */
   ObjectPool< internal::LockFreeStackNode<Type>, ValuePool > objectPool;
-
-  /**
-   * Definition of the used hazard pointer type
-   */
-  typedef internal::HazardPointer < internal::LockFreeStackNode<Type>* >
-    StackNodeHazardPointer_t;
-
-  /**
-   * The hazard pointer object, used for memory management.
-   */
-  StackNodeHazardPointer_t hazardPointer;
 
   /**
    * Atomic pointer to the top node of the stack (element that is popped next)

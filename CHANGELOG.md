@@ -1,37 +1,6 @@
 ﻿Embedded Multicore Building Blocks (EMB²)
 =========================================
 
-Version 0.3.1
--------------
-
-### Features:
-- None
-
-### Changes and improvements:
-- Removed one function argument from algorithms::Invoke
-- Added "explicit" specifier to base type constructor of Atomic<BaseType*>
-- Added "const" qualifier to dereference operator and member access operator of AtomicPointer<>
-- Changed AtomicBase<>::CompareAndSwap to atomically return expected value
-- Replaced constant in dataflow_cpp_test_simple.cc with corresponding macro
-- Added initialization of atomic variable in hazard_pointer_test.cc to avoid warning with GCC 5.1
-- Changed initial value of allocated_object_from_different_thread
-- Added tests for ID Pool and check for memory leaks
-- Updated unit test for the UniqueLock::Swap
-
-### Bug fixes:
-- Fixed implementation of ID pool (provided fewer elements than specified by capacity)
-- Fixed unsigned overflow bug in timed wait function of condition variables
-- Fixed implementation of UniqueLock::Swap
-
-### Build system:
-- Improved CMake output for automatic initialization option
-- Fixed cpplint and unsigned/signed warnings
-
-### Documentation:
-- Fixed documentation of UniqueLock class
-- Updated README file
-
-
 Version 0.3.0
 -------------
 

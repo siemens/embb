@@ -38,7 +38,7 @@ ConditionVarTest::ConditionVarTest()
   embb_condition_init(&cond_wait_);
   embb_mutex_init(&mutex_cond_wait_, EMBB_MUTEX_PLAIN);
 
-  CreateUnit("Timed wait timeouts")
+  CreateUnit("Timed wait timouts")
       .Add(&ConditionVarTest::TestTimedWaitTimeouts, this);
   if (num_threads_ >= 2) {
     CreateUnit("Condition Notify Test")
@@ -64,10 +64,10 @@ void ConditionVarTest::TestNotify() {
 
     while (embb_counter_get(&counter_)
         < static_cast<unsigned int>(num_threads_-1))
-    {}  // All threads entered critical section
+    {}  // all threads entered critical section
     embb_mutex_lock(&mutex_cond_notify_);
     embb_mutex_unlock(&mutex_cond_notify_);
-    // All threads called wait on the condition (even last thread)
+    // All threads called wait on the condition (Even last thread)
 
     embb_counter_init(&counter_);
 
@@ -75,7 +75,7 @@ void ConditionVarTest::TestNotify() {
     embb_mutex_lock(&mutex_cond_wait_);
     embb_condition_wait_for(&cond_wait_, &mutex_cond_wait_, &duration);
     while (embb_counter_get(&counter_) == 0)
-    {} // If test hangs here, signalling has not succeeded
+    {} //if hangs here signal has not succeded
     PT_ASSERT_EQ_MSG(embb_counter_get(&counter_), static_cast<unsigned int>(1),
         "Only one thread notified");
 
@@ -85,7 +85,7 @@ void ConditionVarTest::TestNotify() {
 
     while (embb_counter_get(&counter_) !=
         static_cast<unsigned int>(num_threads_-1))
-    {} // If test hangs here, not all threads were notified
+    {} // If this hangs then not all threads were notified.
 
     embb_mutex_unlock(&mutex_cond_wait_);
     embb_mutex_destroy(&mutex_cond_wait_);
@@ -105,13 +105,13 @@ void ConditionVarTest::TestTimedWaitTimeouts() {
   embb_time_t time;
   embb_duration_t duration = EMBB_DURATION_INIT;
 
-  // Wait for "now" tests already passed time point
+  // Wait for now tests already passed time point
   embb_time_now(&time);
   embb_mutex_lock(&mutex);
   int status = embb_condition_wait_until(&cond, &mutex, &time);
   PT_EXPECT_EQ(status, EMBB_TIMEDOUT);
 
-  // Wait for a future time point
+  // Wait for a future timepoint
   status = embb_duration_set_milliseconds(&duration, 1);
   PT_EXPECT_EQ(status, EMBB_SUCCESS);
   status = embb_time_in(&time, &duration); // Time now

@@ -78,19 +78,13 @@ void TaskTest::TestBasic() {
   PT_EXPECT_EQ(policy.GetPriority(), 0u);
   policy.AddWorker(0u);
   PT_EXPECT_EQ(policy.GetAffinity(), 1u);
-
-  if (policy.GetCoreCount() > 1) {
-    policy.AddWorker(1u);
-    PT_EXPECT_EQ(policy.GetAffinity(), 3u);
-  }
-
+  policy.AddWorker(1u);
+  PT_EXPECT_EQ(policy.GetAffinity(), 3u);
   policy.RemoveWorker(0u);
+  PT_EXPECT_EQ(policy.GetAffinity(), 2u);
   PT_EXPECT_EQ(policy.IsSetWorker(0), false);
+  PT_EXPECT_EQ(policy.IsSetWorker(1), true);
 
-  if (policy.GetCoreCount() > 1) {
-    PT_EXPECT_EQ(policy.GetAffinity(), 2u);
-    PT_EXPECT_EQ(policy.IsSetWorker(1), true);
-  }
   std::string test;
   embb::tasks::Task task = node.Spawn(
     embb::base::Bind(

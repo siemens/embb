@@ -71,7 +71,7 @@ mtapi_uint_t embb_mtapi_id_pool_allocate(embb_mtapi_id_pool_t * that) {
       /* acquire position to fetch id from */
       mtapi_uint_t id_position = that->get_id_position;
       that->get_id_position++;
-      if (that->capacity < that->get_id_position) {
+      if (that->capacity <= that->get_id_position) {
         that->get_id_position = 0;
       }
 
@@ -97,7 +97,7 @@ void embb_mtapi_id_pool_deallocate(
       /* acquire position to put id to */
       mtapi_uint_t id_position = that->put_id_position;
       that->put_id_position++;
-      if (that->capacity < that->put_id_position) {
+      if (that->capacity <= that->put_id_position) {
         that->put_id_position = 0;
       }
 
