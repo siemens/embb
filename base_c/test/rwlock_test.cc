@@ -24,85 +24,85 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <shared_mutex_test.h>
+#include <rwlock_test.h>
 #include <embb/base/c/errors.h>
 
 namespace embb {
 namespace base {
 namespace test {
 
-SharedMutexTest::SharedMutexTest()
+RWLockTest::RWLockTest()
     : counter_(0),
       num_threads_(partest::TestSuite::GetDefaultNumThreads()),
       num_iterations_(partest::TestSuite::GetDefaultNumIterations()) {
   CreateUnit("Shared read")
-      .Pre(&SharedMutexTest::TestSharedRead_Pre, this)
-      .Add(&SharedMutexTest::TestSharedRead_ThreadMethod, this,
+      .Pre(&RWLockTest::TestSharedRead_Pre, this)
+      .Add(&RWLockTest::TestSharedRead_ThreadMethod, this,
            num_threads_, num_iterations_)
-      .Post(&SharedMutexTest::TestSharedRead_Post, this);
+      .Post(&RWLockTest::TestSharedRead_Post, this);
   CreateUnit("Exclusive write")
-      .Pre(&SharedMutexTest::TestExclusiveWrite_Pre, this)
-      .Add(&SharedMutexTest::TestExclusiveWrite_ReaderMethod, this,
-           num_threads_ / 2, num_iterations_)
-      .Add(&SharedMutexTest::TestExclusiveWrite_WriterMethod, this,
-           num_threads_ / 2, num_iterations_)
-      .Post(&SharedMutexTest::TestExclusiveWrite_Post, this);
+      .Pre(&RWLockTest::TestExclusiveWrite_Pre, this)
+      .Add(&RWLockTest::TestExclusiveWrite_ReaderMethod, this,
+           num_threads_, num_iterations_)
+      .Add(&RWLockTest::TestExclusiveWrite_WriterMethod, this,
+           num_threads_, num_iterations_)
+      .Post(&RWLockTest::TestExclusiveWrite_Post, this);
 }
 
-void SharedMutexTest::TestSharedRead_Pre() {
-  int success = embb_shared_mutex_init(&shared_mutex_);
-  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to initialize shared mutex.");
+void RWLockTest::TestSharedRead_Pre() {
+  int success = embb_rwlock_init(&rwlock_);
+  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to initialize rwlock.");
 }
 
-void SharedMutexTest::TestSharedRead_ThreadMethod() {
-  int success = embb_shared_mutex_try_lock_shared(&shared_mutex_);
+void RWLockTest::TestSharedRead_ThreadMethod() {
+  int success = embb_rwlock_try_lock_read(&rwlock_);
   PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to lock for reading.");
 
   int spin = 10000;
   while (--spin != 0);
 
-  success = embb_shared_mutex_unlock_shared(&shared_mutex_);
+  success = embb_rwlock_unlock_read(&rwlock_);
   PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to unlock (reading).");
 }
 
-void SharedMutexTest::TestSharedRead_Post() {
-  embb_shared_mutex_destroy(&shared_mutex_);
+void RWLockTest::TestSharedRead_Post() {
+  embb_rwlock_destroy(&rwlock_);
 }
 
-void SharedMutexTest::TestExclusiveWrite_Pre() {
-  int success = embb_shared_mutex_init(&shared_mutex_);
-  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to initialize shared mutex.");
+void RWLockTest::TestExclusiveWrite_Pre() {
+  int success = embb_rwlock_init(&rwlock_);
+  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to initialize rwlock.");
 
   counter_ = 0;
 }
 
-void SharedMutexTest::TestExclusiveWrite_ReaderMethod() {
+void RWLockTest::TestExclusiveWrite_ReaderMethod() {
   // Just add some contention
 
-  int success = embb_shared_mutex_try_lock_shared(&shared_mutex_);
+  int success = embb_rwlock_try_lock_read(&rwlock_);
   if (success != EMBB_SUCCESS) return;
 
   int spin = 10000;
   while (--spin != 0);
 
-  success = embb_shared_mutex_unlock_shared(&shared_mutex_);
+  success = embb_rwlock_unlock_read(&rwlock_);
   PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to unlock (reading).");
 }
 
-void SharedMutexTest::TestExclusiveWrite_WriterMethod() {
-  int success = embb_shared_mutex_lock(&shared_mutex_);
+void RWLockTest::TestExclusiveWrite_WriterMethod() {
+  int success = embb_rwlock_lock_write(&rwlock_);
   PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to lock for writing.");
 
   ++counter_;
 
-  success = embb_shared_mutex_unlock(&shared_mutex_);
+  success = embb_rwlock_unlock_write(&rwlock_);
   PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to unlock (writing).");
 }
 
-void SharedMutexTest::TestExclusiveWrite_Post() {
-  PT_ASSERT_EQ_MSG(counter_, num_iterations_ * (num_threads_ / 2),
+void RWLockTest::TestExclusiveWrite_Post() {
+  PT_ASSERT_EQ_MSG(counter_, num_iterations_ * num_threads_,
                    "Counter value is inconsistent.");
-  embb_shared_mutex_destroy(&shared_mutex_);
+  embb_rwlock_destroy(&rwlock_);
 }
 
 } // namespace test

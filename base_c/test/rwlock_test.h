@@ -24,21 +24,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BASE_C_TEST_SHARED_MUTEX_TEST_H_
-#define BASE_C_TEST_SHARED_MUTEX_TEST_H_
+#ifndef BASE_C_TEST_RWLOCK_TEST_H_
+#define BASE_C_TEST_RWLOCK_TEST_H_
 
 #include <partest/partest.h>
 #include <embb/base/c/internal/platform.h>
-#include <embb/base/c/shared_mutex.h>
+#include <embb/base/c/rwlock.h>
 
 
 namespace embb {
 namespace base {
 namespace test {
 
-class SharedMutexTest : public partest::TestCase {
+class RWLockTest : public partest::TestCase {
  public:
-  SharedMutexTest();
+  RWLockTest();
 
  private:
   void TestSharedRead_Pre();
@@ -50,7 +50,7 @@ class SharedMutexTest : public partest::TestCase {
   void TestExclusiveWrite_WriterMethod();
   void TestExclusiveWrite_Post();
 
-  embb_shared_mutex_t shared_mutex_;
+  embb_rwlock_t rwlock_;
   size_t counter_;
   size_t num_threads_;
   size_t num_iterations_;
@@ -60,4 +60,4 @@ class SharedMutexTest : public partest::TestCase {
 } // namespace base
 } // namespace embb
 
-#endif  // BASE_C_TEST_SHARED_MUTEX_TEST_H_
+#endif  // BASE_C_TEST_RWLOCK_TEST_H_

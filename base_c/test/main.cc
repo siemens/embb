@@ -35,7 +35,7 @@
 #include <condition_var_test.h>
 #include <thread_test.h>
 #include <thread_specific_storage_test.h>
-#include <shared_mutex_test.h>
+#include <rwlock_test.h>
 #include <embb/base/c/thread.h>
 #include <embb/base/c/log.h>
 #include <iostream>
@@ -52,7 +52,7 @@ using embb::base::test::CoreSetTest;
 using embb::base::test::ConditionVarTest;
 using embb::base::test::ThreadTest;
 using embb::base::test::ThreadSpecificStorageTest;
-using embb::base::test::SharedMutexTest;
+using embb::base::test::RWLockTest;
 
 PT_MAIN("Base C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_WARNING);
@@ -70,7 +70,7 @@ PT_MAIN("Base C") {
   PT_RUN(ConditionVarTest);
   PT_RUN(ThreadTest);
   PT_RUN(ThreadSpecificStorageTest);
-  PT_RUN(SharedMutexTest);
+  PT_RUN(RWLockTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

@@ -24,79 +24,87 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb/base/c/shared_mutex.h>
+#include <embb/base/c/rwlock.h>
 #include <assert.h>
 
 #include <embb/base/c/internal/unused.h>
 
 #ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
-int embb_shared_mutex_init(embb_shared_mutex_t* shared_mutex) {
-  InitializeSRWLock(shared_mutex);
+int embb_rwlock_init(embb_rwlock_t* rwlock) {
+  InitializeSRWLock(rwlock);
   return EMBB_SUCCESS;
 }
 
-int embb_shared_mutex_lock(embb_shared_mutex_t* shared_mutex) {
-  AcquireSRWLockExclusive(shared_mutex);
+int embb_rwlock_lock_read(embb_rwlock_t* rwlock) {
+  AcquireSRWLockShared(rwlock);
   return EMBB_SUCCESS;
 }
 
-int embb_shared_mutex_try_lock(embb_shared_mutex_t* shared_mutex) {
+int embb_rwlock_lock_write(embb_rwlock_t* rwlock) {
+  AcquireSRWLockExclusive(rwlock);
+  return EMBB_SUCCESS;
+}
+
+int embb_rwlock_try_lock_read(embb_rwlock_t* rwlock) {
   BOOLEAN success;
-  success = TryAcquireSRWLockExclusive(shared_mutex);
+  success = TryAcquireSRWLockShared(rwlock);
   if (success == FALSE) return EMBB_ERROR;
   return EMBB_SUCCESS;
 }
 
-int embb_shared_mutex_unlock(embb_shared_mutex_t* shared_mutex) {
-  ReleaseSRWLockExclusive(shared_mutex);
-  return EMBB_SUCCESS;
-}
-
-int embb_shared_mutex_lock_shared(embb_shared_mutex_t* shared_mutex) {
-  AcquireSRWLockShared(shared_mutex);
-  return EMBB_SUCCESS;
-}
-
-int embb_shared_mutex_try_lock_shared(embb_shared_mutex_t* shared_mutex) {
+int embb_rwlock_try_lock_write(embb_rwlock_t* rwlock) {
   BOOLEAN success;
-  success = TryAcquireSRWLockShared(shared_mutex);
+  success = TryAcquireSRWLockExclusive(rwlock);
   if (success == FALSE) return EMBB_ERROR;
   return EMBB_SUCCESS;
 }
 
-int embb_shared_mutex_unlock_shared(embb_shared_mutex_t* shared_mutex) {
-  ReleaseSRWLockShared(shared_mutex);
+int embb_rwlock_unlock_read(embb_rwlock_t* rwlock) {
+  ReleaseSRWLockShared(rwlock);
   return EMBB_SUCCESS;
 }
 
-void embb_shared_mutex_destroy(embb_shared_mutex_t* shared_mutex) {
+int embb_rwlock_unlock_write(embb_rwlock_t* rwlock) {
+  ReleaseSRWLockExclusive(rwlock);
+  return EMBB_SUCCESS;
+}
+
+void embb_rwlock_destroy(embb_rwlock_t* rwlock) {
   // Quoting MSDN: "SRW locks do not need to be explicitly destroyed".
-  EMBB_UNUSED(shared_mutex);
+  EMBB_UNUSED(rwlock);
 }
 
 #endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
-int embb_shared_mutex_init(embb_shared_mutex_t* shared_mutex) {
-  int result = pthread_rwlock_init(shared_mutex, NULL);
+int embb_rwlock_init(embb_rwlock_t* rwlock) {
+  int result = pthread_rwlock_init(rwlock, NULL);
   if (result != 0) {
     return EMBB_ERROR;
   }
   return EMBB_SUCCESS;
 }
 
-int embb_shared_mutex_lock(embb_shared_mutex_t* shared_mutex) {
-  int result = pthread_rwlock_wrlock(shared_mutex);
+int embb_rwlock_lock_read(embb_rwlock_t* rwlock) {
+  int result = pthread_rwlock_rdlock(rwlock);
   if (result != 0) {
     return EMBB_ERROR;
   }
   return EMBB_SUCCESS;
 }
 
-int embb_shared_mutex_try_lock(embb_shared_mutex_t* shared_mutex) {
-  int result = pthread_rwlock_trywrlock(shared_mutex);
+int embb_rwlock_lock_write(embb_rwlock_t* rwlock) {
+  int result = pthread_rwlock_wrlock(rwlock);
+  if (result != 0) {
+    return EMBB_ERROR;
+  }
+  return EMBB_SUCCESS;
+}
+
+int embb_rwlock_try_lock_read(embb_rwlock_t* rwlock) {
+  int result = pthread_rwlock_tryrdlock(rwlock);
   if (result == 0) {
     return EMBB_SUCCESS;
   }
@@ -106,24 +114,8 @@ int embb_shared_mutex_try_lock(embb_shared_mutex_t* shared_mutex) {
   return EMBB_ERROR;
 }
 
-int embb_shared_mutex_unlock(embb_shared_mutex_t* shared_mutex) {
-  int result = pthread_rwlock_unlock(shared_mutex);
-  if (result != 0) {
-    return EMBB_ERROR;
-  }
-  return EMBB_SUCCESS;
-}
-
-int embb_shared_mutex_lock_shared(embb_shared_mutex_t* shared_mutex) {
-  int result = pthread_rwlock_rdlock(shared_mutex);
-  if (result != 0) {
-    return EMBB_ERROR;
-  }
-  return EMBB_SUCCESS;
-}
-
-int embb_shared_mutex_try_lock_shared(embb_shared_mutex_t* shared_mutex) {
-  int result = pthread_rwlock_tryrdlock(shared_mutex);
+int embb_rwlock_try_lock_write(embb_rwlock_t* rwlock) {
+  int result = pthread_rwlock_trywrlock(rwlock);
   if (result == 0) {
     return EMBB_SUCCESS;
   }
@@ -133,16 +125,24 @@ int embb_shared_mutex_try_lock_shared(embb_shared_mutex_t* shared_mutex) {
   return EMBB_ERROR;
 }
 
-int embb_shared_mutex_unlock_shared(embb_shared_mutex_t* shared_mutex) {
-  int result = pthread_rwlock_unlock(shared_mutex);
+int embb_rwlock_unlock_read(embb_rwlock_t* rwlock) {
+  int result = pthread_rwlock_unlock(rwlock);
   if (result != 0) {
     return EMBB_ERROR;
   }
   return EMBB_SUCCESS;
 }
 
-void embb_shared_mutex_destroy(embb_shared_mutex_t* shared_mutex) {
-  pthread_rwlock_destroy(shared_mutex);
+int embb_rwlock_unlock_write(embb_rwlock_t* rwlock) {
+  int result = pthread_rwlock_unlock(rwlock);
+  if (result != 0) {
+    return EMBB_ERROR;
+  }
+  return EMBB_SUCCESS;
+}
+
+void embb_rwlock_destroy(embb_rwlock_t* rwlock) {
+  pthread_rwlock_destroy(rwlock);
 }
 
 #endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */

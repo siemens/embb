@@ -44,7 +44,7 @@ typedef embb_thread_t ThreadType;
 typedef DWORD IDType;
 typedef embb_mutex_t MutexType;
 typedef embb_condition_t ConditionVariableType;
-typedef embb_shared_mutex_t SharedMutexType;
+typedef embb_rwlock_t RWLockType;
 
 } // namespace internal
 } // namespace base
@@ -60,7 +60,7 @@ typedef embb_thread_t ThreadType;
 typedef embb_thread_id_t IDType;
 typedef embb_mutex_t MutexType;
 typedef embb_condition_t ConditionVariableType;
-typedef embb_shared_mutex_t SharedMutexType;
+typedef embb_rwlock_t RWLockType;
 
 } // namespace internal
 } // namespace base
