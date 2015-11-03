@@ -29,7 +29,7 @@
 
 #include <partest/partest.h>
 #include <embb/base/c/internal/platform.h>
-#include <embb/base/c/mutex.h>
+#include <embb/base/c/shared_mutex.h>
 
 
 namespace embb {
@@ -41,39 +41,14 @@ class SharedMutexTest : public partest::TestCase {
   SharedMutexTest();
 
  private:
-  /**
-   * Only readers.
-   *
-   * The readers use try_lock_shared() and test if that always obtains the
-   * shared lock.
-   */
-  void TestSharedReadPre();
-  void TestSharedReadThreadMethod();
-  void TestSharedReadPost();
+  void TestSharedRead_Pre();
+  void TestSharedRead_ThreadMethod();
+  void TestSharedRead_Post();
 
-  /**
-   * Multiple readers and writers.
-   *
-   * The writers use lock() and test if that always obtains the lock (after
-   * waiting). The readers use lock_shared() and test if that always obtains the
-   * shared lock (after waiting).
-   */
-  void TestMultipleWriterPre();
-  void TestMultipleWriterReaderMethod();
-  void TestMultipleWriterWriterMethod();
-  void TestMultipleWriterPost();
-
-  /**
-   * Multiple readers, single writer.
-   *
-   * The single writer uses try_lock() and tests if that always obtains the
-   * lock. The readers use lock_shared() and test if that always obtains the
-   * shared lock (after waiting).
-   */
-  void TestSingleWriterPre();
-  void TestSingleWriterReaderMethod();
-  void TestSingleWriterWriterMethod();
-  void TestSingleWriterPost();
+  void TestExclusiveWrite_Pre();
+  void TestExclusiveWrite_ReaderMethod();
+  void TestExclusiveWrite_WriterMethod();
+  void TestExclusiveWrite_Post();
 
   embb_shared_mutex_t shared_mutex_;
   size_t counter_;

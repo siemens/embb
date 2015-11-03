@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb/base/c/mutex.h>
+#include <embb/base/c/shared_mutex.h>
 #include <assert.h>
 
 #include <embb/base/c/internal/unused.h>
