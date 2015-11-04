@@ -29,7 +29,7 @@
 
 #include <partest/partest.h>
 #include <embb/base/c/internal/platform.h>
-#include <embb/base/shared_mutex.h>
+#include <embb/base/mutex.h>
 
 
 namespace embb {
@@ -41,14 +41,14 @@ class SharedMutexTest : public partest::TestCase {
   SharedMutexTest();
 
  private:
-  void TestSharedRead_ThreadMethod();
+  void TestSharedReadThreadMethod();
 
-  void TestExclusiveWrite_Pre();
-  void TestExclusiveWrite_ReaderMethod();
-  void TestExclusiveWrite_WriterMethod();
-  void TestExclusiveWrite_Post();
+  void TestExclusiveWritePre();
+  void TestExclusiveWriteReaderMethod();
+  void TestExclusiveWriteWriterMethod();
+  void TestExclusiveWritePost();
 
-  void TestSharedLock_ThreadMethod();
+  void TestSharedLockThreadMethod();
 
   SharedMutex shared_mutex_;
   size_t counter_;

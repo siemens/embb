@@ -114,6 +114,83 @@ bool UniqueLock<Mutex>::OwnsLock() const {
   return locked_;
 }
 
+template<typename SharedMutex>
+SharedLock<SharedMutex>::SharedLock()
+    : shared_mutex_(NULL), locked_(false) {}
+
+template<typename SharedMutex>
+SharedLock<SharedMutex>::SharedLock(SharedMutex& shared_mutex)
+    : shared_mutex_(&shared_mutex), locked_(false) {
+  shared_mutex_->LockShared();
+  locked_ = true;
+}
+
+template<typename SharedMutex>
+SharedLock<SharedMutex>::SharedLock(SharedMutex& shared_mutex, DeferLockTag)
+    : shared_mutex_(&shared_mutex), locked_(false) {}
+
+template<typename SharedMutex>
+SharedLock<SharedMutex>::SharedLock(SharedMutex& shared_mutex, TryLockTag)
+    : shared_mutex_(&shared_mutex), locked_(shared_mutex_->TryLockShared()) {}
+
+template<typename SharedMutex>
+SharedLock<SharedMutex>::SharedLock(SharedMutex& shared_mutex, AdoptLockTag)
+    : shared_mutex_(&shared_mutex), locked_(true) {}
+
+template<typename SharedMutex>
+SharedLock<SharedMutex>::~SharedLock() {
+  if (OwnsLock()) {
+    shared_mutex_->UnlockShared();
+  }
+}
+
+template<typename SharedMutex>
+void SharedLock<SharedMutex>::Lock() {
+  if (shared_mutex_ == NULL || locked_) {
+    EMBB_THROW(ErrorException, "Mutex not set or locked");
+  }
+  shared_mutex_->LockShared();
+  locked_ = true;
+}
+
+template<typename SharedMutex>
+bool SharedLock<SharedMutex>::TryLock() {
+  if (shared_mutex_ == NULL || locked_) {
+    EMBB_THROW(ErrorException, "Mutex not set or locked");
+  }
+  locked_ = shared_mutex_->TryLockShared();
+  return locked_;
+}
+
+template<typename SharedMutex>
+void SharedLock<SharedMutex>::Unlock() {
+  if (shared_mutex_ == NULL || !locked_) {
+    EMBB_THROW(ErrorException, "Mutex not set or unlocked");
+  }
+  shared_mutex_->UnlockShared();
+  locked_ = false;
+}
+
+template<typename SharedMutex>
+void SharedLock<SharedMutex>::Swap(SharedLock& other) {
+  std::swap(shared_mutex_, other.shared_mutex_);
+  std::swap(locked_, other.locked_);
+}
+
+template<typename SharedMutex>
+SharedMutex* SharedLock<SharedMutex>::Release() {
+  SharedMutex* to_release = shared_mutex_;
+  shared_mutex_ = NULL;
+  locked_ = false;
+  return to_release;
+}
+
+template<typename SharedMutex>
+bool SharedLock<SharedMutex>::OwnsLock() const {
+  assert(!(locked_ && (shared_mutex_ == NULL)));
+  return locked_;
+}
+
 } // namespace base
 } // namespace embb
 

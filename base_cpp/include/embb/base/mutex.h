@@ -246,6 +246,125 @@ class RecursiveMutex : public internal::MutexBase {
   RecursiveMutex& operator=(const RecursiveMutex&);
 };
 
+/**
+ * Shared mutex providing shared-read/exclusive-write access synchronization.
+ *
+ * Allows simultaneous shared access for concurrent readers, but only exclusive
+ * access for writers. Cannot be locked recursively. Fairness and/or FIFO order
+ * guarantees are platform specific and should be assumed non-existent.
+ *
+ * \see Mutex
+ *
+ * \ingroup CPP_BASE_MUTEX
+ */
+class SharedMutex {
+ public:
+  /**
+   * Creates the shared mutex object which is initially in an unlocked state.
+   *
+   * \memory Potentially allocates dynamic memory
+   *
+   * \notthreadsafe
+   */
+  SharedMutex();
+
+  /**
+   * Destroys internal representation.
+   */
+  ~SharedMutex();
+
+  /**
+   * Waits until the shared mutex can be locked for writing and locks it.
+   *
+   * \pre \c shared_mutex is not locked by the current thread.
+   * \post \c shared_mutex is locked for writing.
+   *
+   * \threadsafe
+   *
+   * \see TryLock(), Unlock()
+   */
+  void Lock();
+
+  /**
+   * Tries to lock the shared mutex for writing and returns immediately.
+   *
+   * The try to lock fails not only if the shared mutex was already locked for
+   * writing, but also in case it was locked shared for reading.
+   *
+   * \pre \c shared_mutex is not locked by the current thread.
+   * \post If successful, \c shared_mutex is locked for writing.
+   *
+   * \return \c true if shared mutex was locked for reading \n
+   *         \c false if shared_mutex could not be locked for writing, because
+   *                   the mutex was already locked for writing or reading \n
+   *
+   * \threadsafe
+   *
+   * \see Lock(), Unlock()
+   */
+  bool TryLock();
+
+  /**
+   * Unlocks the shared mutex locked for writing.
+   *
+   * \pre \c shared_mutex has been locked for writing by the current thread.
+   * \post \c shared_mutex is unlocked.
+   *
+   * \threadsafe
+   *
+   * \see Lock(), TryLock()
+   */
+  void Unlock();
+
+  /**
+   * Waits until the shared mutex can be locked for reading and locks it.
+   *
+   * \pre The \c shared_mutex is not locked by the current thread.
+   * \post The \c shared_mutex is locked for reading.
+   *
+   * \threadsafe
+   *
+   * \see TryLockShared(), UnlockShared()
+   */
+  void LockShared();
+
+  /**
+   * Tries to lock the shared mutex for reading and returns immediately.
+   *
+   * \pre \c shared_mutex is not locked by the current thread.
+   * \post If successful, \c shared_mutex is locked for reading.
+   *
+   * \return \c true if shared mutex was locked for reading \n
+   *         \c false otherwise
+   *
+   * \threadsafe
+   *
+   * \see LockShared(), UnlockShared()
+   */
+  bool TryLockShared();
+
+  /**
+   * Unlocks the shared mutex locked for reading.
+   *
+   * \pre \c shared_mutex has been locked for reading by the current thread.
+   * \post \c shared_mutex is unlocked.
+   *
+   * \threadsafe
+   *
+   * \see LockShared(), TryLockShared()
+   */
+  void UnlockShared();
+
+ private:
+  /**
+   * Disables copy construction and assignment.
+   */
+  SharedMutex(const SharedMutex&);
+  SharedMutex& operator=(const SharedMutex&);
+
+  /** Actual shared mutex implementation from base_c */
+  internal::SharedMutexType shared_mutex_;
+};
 
 /**
  * Scoped lock (according to the RAII principle) using a mutex.
@@ -481,6 +600,143 @@ class UniqueLock {
    * For access to native implementation type.
    */
   friend class embb::base::ConditionVariable;
+};
+
+/**
+ * Ownership wrapper for a \c SharedMutex with shared locking semantics.
+ *
+ * An ownership wrapper with exclusive semantics is given by
+ * \c UniqueLock<SharedMutex>.
+ *
+ * \notthreadsafe
+ *
+ * \tparam SharedMutex Type of the \c SharedMutex object being wrapped
+ *
+ * \see SharedMutex, UniqueLock
+ *
+ * \ingroup CPP_BASE_MUTEX
+ */
+template<typename SharedMutex = embb::base::SharedMutex>
+class SharedLock {
+ public:
+  /**
+   * Creates a lock without assigned shared mutex.
+   *
+   * A shared mutex can be assigned to the lock using the method Swap().
+   */
+  SharedLock();
+
+  /**
+   * Creates a lock from an unlocked shared mutex and locks it for reading.
+   *
+   * \pre \c shared_mutex is unlocked
+   * \post \c shared_mutex is locked for reading
+   *
+   * \param[IN] shared_mutex Shared mutex to be managed
+   */
+  explicit SharedLock(SharedMutex& shared_mutex);
+
+  /**
+   * Creates a lock from an unlocked shared mutex without locking it.
+   *
+   * \pre \c shared_mutex is unlocked
+   * \post \c shared_mutex is unlocked
+   *
+   * \param[IN] shared_mutex Shared mutex to be managed
+   * \param[IN] tag Tag to select correct constructor
+   */
+  SharedLock(SharedMutex& shared_mutex, DeferLockTag tag);
+
+  /**
+   * Creates a lock from an unlocked shared mutex and tries to lock it
+   * for reading.
+   *
+   * \pre \c shared_mutex is unlocked
+   * \post If successful, \c shared_mutex is locked for reading
+   *
+   * \param[IN] shared_mutex Shared mutex to be managed
+   * \param[IN] tag Tag to select correct constructor
+   */
+  SharedLock(SharedMutex& shared_mutex, TryLockTag tag);
+
+  /**
+   * Creates a lock from an already locked shared mutex.
+   *
+   * \pre \c shared_mutex is locked for reading
+   * \post \c shared_mutex is locked for reading
+   *
+   * \param[IN] shared_mutex Shared mutex to be managed
+   * \param[IN] tag Tag to select correct constructor
+   */
+  SharedLock(SharedMutex& shared_mutex, AdoptLockTag tag);
+
+  /**
+   * Unlocks the shared mutex if owned.
+   */
+  ~SharedLock();
+
+  /**
+   * Waits until the shared mutex can be locked for reading and locks it.
+   *
+   * \throws ErrorException, if no shared mutex is set or it is already locked
+   */
+  void Lock();
+
+  /**
+   * Tries to lock the shared mutex for reading and returns immediately.
+   *
+   * If the shared mutex is locked for writing, or a write lock is pending, this
+   * method
+   *
+   * \return \c true if shared mutex was locked for reading \n
+   *         \c false if shared mutex could not be locked for reading due to
+   *                  esablished or pending write lock of other thread.
+   *
+   * \throws ErrorException, if no shared mutex is set or it is already locked
+   */
+  bool TryLock();
+
+  /**
+   * Unlocks the shared mutex locked for reading.
+   *
+   * \throws ErrorException, if no shared mutex is set or it is not yet locked
+   */
+  void Unlock();
+
+  /**
+   * Exchange shared mutex ownership with another shared lock
+   *
+   * \param other Shared lock to exchange ownership with
+   */
+  void Swap(SharedLock& other);
+
+  /**
+   * Gives up ownership of the shared mutex and returns a pointer to it.
+   *
+   * \return A pointer to the owned shared mutex. (If no shared mutex was
+   *         owned, returns NULL).
+   */
+  SharedMutex* Release();
+
+  /**
+   * Checks whether the shared mutex is owned and locked.
+   *
+   * \return \c true if shared mutex is locked, otherwise \c false.
+   */
+  bool OwnsLock() const;
+
+ private:
+  /**
+   * Disable copy construction and assignment.
+   */
+  SharedLock(const SharedLock&);
+  SharedLock& operator=(const SharedLock&);
+
+  /** Pointer to the owned shared mutex */
+  SharedMutex* shared_mutex_;
+
+  /** Locked flag (is true if and only if the owned shared mutex is locked) */
+  bool         locked_;
 };
 
 } // namespace base

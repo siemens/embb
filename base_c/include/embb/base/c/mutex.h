@@ -193,12 +193,16 @@ int embb_shared_mutex_lock(embb_shared_mutex_t* shared_mutex);
 /**
  * Tries to lock the shared mutex for writing and returns immediately.
  *
+ * The try to lock fails not only if the shared mutex was already locked for
+ * writing, but also in case it was locked shared for reading.
+ *
  * \pre \c shared_mutex is initialized
  * \post If successful, \c shared_mutex is locked for writing
  *
  * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if shared_mutex could be locked for writing \n
- *         EMBB_BUSY if shared_mutex could not be locked for writing \n
+ *         EMBB_BUSY if shared_mutex could not be locked for writing, because
+ *                   the mutex is locked for writing or reading \n
  *         EMBB_ERROR if an error occurred
  *
  * \threadsafe

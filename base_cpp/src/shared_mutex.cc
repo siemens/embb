@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb/base/shared_mutex.h>
-#include <embb/base/c/shared_mutex.h>
+#include <embb/base/mutex.h>
+#include <embb/base/c/mutex.h>
 
 namespace embb {
 namespace base {

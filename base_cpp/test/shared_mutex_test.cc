@@ -38,21 +38,21 @@ SharedMutexTest::SharedMutexTest()
       num_threads_(partest::TestSuite::GetDefaultNumThreads()),
       num_iterations_(partest::TestSuite::GetDefaultNumIterations()) {
   CreateUnit("Shared read")
-      .Add(&SharedMutexTest::TestSharedRead_ThreadMethod, this,
+      .Add(&SharedMutexTest::TestSharedReadThreadMethod, this,
            num_threads_, num_iterations_);
   CreateUnit("Exclusive write")
-      .Pre(&SharedMutexTest::TestExclusiveWrite_Pre, this)
-      .Add(&SharedMutexTest::TestExclusiveWrite_ReaderMethod, this,
+      .Pre(&SharedMutexTest::TestExclusiveWritePre, this)
+      .Add(&SharedMutexTest::TestExclusiveWriteReaderMethod, this,
            num_threads_ / 2, num_iterations_)
-      .Add(&SharedMutexTest::TestExclusiveWrite_WriterMethod, this,
+      .Add(&SharedMutexTest::TestExclusiveWriteWriterMethod, this,
            num_threads_ / 2, num_iterations_)
-      .Post(&SharedMutexTest::TestExclusiveWrite_Post, this);
+      .Post(&SharedMutexTest::TestExclusiveWritePost, this);
   CreateUnit("SharedLock")
-      .Add(&SharedMutexTest::TestSharedLock_ThreadMethod, this,
+      .Add(&SharedMutexTest::TestSharedLockThreadMethod, this,
            num_threads_, num_iterations_);
 }
 
-void SharedMutexTest::TestSharedRead_ThreadMethod() {
+void SharedMutexTest::TestSharedReadThreadMethod() {
   SharedLock<embb::base::SharedMutex> lock(shared_mutex_, embb::base::try_lock);
   PT_ASSERT_EQ_MSG(lock.OwnsLock(), true, "Failed to lock for reading.");
 
@@ -60,11 +60,11 @@ void SharedMutexTest::TestSharedRead_ThreadMethod() {
   while (--spin != 0);
 }
 
-void SharedMutexTest::TestExclusiveWrite_Pre() {
+void SharedMutexTest::TestExclusiveWritePre() {
   counter_ = 0;
 }
 
-void SharedMutexTest::TestExclusiveWrite_ReaderMethod() {
+void SharedMutexTest::TestExclusiveWriteReaderMethod() {
   // Just add some contention
   SharedLock<embb::base::SharedMutex> lock(shared_mutex_, embb::base::try_lock);
   
@@ -74,33 +74,33 @@ void SharedMutexTest::TestExclusiveWrite_ReaderMethod() {
   }
 }
 
-void SharedMutexTest::TestExclusiveWrite_WriterMethod() {
+void SharedMutexTest::TestExclusiveWriteWriterMethod() {
   UniqueLock<embb::base::SharedMutex> lock(shared_mutex_);
 
   ++counter_;
 }
 
-void SharedMutexTest::TestExclusiveWrite_Post() {
+void SharedMutexTest::TestExclusiveWritePost() {
   PT_ASSERT_EQ_MSG(counter_, num_iterations_ * (num_threads_ / 2),
                    "Counter value is inconsistent.");
 }
 
-void SharedMutexTest::TestSharedLock_ThreadMethod() {
+void SharedMutexTest::TestSharedLockThreadMethod() {
   // Test basic usage
   {
     SharedLock<> lock(shared_mutex_);
     PT_EXPECT_EQ(lock.OwnsLock(), true);
 
-    lock.UnlockShared();
+    lock.Unlock();
     PT_EXPECT_EQ(lock.OwnsLock(), false);
 
-    lock.LockShared();
+    lock.Lock();
     PT_EXPECT_EQ(lock.OwnsLock(), true);
 
-    lock.UnlockShared();
+    lock.Unlock();
     PT_EXPECT_EQ(lock.OwnsLock(), false);
 
-    bool locked_after_try = lock.TryLockShared();
+    bool locked_after_try = lock.TryLock();
     PT_EXPECT_EQ(locked_after_try, true);
     PT_EXPECT_EQ(lock.OwnsLock(), true);
 
