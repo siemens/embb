@@ -180,7 +180,8 @@ int embb_spin_init(
  *
  * \pre \c spinlock is initialized \n
  * \post If successful, \c spinlock is locked.
- * \return EMBB_SUCCESS if spinlock could be locked.
+ * \return EMBB_SUCCESS if spinlock could be locked. \n
+ *         EMBB_ERROR if an error occurred.
  * \threadsafe
  * \see embb_spinlock_try_lock(), embb_mutex_unlock()
  */
@@ -197,6 +198,7 @@ int embb_spin_lock(
  *
  * \return EMBB_SUCCESS if spinlock could be locked \n
  *         EMBB_BUSY if spinlock could not be locked \n
+ *         EMBB_ERROR if an error occurred
  * \threadsafe
  * \see embb_spin_lock(), embb_spin_unlock()
  */
