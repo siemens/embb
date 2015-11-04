@@ -63,18 +63,6 @@ class SharedMutexTest : public partest::TestCase {
   void TestExclusiveWriterWriterMethod();
   void TestExclusiveWriterPost();
 
-//  /**
-//   * Multiple readers, single writer.
-//   *
-//   * The single writer uses try_lock() and tests if that always obtains the
-//   * lock. The readers use lock_shared() and test if that always obtains the
-//   * shared lock (after waiting).
-//   */
-//  void TestSingleWriterPre();
-//  void TestSingleWriterReaderMethod();
-//  void TestSingleWriterWriterMethod();
-//  void TestSingleWriterPost();
-
   embb_shared_mutex_t shared_mutex_;
   size_t counter_;
   size_t num_threads_;

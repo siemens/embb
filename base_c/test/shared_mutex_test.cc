@@ -48,13 +48,6 @@ SharedMutexTest::SharedMutexTest()
       .Add(&SharedMutexTest::TestExclusiveWriterWriterMethod, this,
            num_threads_ / 2, num_iterations_)
       .Post(&SharedMutexTest::TestExclusiveWriterPost, this);
-//  CreateUnit("Single writer")
-//      .Pre(&SharedMutexTest::TestSingleWriterPre, this)
-//      .Add(&SharedMutexTest::TestSingleWriterReaderMethod, this,
-//           num_threads_, num_iterations_)
-//      .Add(&SharedMutexTest::TestSingleWriterWriterMethod, this,
-//           1, num_iterations_)
-//      .Post(&SharedMutexTest::TestSingleWriterPost, this);
 }
 
 void SharedMutexTest::TestSharedReadPre() {
@@ -112,38 +105,6 @@ void SharedMutexTest::TestExclusiveWriterPost() {
                    "Counter value is inconsistent.");
   embb_shared_mutex_destroy(&shared_mutex_);
 }
-
-//void SharedMutexTest::TestSingleWriterPre() {
-//  int success = embb_shared_mutex_init(&shared_mutex_);
-//  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to initialize shared mutex.");
-//
-//  counter_ = 0;
-//}
-
-//void SharedMutexTest::TestSingleWriterReaderMethod() {
-//  // Just add some contention
-//
-//  int success = embb_shared_mutex_lock_shared(&shared_mutex_);
-//  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to lock for reading.");
-//
-//  success = embb_shared_mutex_unlock_shared(&shared_mutex_);
-//  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to unlock (reading).");
-//}
-//
-//void SharedMutexTest::TestSingleWriterWriterMethod() {
-//  int success = embb_shared_mutex_lock(&shared_mutex_);
-//  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to lock for writing.");
-//
-//  ++counter_;
-//
-//  success = embb_shared_mutex_unlock(&shared_mutex_);
-//  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to unlock (writing).");
-//}
-//
-//void SharedMutexTest::TestSingleWriterPost() {
-//  PT_ASSERT_EQ_MSG(counter_, num_iterations_, "Counter value is inconsistent.");
-//  embb_shared_mutex_destroy(&shared_mutex_);
-//}
 
 } // namespace test
 } // namespace base
