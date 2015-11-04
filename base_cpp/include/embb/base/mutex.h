@@ -631,21 +631,24 @@ class SharedLock {
    *
    * \pre \c shared_mutex is unlocked
    * \post \c shared_mutex is locked for reading
-   *
-   * \param[IN] shared_mutex Shared mutex to be managed
    */
-  explicit SharedLock(SharedMutex& shared_mutex);
+  explicit SharedLock(
+    SharedMutex& shared_mutex
+    /**< [IN] Shared mutex to be managed */
+    );
 
   /**
    * Creates a lock from an unlocked shared mutex without locking it.
    *
    * \pre \c shared_mutex is unlocked
    * \post \c shared_mutex is unlocked
-   *
-   * \param[IN] shared_mutex Shared mutex to be managed
-   * \param[IN] tag Tag to select correct constructor
    */
-  SharedLock(SharedMutex& shared_mutex, DeferLockTag tag);
+  SharedLock(
+    SharedMutex& shared_mutex,
+    /**< [IN] Shared mutex to be managed */
+    DeferLockTag tag
+    /**< [IN] Tag to select correct constructor */
+    );
 
   /**
    * Creates a lock from an unlocked shared mutex and tries to lock it
@@ -653,22 +656,26 @@ class SharedLock {
    *
    * \pre \c shared_mutex is unlocked
    * \post If successful, \c shared_mutex is locked for reading
-   *
-   * \param[IN] shared_mutex Shared mutex to be managed
-   * \param[IN] tag Tag to select correct constructor
    */
-  SharedLock(SharedMutex& shared_mutex, TryLockTag tag);
+  SharedLock(
+    SharedMutex& shared_mutex,
+    /**< [IN] Shared mutex to be managed */
+    TryLockTag tag
+    /**< [IN] Tag to select correct constructor */
+    );
 
   /**
    * Creates a lock from an already locked shared mutex.
    *
    * \pre \c shared_mutex is locked for reading
    * \post \c shared_mutex is locked for reading
-   *
-   * \param[IN] shared_mutex Shared mutex to be managed
-   * \param[IN] tag Tag to select correct constructor
    */
-  SharedLock(SharedMutex& shared_mutex, AdoptLockTag tag);
+  SharedLock(
+    SharedMutex& shared_mutex,
+    /**< [IN] Shared mutex to be managed */
+    AdoptLockTag tag
+    /**< [IN] Tag to select correct constructor */
+    );
 
   /**
    * Unlocks the shared mutex if owned.
@@ -705,10 +712,11 @@ class SharedLock {
 
   /**
    * Exchange shared mutex ownership with another shared lock
-   *
-   * \param other Shared lock to exchange ownership with
    */
-  void Swap(SharedLock& other);
+  void Swap(
+    SharedLock& other
+    /**< [IN/OUT] Shared lock to exchange ownership with */
+    );
 
   /**
    * Gives up ownership of the shared mutex and returns a pointer to it.

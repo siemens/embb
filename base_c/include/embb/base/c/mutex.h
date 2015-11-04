@@ -162,7 +162,6 @@ typedef opaque_type embb_shared_mutex_t;
  * \pre \c shared_mutex is uninitialized
  * \post \c shared_mutex is initialized
  *
- * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if shared mutex could be initialized \n
  *         EMBB_ERROR otherwise
  *
@@ -172,7 +171,10 @@ typedef opaque_type embb_shared_mutex_t;
  *
  * \see embb_shared_mutex_destroy()
  */
-int embb_shared_mutex_init(embb_shared_mutex_t* shared_mutex);
+int embb_shared_mutex_init(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be initialized */
+  );
 
 /**
  * Waits until the shared mutex can be locked for writing and locks it.
@@ -180,7 +182,6 @@ int embb_shared_mutex_init(embb_shared_mutex_t* shared_mutex);
  * \pre \c shared_mutex is initialized and not locked by the current thread.
  * \post If successful, \c shared_mutex is locked for writing.
  *
- * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if shared_mutex could be locked for writing \n
  *         EMBB_ERROR otherwise
  *
@@ -188,7 +189,10 @@ int embb_shared_mutex_init(embb_shared_mutex_t* shared_mutex);
  *
  * \see embb_shared_mutex_try_lock(), embb_shared_mutex_unlock()
  */
-int embb_shared_mutex_lock(embb_shared_mutex_t* shared_mutex);
+int embb_shared_mutex_lock(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be locked */
+  );
 
 /**
  * Tries to lock the shared mutex for writing and returns immediately.
@@ -199,7 +203,6 @@ int embb_shared_mutex_lock(embb_shared_mutex_t* shared_mutex);
  * \pre \c shared_mutex is initialized
  * \post If successful, \c shared_mutex is locked for writing
  *
- * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if shared_mutex could be locked for writing \n
  *         EMBB_BUSY if shared_mutex could not be locked for writing, because
  *                   the mutex is locked for writing or reading \n
@@ -209,7 +212,10 @@ int embb_shared_mutex_lock(embb_shared_mutex_t* shared_mutex);
  *
  * \see embb_shared_mutex_lock(), embb_shared_mutex_unlock()
  */
-int embb_shared_mutex_try_lock(embb_shared_mutex_t* shared_mutex);
+int embb_shared_mutex_try_lock(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be tried to lock */
+  );
 
 /**
  * Unlocks the shared mutex locked for writing.
@@ -217,7 +223,6 @@ int embb_shared_mutex_try_lock(embb_shared_mutex_t* shared_mutex);
  * \pre \c shared_mutex has been locked for writing by the current thread.
  * \post If successful, \c shared_mutex is unlocked.
  *
- * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if the operation was successful \n
  *         EMBB_ERROR otherwise
  *
@@ -225,7 +230,10 @@ int embb_shared_mutex_try_lock(embb_shared_mutex_t* shared_mutex);
  *
  * \see embb_shared_mutex_lock(), embb_shared_mutex_try_lock()
  */
-int embb_shared_mutex_unlock(embb_shared_mutex_t* shared_mutex);
+int embb_shared_mutex_unlock(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be unlocked */
+  );
 
 /**
  * Waits until the shared mutex can be locked for reading and locks it.
@@ -233,7 +241,6 @@ int embb_shared_mutex_unlock(embb_shared_mutex_t* shared_mutex);
  * \pre \c shared_mutex is initialized and not locked by the current thread.
  * \post If successful, \c shared_mutex is locked for reading.
  *
- * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if shared_mutex could be locked for reading \n
  *         EMBB_ERROR otherwise
  *
@@ -241,7 +248,10 @@ int embb_shared_mutex_unlock(embb_shared_mutex_t* shared_mutex);
  *
  * \see embb_shared_mutex_try_lock_shared(), embb_shared_mutex_unlock_shared()
  */
-int embb_shared_mutex_lock_shared(embb_shared_mutex_t* shared_mutex);
+int embb_shared_mutex_lock_shared(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be locked shared */
+  );
 
 /**
  * Tries to lock the shared mutex for reading and returns immediately.
@@ -249,7 +259,6 @@ int embb_shared_mutex_lock_shared(embb_shared_mutex_t* shared_mutex);
  * \pre \c shared_mutex is initialized
  * \post If successful, \c shared_mutex is locked for reading
  *
- * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if shared_mutex could be locked for reading \n
  *         EMBB_BUSY if shared_mutex could not be locked for reading \n
  *         EMBB_ERROR if an error occurred
@@ -258,7 +267,10 @@ int embb_shared_mutex_lock_shared(embb_shared_mutex_t* shared_mutex);
  *
  * \see embb_shared_mutex_lock_shared(), embb_shared_mutex_unlock_shared()
  */
-int embb_shared_mutex_try_lock_shared(embb_shared_mutex_t* shared_mutex);
+int embb_shared_mutex_try_lock_shared(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be tried to lock shared */
+  );
 
 /**
  * Unlocks the shared mutex locked for reading.
@@ -266,7 +278,6 @@ int embb_shared_mutex_try_lock_shared(embb_shared_mutex_t* shared_mutex);
  * \pre \c shared_mutex has been locked for reading by the current thread.
  * \post If successful, \c shared_mutex is unlocked.
  *
- * \param shared_mutex Pointer to shared mutex
  * \return EMBB_SUCCESS if the operation was successful \n
  *         EMBB_ERROR otherwise
  *
@@ -274,7 +285,10 @@ int embb_shared_mutex_try_lock_shared(embb_shared_mutex_t* shared_mutex);
  *
  * \see embb_shared_mutex_lock_shared(), embb_shared_mutex_try_lock_shared()
  */
-int embb_shared_mutex_unlock_shared(embb_shared_mutex_t* shared_mutex);
+int embb_shared_mutex_unlock_shared(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be unlocked shared */
+  );
 
 /**
  * Destroys the shared mutex and frees its resources.
@@ -282,13 +296,14 @@ int embb_shared_mutex_unlock_shared(embb_shared_mutex_t* shared_mutex);
  * \pre \c shared_mutex has been initialized
  * \post \c shared_mutex is uninitialized
  *
- * \param shared_mutex Pointer to shared mutex
- *
  * \notthreadsafe
  *
  * \see embb_shared_mutex_init()
  */
-void embb_shared_mutex_destroy(embb_shared_mutex_t* shared_mutex);
+void embb_shared_mutex_destroy(
+  embb_shared_mutex_t* shared_mutex
+  /**< [IN/OUT] Pointer to shared mutex to be destroyed */
+  );
 
 
 #ifdef __cplusplus
