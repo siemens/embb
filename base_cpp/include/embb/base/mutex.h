@@ -29,10 +29,10 @@
 
 #include <embb/base/internal/platform.h>
 #include <embb/base/exceptions.h>
+#include <embb/base/c/mutex.h>
 
 namespace embb {
 namespace base {
-
 /**
  * \defgroup CPP_BASE_MUTEX Mutex and Lock
  *
@@ -47,7 +47,6 @@ namespace base {
 class ConditionVariable;
 
 namespace internal {
-
 /**
  * Provides main functionality for mutexes.
  */
@@ -111,8 +110,109 @@ class MutexBase {
    */
   friend class embb::base::ConditionVariable;
 };
-
 } // namespace internal
+
+/**
+ * \defgroup CPP_BASE_SPINLOCK Spinlock
+ *
+ * Spinlock for thread synchronization.
+ *
+ * \ingroup CPP_BASE
+ */
+
+/**
+ * Spinlock
+ *
+ * \ingroup CPP_BASE_SPINLOCK
+ */
+class Spinlock {
+ public:
+  /**
+   * Creates a spinlock which is in unlocked state.
+   *
+   * \notthreadsafe
+   */
+  Spinlock() {
+    embb_spin_init(&spinlock_);
+  }
+
+  /**
+   * Destructs a spinlock.
+   *
+   * \notthreadsafe
+   */
+  ~Spinlock() {
+    embb_spin_destroy(&spinlock_);
+  }
+
+  /**
+   * Waits until the spinlock can be locked and locks it.
+   *
+   * \pre The spinlock is not locked by the current thread.
+   * \post The spinlock is locked
+   * \threadsafe
+   * \see TryLock(), Unlock()
+   */
+  void Lock() {
+    int status = embb_spin_lock(&spinlock_);
+
+    // Currently, embb_spin_lock will always return EMBB_SUCCESS. However,
+    // This might change.
+    if (status != EMBB_SUCCESS) {
+      EMBB_THROW(ErrorException, "Error in embb_spin_lock");
+    }
+  }
+
+  /**
+   * Tries to lock the spinlock for \c number_spins times and returns.
+   *
+   * \pre The spinlock is not locked by the current thread.
+   * \post If successful, the spinlock is locked.
+   * \return \c true if the spinlock could be locked, otherwise \c false.
+   * \threadsafe
+   * \see Lock(), Unlock()
+   */
+  bool TryLock(unsigned int number_spins = 1) {
+    int status = embb_spin_try_lock(&spinlock_, number_spins);
+
+    if (status == EMBB_BUSY){
+      return false;
+    }
+    else if (status != EMBB_SUCCESS) {
+      EMBB_THROW(ErrorException, "Error in embb_spin_try_lock");
+    }
+
+    return true;
+  }
+
+  /**
+   * Unlocks the spinlock.
+   *
+   * \pre The spinlock is locked by the current thread
+   * \post The spinlock is unlocked
+   * \threadsafe
+   * \see Lock(), TryLock()
+   */
+  void Unlock() {
+    int status = embb_spin_unlock(&spinlock_);
+
+    if (status != EMBB_SUCCESS) {
+      EMBB_THROW(ErrorException, "Error in embb_spin_unlock");
+    }
+  }
+
+ private:
+  /**
+   * Disables copy construction and assignment.
+   */
+  Spinlock(const Spinlock&);
+  Spinlock& operator=(const Spinlock&);
+
+  /**
+   * Internal spinlock from base_c
+   */
+  embb_spinlock_t spinlock_;
+};
 
 /**
  * Non-recursive, exclusive mutex.
@@ -182,7 +282,6 @@ class Mutex : public internal::MutexBase {
   friend class ConditionVariable;
 };
 
-
 /**
  * Recursive, exclusive mutex.
  *
@@ -245,7 +344,6 @@ class RecursiveMutex : public internal::MutexBase {
   RecursiveMutex(const RecursiveMutex&);
   RecursiveMutex& operator=(const RecursiveMutex&);
 };
-
 
 /**
  * Scoped lock (according to the RAII principle) using a mutex.
@@ -482,7 +580,6 @@ class UniqueLock {
    */
   friend class embb::base::ConditionVariable;
 };
-
 } // namespace base
 } // namespace embb
 

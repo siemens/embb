@@ -32,7 +32,6 @@
 namespace embb {
 namespace base {
 namespace test {
-
 MutexTest::MutexTest() : mutex_(), counter_(0),
     number_threads_(partest::TestSuite::GetDefaultNumThreads()),
     number_iterations_(partest::TestSuite::GetDefaultNumIterations()) {
@@ -209,6 +208,57 @@ void MutexTest::TestUniqueLock() {
   }
 }
 
+SpinLockTest::SpinLockTest() : spinlock_(), counter_(0),
+number_threads_(partest::TestSuite::GetDefaultNumThreads()),
+  number_iterations_(partest::TestSuite::GetDefaultNumIterations()),
+  counter_iterations_(10000) {
+  CreateUnit("Spinlock protected counter (using Lock)")
+    .Add(&SpinLockTest::TestSpinlockCountLock, this, number_threads_,
+        number_iterations_)
+    .Post(&SpinLockTest::PostSpinlockCount, this);
+
+  CreateUnit("Spinlock protected counter (using Trylock)")
+    .Add(&SpinLockTest::TestSpinlockCountLockTryLock, this, number_threads_,
+        number_iterations_)
+    .Post(&SpinLockTest::PostSpinlockCount, this);
+
+  CreateUnit("Test spinning (too many spins), single thread")
+    .Add(&SpinLockTest::TestSpinLockTooManySpins, this, 1, 1);
+}
+
+void SpinLockTest::TestSpinlockCountLock() {
+  for (unsigned int i = 0; i != counter_iterations_; ++i){
+    spinlock_.Lock();
+    counter_++;
+    spinlock_.Unlock();
+  }
+}
+
+void SpinLockTest::TestSpinlockCountLockTryLock() {
+  for (unsigned int i = 0; i != counter_iterations_; ++i){
+    while (!spinlock_.TryLock()) {}
+    counter_++;
+    spinlock_.Unlock();
+  }
+}
+
+void SpinLockTest::PostSpinlockCount() {
+  PT_EXPECT_EQ(counter_,
+    number_iterations_ *
+    number_threads_*
+    counter_iterations_);
+  counter_ = 0;
+}
+
+void SpinLockTest::TestSpinLockTooManySpins() {
+  Spinlock lock;
+  lock.Lock();
+  bool success = lock.TryLock(100);
+  PT_ASSERT(!success);
+  lock.Unlock();
+  success = lock.TryLock(100);
+  PT_ASSERT(success);
+}
 } // namespace test
 } // namespace base
 } // namespace embb

@@ -62,6 +62,3 @@ RecursiveMutex::RecursiveMutex() : MutexBase(EMBB_MUTEX_RECURSIVE) {
 
 } // namespace base
 } // namespace embb
-
-
-
