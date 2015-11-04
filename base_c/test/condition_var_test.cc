@@ -105,7 +105,7 @@ void ConditionVarTest::TestTimedWaitTimeouts() {
   embb_time_t time;
   embb_duration_t duration = EMBB_DURATION_INIT;
 
-  // Wait for now tests already passed time point
+  // Wait for "now" tests already passed time point
   embb_time_now(&time);
   embb_mutex_lock(&mutex);
   int status = embb_condition_wait_until(&cond, &mutex, &time);

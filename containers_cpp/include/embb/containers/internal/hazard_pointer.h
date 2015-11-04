@@ -238,6 +238,8 @@ class HazardPointerThreadEntry {
   HazardPointerThreadEntry & operator= (const HazardPointerThreadEntry&);
 
  public:
+  typedef embb::base::Atomic< GuardType > AtomicGuard;
+
   /**
    * Checks if current thread is active (with respect to participating in hazard
    * pointer management)
@@ -318,7 +320,7 @@ class HazardPointerThreadEntry {
    * Gets the guard at the specified position.
    * Positions are numbered, beginning with 0.
    */
-  GuardType GetGuard(
+  AtomicGuard& GetGuard(
     int pos
     /**< [IN] Position of the guard */) const;
 
@@ -467,6 +469,8 @@ class HazardPointer  {
              can be deleted*/);
 
  public:
+  typedef typename HazardPointerThreadEntry_t::AtomicGuard AtomicGuard;
+
   /**
    * Gets the capacity of one retired list
    *
@@ -516,12 +520,186 @@ class HazardPointer  {
    * Guards \c guardedElement with the guard at position \c guardPosition
    */
   void GuardPointer(int guardPosition, GuardType guardedElement);
+
+  AtomicGuard& GetGuardedPointer(int guardPosition);
+
   /**
    * Enqueue a pointer for deletion. It is added to the retired list and
    * deleted when no thread accesses it anymore.
    */
   void EnqueuePointerForDeletion(GuardType guardedElement);
 };
+
+/**
+ * Ownership wrapper for a hazard pointer
+ *
+ * Uses an entry of the hazard table (guard) to provide protection for a single
+ * hazardous pointer. While providing standard pointer dereference and member
+ * access operators, it requires special care for pointer assignment (realized
+ * via 'ProtectHazard' method).
+ * On destruction, it clears the wrapped hazard table entry, releasing the
+ * protected hazardous pointer (if any).
+ *
+ * \tparam Type Type of the object to be protected by the hazard pointer
+ */
+template<typename Type>
+class UniqueHazardPointer {
+ public:
+  /** Typedef for a atomic pointer to the guarded object. */
+  typedef embb::base::Atomic<Type*> AtomicTypePtr;
+
+  /**
+   * Creates an uninitialized, empty wrapper.
+   *
+   * An uninitialized wrapper may only be swapped with another wrapper (using
+   * \c Swap() method) or checked for being active (using 'IsActive()' method,
+   * which should always return /c false for an uninitialized wrapper).
+   */
+  UniqueHazardPointer();
+
+  /**
+   * Creates a wrapper that uses the given hazard table entry (referred to as
+   * "guard") to protect hazardous pointers.
+   *
+   * \param[IN] hazard_guard Reference to a hazard table entry
+   * \param[IN] undefined_guard Dummy value used to clear the hazard table entry
+   */
+  explicit
+  UniqueHazardPointer(AtomicTypePtr& hazard_guard,
+                      Type* undefined_guard = NULL);
+
+  /**
+   * If initialized and active, clears the hazard table entry.
+   */
+  ~UniqueHazardPointer();
+
+  /**
+   * Tries to protect the given hazard using the wrapped guard.
+   * If it succeeds, the hazard may be safely dereferenced as long as the guard
+   * is not destroyed or reset to protect another hazard.
+   *
+   * \param hazard The hazard to be protected
+   * \return \c true if the specified hazard is now protected by the guard,
+   *         \c false if the hazard was modified by a concurrent thread
+   */
+  bool ProtectHazard(const AtomicTypePtr& hazard);
+
+  /**
+   * Uses the wrapped guard to protect a pointer that is not hazardous yet.
+   *
+   * \param safe_ptr The pointer to be protected
+   */
+  void ProtectSafe(Type* safe_ptr);
+
+  /**
+   * Type cast operator.
+   *
+   * \return The hazardous pointer protected by this wrapper
+   */
+  operator Type* () const;
+
+  /**
+   * Pointer member access operator.
+   *
+   * \return The hazardous pointer protected by this wrapper
+   */
+  Type* operator->() const;
+
+  /**
+   * Pointer dereference operator.
+   *
+   * \return Reference to the object pointed to by the protected pointer
+   */
+  Type& operator*() const;
+
+  /**
+   * Protects the hazard that is currently protected by another wrapper (so it
+   * becomes protected by two guards simultaneously). The other wrapper remains
+   * unmodified.
+   *
+   * \param other Another wrapper those protected pointer is to be protected by
+   *              the calling wrapper
+   */
+  void AdoptHazard(const UniqueHazardPointer& other);
+
+  /**
+   * Swaps the guard ownership with another wrapper. Swaps not just the
+   * protected hazards, but the hazard guards themselves.
+   *
+   * \param other Another wrapper to swap guards with
+   */
+  void Swap(UniqueHazardPointer& other);
+
+  /**
+   * Clears the hazard guard and returns the hazard previously protected by that
+   * guard.
+   *
+   * \return The hazardous pointer previously protected by this wrapper
+   */
+  Type* ReleaseHazard();
+
+  /**
+   * Check whether the wrapper is active.
+   *
+   * \return \c true if the wrapper is initialized and currently protecting some
+   *         hazard, \c false otherwise
+   */
+  bool IsActive() const;
+
+ private:
+  /**
+   * Sets the 'active' flag of this wrapper.
+   *
+   * \param active The new value for the flag
+   */
+  void SetActive(bool active);
+
+  /**
+   * Reset the wrapped hazard guard to a state when it is not protecting any
+   * hazards.
+   */
+  void ClearHazard();
+
+  /**
+   * Retrieves the hazardous pointer currently protected by the wrapped guard.
+   *
+   * \return The hazardous pointer protected by this wrapper
+   */
+  Type* LoadGuardedPointer() const;
+
+  /**
+   * Updates the wrapped guard to protect the specified hazardous pointer.
+   *
+   * \param ptr Hazardous pointer to be protected
+   */
+  void StoreGuardedPointer(Type* ptr);
+
+  /**
+   * Check whether the wrapper is initialized (i.e. it wraps some hazard guard)
+   *
+   * \return \c true if this wrapper is initialized, \c false otherwise
+   */
+  bool OwnsHazardGuard() const;
+
+  /**
+   * Disable copy construction and assignment.
+   */
+  UniqueHazardPointer(const UniqueHazardPointer&);
+  UniqueHazardPointer& operator=(const UniqueHazardPointer&);
+
+  /**
+   * Pointer to a hazard table entry (the guard) that is used to store the
+   * hazardous pointers
+   */
+  AtomicTypePtr* hazard_guard_;
+  /** Local copy of the guarded pointer value (used for optimization) */
+  Type*          local_ptr_value_;
+  /** Dummy value used to clear the hazard guard from any hazards */
+  Type*          undefined_guard_;
+  /** Flag set to true when the guard is protecting some hazardous pointer */
+  bool           active_;
+};
+
 } // namespace internal
 } // namespace containers
 } // namespace embb

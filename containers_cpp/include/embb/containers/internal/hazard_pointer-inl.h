@@ -182,7 +182,9 @@ HazardPointerThreadEntry<GuardType>::~HazardPointerThreadEntry() {
 }
 
 template< typename GuardType >
-GuardType HazardPointerThreadEntry<GuardType>::GetGuard(int pos) const {
+typename HazardPointerThreadEntry<GuardType>::AtomicGuard&
+HazardPointerThreadEntry<GuardType>::GetGuard(int pos) const {
+  assert(pos >= 0 && pos < guards_per_thread);
   return guarded_pointers[pos];
 }
 
@@ -393,6 +395,12 @@ void HazardPointer< GuardType >::GuardPointer(int guardPosition,
 }
 
 template< typename GuardType >
+typename HazardPointer< GuardType >::AtomicGuard&
+HazardPointer< GuardType >::GetGuardedPointer(int guardPosition) {
+  return GetHazardPointerElementForCurrentThread().GetGuard(guardPosition);
+}
+
+template< typename GuardType >
 void HazardPointer< GuardType >::EnqueuePointerForDeletion(
   GuardType guardedElement) {
   GetHazardPointerElementForCurrentThread().AddRetired(guardedElement);
@@ -410,6 +418,124 @@ void HazardPointer< GuardType >::EnqueuePointerForDeletion(
 template<typename GuardType>
 const double embb::containers::internal::HazardPointer<GuardType>::
   RETIRE_THRESHOLD = 1.25f;
+
+template<typename Type>
+UniqueHazardPointer<Type>::
+UniqueHazardPointer()
+    : hazard_guard_(NULL),
+      local_ptr_value_(NULL),
+      undefined_guard_(NULL),
+      active_(false) {}
+
+template<typename Type>
+UniqueHazardPointer<Type>::
+UniqueHazardPointer(AtomicTypePtr& hazard_guard, Type* undefined_guard)
+    : hazard_guard_(&hazard_guard),
+      local_ptr_value_(hazard_guard_->Load()),
+      undefined_guard_(undefined_guard),
+      active_(LoadGuardedPointer() == undefined_guard_) {}
+
+template<typename Type>
+UniqueHazardPointer<Type>::~UniqueHazardPointer() {
+  if (IsActive()) ClearHazard();
+}
+
+template<typename Type>
+bool UniqueHazardPointer<Type>::ProtectHazard(const AtomicTypePtr& hazard) {
+  assert(OwnsHazardGuard());
+
+  // Read the hazard and store it into the guard
+  StoreGuardedPointer(hazard.Load());
+
+  // Check whether the guard is valid
+  SetActive(LoadGuardedPointer() == hazard.Load());
+
+  // Clear the guard if it is invalid
+  if (!IsActive()) ClearHazard();
+
+  return IsActive();
+}
+
+template<typename Type>
+void UniqueHazardPointer<Type>::ProtectSafe(Type* safe_ptr) {
+  assert(OwnsHazardGuard());
+  StoreGuardedPointer(safe_ptr);
+  SetActive(true);
+}
+
+template<typename Type>
+UniqueHazardPointer<Type>::operator Type* () const {
+  assert(IsActive());
+  return LoadGuardedPointer();
+}
+
+template<typename Type>
+Type* UniqueHazardPointer<Type>::operator->() const {
+  assert(IsActive());
+  return LoadGuardedPointer();
+}
+
+template<typename Type>
+Type& UniqueHazardPointer<Type>::operator*() const {
+  assert(IsActive());
+  return *(LoadGuardedPointer());
+}
+
+template<typename Type>
+void UniqueHazardPointer<Type>::AdoptHazard(const UniqueHazardPointer& other) {
+  assert(OwnsHazardGuard());
+  StoreGuardedPointer(other.LoadGuardedPointer());
+  SetActive(other.active_);
+}
+
+template<typename Type>
+void UniqueHazardPointer<Type>::Swap(UniqueHazardPointer& other) {
+  std::swap(hazard_guard_, other.hazard_guard_);
+  std::swap(local_ptr_value_, other.local_ptr_value_);
+  std::swap(undefined_guard_, other.undefined_guard_);
+  std::swap(active_, other.active_);
+}
+
+template<typename Type>
+Type* UniqueHazardPointer<Type>::ReleaseHazard() {
+  assert(IsActive());
+  Type* released_hazard = LoadGuardedPointer();
+  ClearHazard();
+  SetActive(false);
+  return released_hazard;
+}
+
+template<typename Type>
+bool UniqueHazardPointer<Type>::IsActive() const {
+  return active_;
+}
+
+template<typename Type>
+void UniqueHazardPointer<Type>::SetActive(bool active) {
+  active_ = active;
+}
+
+template<typename Type>
+void UniqueHazardPointer<Type>::ClearHazard() {
+  StoreGuardedPointer(undefined_guard_);
+}
+
+template<typename Type>
+Type* UniqueHazardPointer<Type>::LoadGuardedPointer() const {
+  return local_ptr_value_;
+}
+
+template<typename Type>
+void UniqueHazardPointer<Type>::StoreGuardedPointer(Type* ptr) {
+  hazard_guard_->Store(ptr);
+  local_ptr_value_ = ptr;
+}
+
+template<typename Type>
+bool UniqueHazardPointer<Type>::OwnsHazardGuard() const {
+  return hazard_guard_ != NULL;
+}
+
 } // namespace internal
 } // namespace containers
 } // namespace embb
