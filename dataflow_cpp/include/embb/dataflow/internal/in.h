@@ -29,7 +29,7 @@
 
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
 #include <vector>
-#include <embb/dataflow/internal/spinlock.h>
+#include <embb/base/mutex.h>
 #endif
 
 #include <embb/dataflow/internal/signal.h>
@@ -80,7 +80,7 @@ class In {
   ClockListener * listener_;
   bool connected_;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
-  SpinLock lock_;
+  embb::base::Spinlock lock_;
   std::vector<SignalType> history_;
 #endif
 
