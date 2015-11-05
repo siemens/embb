@@ -31,7 +31,7 @@
 #include <embb/base/c/atomic.h>
 
 #include <embb_mtapi_pool_template.h>
-#include <embb_mtapi_spinlock_t.h>
+#include <embb/base/c/mutex.h>
 
 #ifdef __cplusplus
 extern "C" {

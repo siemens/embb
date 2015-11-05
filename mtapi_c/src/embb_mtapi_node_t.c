@@ -41,7 +41,6 @@
 
 
 static embb_mtapi_node_t* embb_mtapi_node_instance = NULL;
-extern embb_atomic_int embb_mtapi_spinlock_spins;
 
 /* ---- CLASS MEMBERS ------------------------------------------------------ */
 
@@ -87,8 +86,6 @@ void mtapi_initialize(
       /* out of memory! */
       local_status = MTAPI_ERR_UNKNOWN;
     } else {
-      embb_atomic_store_int(&embb_mtapi_spinlock_spins, 0);
-
       node = embb_mtapi_node_instance;
 
       node->domain_id = domain_id;
@@ -183,9 +180,6 @@ void mtapi_finalize(MTAPI_OUT mtapi_status_t* status) {
     /* free system instance */
     embb_mtapi_alloc_deallocate(node);
     embb_mtapi_node_instance = MTAPI_NULL;
-
-    embb_mtapi_log_info("mtapi spinlock spun %d times.\n",
-      embb_atomic_load_int(&embb_mtapi_spinlock_spins));
 
     local_status = MTAPI_SUCCESS;
   } else {

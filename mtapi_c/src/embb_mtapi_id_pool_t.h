@@ -29,8 +29,7 @@
 
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/base/c/atomic.h>
-
-#include <embb_mtapi_spinlock_t.h>
+#include <embb/base/c/mutex.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +50,7 @@ struct embb_mtapi_id_pool_struct {
   mtapi_uint_t ids_available;
   mtapi_uint_t get_id_position;
   mtapi_uint_t put_id_position;
-  embb_mtapi_spinlock_t lock;
+  embb_spinlock_t lock;
 };
 
 /**
