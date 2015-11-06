@@ -55,7 +55,6 @@ using embb::containers::test::HazardPointerTest;
 using embb::containers::test::QueueTest;
 using embb::containers::test::StackTest;
 using embb::containers::test::ObjectPoolTest;
-using embb::containers::test::HazardPointerTest2;
 
 PT_MAIN("Data Structures C++") {
   unsigned int max_threads = static_cast<unsigned int>(
@@ -65,7 +64,6 @@ PT_MAIN("Data Structures C++") {
   PT_RUN(PoolTest< WaitFreeArrayValuePool<int COMMA -1> >);
   PT_RUN(PoolTest< LockFreeTreeValuePool<int COMMA -1> >);
   PT_RUN(HazardPointerTest);
-  PT_RUN(HazardPointerTest2);
   PT_RUN(QueueTest< WaitFreeSPSCQueue< ::std::pair<size_t COMMA int> > >);
   PT_RUN(QueueTest< LockFreeMPMCQueue< ::std::pair<size_t COMMA int> >
     COMMA true COMMA true >);

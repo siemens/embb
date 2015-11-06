@@ -28,7 +28,6 @@
 #define EMBB_BASE_INTERNAL_MUTEX_INL_H_
 
 #include <cassert>
-#include <algorithm>
 
 namespace embb {
 namespace base {
@@ -96,8 +95,8 @@ void UniqueLock<Mutex>::Unlock() {
 
 template<typename Mutex>
 void UniqueLock<Mutex>::Swap(UniqueLock<Mutex>& other) {
-  std::swap(mutex_, other.mutex_);
-  std::swap(locked_, other.locked_);
+  locked_ = other.locked_;
+  mutex_ = other.Release();
 }
 
 template<typename Mutex>

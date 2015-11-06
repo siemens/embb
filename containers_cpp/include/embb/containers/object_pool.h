@@ -35,6 +35,7 @@
 
 namespace embb {
 namespace containers {
+
 /**
  * \defgroup CPP_CONTAINERS_POOLS Pools
  * Concurrent pools
@@ -61,29 +62,22 @@ class ObjectPool {
   /**
    * Allocator used to allocate elements of the object pool
    */
-  ObjectAllocator object_allocator_;
-
-  /**
-   * Capacity of the object pool
-   */
-  size_t capacity_;
-
-  /**
-   * The size of the underlying value pool. This is also the size of the object
-   * array in this class. It is assumed, that the valuepool manages indices in
-   * range [0;value_pool_size_-1].
-   */
-  size_t value_pool_size_;
-
-  /**
-   * Underlying value pool
-   */
-  ValuePool value_pool_;
+  ObjectAllocator objectAllocator;
 
   /**
    * Array holding the allocated object
    */
-  Type* objects_array_;
+  Type* objects;
+
+  /**
+   * Capacity of the object pool
+   */
+  size_t capacity;
+
+  /**
+   * Underlying value pool
+   */
+  ValuePool p;
 
   /**
    * Helper providing a virtual iterator that just returns true in each

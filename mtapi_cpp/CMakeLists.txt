@@ -5,10 +5,14 @@ file(GLOB_RECURSE EMBB_MTAPI_CPP_HEADERS "include/*.h")
 file(GLOB_RECURSE EMBB_MTAPI_CPP_TEST_SOURCES "test/*.cc" "test/*.h")
 
 if (USE_AUTOMATIC_INITIALIZATION STREQUAL ON)
+  message("-- Automatic initialization enabled (default)")
   set(MTAPI_CPP_AUTOMATIC_INITIALIZE 1)
 else()
   set(MTAPI_CPP_AUTOMATIC_INITIALIZE 0)
+  message("-- Automatic initialization disabled")
 endif()
+message("   (set with command line option -DUSE_AUTOMATIC_INITIALIZATION=ON/OFF)")
+
 
 # Execute the GroupSources macro
 include(${CMAKE_SOURCE_DIR}/CMakeCommon/GroupSourcesMSVC.cmake)
