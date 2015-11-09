@@ -50,19 +50,19 @@ namespace containers {
  * to the pool. To guarantee linearizability, \c element is not allowed to be
  * modified between \c Allocate and \c Free. It is only allowed to free elements
  * that have previously been allocated. The \c Allocate function does not
- * guarantee an order on which indices are allocated. The number of elements
+ * guarantee an order in which indices are allocated. The number of elements
  * that can be allocated with \c Allocate might be smaller than the number of
- * elements, the pool is initialized with. This might be because of
- * implementation details and respective concurrency effects: for example, if
+ * elements the pool is initialized with. This might be because of
+ * implementation details and respective concurrency effects: For example, if
  * indices are managed within a queue, one has to protect queue elements from
  * concurrency effects (reuse and access). As long as a thread potentially
  * accesses a node (and with that an index), the respective index cannot not be
  * given out to the user, even if being logically not part of the pool anymore.
  * However, the user might want to guarantee the required capacity.
  * For that purpose, the static \c GetMinimumElementCountForGuaranteedCapacity method
- * is used. The user passes the number of indices to this method, that shall be
- * guaranteed by the pool. The method returns the number on indices, the pool
- * has to be initialized with in order to guarantee this number on indices.
+ * is used. The user passes the number of indices that shall be guaranteed by the
+ * pool to this method. The method returns the number of indices the pool
+ * has to be initialized with in order to guarantee this number of indices.
  *
  * \par Requirements
  * - Let \c Pool be the pool class
@@ -117,7 +117,7 @@ namespace containers {
  *     <td>\code{.cpp} GetMinimumElementCountForGuaranteedCapacity(f)
  *     \endcode</td>
  *     <td>\c void</td>
- *     <td>Static method, returns the number of indices, the user has to
+ *     <td>Static method, returns the number of indices the user has to
  *     initialize the pool with in order to guarantee a capacity of \c f elements
  *     (irrespective of concurrency effects).
  *      </td>
@@ -181,7 +181,7 @@ class WaitFreeArrayValuePool {
   /**
    * Due to concurrency effects, a pool might provide less elements than managed
    * by it. However, usually one wants to guarantee a minimal capacity. The
-   * number of elements that must be given to the pool when to guarantee \c
+   * number of elements that must be given to the pool to guarantee \c
    * capacity elements is computed using this function.
    *
    * \return number of indices the pool has to be initialized with

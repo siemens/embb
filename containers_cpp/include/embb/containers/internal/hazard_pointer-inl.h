@@ -30,7 +30,7 @@
 namespace embb {
 namespace containers {
 namespace internal {
-// Visual Studio is complaining, that the return in the last line of this
+// Visual Studio is complaining that the return in the last line of this
 // function is not reachable. This is true, as long as exceptions are enabled.
 // Otherwise, the exception becomes an assertion and with disabling assertions,
 // the code becomes reachable. So, disabling this warning.
