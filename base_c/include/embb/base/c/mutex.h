@@ -163,6 +163,7 @@ void embb_mutex_destroy(
 /**
  * Initializes a spinlock
  *
+ * \pre \c spinlock is uninitialized
  * \post \c spinlock is initialized
  * \return EMBB_SUCCESS if spinlock could be initialized \n
  *         EMBB_ERROR otherwise
@@ -206,8 +207,9 @@ int embb_spin_try_lock(
   embb_spinlock_t* spinlock,
   /**< [IN/OUT] Pointer to spinlock */
   unsigned int max_number_spins
-  /**< [IN] Number of attempts the locking operation is repeated if
-   *        unsuccessful */
+  /**< [IN] Maximal count of spins to perform, trying to acquire lock. Note that
+   * passing 0 here results in not trying to obtain the lock at all.
+   */
   );
 
 /**

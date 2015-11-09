@@ -117,9 +117,9 @@ void embb_mutex_destroy(embb_mutex_t* mutex) {
 #endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */
 
 int embb_spin_init(embb_spinlock_t* spinlock) {
-  // for now, just assign the internal struct value... in the future,
-  // we will have an atomic init function.
-  spinlock->atomic_spin_variable_.internal_variable = 0;
+  // For now, store the initial value. In the future will use atomic init
+  // function (as soon as available).
+  embb_atomic_store_int(&spinlock->atomic_spin_variable_, 0);
 }
 
 int embb_spin_lock(embb_spinlock_t* spinlock) {
@@ -128,9 +128,6 @@ int embb_spin_lock(embb_spinlock_t* spinlock) {
   // try to swap the
   while (0 == embb_atomic_compare_and_swap_int(
     &spinlock->atomic_spin_variable_, &expected, 1)) {
-    // mtapi has a debug variable, counting spins... think about that...
-    // embb_atomic_fetch_and_add_int(&embb_mtapi_spinlock_spins, 1);
-
     // reset expected, as CAS might change it...
     expected = 0;
   }
@@ -139,16 +136,15 @@ int embb_spin_lock(embb_spinlock_t* spinlock) {
 
 int embb_spin_try_lock(embb_spinlock_t* spinlock,
   unsigned int max_number_spins) {
+  if (max_number_spins == 0)
+    return EMBB_BUSY;
+
   int expected = 0;
-  unsigned int spin_count = max_number_spins;
   while (0 == embb_atomic_compare_and_swap_int(
     &spinlock->atomic_spin_variable_,
     &expected, 1)) {
-    // mtapi has a debug variable, counting spins... think about that...
-    // embb_atomic_fetch_and_add_int(&embb_mtapi_spinlock_spins, 1);
-
-    spin_count--;
-    if (0 == spin_count) {
+    max_number_spins--;
+    if (0 == max_number_spins) {
       return EMBB_BUSY;
     }
     expected = 0;

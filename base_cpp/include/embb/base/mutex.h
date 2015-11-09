@@ -180,18 +180,14 @@ class Spinlock {
    *
    * \notthreadsafe
    */
-  Spinlock() {
-    embb_spin_init(&spinlock_);
-  }
+  Spinlock();
 
   /**
    * Destructs a spinlock.
    *
    * \notthreadsafe
    */
-  ~Spinlock() {
-    embb_spin_destroy(&spinlock_);
-  }
+  ~Spinlock();
 
   /**
    * Waits until the spinlock can be locked and locks it.
@@ -201,15 +197,7 @@ class Spinlock {
    * \threadsafe
    * \see TryLock(), Unlock()
    */
-  void Lock() {
-    int status = embb_spin_lock(&spinlock_);
-
-    // Currently, embb_spin_lock will always return EMBB_SUCCESS. However,
-    // This might change.
-    if (status != EMBB_SUCCESS) {
-      EMBB_THROW(ErrorException, "Error in embb_spin_lock");
-    }
-  }
+  void Lock();
 
   /**
    * Tries to lock the spinlock for \c number_spins times and returns.
@@ -222,19 +210,11 @@ class Spinlock {
    */
   bool TryLock(
     unsigned int number_spins = 1
-    /**< [IN] Maximal spins to perform, trying to acquire lock */
-    ) {
-    int status = embb_spin_try_lock(&spinlock_, number_spins);
-
-    if (status == EMBB_BUSY){
-      return false;
-    }
-    else if (status != EMBB_SUCCESS) {
-      EMBB_THROW(ErrorException, "Error in embb_spin_try_lock");
-    }
-
-    return true;
-  }
+    /**< [IN] Maximal count of spins to perform, trying to acquire lock.
+     * Note that passing 0 here results in not trying to obtain the lock at all.
+     * Default parameter is 1.
+     */
+    );
 
   /**
    * Unlocks the spinlock.
@@ -244,13 +224,7 @@ class Spinlock {
    * \threadsafe
    * \see Lock(), TryLock()
    */
-  void Unlock() {
-    int status = embb_spin_unlock(&spinlock_);
-
-    if (status != EMBB_SUCCESS) {
-      EMBB_THROW(ErrorException, "Error in embb_spin_unlock");
-    }
-  }
+  void Unlock();
 
  private:
   /**
