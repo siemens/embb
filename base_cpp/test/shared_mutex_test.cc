@@ -31,7 +31,6 @@
 namespace embb {
 namespace base {
 namespace test {
-
 SharedMutexTest::SharedMutexTest()
     : shared_mutex_(),
       counter_(0),
@@ -55,9 +54,6 @@ SharedMutexTest::SharedMutexTest()
 void SharedMutexTest::TestSharedReadThreadMethod() {
   SharedLock<embb::base::SharedMutex> lock(shared_mutex_, embb::base::try_lock);
   PT_ASSERT_EQ_MSG(lock.OwnsLock(), true, "Failed to lock for reading.");
-
-  int spin = 10000;
-  while (--spin != 0);
 }
 
 void SharedMutexTest::TestExclusiveWritePre() {
@@ -67,11 +63,6 @@ void SharedMutexTest::TestExclusiveWritePre() {
 void SharedMutexTest::TestExclusiveWriteReaderMethod() {
   // Just add some contention
   SharedLock<embb::base::SharedMutex> lock(shared_mutex_, embb::base::try_lock);
-  
-  if (lock.OwnsLock()) {
-    int spin = 10000;
-    while (--spin != 0);
-  }
 }
 
 void SharedMutexTest::TestExclusiveWriteWriterMethod() {
@@ -113,20 +104,20 @@ void SharedMutexTest::TestSharedLockThreadMethod() {
     SharedLock<> lock(shared_mutex_, embb::base::defer_lock);
     PT_EXPECT_EQ(lock.OwnsLock(), false);
   }
-  
+
   // Test try-lock construction
   {
     SharedLock<> lock(shared_mutex_, embb::base::try_lock);
     PT_EXPECT_EQ(lock.OwnsLock(), true);
   }
-  
+
   // Test adopt lock construction
   {
     shared_mutex_.LockShared();
     SharedLock<> lock(shared_mutex_, embb::base::adopt_lock);
     PT_EXPECT_EQ(lock.OwnsLock(), true);
   }
-  
+
   // Test lock swapping
   {
     SharedMutex another_mutex;
@@ -152,7 +143,6 @@ void SharedMutexTest::TestSharedLockThreadMethod() {
     PT_EXPECT_EQ(lock1.OwnsLock(), false);
   }
 }
-
 } // namespace test
 } // namespace base
 } // namespace embb

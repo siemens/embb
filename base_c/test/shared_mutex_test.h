@@ -30,6 +30,7 @@
 #include <partest/partest.h>
 #include <embb/base/c/internal/platform.h>
 #include <embb/base/c/mutex.h>
+#include <embb/base/c/atomic.h>
 
 
 namespace embb {
@@ -63,6 +64,13 @@ class SharedMutexTest : public partest::TestCase {
   void TestExclusiveWriterWriterMethod();
   void TestExclusiveWriterPost();
 
+
+  void TestLockedForWritingPreventsLockForReading();
+  void TestLockedForReadingPreventsLockForWriting();
+  void TestLockedPost();
+  void TestLockedPre();
+
+  embb_atomic_int synchronize_;
   embb_shared_mutex_t shared_mutex_;
   size_t counter_;
   size_t num_threads_;

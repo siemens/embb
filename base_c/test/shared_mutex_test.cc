@@ -30,9 +30,8 @@
 namespace embb {
 namespace base {
 namespace test {
-
 SharedMutexTest::SharedMutexTest()
-    : shared_mutex_(),
+  : shared_mutex_(),
       counter_(0),
       num_threads_(partest::TestSuite::GetDefaultNumThreads()),
       num_iterations_(partest::TestSuite::GetDefaultNumIterations()) {
@@ -48,6 +47,123 @@ SharedMutexTest::SharedMutexTest()
       .Add(&SharedMutexTest::TestExclusiveWriterWriterMethod, this,
            num_threads_ / 2, num_iterations_)
       .Post(&SharedMutexTest::TestExclusiveWriterPost, this);
+
+  CreateUnit("Basic test: read lock after write lock fails")
+    .Pre(&SharedMutexTest::TestLockedPre, this)
+    .Add(&SharedMutexTest::TestLockedForWritingPreventsLockForReading
+      , this, 2, num_iterations_)
+     .Add(&SharedMutexTest::TestLockedPost, this);
+
+  CreateUnit("Basic test: write lock after read lock fails")
+    .Pre(&SharedMutexTest::TestLockedPre, this)
+    .Add(&SharedMutexTest::TestLockedForReadingPreventsLockForWriting, this, 2,
+    num_iterations_)
+     .Add(&SharedMutexTest::TestLockedPost, this);
+}
+
+void SharedMutexTest::TestLockedPre() {
+  embb_atomic_store_int(&synchronize_, 0);
+  int success = embb_shared_mutex_init(&shared_mutex_);
+
+  PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS, "Failed to initialize shared mutex.");
+}
+
+void SharedMutexTest::TestLockedForWritingPreventsLockForReading() {
+  int expected = 0;
+  int success = 0;
+  int which_thread = 0;
+
+  if (embb_atomic_compare_and_swap_int(&synchronize_, &expected, 1)) {
+    // we are the write locking thread (will happen first)!
+    success = embb_shared_mutex_lock(&shared_mutex_);
+
+    PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS,
+      "Failed to lock shared mutex for writing");
+
+    // signal the second thread to continue
+    embb_atomic_store_int(&synchronize_, 2);
+  } else {
+    while (embb_atomic_load_int(&synchronize_) != 2) {}
+    // we are the read lock thread! (second thread)
+    which_thread = 1;
+
+    // the mutex is locked for writing... try lock for reading must fail now!
+    success = embb_shared_mutex_try_lock_shared(&shared_mutex_);
+
+    PT_ASSERT_EQ_MSG(success, EMBB_BUSY,
+     "Not failed to lock shared mutex for reading");
+
+    // synchronize, that first thread can unlock
+    embb_atomic_store_int(&synchronize_, 3);
+  }
+
+  if (which_thread == 0) {
+    // wait for second thread to finish!
+    while (embb_atomic_load_int(&synchronize_) != 3) {}
+
+    // the first thread unlocks the mutex...
+    success = embb_shared_mutex_unlock(&shared_mutex_);
+
+    PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS,
+      "Failed to unlock mutex");
+
+    // reset synchronize flag for next round...
+    embb_atomic_store_int(&synchronize_, 0);
+  } else {
+    //wait for next round
+    while (embb_atomic_load_int(&synchronize_) == 3) {}
+  }
+}
+
+void SharedMutexTest::TestLockedForReadingPreventsLockForWriting() {
+  int expected = 0;
+  int success = 0;
+  int which_thread = 0;
+
+  if (embb_atomic_compare_and_swap_int(&synchronize_, &expected, 1)) {
+    // we are the write locking thread (will happen first)!
+    success = embb_shared_mutex_lock_shared(&shared_mutex_);
+
+    PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS,
+      "Failed to lock shared mutex for writing");
+
+    // signal the second thread to continue
+    embb_atomic_store_int(&synchronize_, 2);
+  } else {
+    while (embb_atomic_load_int(&synchronize_) != 2) {}
+    // we are the read lock thread! (second thread)
+    which_thread = 1;
+
+    // the mutex is locked for writing... try lock for reading must fail now!
+    success = embb_shared_mutex_try_lock(&shared_mutex_);
+
+    PT_ASSERT_EQ_MSG(success, EMBB_BUSY,
+     "Not failed to lock shared mutex for reading");
+
+    // synchronize, that first thread can unlock
+    embb_atomic_store_int(&synchronize_, 3);
+  }
+
+  if (which_thread == 0) {
+    // wait for second thread to finish!
+    while (embb_atomic_load_int(&synchronize_) != 3) {}
+
+    // the first thread unlocks the mutex...
+    success = embb_shared_mutex_unlock(&shared_mutex_);
+
+    PT_ASSERT_EQ_MSG(success, EMBB_SUCCESS,
+      "Failed to unlock mutex");
+
+    // reset synchronize flag for next round...
+    embb_atomic_store_int(&synchronize_, 0);
+  } else {
+    //wait for next round
+    while (embb_atomic_load_int(&synchronize_) == 3) {}
+  }
+}
+
+void SharedMutexTest::TestLockedPost() {
+  embb_shared_mutex_destroy(&shared_mutex_);
 }
 
 void SharedMutexTest::TestSharedReadPre() {
@@ -105,7 +221,6 @@ void SharedMutexTest::TestExclusiveWriterPost() {
                    "Counter value is inconsistent.");
   embb_shared_mutex_destroy(&shared_mutex_);
 }
-
 } // namespace test
 } // namespace base
 } // namespace embb

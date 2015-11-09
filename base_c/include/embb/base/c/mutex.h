@@ -314,4 +314,4 @@ void embb_shared_mutex_destroy(
  * \}
  */
 
-#endif /* EMBB_BASE_C_MUTEX_H_ */
+#endif  // EMBB_BASE_C_MUTEX_H_
