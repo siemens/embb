@@ -44,25 +44,25 @@ namespace containers {
  * given at construction time by providing first/last iterators.
  *
  * \par
- * A value pool provides two primary operations: \c Allocate and \c Free. \c
- * Allocate allocates an element/index "pair" (index via return, element via
+ * A value pool provides two primary operations: \c Allocate and \c Free.
+ * \c Allocate allocates an element/index "pair" (index via return, element via
  * reference parameter) from the pool, and \c Free returns an element/index pair
  * to the pool. To guarantee linearizability, \c element is not allowed to be
  * modified between \c Allocate and \c Free. It is only allowed to free elements
  * that have previously been allocated. The \c Allocate function does not
- * guarantee an order on which indices are allocated. The count of elements that
- * can be allocated with \c Allocate might be smaller than the count of
+ * guarantee an order on which indices are allocated. The number of elements
+ * that can be allocated with \c Allocate might be smaller than the number of
  * elements, the pool is initialized with. This might be because of
  * implementation details and respective concurrency effects: for example, if
  * indices are managed within a queue, one has to protect queue elements from
  * concurrency effects (reuse and access). As long as a thread potentially
  * accesses a node (and with that an index), the respective index cannot not be
  * given out to the user, even if being logically not part of the pool anymore.
- * However, the user might want to guarantee a certain amount of indices to the
- * user. Therefore, the static \c GetMinimumElementCountForGuaranteedCapacity
- * method is used. The user passes the count of indices to this method, that
- * shall be guaranteed by the pool. The method returns the count on indices, the
- * pool has to be initialized with in order to guarantee this count on indices.
+ * However, the user might want to guarantee the required capacity.
+ * For that purpose, the static \c GetMinimumElementCountForGuaranteedCapacity method
+ * is used. The user passes the number of indices to this method, that shall be
+ * guaranteed by the pool. The method returns the number on indices, the pool
+ * has to be initialized with in order to guarantee this number on indices.
  *
  * \par Requirements
  * - Let \c Pool be the pool class
@@ -102,7 +102,7 @@ namespace containers {
  *     Allocates an element/index "pair" from the pool. Returns -1, if no
  *     element is available, i.e., the pool is empty. Otherwise, returns the
  *     index of the element in the pool. The value of the pool element is
- *     written into parameter reference \c c.
+ *     written into reference parameter \c c.
  *     </td>
  *   </tr>
  *   <tr>
@@ -117,8 +117,8 @@ namespace containers {
  *     <td>\code{.cpp} GetMinimumElementCountForGuaranteedCapacity(f)
  *     \endcode</td>
  *     <td>\c void</td>
- *     <td>Static method, returns the count of indices, the user has to
- *     initialize the pool with in order to guarantee a count of \c f elements
+ *     <td>Static method, returns the number of indices, the user has to
+ *     initialize the pool with in order to guarantee a capacity of \c f elements
  *     (irrespective of concurrency effects).
  *      </td>
  *   </tr>
@@ -181,14 +181,14 @@ class WaitFreeArrayValuePool {
   /**
    * Due to concurrency effects, a pool might provide less elements than managed
    * by it. However, usually one wants to guarantee a minimal capacity. The
-   * count of elements, that must be given to the pool when to guarantee \c
+   * number of elements that must be given to the pool when to guarantee \c
    * capacity elements is computed using this function.
    *
-   * \return count of indices the pool has to be initialized with
+   * \return number of indices the pool has to be initialized with
    */
   static size_t GetMinimumElementCountForGuaranteedCapacity(
     size_t capacity
-    /**< [IN] count of indices that shall be guaranteed */);
+    /**< [IN] number of indices that shall be guaranteed */);
 
   /**
    * Destructs the pool.

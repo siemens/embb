@@ -70,7 +70,7 @@ class ObjectPool {
 
   /**
    * The size of the underlying value pool. This is also the size of the object
-   * array in this class. It is assumed, that the valuepool manages indices in
+   * array in this class. It is assumed that the valuepool manages indices in
    * range [0;value_pool_size_-1].
    */
   size_t value_pool_size_;
