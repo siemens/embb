@@ -74,7 +74,7 @@ void Spinlock::Lock() {
   // Currently, embb_spin_lock will always return EMBB_SUCCESS. However,
   // This might change.
   if (status != EMBB_SUCCESS) {
-    EMBB_THROW(ErrorException, "Error during locking spinlock");
+    EMBB_THROW(ErrorException, "Error while locking spinlock");
   }
 }
 
@@ -85,7 +85,7 @@ bool Spinlock::TryLock(unsigned int number_spins) {
     return false;
   }
   else if (status != EMBB_SUCCESS) {
-    EMBB_THROW(ErrorException, "Error during try-locking spinlock");
+    EMBB_THROW(ErrorException, "Error while try-locking spinlock");
   }
 
   return true;
@@ -95,7 +95,7 @@ void Spinlock::Unlock() {
   int status = embb_spin_unlock(&spinlock_);
 
   if (status != EMBB_SUCCESS) {
-    EMBB_THROW(ErrorException, "Error during unlocking spinlock");
+    EMBB_THROW(ErrorException, "Error while unlocking spinlock");
   }
 }
 } // namespace base
