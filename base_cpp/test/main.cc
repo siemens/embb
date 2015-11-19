@@ -41,6 +41,7 @@ using embb::base::test::CoreSetTest;
 using embb::base::test::DurationTest;
 using embb::base::test::ConditionVarTest;
 using embb::base::test::MutexTest;
+using embb::base::test::SpinLockTest;
 using embb::base::test::ThreadSpecificStorageTest;
 using embb::base::test::AtomicTest;
 using embb::base::test::MemoryAllocationTest;
@@ -50,10 +51,12 @@ PT_MAIN("Base C++") {
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
+
   PT_RUN(CoreSetTest);
   PT_RUN(DurationTest);
   PT_RUN(ConditionVarTest);
   PT_RUN(MutexTest);
+  PT_RUN(SpinLockTest);
   PT_RUN(ThreadSpecificStorageTest);
   PT_RUN(AtomicTest);
   PT_RUN(MemoryAllocationTest);

@@ -114,6 +114,8 @@ bool UniqueLock<Mutex>::OwnsLock() const {
   return locked_;
 }
 
+
+
 } // namespace base
 } // namespace embb
 

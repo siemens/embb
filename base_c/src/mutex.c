@@ -115,3 +115,53 @@ void embb_mutex_destroy(embb_mutex_t* mutex) {
 }
 
 #endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */
+
+int embb_spin_init(embb_spinlock_t* spinlock) {
+  // For now, store the initial value. In the future will use atomic init
+  // function (as soon as available).
+  embb_atomic_store_int(&spinlock->atomic_spin_variable_, 0);
+}
+
+int embb_spin_lock(embb_spinlock_t* spinlock) {
+  int expected = 0;
+
+  // try to swap the
+  while (0 == embb_atomic_compare_and_swap_int(
+    &spinlock->atomic_spin_variable_, &expected, 1)) {
+    // reset expected, as CAS might change it...
+    expected = 0;
+  }
+  return EMBB_SUCCESS;
+}
+
+int embb_spin_try_lock(embb_spinlock_t* spinlock,
+  unsigned int max_number_spins) {
+  if (max_number_spins == 0)
+    return EMBB_BUSY;
+
+  int expected = 0;
+  while (0 == embb_atomic_compare_and_swap_int(
+    &spinlock->atomic_spin_variable_,
+    &expected, 1)) {
+    max_number_spins--;
+    if (0 == max_number_spins) {
+      return EMBB_BUSY;
+    }
+    expected = 0;
+  }
+
+  return EMBB_SUCCESS;
+}
+
+int embb_spin_unlock(embb_spinlock_t* spinlock) {
+  int expected = 1;
+  return embb_atomic_compare_and_swap_int(&spinlock->atomic_spin_variable_,
+    &expected, 0) ?
+  EMBB_SUCCESS : EMBB_ERROR;
+}
+
+void embb_spin_destroy(embb_spinlock_t* spinlock) {
+  // for now, doing nothing here... in future, will call the respective
+  // destroy function for atomics...
+  return EMBB_SUCCESS;
+}
