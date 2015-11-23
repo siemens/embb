@@ -163,5 +163,4 @@ int embb_spin_unlock(embb_spinlock_t* spinlock) {
 void embb_spin_destroy(embb_spinlock_t* spinlock) {
   // for now, doing nothing here... in future, will call the respective
   // destroy function for atomics...
-  return EMBB_SUCCESS;
 }

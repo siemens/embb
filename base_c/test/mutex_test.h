@@ -89,6 +89,7 @@ class MutexTest : public partest::TestCase {
 class SpinLockTest : public partest::TestCase {
  public:
   SpinLockTest();
+
  private:
   /**
    * Check that the try lock fails, when lock is already set.

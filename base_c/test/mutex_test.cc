@@ -124,7 +124,7 @@ void SpinLockTest::PreSpinLockInc() {
 }
 
 void SpinLockTest::TestSpinLockIncUseLock() {
-  for (unsigned int i = 0; i != counter_iterations_; ++i){
+  for (unsigned int i = 0; i != counter_iterations_; ++i) {
     embb_spin_lock(&spinlock_);
     counter_++;
     embb_spin_unlock(&spinlock_);
@@ -132,7 +132,7 @@ void SpinLockTest::TestSpinLockIncUseLock() {
 }
 
 void SpinLockTest::TestSpinLockIncUseTryLock() {
-  for (unsigned int i = 0; i != counter_iterations_; ++i){
+  for (unsigned int i = 0; i != counter_iterations_; ++i) {
     while (embb_spin_try_lock(&spinlock_, 100) != EMBB_SUCCESS) {}
     counter_++;
     embb_spin_unlock(&spinlock_);

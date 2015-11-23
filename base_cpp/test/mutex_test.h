@@ -90,10 +90,10 @@ class MutexTest : public partest::TestCase {
 };
 
 class SpinLockTest : public partest::TestCase {
-public:
+ public:
   SpinLockTest();
-private:
 
+ private:
   /**
     * Uses Spinlock to realize multi-threaded counting.
     */
