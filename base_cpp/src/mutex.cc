@@ -81,10 +81,9 @@ void Spinlock::Lock() {
 bool Spinlock::TryLock(unsigned int number_spins) {
   int status = embb_spin_try_lock(&spinlock_, number_spins);
 
-  if (status == EMBB_BUSY){
+  if (status == EMBB_BUSY) {
     return false;
-  }
-  else if (status != EMBB_SUCCESS) {
+  } else if (status != EMBB_SUCCESS) {
     EMBB_THROW(ErrorException, "Error while try-locking spinlock");
   }
 

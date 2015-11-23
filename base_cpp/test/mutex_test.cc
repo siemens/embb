@@ -227,7 +227,7 @@ number_threads_(partest::TestSuite::GetDefaultNumThreads()),
 }
 
 void SpinLockTest::TestSpinlockCountLock() {
-  for (unsigned int i = 0; i != counter_iterations_; ++i){
+  for (unsigned int i = 0; i != counter_iterations_; ++i) {
     spinlock_.Lock();
     counter_++;
     spinlock_.Unlock();
@@ -235,7 +235,7 @@ void SpinLockTest::TestSpinlockCountLock() {
 }
 
 void SpinLockTest::TestSpinlockCountLockTryLock() {
-  for (unsigned int i = 0; i != counter_iterations_; ++i){
+  for (unsigned int i = 0; i != counter_iterations_; ++i) {
     while (!spinlock_.TryLock()) {}
     counter_++;
     spinlock_.Unlock();
