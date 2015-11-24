@@ -120,6 +120,7 @@ int embb_spin_init(embb_spinlock_t* spinlock) {
   // For now, store the initial value. In the future will use atomic init
   // function (as soon as available).
   embb_atomic_store_int(&spinlock->atomic_spin_variable_, 0);
+  return EMBB_SUCCESS;
 }
 
 int embb_spin_lock(embb_spinlock_t* spinlock) {
