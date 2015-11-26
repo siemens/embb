@@ -44,10 +44,10 @@ namespace base {
  * \{
  * \par Description
  *
- * The mutex concept is a concept for thread synchronization. It provides a
- * lock. At any point in time, only one thread can exclusively hold the lock and
- * the lock is held, until the thread explicitly releases the beforehand
- * acquired lock.
+ 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+ * The mutex concept is used for thread synchronization and provides a lock.
+ * At any point in time, only one thread can exclusively hold the lock and
+ * the lock is held until the thread explicitly releases it.
  *
  * \par Requirements
  * - Let \c Mutex be the mutex type
@@ -193,7 +193,7 @@ class Spinlock {
    * Waits until the spinlock can be locked and locks it.
    *
    * \pre The spinlock is not locked by the current thread.
-   * \post The spinlock is locked
+   * \post The spinlock is locked.
    * \threadsafe
    * \see TryLock(), Unlock()
    */
@@ -210,17 +210,17 @@ class Spinlock {
    */
   bool TryLock(
     unsigned int number_spins = 1
-    /**< [IN] Maximal count of spins to perform, trying to acquire lock.
+    /**< [IN] Maximal number of spins when trying to acquire the lock.
      * Note that passing 0 here results in not trying to obtain the lock at all.
-     * Default parameter is 1.
+     * The default parameter is 1.
      */
     );
 
   /**
    * Unlocks the spinlock.
    *
-   * \pre The spinlock is locked by the current thread
-   * \post The spinlock is unlocked
+   * \pre The spinlock is locked by the current thread.
+   * \post The spinlock is unlocked.
    * \threadsafe
    * \see Lock(), TryLock()
    */
