@@ -1,5 +1,32 @@
-﻿Embedded Multicore Building Blocks (EMB²)
+Embedded Multicore Building Blocks (EMB²)
 =========================================
+
+Version 0.3.2
+-------------
+
+### Features:
+- Added central spinlock implementation for C/C++ and removed existing (decentral) ones
+
+### Changes and improvements:
+- Reworked and optimized hazard pointer implementation
+- Adjusted interfaces of value pool and object pool
+- Replaced C style casts
+
+### Bug fixes:
+- Fixed ordering of destruction and deallocation in value pool
+- Fixed potential use of uninitialized memory in WaitFreeArrayValuePool and LockFreeTreeValuePool
+
+### Build system:
+- Given user the ability to append compiler flags
+- Let Cmake return an error on Doxygen warnings when WARNINGS_ARE_ERRORS is enabled
+- Fixed cpplint warnings
+
+### Documentation:
+- Added mutex concept
+- Corrected library ordering/names in README (section "Using the Library")
+- Improved exception messages
+- Fixed typos in condition_var_test.cc
+
 
 Version 0.3.1
 -------------
