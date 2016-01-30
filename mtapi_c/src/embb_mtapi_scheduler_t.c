@@ -302,7 +302,7 @@ int embb_mtapi_scheduler_worker(void * arg) {
             node->queue_pool, task->queue);
       }
 
-      switch (task->state) {
+      switch (embb_atomic_load_int(&task->state)) {
       case MTAPI_TASK_SCHEDULED:
       /* multi-instance task, another instance might be running */
       case MTAPI_TASK_RUNNING:
@@ -398,10 +398,11 @@ mtapi_boolean_t embb_mtapi_scheduler_wait_for_task(
     node->scheduler);
 
   /* now wait and schedule new tasks if we are on a worker */
+  mtapi_task_state_t task_state = embb_atomic_load_int(&task->state);
   while (
-    (MTAPI_TASK_SCHEDULED == task->state) ||
-    (MTAPI_TASK_RUNNING == task->state) ||
-    (MTAPI_TASK_RETAINED == task->state) ) {
+    (MTAPI_TASK_SCHEDULED == task_state) ||
+    (MTAPI_TASK_RUNNING == task_state) ||
+    (MTAPI_TASK_RETAINED == task_state) ) {
     if (MTAPI_INFINITE < timeout) {
       embb_time_t current_time;
       embb_time_now(&current_time);
@@ -416,6 +417,8 @@ mtapi_boolean_t embb_mtapi_scheduler_wait_for_task(
       node->scheduler,
       node,
       context);
+
+    task_state = embb_atomic_load_int(&task->state);
   }
 
   return MTAPI_TRUE;

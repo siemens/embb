@@ -377,7 +377,7 @@ static int embb_mtapi_network_thread(void * args) {
               assert(err == results_size);
 
               local_task->error_code = (mtapi_status_t)task_status;
-              local_task->state = MTAPI_TASK_COMPLETED;
+              embb_atomic_store_int(&local_task->state, MTAPI_TASK_COMPLETED);
               embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
 
               /* is task associated with a group? */
@@ -530,7 +530,7 @@ static void network_task_start(
         assert(err == send_buf->size);
 
         embb_atomic_fetch_and_add_int(&local_action->num_tasks, 1);
-        local_task->state = MTAPI_TASK_RUNNING;
+        embb_atomic_store_int(&local_task->state, MTAPI_TASK_RUNNING);
 
         embb_mtapi_network_buffer_clear(send_buf);
 
