@@ -120,6 +120,15 @@ class Node {
   static void Finalize();
 
   /**
+    * Returns the number of available queues.
+    * \return The number of available queues
+    * \waitfree
+    */
+  mtapi_uint_t GetQueueCount() const {
+    return queue_count_;
+  }
+
+  /**
     * Returns the number of available cores.
     * \return The number of available cores
     * \waitfree
@@ -218,6 +227,7 @@ class Node {
     mtapi_size_t node_local_data_size,
     mtapi_task_context_t * context);
 
+  mtapi_uint_t queue_count_;
   mtapi_uint_t core_count_;
   mtapi_uint_t worker_thread_count_;
   mtapi_action_hndl_t action_handle_;
