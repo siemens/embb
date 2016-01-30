@@ -156,7 +156,7 @@ void SimpleTest::TestBasic() {
     core_set,
     1024, // max tasks (default: 1024)
     128,  // max groups (default: 128)
-    num_cores, // max queues (default: 16)
+    2, // max queues (default: 16)
     1024, // queue capacity (default: 1024)
     4);   // num priorities (default: 4)
 
