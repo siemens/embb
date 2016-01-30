@@ -307,8 +307,22 @@ typedef mtapi_uint_t  mtapi_size_t;
  * \ingroup RUNTIME_INIT_SHUTDOWN
  */
 struct mtapi_info_struct {
-  unsigned int hardware_concurrency;   /**< number of CPU cores */
-  unsigned int used_memory;            /**< bytes of memory used by MTAPI */
+  mtapi_uint_t mtapi_version;          /**< The three last (rightmost) hex
+                                            digits are the minor number, and
+                                            those left of the minor number are
+                                            the major number. */
+  mtapi_uint_t organization_id;        /**< Implementation vendor or
+                                            organization ID. */
+  mtapi_uint_t implementation_version; /**< The three last (rightmost) hex
+                                            digits are the minor number, and
+                                            those left of the minor number are
+                                            the major number.*/
+  mtapi_uint_t number_of_domains;      /**< Number of domains allowed by the
+                                            implementation.*/
+  mtapi_uint_t number_of_nodes;        /**< Number of nodes allowed by the
+                                            implementation.*/
+  mtapi_uint_t hardware_concurrency;   /**< Number of CPU cores available. */
+  mtapi_uint_t used_memory;            /**< Bytes of memory used by MTAPI. */
 };
 
 /**

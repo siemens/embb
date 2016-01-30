@@ -120,6 +120,11 @@ void mtapi_initialize(
         node->scheduler = embb_mtapi_scheduler_new();
         if (MTAPI_NULL != node->scheduler) {
           /* fill information structure */
+          node->info.mtapi_version = 0x1000; // mtapi version 1.0
+          node->info.organization_id = 0x4711; // TODO(marcus): change to real id
+          node->info.implementation_version = 0x0003; // implementation version 0.3
+          node->info.number_of_domains = 1;
+          node->info.number_of_nodes = 1;
           node->info.hardware_concurrency = embb_core_count_available();
           node->info.used_memory = embb_mtapi_alloc_get_bytes_allocated();
           if (MTAPI_NULL != mtapi_info) {
