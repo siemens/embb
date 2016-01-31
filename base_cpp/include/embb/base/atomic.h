@@ -62,7 +62,7 @@ class Atomic {
   /**
    * Default constructor.
    *
-   * Constructs an atomic variable holding an uninitialized value.
+   * Constructs an atomic variable holding zero.
    *
    * \waitfree
    *
