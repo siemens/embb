@@ -53,12 +53,6 @@ if(POLICY CMP0053)
   cmake_policy(SET CMP0053 OLD)
 endif(POLICY CMP0053)
 
-
-include(CMakeCommon/FindOpenCL.cmake)
-IF(NOT OpenCL_FOUND)
-  MESSAGE( STATUS "OpenCL is not there, will build without MTAPI OpenCL Plugin." )
-ENDIF()
-
 # give the user the possibility, to append compiler flags
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CMAKE_CXX_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CMAKE_C_FLAGS}")
@@ -88,6 +82,7 @@ option(USE_EXCEPTIONS "Specify whether exceptions should be activated in C++" ON
 option(INSTALL_DOCS "Specify whether Doxygen docs should be installed" ON)
 option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors" OFF)
 option(USE_AUTOMATIC_INITIALIZATION "Specify whether the MTAPI C++ interface, algorithms and dataflow should automatically intialize the MTAPI node if no explicit initialization is present" ON)
+option(BUILD_OPENCL_PLUGIN "Specify whether the MTAPI OpenCL plugin should be built" OFF)
 
 ## LOCAL INSTALLATION OF SUBPROJECT BINARIES
 #
@@ -146,7 +141,7 @@ set(EXPECTED_EMBB_TEST_EXECUTABLES "embb_algorithms_cpp_test"
                 )
 
 # if opencl is there, we also expect the mtapi opencl test to be generated
-if(OpenCL_FOUND)
+if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   list(APPEND EXPECTED_EMBB_TEST_EXECUTABLES "embb_mtapi_opencl_c_test")
 endif()
 
@@ -182,7 +177,7 @@ add_subdirectory(base_c)
 add_subdirectory(base_cpp)
 add_subdirectory(mtapi_c)
 add_subdirectory(mtapi_network_c)
-if(OpenCL_FOUND)
+if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   add_subdirectory(mtapi_opencl_c)
 endif()
 add_subdirectory(tasks_cpp)

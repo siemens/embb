@@ -21,7 +21,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../../dataflow_cpp/include
   )
 
-if(OpenCL_FOUND)
+if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   # used in source code, to include opencl code
   add_definitions(-DEMBB_WITH_OPENCL)
   # add opencl includes

@@ -34,5 +34,7 @@ LinkerTest::LinkerTest() {
 }
 
 void LinkerTest::TestBasic() {
-  PT_EXPECT(embb_mtapi_opencl_link_at_runtime() != 0);
+  int result = embb_mtapi_opencl_link_at_runtime();
+  bool success = result != 0;
+  PT_EXPECT(success);
 }

@@ -259,7 +259,11 @@ void mtapi_opencl_plugin_initialize(
   embb_mtapi_opencl_plugin_t * plugin = &embb_mtapi_opencl_plugin;
 
   err = embb_mtapi_opencl_link_at_runtime();
-  if (err != 0) {
+  if (err <= 0) {
+    // OpenCL not available, or wrong version
+    local_status = MTAPI_ERR_FUNC_NOT_IMPLEMENTED;
+  } else {
+    // all good, go ahead
     err = clGetPlatformIDs(1, &plugin->platform_id, NULL);
     if (CL_SUCCESS == err) {
       err = clGetDeviceIDs(plugin->platform_id, CL_DEVICE_TYPE_DEFAULT,
