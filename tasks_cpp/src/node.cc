@@ -31,6 +31,7 @@
 
 #include <embb/base/memory_allocation.h>
 #include <embb/base/exceptions.h>
+#include <embb/base/thread.h>
 #include <embb/tasks/tasks.h>
 #if TASKS_CPP_AUTOMATIC_INITIALIZE
 #include <embb/base/mutex.h>
@@ -234,7 +235,11 @@ void Node::Finalize() {
 
 Group & Node::CreateGroup() {
   Group * group = embb::base::Allocation::New<Group>();
+  while (!group_lock_.TryLock(1024)) {
+      embb::base::Thread::CurrentYield();
+  }
   groups_.push_back(group);
+  group_lock_.Unlock();
   return *group;
 }
 
@@ -249,7 +254,11 @@ void Node::DestroyGroup(Group & group) {
 
 Queue & Node::CreateQueue(mtapi_uint_t priority, bool ordered) {
   Queue * queue = embb::base::Allocation::New<Queue>(priority, ordered);
+  while (!queue_lock_.TryLock(1024)) {
+      embb::base::Thread::CurrentYield();
+  }
   queues_.push_back(queue);
+  queue_lock_.Unlock();
   return *queue;
 }
 
