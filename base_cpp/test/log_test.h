@@ -24,46 +24,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef BASE_CPP_TEST_LOG_TEST_H_
+#define BASE_CPP_TEST_LOG_TEST_H_
+
 #include <partest/partest.h>
-#include <embb/base/thread.h>
-#include <duration_test.h>
-#include <core_set_test.h>
-#include <mutex_test.h>
-#include <condition_var_test.h>
-#include <thread_test.h>
-#include <thread_specific_storage_test.h>
-#include <atomic_test.h>
-#include <memory_allocation_test.h>
-#include <log_test.h>
 
-#include <embb/base/c/memory_allocation.h>
+namespace embb {
+namespace base {
+namespace test {
 
-using embb::base::test::CoreSetTest;
-using embb::base::test::DurationTest;
-using embb::base::test::ConditionVarTest;
-using embb::base::test::MutexTest;
-using embb::base::test::SpinLockTest;
-using embb::base::test::ThreadSpecificStorageTest;
-using embb::base::test::AtomicTest;
-using embb::base::test::MemoryAllocationTest;
-using embb::base::test::ThreadTest;
-using embb::base::test::LogTest;
+/**
+ * Provides tests for Log.
+ */
+class LogTest : public partest::TestCase {
+ public:
+  /**
+   * Adds test methods.
+   */
+     LogTest();
 
-PT_MAIN("Base C++") {
-  unsigned int max_threads =
-      static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
-  embb_thread_set_max_count(max_threads);
+ private:
+  /**
+   * Tests all functionalities.
+   */
+  void Test();
+};
 
-  PT_RUN(CoreSetTest);
-  PT_RUN(DurationTest);
-  PT_RUN(ConditionVarTest);
-  PT_RUN(MutexTest);
-  PT_RUN(SpinLockTest);
-  PT_RUN(ThreadSpecificStorageTest);
-  PT_RUN(AtomicTest);
-  PT_RUN(MemoryAllocationTest);
-  PT_RUN(ThreadTest);
-  PT_RUN(LogTest);
+} // namespace test
+} // namespace base
+} // namespace embb
 
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
-}
+#endif // BASE_CPP_TEST_LOG_TEST_H_
