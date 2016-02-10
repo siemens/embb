@@ -121,7 +121,7 @@ void mtapi_initialize(
         if (MTAPI_NULL != node->scheduler) {
           /* fill information structure */
           node->info.mtapi_version = 0x1000; // mtapi version 1.0
-          node->info.organization_id = 0x4711; // TODO(marcus): change to real id
+          node->info.organization_id = 'LYH '; // siemens fcc prefix
           node->info.implementation_version = 0x0003; // implementation version 0.3
           node->info.number_of_domains = 1;
           node->info.number_of_nodes = 1;
