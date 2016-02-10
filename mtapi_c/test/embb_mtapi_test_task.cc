@@ -107,7 +107,7 @@ void TaskTest::TestBasic() {
   mtapi_action_hndl_t action;
   mtapi_job_hndl_t job;
   mtapi_task_hndl_t task[100];
-  int ii;
+  mtapi_uint_t ii;
 
   embb_mtapi_log_info("running testTask...\n");
 
@@ -169,9 +169,9 @@ void TaskTest::TestBasic() {
   job = mtapi_job_get(JOB_TEST_TASK, THIS_DOMAIN_ID, &status);
   MTAPI_CHECK_STATUS(status);
 
-  for (ii = 0; ii < 100; ii++) {
+  for (ii = 0; ii < 100u; ii++) {
     status = MTAPI_ERR_UNKNOWN;
-    int arg = ii;
+    mtapi_uint_t arg = ii;
     task[ii] = mtapi_task_start(
       TASK_TEST_ID,
       job,
@@ -187,7 +187,7 @@ void TaskTest::TestBasic() {
 
   testDoSomethingElse();
 
-  for (ii = 0; ii < 100; ii++) {
+  for (ii = 0; ii < 100u; ii++) {
     status = MTAPI_ERR_UNKNOWN;
     mtapi_task_wait(task[ii], 100000, &status);
     MTAPI_CHECK_STATUS(status);
@@ -227,7 +227,7 @@ void TaskTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   mtapi_uint_t result[kTaskInstances];
-  for (mtapi_uint_t ii = 0; ii < kTaskInstances; ii++) {
+  for (ii = 0; ii < kTaskInstances; ii++) {
     result[ii] = kTaskInstances + 1;
   }
 
@@ -245,7 +245,7 @@ void TaskTest::TestBasic() {
   mtapi_task_wait(multiinstance_task, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
-  for (mtapi_uint_t ii = 0; ii < kTaskInstances; ii++) {
+  for (ii = 0; ii < kTaskInstances; ii++) {
     PT_EXPECT_EQ(result[ii], ii);
   }
 
