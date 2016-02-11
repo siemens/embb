@@ -41,6 +41,9 @@
 mtapi_boolean_t embb_mtapi_job_initialize_list(embb_mtapi_node_t * node) {
   node->job_list = (embb_mtapi_job_t*)embb_mtapi_alloc_allocate(
     sizeof(embb_mtapi_job_t)*(node->attributes.max_jobs + 1));
+  if (NULL == node->job_list) {
+    return MTAPI_FALSE;
+  }
   mtapi_uint_t ii;
   for (ii = 0; ii <= node->attributes.max_jobs; ii++) {
     embb_mtapi_job_initialize(
@@ -112,11 +115,15 @@ void embb_mtapi_job_initialize(
   that->domain_id = 0;
   that->node_id = 0;
   that->num_actions = 0;
-  that->max_actions = max_actions;
   that->actions = (mtapi_action_hndl_t*)
     embb_mtapi_alloc_allocate(sizeof(mtapi_action_hndl_t)*max_actions);
-  for (ii = 0; ii < max_actions; ii++) {
-    that->actions[ii].id = EMBB_MTAPI_IDPOOL_INVALID_ID;
+  if (NULL != that->actions) {
+    that->max_actions = max_actions;
+    for (ii = 0; ii < max_actions; ii++) {
+      that->actions[ii].id = EMBB_MTAPI_IDPOOL_INVALID_ID;
+    }
+  } else {
+    that->max_actions = 0;
   }
 }
 
