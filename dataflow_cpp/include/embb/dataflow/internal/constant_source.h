@@ -35,11 +35,11 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, typename Type>
+template <typename Type>
 class ConstantSource
   : public Node {
  public:
-  typedef Outputs<Slices, Type> OutputsType;
+  typedef Outputs<Type> OutputsType;
 
  private:
   OutputsType outputs_;

@@ -39,7 +39,7 @@
 #define NUM_SLICES 8
 #define TEST_COUNT 12
 
-typedef embb::dataflow::Network<NUM_SLICES> MyNetwork;
+typedef embb::dataflow::Network MyNetwork;
 typedef MyNetwork::ConstantSource< int > MyConstantSource;
 typedef MyNetwork::Source< int > MySource;
 typedef MyNetwork::SerialProcess< MyNetwork::Inputs<int>::Type,
@@ -206,7 +206,7 @@ void SimpleTest::TestBasic() {
     network.AddSource(source);
 
     try {
-      network();
+      network(NUM_SLICES);
     } catch (embb::base::ErrorException & e) {
       PT_ASSERT_MSG(false, e.What());
     }

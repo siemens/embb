@@ -27,7 +27,6 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SELECT_H_
 #define EMBB_DATAFLOW_INTERNAL_SELECT_H_
 
-#include <embb/dataflow/internal/action.h>
 #include <embb/dataflow/internal/signal.h>
 #include <embb/dataflow/internal/node.h>
 #include <embb/dataflow/internal/inputs.h>
@@ -37,13 +36,13 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, typename Type>
+template <typename Type>
 class Select
   : public Node
   , public ClockListener {
  public:
-  typedef Inputs<Slices, bool, Type, Type> InputsType;
-  typedef Outputs<Slices, Type> OutputsType;
+  typedef Inputs<bool, Type, Type> InputsType;
+  typedef Outputs<Type> OutputsType;
 
   Select() {
     inputs_.SetListener(this);
@@ -82,6 +81,8 @@ class Select
   }
 
   virtual void Init(InitData * init_data) {
+    slices_ = init_data->slices;
+    //inputs_.SetSlices(slices_);
     SetScheduler(init_data->sched);
     GetOutput<0>().SendInit(init_data);
   }
@@ -124,7 +125,7 @@ class Select
  private:
   InputsType inputs_;
   OutputsType outputs_;
-  Action action_[Slices];
+  int slices_;
 };
 
 } // namespace internal

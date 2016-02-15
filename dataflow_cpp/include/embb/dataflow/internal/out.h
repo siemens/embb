@@ -37,11 +37,11 @@ namespace internal {
 
 class Scheduler;
 
-template <typename Type, int Slices>
+template <typename Type>
 class Out {
  public:
   typedef Signal<Type> SignalType;
-  typedef In<Type, Slices> InType;
+  typedef In<Type> InType;
 
   Out() {
   }

@@ -35,6 +35,7 @@ class Scheduler;
 class ClockListener;
 
 struct InitData {
+  int slices;
   Scheduler * sched;
   ClockListener * sink_listener;
 };

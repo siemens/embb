@@ -27,7 +27,6 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SWITCH_H_
 #define EMBB_DATAFLOW_INTERNAL_SWITCH_H_
 
-#include <embb/dataflow/internal/action.h>
 #include <embb/dataflow/internal/signal.h>
 #include <embb/dataflow/internal/node.h>
 #include <embb/dataflow/internal/inputs.h>
@@ -37,13 +36,13 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, typename Type>
+template <typename Type>
 class Switch
   : public Node
   , public ClockListener {
  public:
-  typedef Inputs<Slices, bool, Type> InputsType;
-  typedef Outputs<Slices, Type, Type> OutputsType;
+  typedef Inputs<bool, Type> InputsType;
+  typedef Outputs<Type, Type> OutputsType;
 
   Switch() {
     inputs_.SetListener(this);
@@ -79,6 +78,7 @@ class Switch
   }
 
   virtual void Init(InitData * init_data) {
+    //inputs_.SetSlices(init_data->slices);
     SetScheduler(init_data->sched);
     GetOutput<0>().SendInit(init_data);
     GetOutput<1>().SendInit(init_data);
@@ -122,7 +122,6 @@ class Switch
  private:
   InputsType inputs_;
   OutputsType outputs_;
-  Action action_[Slices];
 };
 
 } // namespace internal

@@ -36,16 +36,15 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, class Inputs> class Sink;
+template <class Inputs> class Sink;
 
 template <
-  int Slices,
   typename I1, typename I2, typename I3, typename I4, typename I5>
-class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
+class Sink< Inputs<I1, I2, I3, I4, I5> >
   : public Node
   , public ClockListener {
  public:
-  typedef Inputs<Slices, I1, I2, I3, I4, I5> InputsType;
+  typedef Inputs<I1, I2, I3, I4, I5> InputsType;
   typedef SinkExecutor< InputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
@@ -73,6 +72,13 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
   }
 
   virtual void Init(InitData * init_data) {
+    slices_ = init_data->slices;
+    action_ = reinterpret_cast<Action*>(
+      embb::base::Allocation::Allocate(
+      sizeof(Action)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      action_[ii] = Action();
+    }
     SetListener(init_data->sink_listener);
     SetScheduler(init_data->sched);
     listener_->OnInit(init_data);
@@ -96,7 +102,7 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
     bool retry = true;
     while (retry) {
       int clk = next_clock_;
-      int clk_end = clk + Slices;
+      int clk_end = clk + slices_;
       int clk_res = clk;
       for (int ii = clk; ii < clk_end; ii++) {
         if (!inputs_.AreAtClock(ii)) {
@@ -108,7 +114,7 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
         if (next_clock_.CompareAndSwap(clk, clk_res)) {
           while (queued_clock_.Load() < clk) continue;
           for (int ii = clk; ii < clk_res; ii++) {
-            const int idx = ii % Slices;
+            const int idx = ii % slices_;
             action_[idx] = Action(this, ii);
             sched_->Enqueue(queue_id_, action_[idx]);
           }
@@ -128,11 +134,12 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
  private:
   InputsType inputs_;
   ExecutorType executor_;
-  Action action_[Slices];
+  Action * action_;
   ClockListener * listener_;
   embb::base::Atomic<int> next_clock_;
   embb::base::Atomic<int> queued_clock_;
   int queue_id_;
+  int slices_;
 };
 
 } // namespace internal

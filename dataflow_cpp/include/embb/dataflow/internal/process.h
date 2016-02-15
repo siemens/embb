@@ -37,24 +37,25 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, bool Serial, class INPUTS, class OUTPUTS> class Process;
+template <bool Serial, class INPUTS, class OUTPUTS> class Process;
 
 template <
-  int Slices, bool Serial,
+  bool Serial,
   typename I1, typename I2, typename I3, typename I4, typename I5,
   typename O1, typename O2, typename O3, typename O4, typename O5>
-class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
-  Outputs<Slices, O1, O2, O3, O4, O5> >
+class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
+  Outputs<O1, O2, O3, O4, O5> >
   : public Node
   , public ClockListener {
  public:
-  typedef Inputs<Slices, I1, I2, I3, I4, I5> InputsType;
-  typedef Outputs<Slices, O1, O2, O3, O4, O5> OutputsType;
+  typedef Inputs<I1, I2, I3, I4, I5> InputsType;
+  typedef Outputs<O1, O2, O3, O4, O5> OutputsType;
   typedef ProcessExecutor< InputsType, OutputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
   explicit Process(FunctionType function)
-    : executor_(function) {
+    : executor_(function)
+    , slices_(0) {
     next_clock_ = 0;
     queued_clock_ = 0;
     bool ordered = Serial;
@@ -79,6 +80,14 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
   }
 
   virtual void Init(InitData * init_data) {
+    slices_ = init_data->slices;
+    //inputs_.SetSlices(init_data->slices);
+    action_ = reinterpret_cast<Action*>(
+      embb::base::Allocation::Allocate(
+      sizeof(Action)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      action_[ii] = Action();
+    }
     SetScheduler(init_data->sched);
     executor_.Init(init_data, outputs_);
   }
@@ -117,7 +126,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
       bool retry = true;
       while (retry) {
         int clk = next_clock_;
-        int clk_end = clk + Slices;
+        int clk_end = clk + slices_;
         int clk_res = clk;
         for (int ii = clk; ii < clk_end; ii++) {
           if (!inputs_.AreAtClock(ii)) {
@@ -129,7 +138,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
           if (next_clock_.CompareAndSwap(clk, clk_res)) {
             while (queued_clock_.Load() < clk) continue;
             for (int ii = clk; ii < clk_res; ii++) {
-              const int idx = ii % Slices;
+              const int idx = ii % slices_;
               action_[idx] = Action(this, ii);
               sched_->Enqueue(queue_id_, action_[idx]);
             }
@@ -141,7 +150,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
         }
       }
     } else {
-      const int idx = clock % Slices;
+      const int idx = clock % slices_;
       action_[idx] = Action(this, clock);
       sched_->Spawn(action_[idx]);
     }
@@ -155,10 +164,11 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
   InputsType inputs_;
   OutputsType outputs_;
   ExecutorType executor_;
-  Action action_[Slices];
+  Action * action_;
   embb::base::Atomic<int> next_clock_;
   embb::base::Atomic<int> queued_clock_;
   int queue_id_;
+  int slices_;
 };
 
 } // namespace internal

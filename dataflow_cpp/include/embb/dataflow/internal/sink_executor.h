@@ -38,8 +38,8 @@ namespace internal {
 template <class Inputs>
 class SinkExecutor;
 
-template <int Slices, typename I1>
-class SinkExecutor< Inputs<Slices, I1> > {
+template <typename I1>
+class SinkExecutor< Inputs<I1> > {
  public:
   typedef embb::base::Function<void, I1 const &> FunctionType;
 
@@ -47,7 +47,7 @@ class SinkExecutor< Inputs<Slices, I1> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1> & inputs) {
+    Inputs<I1> & inputs) {
     function_(
       inputs.template Get<0>().GetValue(clock));
   }
@@ -56,8 +56,8 @@ class SinkExecutor< Inputs<Slices, I1> > {
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2>
-class SinkExecutor< Inputs<Slices, I1, I2> > {
+template <typename I1, typename I2>
+class SinkExecutor< Inputs<I1, I2> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &> FunctionType;
 
@@ -65,7 +65,7 @@ class SinkExecutor< Inputs<Slices, I1, I2> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2> & inputs) {
+    Inputs<I1, I2> & inputs) {
     function_(
       inputs.template Get<0>().GetValue(clock),
       inputs.template Get<1>().GetValue(clock));
@@ -75,8 +75,8 @@ class SinkExecutor< Inputs<Slices, I1, I2> > {
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename I3>
-class SinkExecutor< Inputs<Slices, I1, I2, I3> > {
+template <typename I1, typename I2, typename I3>
+class SinkExecutor< Inputs<I1, I2, I3> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, I3 const &>
     FunctionType;
@@ -85,7 +85,7 @@ class SinkExecutor< Inputs<Slices, I1, I2, I3> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2, I3> & inputs) {
+    Inputs<I1, I2, I3> & inputs) {
     function_(
       inputs.template Get<0>().GetValue(clock),
       inputs.template Get<1>().GetValue(clock),
@@ -96,8 +96,8 @@ class SinkExecutor< Inputs<Slices, I1, I2, I3> > {
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename I3, typename I4>
-class SinkExecutor< Inputs<Slices, I1, I2, I3, I4> > {
+template <typename I1, typename I2, typename I3, typename I4>
+class SinkExecutor< Inputs<I1, I2, I3, I4> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, I3 const &,
     I4 const &> FunctionType;
@@ -106,7 +106,7 @@ class SinkExecutor< Inputs<Slices, I1, I2, I3, I4> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2, I3, I4> & inputs) {
+    Inputs<I1, I2, I3, I4> & inputs) {
     function_(
       inputs.template Get<0>().GetValue(clock),
       inputs.template Get<1>().GetValue(clock),
@@ -118,9 +118,9 @@ class SinkExecutor< Inputs<Slices, I1, I2, I3, I4> > {
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename I3, typename I4,
+template <typename I1, typename I2, typename I3, typename I4,
   typename I5>
-class SinkExecutor< Inputs<Slices, I1, I2, I3, I4, I5> > {
+class SinkExecutor< Inputs<I1, I2, I3, I4, I5> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, I3 const &,
     I4 const &, I5 const &> FunctionType;
@@ -129,7 +129,7 @@ class SinkExecutor< Inputs<Slices, I1, I2, I3, I4, I5> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2, I3, I4, I5> & inputs) {
+    Inputs<I1, I2, I3, I4, I5> & inputs) {
     function_(
       inputs.template Get<0>().GetValue(clock),
       inputs.template Get<1>().GetValue(clock),

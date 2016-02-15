@@ -41,18 +41,18 @@ namespace internal {
 
 class Scheduler;
 
-template <typename, int>
+template <typename>
 class Out;
 
-template <typename Type, int Slices>
+template <typename Type>
 class In {
  public:
   typedef Signal<Type> SignalType;
 
-  In() : connected_(false) {}
+  In() : values_(NULL), connected_(false), slices_(0) {}
 
   SignalType const & GetSignal(int clock) const {
-    return values_[clock % Slices];
+    return values_[clock % slices_];
   }
 
   Type GetValue(int clock) const {
@@ -66,26 +66,37 @@ class In {
   bool IsConnected() const { return connected_; }
   void SetConnected() { connected_ = true; }
 
+  void SetSlices(int slices) {
+    slices_ = slices;
+    values_ = reinterpret_cast<SignalType*>(
+      embb::base::Allocation::Allocate(
+      sizeof(SignalType)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      values_[ii] = SignalType();
+    }
+  }
+
   void SetListener(ClockListener * listener) { listener_ = listener; }
 
   void Clear(int clock) {
-    const int idx = clock % Slices;
+    const int idx = clock % slices_;
     values_[idx].Clear();
   }
 
-  friend class Out<Type, Slices>;
+  friend class Out<Type>;
 
  private:
-  SignalType values_[Slices];
+  SignalType * values_;
   ClockListener * listener_;
   bool connected_;
+  int slices_;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
   embb::base::Spinlock lock_;
   std::vector<SignalType> history_;
 #endif
 
   void Receive(SignalType const & value) {
-    const int idx = value.GetClock() % Slices;
+    const int idx = value.GetClock() % slices_;
     if (values_[idx].GetClock() >= value.GetClock())
       EMBB_THROW(embb::base::ErrorException,
         "Received signal does not increase clock.");
@@ -99,6 +110,7 @@ class In {
   }
 
   void ReceiveInit(InitData * init_data) {
+    SetSlices(init_data->slices);
     listener_->OnInit(init_data);
   }
 };

@@ -36,7 +36,6 @@ namespace dataflow {
 namespace internal {
 
 template <
-  int,
   typename = embb::base::internal::Nil,
   typename = embb::base::internal::Nil,
   typename = embb::base::internal::Nil,
@@ -44,8 +43,8 @@ template <
   typename = embb::base::internal::Nil>
 class Inputs;
 
-template <int Slices>
-class Inputs<Slices, embb::base::internal::Nil, embb::base::internal::Nil,
+template <>
+class Inputs<embb::base::internal::Nil, embb::base::internal::Nil,
   embb::base::internal::Nil, embb::base::internal::Nil,
   embb::base::internal::Nil>
   : public Tuple<embb::base::internal::Nil, embb::base::internal::Nil,
@@ -60,17 +59,15 @@ class Inputs<Slices, embb::base::internal::Nil, embb::base::internal::Nil,
   virtual void OnInit(InitData * /*init_data*/) {}
 };
 
-template <int Slices, typename T1>
-class Inputs<Slices, T1, embb::base::internal::Nil, embb::base::internal::Nil,
+template <typename T1>
+class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
   embb::base::internal::Nil, embb::base::internal::Nil>
-  : public Tuple<In<T1, Slices>, embb::base::internal::Nil,
+  : public Tuple<In<T1>, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil>
   , public ClockListener {
  public:
   Inputs() {
-    for (int ii = 0; ii < Slices; ii++)
-      count_[ii] = 1;
     test_count_ = 1;
   }
   void SetListener(ClockListener * listener) {
@@ -89,7 +86,7 @@ class Inputs<Slices, T1, embb::base::internal::Nil, embb::base::internal::Nil,
     this->template Get<0>().Clear(clock);
   }
   virtual void OnClock(int clock) {
-    const int idx = clock % Slices;
+    const int idx = clock % slices_;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
         "All inputs already fired for this clock.");
@@ -101,25 +98,31 @@ class Inputs<Slices, T1, embb::base::internal::Nil, embb::base::internal::Nil,
   }
   virtual void OnInit(InitData * init_data) {
     if (--test_count_ == 0) {
+      slices_ = init_data->slices;
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 1;
+      }
       listener_->OnInit(init_data);
     }
   }
  private:
-  embb::base::Atomic<int> count_[Slices];
+  embb::base::Atomic<int> * count_;
   int test_count_;
   ClockListener * listener_;
+  int slices_;
 };
 
-template <int Slices, typename T1, typename T2>
-class Inputs<Slices, T1, T2, embb::base::internal::Nil,
+template <typename T1, typename T2>
+class Inputs<T1, T2, embb::base::internal::Nil,
   embb::base::internal::Nil, embb::base::internal::Nil>
-  : public Tuple<In<T1, Slices>, In<T2, Slices>, embb::base::internal::Nil,
+  : public Tuple<In<T1>, In<T2>, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
   Inputs() {
-    for (int ii = 0; ii < Slices; ii++)
-      count_[ii] = 2;
     test_count_ = 2;
   }
   void SetListener(ClockListener * listener) {
@@ -142,7 +145,7 @@ class Inputs<Slices, T1, T2, embb::base::internal::Nil,
     this->template Get<1>().Clear(clock);
   }
   virtual void OnClock(int clock) {
-    const int idx = clock % Slices;
+    const int idx = clock % slices_;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
         "All inputs already fired for this clock.");
@@ -154,25 +157,31 @@ class Inputs<Slices, T1, T2, embb::base::internal::Nil,
   }
   virtual void OnInit(InitData * init_data) {
     if (--test_count_ == 0) {
+      slices_ = init_data->slices;
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 2;
+      }
       listener_->OnInit(init_data);
     }
   }
  private:
-  embb::base::Atomic<int> count_[Slices];
+  embb::base::Atomic<int> * count_;
   int test_count_;
   ClockListener * listener_;
+  int slices_;
 };
 
-template <int Slices, typename T1, typename T2, typename T3>
-class Inputs<Slices, T1, T2, T3, embb::base::internal::Nil,
+template <typename T1, typename T2, typename T3>
+class Inputs<T1, T2, T3, embb::base::internal::Nil,
   embb::base::internal::Nil>
-  : public Tuple<In<T1, Slices>, In<T2, Slices>, In<T3, Slices>,
+  : public Tuple<In<T1>, In<T2>, In<T3>,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
   Inputs() {
-    for (int ii = 0; ii < Slices; ii++)
-      count_[ii] = 3;
     test_count_ = 3;
   }
   void SetListener(ClockListener * listener) {
@@ -199,7 +208,7 @@ class Inputs<Slices, T1, T2, T3, embb::base::internal::Nil,
     this->template Get<2>().Clear(clock);
   }
   virtual void OnClock(int clock) {
-    const int idx = clock % Slices;
+    const int idx = clock % slices_;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
         "All inputs already fired for this clock.");
@@ -211,24 +220,30 @@ class Inputs<Slices, T1, T2, T3, embb::base::internal::Nil,
   }
   virtual void OnInit(InitData * init_data) {
     if (--test_count_ == 0) {
+      slices_ = init_data->slices;
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 3;
+      }
       listener_->OnInit(init_data);
     }
   }
  private:
-  embb::base::Atomic<int> count_[Slices];
+  embb::base::Atomic<int> * count_;
   int test_count_;
   ClockListener * listener_;
+  int slices_;
 };
 
-template <int Slices, typename T1, typename T2, typename T3, typename T4>
-class Inputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
-  : public Tuple<In<T1, Slices>, In<T2, Slices>, In<T3, Slices>,
-      In<T4, Slices>, embb::base::internal::Nil>
+template <typename T1, typename T2, typename T3, typename T4>
+class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
+  : public Tuple<In<T1>, In<T2>, In<T3>,
+      In<T4>, embb::base::internal::Nil>
   , public ClockListener {
  public:
   Inputs() {
-    for (int ii = 0; ii < Slices; ii++)
-      count_[ii] = 4;
     test_count_ = 4;
   }
   void SetListener(ClockListener * listener) {
@@ -259,7 +274,7 @@ class Inputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
     this->template Get<3>().Clear(clock);
   }
   virtual void OnClock(int clock) {
-    const int idx = clock % Slices;
+    const int idx = clock % slices_;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
         "All inputs already fired for this clock.");
@@ -271,25 +286,31 @@ class Inputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
   }
   virtual void OnInit(InitData * init_data) {
     if (--test_count_ == 0) {
+      slices_ = init_data->slices;
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 4;
+      }
       listener_->OnInit(init_data);
     }
   }
  private:
-  embb::base::Atomic<int> count_[Slices];
+  embb::base::Atomic<int> * count_;
   int test_count_;
   ClockListener * listener_;
+  int slices_;
 };
 
-template <int Slices, typename T1, typename T2, typename T3, typename T4,
+template <typename T1, typename T2, typename T3, typename T4,
   typename T5>
 class Inputs
-  : public Tuple<In<T1, Slices>, In<T2, Slices>, In<T3, Slices>,
-      In<T4, Slices>, In<T5, Slices> >
+  : public Tuple<In<T1>, In<T2>, In<T3>,
+      In<T4>, In<T5> >
   , public ClockListener {
  public:
   Inputs() {
-    for (int ii = 0; ii < Slices; ii++)
-      count_[ii] = 5;
     test_count_ = 5;
   }
   void SetListener(ClockListener * listener) {
@@ -324,7 +345,7 @@ class Inputs
     this->template Get<4>().Clear(clock);
   }
   virtual void OnClock(int clock) {
-    const int idx = clock % Slices;
+    const int idx = clock % slices_;
     if (count_[idx] == 0) {
       EMBB_THROW(embb::base::ErrorException,
         "All inputs already fired for this clock.");
@@ -336,13 +357,21 @@ class Inputs
   }
   virtual void OnInit(InitData * init_data) {
     if (--test_count_ == 0) {
+      slices_ = init_data->slices;
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 5;
+      }
       listener_->OnInit(init_data);
     }
   }
  private:
-  embb::base::Atomic<int> count_[Slices];
+  embb::base::Atomic<int> * count_;
   int test_count_;
   ClockListener * listener_;
+  int slices_;
 };
 
 } // namespace internal

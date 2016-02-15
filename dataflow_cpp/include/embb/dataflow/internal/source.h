@@ -35,15 +35,14 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, class Outputs> class Source;
+template <class Outputs> class Source;
 
 template <
-  int Slices,
   typename O1, typename O2, typename O3, typename O4, typename O5>
-class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
+class Source< Outputs<O1, O2, O3, O4, O5> >
   : public Node {
  public:
-  typedef Outputs<Slices, O1, O2, O3, O4, O5> OutputsType;
+  typedef Outputs<O1, O2, O3, O4, O5> OutputsType;
   typedef SourceExecutor< OutputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
