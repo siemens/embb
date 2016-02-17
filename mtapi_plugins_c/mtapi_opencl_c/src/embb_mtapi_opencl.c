@@ -184,7 +184,8 @@ static void opencl_task_start(
 
         err = clEnqueueWriteBuffer(plugin->command_queue,
           opencl_task->arguments, CL_FALSE, 0,
-          (size_t)opencl_task->arguments_size, local_task->arguments, 0, NULL, NULL);
+          (size_t)opencl_task->arguments_size, local_task->arguments,
+          0, NULL, NULL);
         err = clEnqueueNDRangeKernel(plugin->command_queue,
           opencl_action->kernel, 1, NULL,
           &global_work_size, &opencl_action->local_work_size, 0, NULL, NULL);
