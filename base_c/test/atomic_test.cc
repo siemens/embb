@@ -24,9 +24,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_BASE_C_INTERNAL_ATOMIC_INIT_H_
-#define EMBB_BASE_C_INTERNAL_ATOMIC_INIT_H_
+#include <atomic_test.h>
+#include <embb/base/c/atomic.h>
 
-// TODO implementation of embb_atomic_init()
+namespace embb {
+namespace base {
+namespace test {
 
-#endif // EMBB_BASE_C_INTERNAL_ATOMIC_INIT_H_
+AtomicTest::AtomicTest() {
+  CreateUnit("Initialization and destroy").Add(&AtomicTest::TestInitDestroy, this);
+  CreateUnit("AndAssign").Add(&AtomicTest::TestAndAssign, this);
+  CreateUnit("Load").Add(&AtomicTest::TestLoad, this);
+}
+
+void AtomicTest::TestInitDestroy() {
+  embb_atomic_int var;
+  embb_atomic_init_int(&var, 1);
+  PT_EXPECT_EQ(var.internal_variable, 1);
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  PT_EXPECT_EQ(var.init_flag, EMBB_ATOMIC_INTERNAL_INITIALIZED_VALUE);
+#endif
+
+  embb_atomic_destroy_int(&var);
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  PT_EXPECT_NE(var.init_flag, EMBB_ATOMIC_INTERNAL_INITIALIZED_VALUE);
+#endif
+}
+
+void AtomicTest::TestAndAssign() {
+  embb_atomic_int var;
+  embb_atomic_init_int(&var, 1);
+  embb_atomic_and_assign_int(&var, 2);
+  PT_EXPECT_EQ(var.internal_variable, 3);
+  embb_atomic_destroy_int(&var);
+}
+
+void AtomicTest::TestLoad() {
+  embb_atomic_int var;
+  embb_atomic_init_int(&var, 1);
+  int value = embb_atomic_load_int(&var);
+  PT_EXPECT_EQ(value, 1);
+}
+
+} // namespace test
+} // namespace base
+} // namespace embb

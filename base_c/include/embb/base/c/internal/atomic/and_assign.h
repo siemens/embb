@@ -53,6 +53,20 @@
  * BYTE_SIZE is the number of bytes passed to the macro.
  *
  */
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+
+#define EMBB_ATOMIC_INTERNAL_DEFINE_AND_ASSIGN_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
+  EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_atomic_and_assign_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
+      EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, \
+      EMBB_ATOMIC_PARAMETER_TYPE_NATIVE value) { \
+    embb_atomic_internal_check_init_flag(variable->init_flag); \
+    embb_mutex_lock(&(variable->mutex)); \
+    variable->internal_variable |= value; \
+    embb_mutex_unlock(&(variable->mutex)); \
+  }
+
+#else // EMBB_THREADING_ANALYSIS_MODE
+
 #ifdef EMBB_PLATFORM_ARCH_X86
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
@@ -155,6 +169,8 @@ EMBB_DEFINE_AND_ASSIGN(4, "")
   EMBB_CAT2(embb_internal__atomic_and_assign_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)((EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) \
   (&(variable->internal_variable)), value_pun); \
   }
+
+#endif // else EMBB_THREADING_ANALYSIS_MODE
 
 #undef EMBB_ATOMIC_METHOD_TO_GENERATE
 #define EMBB_ATOMIC_METHOD_TO_GENERATE AND_ASSIGN_METHOD

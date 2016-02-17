@@ -35,6 +35,23 @@
 #include <embb/base/c/internal/atomic/atomic_variables.h>
 #include <string.h>
 
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+
+/**
+ * This macro is used to generate the load function for all atomic types
+ */
+#define EMBB_ATOMIC_INTERNAL_DEFINE_LOAD_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
+  EMBB_PLATFORM_INLINE EMBB_ATOMIC_PARAMETER_TYPE_NATIVE EMBB_CAT2(embb_atomic_load_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
+      const EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable) { \
+    embb_atomic_internal_check_init_flag(variable->init_flag); \
+    embb_mutex_lock((embb_mutex_t*)&(variable->mutex)); \
+    EMBB_ATOMIC_PARAMETER_TYPE_NATIVE return_value = variable->internal_variable; \
+    embb_mutex_unlock((embb_mutex_t*)&(variable->mutex)); \
+  return return_value; \
+  }
+
+#else // EMBB_THREADING_ANALYSIS_MODE
+
 /*
 * See file and_assign.h for a detailed (and operation independent) description
 * of the following macro.
@@ -127,6 +144,8 @@ EMBB_DEFINE_LOAD(4, "")
   memcpy(&return_val_pun, &return_val, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE)); \
   return return_val_pun; \
   }
+
+#endif // else EMBB_THREADING_ANALYSIS_MODE
 
 #undef EMBB_ATOMIC_METHOD_TO_GENERATE
 #define EMBB_ATOMIC_METHOD_TO_GENERATE LOAD_METHOD

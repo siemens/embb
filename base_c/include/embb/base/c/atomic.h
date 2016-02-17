@@ -92,7 +92,9 @@
  *       atomic operations.
  *
  * \ingroup C_BASE_ATOMIC
- * \notthreadsafe
+ * \notthreadsafe No thread safety is given with respect to multiple calls of
+ *                the method itself or to concurrent calls with other
+ *                embb_atomic methods.
  */
 void embb_atomic_init_TYPE(
   emb_atomic_TYPE* variable,
@@ -108,7 +110,9 @@ void embb_atomic_init_TYPE(
  * \post The atomic variable is uninitialized.
  *
  * \ingroup C_BASE_ATOMIC
- * \notthreadsafe
+ * \notthreadsafe No thread safety is given with respect to multiple calls of
+ *                the method itself or to concurrent calls with other
+ *                embb_atomic methods.
  */
 void embb_atomic_destroy_TYPE(
   emb_atomic_TYPE* variable

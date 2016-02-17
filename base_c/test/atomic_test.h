@@ -24,53 +24,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef BASE_C_TEST_ATOMIC_TEST_H_
+#define BASE_C_TEST_ATOMIC_TEST_H_
+
 #include <partest/partest.h>
-#include <atomic_test.h>
-#include <alloc_test.h>
-#include <duration_test.h>
-#include <time_test.h>
-#include <counter_test.h>
-#include <mutex_test.h>
-#include <thread_index_test.h>
-#include <core_set_test.h>
-#include <condition_var_test.h>
-#include <thread_test.h>
-#include <thread_specific_storage_test.h>
-#include <embb/base/c/thread.h>
-#include <embb/base/c/log.h>
-#include <iostream>
 
-#include <embb/base/c/memory_allocation.h>
+namespace embb {
+namespace base {
+namespace test {
 
-using embb::base::test::AtomicTest;
-using embb::base::test::AllocTest;
-using embb::base::test::DurationTest;
-using embb::base::test::TimeTest;
-using embb::base::test::CounterTest;
-using embb::base::test::MutexTest;
-using embb::base::test::ThreadIndexTest;
-using embb::base::test::CoreSetTest;
-using embb::base::test::ConditionVarTest;
-using embb::base::test::ThreadTest;
-using embb::base::test::ThreadSpecificStorageTest;
+class AtomicTest : public partest::TestCase {
+ public:
+  /**
+   * Adds test methods.
+   */
+	AtomicTest();
 
-PT_MAIN("Base C") {
-  embb_log_set_log_level(EMBB_LOG_LEVEL_WARNING);
-  unsigned int max_threads =
-      static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
-  embb_thread_set_max_count(max_threads);
+ private:
+  /**
+   * Tests init and destroy methods.
+   */
+  void TestInitDestroy();
 
-  PT_RUN(AtomicTest);
-  PT_RUN(AllocTest);
-  PT_RUN(DurationTest);
-  PT_RUN(TimeTest);
-  PT_RUN(CounterTest);
-  PT_RUN(MutexTest);
-  PT_RUN(ThreadIndexTest);
-  PT_RUN(CoreSetTest);
-  PT_RUN(ConditionVarTest);
-  PT_RUN(ThreadTest);
-  PT_RUN(ThreadSpecificStorageTest);
+  /**
+   * Tests and_assign method.
+   */
+  void TestAndAssign();
 
-  PT_EXPECT(embb_get_bytes_allocated() == 0);
-}
+  /**
+   * Tests load method.
+   */
+  void TestLoad();
+};
+
+} // namespace test
+} // namespace base
+} // namespace embb
+
+
+
+#endif // BASE_C_TEST_ATOMIC_TEST_H_
