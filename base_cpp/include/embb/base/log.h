@@ -92,8 +92,8 @@ class Log {
     embb_log_level_t log_level,          /**< [in] Log level to use */
     char const * message,                /**< [in] Message to convey, may use
                                               \c printf style formatting */
-    ...                                  /**< Additional parameters determined by
-                                              the format specifiers in
+    ...                                  /**< Additional parameters determined
+                                              by the format specifiers in
                                               \c message */
   );
 
@@ -107,8 +107,8 @@ class Log {
     char const * channel,                /**< [in] User specified channel id */
     char const * message,                /**< [in] Message to convey, may use
                                               \c printf style formatting */
-    ...                                  /**< Additional parameters determined by
-                                              the format specifiers in
+    ...                                  /**< Additional parameters determined
+                                              by the format specifiers in
                                               \c message */
   );
 
@@ -122,8 +122,8 @@ class Log {
     char const * channel,                /**< [in] User specified channel id */
     char const * message,                /**< [in] Message to convey, may use
                                               \c printf style formatting */
-    ...                                  /**< Additional parameters determined by
-                                              the format specifiers in
+    ...                                  /**< Additional parameters determined
+                                              by the format specifiers in
                                               \c message */
   );
 
@@ -136,8 +136,8 @@ class Log {
     char const * channel,                /**< [in] User specified channel id */
     char const * message,                /**< [in] Message to convey, may use
                                               \c printf style formatting */
-    ...                                  /**< Additional parameters determined by
-                                              the format specifiers in
+    ...                                  /**< Additional parameters determined
+                                              by the format specifiers in
                                               \c message */
   );
 
@@ -150,14 +150,13 @@ class Log {
     char const * channel,                /**< [in] User specified channel id */
     char const * message,                /**< [in] Message to convey, may use
                                               \c printf style formatting */
-    ...                                  /**< Additional parameters determined by
-                                              the format specifiers in
+    ...                                  /**< Additional parameters determined
+                                              by the format specifiers in
                                               \c message */
   );
-
 };
 
 } // namespace base
 } // namespace embb
 
-#endif /* EMBB_BASE_LOG_H_ */ 
+#endif // EMBB_BASE_LOG_H_
