@@ -68,7 +68,6 @@ class Log {
    * additional data is needed). The default logging function is
    * embb_log_write_file() with context set to \c stdout.
    * \see embb_log_function_t
-   * \ingroup C_LOG
    * \notthreadsafe
    */
   static void SetLogFunction(
