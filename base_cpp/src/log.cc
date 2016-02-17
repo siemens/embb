@@ -28,6 +28,7 @@
 #include <embb/base/c/internal/unused.h>
 
 #include <cstdarg>
+#include <cstring>
 
 extern "C" void embb_log_write_internal(
   char const * channel,
