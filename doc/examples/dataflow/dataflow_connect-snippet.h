@@ -1,2 +1,1 @@
-  read >> replace;
-  replace >> write;
+  read >> replace >> write;
