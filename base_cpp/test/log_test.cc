@@ -28,6 +28,8 @@
 #include <embb/base/c/internal/unused.h>
 #include <embb/base/log.h>
 
+#include <cstring>
+
 namespace embb {
 namespace base {
 namespace test {
