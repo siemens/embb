@@ -169,7 +169,7 @@ void HazardPointerTest::HazardPointerTest1ThreadMethod() {
         same = true;
         break;
       }
-      bool success = stack_->TryPush(allocated_object_from_different_thread);
+      success = stack_->TryPush(allocated_object_from_different_thread);
       PT_ASSERT(success == true);
     }
     PT_ASSERT(success_pop == true);
