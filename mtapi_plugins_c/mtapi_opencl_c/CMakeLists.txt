@@ -26,17 +26,17 @@ GroupSourcesMSVC(test)
 
 set (EMBB_MTAPI_OPENCL_INCLUDE_DIRS "include" "src" "test")
 include_directories(${EMBB_MTAPI_OPENCL_INCLUDE_DIRS}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/../base_c/include
-                    ${CMAKE_CURRENT_BINARY_DIR}/../base_c/include
-                    ${CMAKE_CURRENT_SOURCE_DIR}/../mtapi_c/include
-                    ${CMAKE_CURRENT_SOURCE_DIR}/../mtapi_c/src
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../../base_c/include
+                    ${CMAKE_CURRENT_BINARY_DIR}/../../base_c/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_c/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_c/src
                     )
 
 add_library(embb_mtapi_opencl_c ${EMBB_MTAPI_OPENCL_C_SOURCES} ${EMBB_MTAPI_OPENCL_C_HEADERS})
 target_link_libraries(embb_mtapi_opencl_c embb_mtapi_c embb_base_c)
 
 if (BUILD_TESTS STREQUAL ON)
-  include_directories(${CMAKE_CURRENT_BINARY_DIR}/../partest/include)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/../../partest/include)
   add_executable (embb_mtapi_opencl_c_test ${EMBB_MTAPI_OPENCL_TEST_SOURCES})
   target_link_libraries(embb_mtapi_opencl_c_test embb_mtapi_opencl_c embb_mtapi_c partest embb_base_c ${compiler_libs} ${EMBB_MTAPI_OPENCL_C_LIBS})
   CopyBin(BIN embb_mtapi_opencl_c_test DEST ${local_install_dir})

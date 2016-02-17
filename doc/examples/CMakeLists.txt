@@ -12,7 +12,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/../../base_cpp/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_c/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_c/src
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_network_c/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_plugins_c/mtapi_network_c/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_cpp/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../tasks_cpp/include
   ${CMAKE_CURRENT_BINARY_DIR}/../../tasks_cpp/include
@@ -26,7 +26,7 @@ if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   add_definitions(-DEMBB_WITH_OPENCL)
   # add opencl includes
   include_directories( 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_opencl_c/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../mtapi_plugins_c/mtapi_opencl_c/include
   )
   # later used, to link opencl to target...
   set (EMBB_MTAPI_OPENCL_C_CONDITIONAL "embb_mtapi_opencl_c")
