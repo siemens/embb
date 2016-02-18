@@ -210,7 +210,7 @@ void HazardPointerTest2::DeletePointerCallback(int* to_delete) {
 }
 
 bool HazardPointerTest2::SetRelativeGuards() {
-  unsigned int thread_index;
+  unsigned int thread_index = 0;
   int result = embb_internal_thread_index(&thread_index);
   PT_ASSERT(EMBB_SUCCESS == result);
 
@@ -451,7 +451,7 @@ void HazardPointerTest2::HazardPointerTest2Post() {
 
 void HazardPointerTest2::HazardPointerTest2ThreadMethod() {
   for (;;) {
-    unsigned int thread_index;
+    unsigned int thread_index = 0;
     int result = embb_internal_thread_index(&thread_index);
     PT_ASSERT(EMBB_SUCCESS == result);
 
