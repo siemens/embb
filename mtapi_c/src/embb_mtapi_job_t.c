@@ -166,7 +166,7 @@ void embb_mtapi_job_remove_action(
   embb_mtapi_action_t * action) {
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != action);
-  mtapi_uint_t ii = 0;
+  mtapi_uint_t ii;
 
   for (ii = 0; ii + 1 < that->num_actions; ii++) {
     if (that->actions[ii].id == action->handle.id &&

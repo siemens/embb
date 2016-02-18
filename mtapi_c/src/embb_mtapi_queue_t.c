@@ -325,7 +325,7 @@ mtapi_queue_hndl_t mtapi_queue_get(
 
   if (embb_mtapi_node_is_initialized()) {
     embb_mtapi_node_t* node = embb_mtapi_node_get_instance();
-    mtapi_uint_t ii = 0;
+    mtapi_uint_t ii;
 
     local_status = MTAPI_ERR_QUEUE_INVALID;
     for (ii = 0; ii < node->attributes.max_queues; ii++) {

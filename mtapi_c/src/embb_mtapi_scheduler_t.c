@@ -78,8 +78,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_vhpf(
   embb_mtapi_node_t * node,
   embb_mtapi_thread_context_t * thread_context) {
   embb_mtapi_task_t * task = MTAPI_NULL;
-  mtapi_uint_t ii = 0;
-  mtapi_uint_t kk = 0;
+  mtapi_uint_t ii;
 
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != node);
@@ -102,6 +101,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_vhpf(
         */
         mtapi_uint_t context_index =
           (thread_context->worker_index + 1) % that->worker_count;
+        mtapi_uint_t kk;
         for (kk = 0;
           kk < that->worker_count - 1 && MTAPI_NULL == task;
           kk++) {
@@ -121,8 +121,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_lf(
   embb_mtapi_node_t * node,
   embb_mtapi_thread_context_t * thread_context) {
   embb_mtapi_task_t * task = MTAPI_NULL;
-  mtapi_uint_t prio = 0;
-  mtapi_uint_t kk = 0;
+  mtapi_uint_t prio;
 
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != node);
@@ -153,6 +152,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_lf(
     prio++) {
     mtapi_uint_t context_index =
       (thread_context->worker_index + 1) % that->worker_count;
+    mtapi_uint_t kk;
     for (kk = 0;
       kk < that->worker_count - 1 && MTAPI_NULL == task;
       kk++) {
@@ -195,7 +195,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task(
 
 embb_mtapi_thread_context_t * embb_mtapi_scheduler_get_current_thread_context(
   embb_mtapi_scheduler_t * that) {
-  mtapi_uint_t ii = 0;
+  mtapi_uint_t ii;
   embb_mtapi_thread_context_t * context = NULL;
 
   assert(MTAPI_NULL != that);
@@ -433,7 +433,7 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
   embb_mtapi_scheduler_t * that,
   embb_mtapi_scheduler_mode_t mode) {
   embb_mtapi_node_t* node = embb_mtapi_node_get_instance();
-  mtapi_uint_t ii = 0;
+  mtapi_uint_t ii;
 
   embb_mtapi_log_trace("embb_mtapi_scheduler_initialize() called\n");
 
@@ -480,7 +480,7 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
 }
 
 void embb_mtapi_scheduler_finalize(embb_mtapi_scheduler_t * that) {
-  mtapi_uint_t ii = 0;
+  mtapi_uint_t ii;
   embb_mtapi_log_trace("embb_mtapi_scheduler_finalize() called\n");
 
   assert(MTAPI_NULL != that);
