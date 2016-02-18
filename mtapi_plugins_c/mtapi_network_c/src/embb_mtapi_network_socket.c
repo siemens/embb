@@ -73,8 +73,7 @@ int embb_mtapi_network_socket_bind_and_listen(
   struct sockaddr_in in_addr;
   int reuseaddr_on = 1;
 
-  // addr reuse
-  if (SOCKET_ERROR == setsockopt(that->handle, SOL_SOCKET, SO_REUSEADDR,
+  if (SOCKET_ERROR == setsockopt(that->handle, SOL_SOCKET, 0,
     (const char *)&reuseaddr_on, sizeof(reuseaddr_on))) {
     return 0;
   }
