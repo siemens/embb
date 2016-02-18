@@ -49,10 +49,14 @@ int embb_duration_set_nanoseconds(embb_duration_t* duration,
   assert(duration != NULL);
   if (nanoseconds > 0) {
     if (embb_duration_min()->nanoseconds > nanoseconds) {
+      duration->seconds = 0;
+      duration->nanoseconds = 0;
       return EMBB_UNDERFLOW;
     }
     const embb_duration_t* max = embb_duration_max();
     if (max->seconds * 1000000000 + max->nanoseconds < nanoseconds) {
+      duration->seconds = max->seconds;
+      duration->nanoseconds = max->nanoseconds;
       return EMBB_OVERFLOW;
     }
   }
@@ -66,10 +70,14 @@ int embb_duration_set_microseconds(embb_duration_t* duration,
   assert(duration != NULL);
   if (microseconds > 0) {
     if (embb_duration_min()->nanoseconds > microseconds*1000) {
+      duration->seconds = 0;
+      duration->nanoseconds = 0;
       return EMBB_UNDERFLOW;
     }
     const embb_duration_t* max = embb_duration_max();
     if (max->seconds * 1000000 + max->nanoseconds / 1000 < microseconds) {
+      duration->seconds = max->seconds;
+      duration->nanoseconds = max->nanoseconds;
       return EMBB_OVERFLOW;
     }
   }
@@ -83,10 +91,14 @@ int embb_duration_set_milliseconds(embb_duration_t* duration,
   assert(duration != NULL);
   if (milliseconds > 0) {
     if (embb_duration_min()->nanoseconds > milliseconds*1000000) {
+      duration->seconds = 0;
+      duration->nanoseconds = 0;
       return EMBB_UNDERFLOW;
     }
     const embb_duration_t* max = embb_duration_max();
     if (max->seconds * 1000 + max->nanoseconds / 1000000 < milliseconds) {
+      duration->seconds = max->seconds;
+      duration->nanoseconds = max->nanoseconds;
       return EMBB_OVERFLOW;
     }
   }
@@ -100,10 +112,14 @@ int embb_duration_set_seconds(embb_duration_t* duration,
   assert(duration != NULL);
   if (seconds > 0) {
     if (embb_duration_min()->nanoseconds > seconds*1000000000) {
+      duration->seconds = 0;
+      duration->nanoseconds = 0;
       return EMBB_UNDERFLOW;
     }
     const embb_duration_t* max = embb_duration_max();
     if (max->seconds + max->nanoseconds / 1000000000 < seconds) {
+      duration->seconds = max->seconds;
+      duration->nanoseconds = max->nanoseconds;
       return EMBB_OVERFLOW;
     }
   }
@@ -117,6 +133,8 @@ int embb_duration_add(embb_duration_t* lhs, const embb_duration_t* rhs) {
   assert(rhs != NULL);
   int carry = (int)((lhs->nanoseconds + rhs->nanoseconds) / 1000000000);
   if (lhs->seconds + rhs->seconds + carry > EMBB_DURATION_MAX_SECONDS) {
+    lhs->seconds = 0;
+    lhs->nanoseconds = 0;
     return EMBB_OVERFLOW;
   }
   lhs->nanoseconds = (lhs->nanoseconds + rhs->nanoseconds) % 1000000000;

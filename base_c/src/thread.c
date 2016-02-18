@@ -83,7 +83,10 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   assert(thread != NULL);
   thread->embb_internal_arg = (embb_internal_thread_arg_t*)
                               embb_alloc(sizeof(embb_internal_thread_arg_t));
-  if (thread->embb_internal_arg == NULL) return EMBB_NOMEM;
+  if (thread->embb_internal_arg == NULL) {
+    thread->embb_internal_handle = NULL;
+    return EMBB_NOMEM;
+  }
   thread->embb_internal_arg->func = func;
   thread->embb_internal_arg->arg = arg;
 
