@@ -98,6 +98,9 @@ int embb_mutex_init(
 /**
  * Waits until the mutex can be locked and locks it.
  *
+ * \note This method yields the current thread in regular,
+ *       implementation-defined intervals.
+ *
  * \pre \c mutex is initialized \n
  *      If the mutex type is plain, \c mutex must not be locked by the current
  *      thread.
