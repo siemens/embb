@@ -184,7 +184,8 @@ static void opencl_task_start(
 
         err = clEnqueueWriteBuffer(plugin->command_queue,
           opencl_task->arguments, CL_FALSE, 0,
-          (size_t)opencl_task->arguments_size, local_task->arguments, 0, NULL, NULL);
+          (size_t)opencl_task->arguments_size, local_task->arguments,
+          0, NULL, NULL);
         err = clEnqueueNDRangeKernel(plugin->command_queue,
           opencl_action->kernel, 1, NULL,
           &global_work_size, &opencl_action->local_work_size, 0, NULL, NULL);
@@ -259,7 +260,11 @@ void mtapi_opencl_plugin_initialize(
   embb_mtapi_opencl_plugin_t * plugin = &embb_mtapi_opencl_plugin;
 
   err = embb_mtapi_opencl_link_at_runtime();
-  if (err != 0) {
+  if (err <= 0) {
+    // OpenCL not available, or wrong version
+    local_status = MTAPI_ERR_FUNC_NOT_IMPLEMENTED;
+  } else {
+    // all good, go ahead
     err = clGetPlatformIDs(1, &plugin->platform_id, NULL);
     if (CL_SUCCESS == err) {
       err = clGetDeviceIDs(plugin->platform_id, CL_DEVICE_TYPE_DEFAULT,

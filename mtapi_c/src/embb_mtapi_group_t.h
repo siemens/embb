@@ -55,7 +55,7 @@ struct embb_mtapi_group_struct {
   mtapi_group_hndl_t handle;
 
   mtapi_group_id_t group_id;
-  volatile mtapi_boolean_t deleted;
+  embb_atomic_int deleted;
   embb_atomic_int num_tasks;
   mtapi_group_attributes_t attributes;
   embb_mtapi_task_queue_t queue;

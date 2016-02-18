@@ -75,6 +75,10 @@ void TaskTest::TestBasic() {
   }
 
   mtapi_opencl_plugin_initialize(&status);
+  if (status == MTAPI_ERR_FUNC_NOT_IMPLEMENTED) {
+    // OpenCL unavailable
+    return;
+  }
   MTAPI_CHECK_STATUS(status);
 
   mtapi_initialize(

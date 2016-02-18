@@ -149,14 +149,13 @@ SimpleTest::SimpleTest() {
 void SimpleTest::TestBasic() {
   // All available cores
   embb::base::CoreSet core_set(true);
-  unsigned int num_cores = core_set.Count();
   embb::tasks::Node::Initialize(
     MTAPI_DOMAIN_ID,
     MTAPI_NODE_ID,
     core_set,
     1024, // max tasks (default: 1024)
     128,  // max groups (default: 128)
-    num_cores, // max queues (default: 16)
+    2, // max queues (default: 16)
     1024, // queue capacity (default: 1024)
     4);   // num priorities (default: 4)
 

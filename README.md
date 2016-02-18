@@ -98,7 +98,8 @@ postfixed with either "_cpp" or "_c" for the C++ and C versions, respectively.
 Currently, EMB² contains the following components:
 
   - base: base_c, base_cpp
-  - mtapi: mtapi_c, mtapi_network_c, mtapi_opencl_c, mtapi_cpp
+  - mtapi: mtapi_c, mtapi_cpp and
+    mtapi_plugins_c (mtapi_network_c and mtapi_opencl_c)
   - tasks: tasks_cpp
   - algorithms: algorithms_cpp
   - dataflow: dataflow_cpp

@@ -55,7 +55,7 @@ void embb_mtapi_group_initialize(embb_mtapi_group_t * that) {
   assert(MTAPI_NULL != that);
 
   that->group_id = MTAPI_GROUP_ID_NONE;
-  that->deleted = MTAPI_FALSE;
+  embb_atomic_store_int(&that->deleted, MTAPI_FALSE);
   that->num_tasks.internal_variable = 0;
   embb_mtapi_task_queue_initialize(&that->queue);
 }
@@ -67,7 +67,7 @@ void embb_mtapi_group_initialize_with_node(
   assert(MTAPI_NULL != node);
 
   that->group_id = MTAPI_GROUP_ID_NONE;
-  that->deleted = MTAPI_FALSE;
+  embb_atomic_store_int(&that->deleted, MTAPI_FALSE);
   that->num_tasks.internal_variable = 0;
   embb_mtapi_task_queue_initialize_with_capacity(
     &that->queue, node->attributes.queue_limit);
@@ -76,7 +76,7 @@ void embb_mtapi_group_initialize_with_node(
 void embb_mtapi_group_finalize(embb_mtapi_group_t * that) {
   assert(MTAPI_NULL != that);
 
-  that->deleted = MTAPI_TRUE;
+  embb_atomic_store_int(&that->deleted, MTAPI_TRUE);
   that->num_tasks.internal_variable = 0;
   embb_mtapi_task_queue_finalize(&that->queue);
 }
@@ -375,7 +375,7 @@ void mtapi_group_delete(
         embb_mtapi_group_pool_get_storage_for_handle(
           node->group_pool, group);
 
-      if (local_group->deleted) {
+      if (embb_atomic_load_int(&local_group->deleted)) {
         local_status = MTAPI_ERR_GROUP_INVALID;
       } else {
         embb_mtapi_group_finalize(local_group);

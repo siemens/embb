@@ -24,17 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
-#define MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+#include <embb_mtapi_opencl_test_linker.h>
 
-#include <partest/partest.h>
+#include <embb_mtapi_opencl_runtimelinker.h>
 
-class NetworkSocketTest : public partest::TestCase {
- public:
-  NetworkSocketTest();
 
- private:
-  void TestBasic();
-};
+LinkerTest::LinkerTest() {
+  CreateUnit("mtapi opencl linker test").Add(&LinkerTest::TestBasic, this);
+}
 
-#endif // MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+void LinkerTest::TestBasic() {
+  int result = embb_mtapi_opencl_link_at_runtime();
+  bool success = result != 0;
+  PT_EXPECT(success);
+}
