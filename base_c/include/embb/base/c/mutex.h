@@ -98,9 +98,6 @@ int embb_mutex_init(
 /**
  * Waits until the mutex can be locked and locks it.
  *
- * \note This method yields the current thread in regular,
- *       implementation-defined intervals.
- *
  * \pre \c mutex is initialized \n
  *      If the mutex type is plain, \c mutex must not be locked by the current
  *      thread.
@@ -181,6 +178,9 @@ int embb_spin_init(
 
 /**
  * Spins until the spinlock can be locked and locks it.
+ *
+ * \note This method yields the current thread in regular,
+ *       implementation-defined intervals.
  *
  * \pre \c spinlock is initialized \n
  * \post If successful, \c spinlock is locked.
