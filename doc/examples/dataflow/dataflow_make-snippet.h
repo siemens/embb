@@ -1,1 +1,1 @@
-  nw.Make(2);
+  nw.Make(4);
