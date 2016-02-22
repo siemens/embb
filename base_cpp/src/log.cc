@@ -27,14 +27,6 @@
 #include <embb/base/log.h>
 #include <embb/base/c/internal/unused.h>
 
-#include <cstdarg>
-
-extern "C" void embb_log_write_internal(
-  char const * channel,
-  embb_log_level_t log_level,
-  char const * message,
-  va_list argp);
-
 namespace embb {
 namespace base {
 

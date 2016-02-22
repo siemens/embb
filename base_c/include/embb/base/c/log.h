@@ -28,6 +28,7 @@
 #define EMBB_BASE_C_LOG_H_
 
 #include <embb/base/c/internal/config.h>
+#include <stdarg.h>
 
 /**
  * \defgroup C_LOG Logging
@@ -196,6 +197,13 @@ void embb_log_error(
                                             the format specifiers in
                                             \c message */
   );
+
+/* function for internal use only */
+void embb_log_write_internal(
+  char const * channel,
+  embb_log_level_t log_level,
+  char const * message,
+  va_list argp);
 
 #ifdef __cplusplus
 }
