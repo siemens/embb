@@ -35,7 +35,7 @@ namespace tasks {
 
 ExecutionPolicy::ExecutionPolicy() :
     priority_(DefaultPriority) {
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
@@ -48,7 +48,7 @@ ExecutionPolicy::ExecutionPolicy() :
 
 ExecutionPolicy::ExecutionPolicy(bool initial_affinity, mtapi_uint_t priority)
 :priority_(priority) {
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
@@ -62,7 +62,7 @@ ExecutionPolicy::ExecutionPolicy(bool initial_affinity, mtapi_uint_t priority)
 
 ExecutionPolicy::ExecutionPolicy(mtapi_uint_t priority)
 :priority_(priority) {
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
@@ -75,7 +75,7 @@ ExecutionPolicy::ExecutionPolicy(mtapi_uint_t priority)
 
 ExecutionPolicy::ExecutionPolicy(bool initial_affinity)
 :priority_(DefaultPriority) {
-#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+#if TASKS_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
