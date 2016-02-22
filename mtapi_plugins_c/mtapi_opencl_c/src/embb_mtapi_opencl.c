@@ -188,6 +188,8 @@ static void opencl_task_start(
           0, NULL, NULL);
 
         if (CL_SUCCESS == err) {
+          embb_mtapi_task_set_state(local_task, MTAPI_TASK_RUNNING);
+
           err |= clEnqueueNDRangeKernel(plugin->command_queue,
             opencl_action->kernel, 1, NULL,
             &global_work_size, &opencl_action->local_work_size, 0, NULL, NULL);
@@ -197,8 +199,6 @@ static void opencl_task_start(
             0, NULL, &opencl_task->kernel_finish_event);
           err |= clSetEventCallback(opencl_task->kernel_finish_event,
             CL_COMPLETE, opencl_task_complete, opencl_task);
-
-          embb_mtapi_task_set_state(local_task, MTAPI_TASK_RUNNING);
         }
 
         err |= clFlush(plugin->command_queue);
