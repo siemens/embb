@@ -53,6 +53,9 @@ class In {
 
   ~In() {
     if (NULL != values_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        values_[ii].~SignalType();
+      }
       embb::base::Allocation::Free(values_);
     }
   }
@@ -78,7 +81,7 @@ class In {
       embb::base::Allocation::Allocate(
       sizeof(SignalType)*slices_));
     for (int ii = 0; ii < slices_; ii++) {
-      values_[ii] = SignalType();
+      new (&values_[ii]) SignalType();
     }
   }
 
