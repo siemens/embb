@@ -56,17 +56,14 @@ embb::base::Atomic<int> source_counter;
 int source_array[TEST_COUNT];
 
 bool sourceFunc(int & out) {
-  if (source_counter < TEST_COUNT)
-  {
+  if (source_counter < TEST_COUNT) {
     out = source_counter;
 
     source_array[source_counter] = out;
     source_counter++;
 
     return true;
-  }
-  else
-  {
+  } else {
     return false;
   }
 }
