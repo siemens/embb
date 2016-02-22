@@ -24,17 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_TASK_H_
-#define MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_TASK_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
+#define MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
 
 #include <partest/partest.h>
 
-class NetworkTaskTest : public partest::TestCase {
+class TaskTest : public partest::TestCase {
  public:
-  NetworkTaskTest();
+  TaskTest();
 
  private:
   void TestBasic();
 };
 
-#endif // MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_TASK_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_

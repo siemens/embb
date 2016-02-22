@@ -24,23 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
-#define MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_LINKER_H_
+#define MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_LINKER_H_
 
-#include <stdint.h>
+#include <partest/partest.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class LinkerTest : public partest::TestCase {
+ public:
+  LinkerTest();
 
+ private:
+  void TestBasic();
+};
 
-int embb_mtapi_network_initialize();
-
-void embb_mtapi_network_finalize();
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_LINKER_H_

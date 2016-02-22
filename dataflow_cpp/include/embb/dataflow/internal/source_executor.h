@@ -53,7 +53,9 @@ class SourceExecutor< Outputs<O1> > {
     Outputs<O1> & outputs) {
     O1 o1;
     bool result = function_(o1);
-    outputs.template Get<0>().Send(Signal<O1>(clock, o1));
+    if (result) {
+      outputs.template Get<0>().Send(Signal<O1>(clock, o1));
+    }
     return result;
   }
 
@@ -78,8 +80,10 @@ class SourceExecutor< Outputs<O1, O2> > {
     O1 o1;
     O2 o2;
     bool result = function_(o1, o2);
-    outputs.template Get<0>().Send(Signal<O1>(clock, o1));
-    outputs.template Get<1>().Send(Signal<O2>(clock, o2));
+    if (result) {
+      outputs.template Get<0>().Send(Signal<O1>(clock, o1));
+      outputs.template Get<1>().Send(Signal<O2>(clock, o2));
+    }
     return result;
   }
 
@@ -106,9 +110,11 @@ class SourceExecutor< Outputs<O1, O2, O3> > {
     O2 o2;
     O3 o3;
     bool result = function_(o1, o2, o3);
-    outputs.template Get<0>().Send(Signal<O1>(clock, o1));
-    outputs.template Get<1>().Send(Signal<O2>(clock, o2));
-    outputs.template Get<2>().Send(Signal<O3>(clock, o3));
+    if (result) {
+      outputs.template Get<0>().Send(Signal<O1>(clock, o1));
+      outputs.template Get<1>().Send(Signal<O2>(clock, o2));
+      outputs.template Get<2>().Send(Signal<O3>(clock, o3));
+    }
     return result;
   }
 
@@ -137,10 +143,12 @@ class SourceExecutor< Outputs<O1, O2, O3, O4> > {
     O3 o3;
     O4 o4;
     bool result = function_(o1, o2, o3, o4);
-    outputs.template Get<0>().Send(Signal<O1>(clock, o1));
-    outputs.template Get<1>().Send(Signal<O2>(clock, o2));
-    outputs.template Get<2>().Send(Signal<O3>(clock, o3));
-    outputs.template Get<3>().Send(Signal<O4>(clock, o4));
+    if (result) {
+      outputs.template Get<0>().Send(Signal<O1>(clock, o1));
+      outputs.template Get<1>().Send(Signal<O2>(clock, o2));
+      outputs.template Get<2>().Send(Signal<O3>(clock, o3));
+      outputs.template Get<3>().Send(Signal<O4>(clock, o4));
+    }
     return result;
   }
 
@@ -172,11 +180,13 @@ class SourceExecutor< Outputs<O1, O2, O3, O4, O5> > {
     O4 o4;
     O5 o5;
     bool result = function_(o1, o2, o3, o4, o5);
-    outputs.template Get<0>().Send(Signal<O1>(clock, o1));
-    outputs.template Get<1>().Send(Signal<O2>(clock, o2));
-    outputs.template Get<2>().Send(Signal<O3>(clock, o3));
-    outputs.template Get<3>().Send(Signal<O4>(clock, o4));
-    outputs.template Get<4>().Send(Signal<O5>(clock, o5));
+    if (result) {
+      outputs.template Get<0>().Send(Signal<O1>(clock, o1));
+      outputs.template Get<1>().Send(Signal<O2>(clock, o2));
+      outputs.template Get<2>().Send(Signal<O3>(clock, o3));
+      outputs.template Get<3>().Send(Signal<O4>(clock, o4));
+      outputs.template Get<4>().Send(Signal<O5>(clock, o5));
+    }
     return result;
   }
 

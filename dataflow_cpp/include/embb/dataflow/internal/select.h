@@ -106,8 +106,9 @@ class Select
   }
 
   template <typename T>
-  void operator >> (T & target) {
+  T & operator >> (T & target) {
     GetOutput<0>() >> target.template GetInput<0>();
+    return target;
   }
 
   virtual void OnClock(int clock) {

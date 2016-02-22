@@ -165,7 +165,6 @@ void PoolTest<ValuePool_t>::PoolTestStatic() {
 
   //if we allocate again, we should get those elements
   for (int i = 0; i != static_cast<int>(indexes_to_free.size()); i++) {
-    int element, index;
     index = ap.Allocate(element);
 
     PT_EXPECT((index != -1));

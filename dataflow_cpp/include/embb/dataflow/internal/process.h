@@ -111,8 +111,9 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   }
 
   template <typename T>
-  void operator >> (T & target) {
+  T & operator >> (T & target) {
     GetOutput<0>() >> target.template GetInput<0>();
+    return target;
   }
 
   virtual void OnClock(int clock) {

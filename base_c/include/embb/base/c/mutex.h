@@ -179,6 +179,9 @@ int embb_spin_init(
 /**
  * Spins until the spinlock can be locked and locks it.
  *
+ * \note This method yields the current thread in regular,
+ *       implementation-defined intervals.
+ *
  * \pre \c spinlock is initialized \n
  * \post If successful, \c spinlock is locked.
  * \return EMBB_SUCCESS if spinlock could be locked. \n

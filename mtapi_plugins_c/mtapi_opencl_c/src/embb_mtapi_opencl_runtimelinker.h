@@ -24,15 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb_mtapi_opencl_test_linker.h>
+#ifndef MTAPI_PLUGINS_C_MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
+#define MTAPI_PLUGINS_C_MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
 
-#include <embb_mtapi_opencl_runtimelinker.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+int embb_mtapi_opencl_link_at_runtime();
 
-LinkerTest::LinkerTest() {
-  CreateUnit("mtapi opencl linker test").Add(&LinkerTest::TestBasic, this);
+#ifdef __cplusplus
 }
+#endif
 
-void LinkerTest::TestBasic() {
-  PT_EXPECT(embb_mtapi_opencl_link_at_runtime() != 0);
-}
+#endif // MTAPI_PLUGINS_C_MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
