@@ -29,6 +29,7 @@
 
 #include <list>
 #include <embb/base/core_set.h>
+#include <embb/base/mutex.h>
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/tasks/action.h>
 #include <embb/tasks/task.h>
@@ -233,6 +234,8 @@ class Node {
   mtapi_action_hndl_t action_handle_;
   std::list<Queue*> queues_;
   std::list<Group*> groups_;
+  embb::base::Spinlock queue_lock_;
+  embb::base::Spinlock group_lock_;
 };
 
 } // namespace tasks
