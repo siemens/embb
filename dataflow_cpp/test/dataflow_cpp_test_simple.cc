@@ -211,8 +211,10 @@ void SimpleTest::TestBasic() {
     network.AddSource(constant);
     network.AddSource(source);
 
+    network.Make(NUM_SLICES);
+
     try {
-      network(NUM_SLICES);
+      network();
     } catch (embb::base::ErrorException & e) {
       PT_ASSERT_MSG(false, e.What());
     }

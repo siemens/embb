@@ -52,10 +52,8 @@ namespace dataflow {
 /**
  * Represents a set of processes, that are connected by communication channels.
  *
- * \tparam Slices Number of concurrently processed tokens.
  * \ingroup CPP_DATAFLOW
  */
-template <int Slices>
 class Network {
  public:
   /**
@@ -662,6 +660,14 @@ class Network {
   void AddSource(ConstantSource<Type> & source);
 
   /**
+   * Builds the network for usage with \c slices concurrent tokens. This
+   * function needs to be called after adding all sources and before
+   * executing the network.
+   * \param slices Number of concurrent tokens allowed in the network.
+   */
+  void Make(int slices);
+
+  /**
    * Executes the network until one of the the sources returns \c false.
    */
   void operator () ();
@@ -671,7 +677,14 @@ class Network {
 
 class Network : public internal::ClockListener {
  public:
-  Network() {}
+  Network() : sched_(NULL) {}
+
+  ~Network() {
+    if (NULL != sched_) {
+      embb::base::Allocation::Delete<internal::Scheduler>(sched_);
+      embb::base::Allocation::Free(sink_counter_);
+    }
+  }
 
   template <typename T1, typename T2 = embb::base::internal::Nil,
     typename T3 = embb::base::internal::Nil,
@@ -799,21 +812,18 @@ class Network : public internal::ClockListener {
     sources_.push_back(&source);
   }
 
-  void operator () (int slices) {
+  void Make(int slices) {
     slices_ = slices;
-
-    internal::SchedulerSequential sched_seq;
-    internal::SchedulerMTAPI sched_mtapi(slices_);
-    internal::Scheduler * sched = &sched_mtapi;
+    sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
 
     internal::InitData init_data;
     init_data.slices = slices_;
-    init_data.sched = sched;
+    init_data.sched = sched_;
     init_data.sink_listener = this;
 
     sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
       embb::base::Allocation::Allocate(
-      sizeof(embb::base::Atomic<int>)*slices_));
+        sizeof(embb::base::Atomic<int>)*slices_));
     for (int ii = 0; ii < slices_; ii++) {
       sink_counter_[ii] = 0;
     }
@@ -825,12 +835,18 @@ class Network : public internal::ClockListener {
     for (int ii = 0; ii < slices_; ii++) {
       sink_counter_[ii] = 0;
     }
+  }
+
+  void operator () () {
+    if (NULL == sched_) {
+      throw embb::base::ErrorException("Network was not properly prepared");
+    }
 
     int clock = 0;
     while (clock >= 0) {
       const int idx = clock % slices_;
       while (sink_counter_[idx] > 0) embb::base::Thread::CurrentYield();
-      sched->WaitForSlice(idx);
+      sched_->WaitForSlice(idx);
       if (!SpawnClock(clock))
         break;
       clock++;
@@ -841,7 +857,7 @@ class Network : public internal::ClockListener {
     for (; ii < clock; ii++) {
       const int idx = ii % slices_;
       while (sink_counter_[idx] > 0) embb::base::Thread::CurrentYield();
-      sched->WaitForSlice(idx);
+      sched_->WaitForSlice(idx);
     }
   }
 
@@ -875,6 +891,7 @@ class Network : public internal::ClockListener {
   embb::base::Atomic<int> * sink_counter_;
   int sink_count_;
   int slices_;
+  internal::Scheduler * sched_;
 
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
   std::vector<int> spawn_history_[Slices];

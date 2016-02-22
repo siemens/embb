@@ -67,8 +67,13 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() {
+  Inputs() : count_(NULL) {
     test_count_ = 1;
+  }
+  ~Inputs() {
+    if (NULL != count_) {
+      embb::base::Allocation::Free(count_);
+    }
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -122,8 +127,13 @@ class Inputs<T1, T2, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() {
+  Inputs() : count_(NULL) {
     test_count_ = 2;
+  }
+  ~Inputs() {
+    if (NULL != count_) {
+      embb::base::Allocation::Free(count_);
+    }
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -181,8 +191,13 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() {
+  Inputs() : count_(NULL) {
     test_count_ = 3;
+  }
+  ~Inputs() {
+    if (NULL != count_) {
+      embb::base::Allocation::Free(count_);
+    }
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -243,8 +258,13 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
       In<T4>, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() {
+  Inputs() : count_(NULL) {
     test_count_ = 4;
+  }
+  ~Inputs() {
+    if (NULL != count_) {
+      embb::base::Allocation::Free(count_);
+    }
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;
@@ -310,8 +330,13 @@ class Inputs
       In<T4>, In<T5> >
   , public ClockListener {
  public:
-  Inputs() {
+  Inputs() : count_(NULL) {
     test_count_ = 5;
+  }
+  ~Inputs() {
+    if (NULL != count_) {
+      embb::base::Allocation::Free(count_);
+    }
   }
   void SetListener(ClockListener * listener) {
     listener_ = listener;

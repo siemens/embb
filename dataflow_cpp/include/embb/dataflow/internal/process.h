@@ -55,6 +55,7 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
 
   explicit Process(FunctionType function)
     : executor_(function)
+    , action_(NULL)
     , slices_(0) {
     next_clock_ = 0;
     queued_clock_ = 0;
@@ -65,6 +66,12 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
       queue_id_ = 0;
     }
     inputs_.SetListener(this);
+  }
+
+  ~Process() {
+    if (NULL != action_) {
+      embb::base::Allocation::Free(action_);
+    }
   }
 
   virtual bool HasInputs() const {

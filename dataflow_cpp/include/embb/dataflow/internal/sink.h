@@ -49,11 +49,18 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   typedef typename ExecutorType::FunctionType FunctionType;
 
   explicit Sink(FunctionType function)
-    : executor_(function) {
+    : executor_(function)
+    , action_(NULL) {
     next_clock_ = 0;
     queued_clock_ = 0;
     queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
+  }
+
+  ~Sink() {
+    if (NULL != action_) {
+      embb::base::Allocation::Free(action_);
+    }
   }
 
   void SetListener(ClockListener * listener) {

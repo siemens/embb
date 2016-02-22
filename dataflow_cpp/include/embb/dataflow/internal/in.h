@@ -51,6 +51,12 @@ class In {
 
   In() : values_(NULL), connected_(false), slices_(0) {}
 
+  ~In() {
+    if (NULL != values_) {
+      embb::base::Allocation::Free(values_);
+    }
+  }
+
   SignalType const & GetSignal(int clock) const {
     return values_[clock % slices_];
   }
