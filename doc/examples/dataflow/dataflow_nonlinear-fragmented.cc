@@ -83,5 +83,6 @@ void RunDataflowNonLinear() {
   process5.GetOutput<1>() >> sink1.GetInput<2>();
   process4.GetOutput<1>() >> sink1.GetInput<3>();
 
+  nw.Make(2);
   nw();
 }

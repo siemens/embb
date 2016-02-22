@@ -57,5 +57,6 @@ void RunDataflowLinear() {
 #include "dataflow/dataflow_declare_sink-snippet.h"
 #include "dataflow/dataflow_connect-snippet.h"
 #include "dataflow/dataflow_add-snippet.h"
+#include "dataflow/dataflow_make-snippet.h"
 #include "dataflow/dataflow_run-snippet.h"
 }

@@ -1,2 +1,2 @@
-typedef embb::dataflow::Network<2> Network;
+typedef embb::dataflow::Network Network;
 static Network nw;
