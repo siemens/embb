@@ -113,14 +113,17 @@ allocate_rec(int node, Type& element) {
     int pool_index = NodeIndexToPoolIndex(node);
 
     Type expected = pool_[pool_index];
-    if (expected == Undefined)
+    if (expected == Undefined) {
+      element = Type();
       return -1;
+    }
 
     if (pool_[pool_index].CompareAndSwap(expected, Undefined)) {
       element = expected;
       return pool_index;
     }
 
+    element = Type();
     return -1;
   }
 

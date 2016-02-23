@@ -144,6 +144,7 @@ void HazardPointerTest::HazardPointerTest1ThreadMethod() {
 
   for (int i = 0; i != n_elements_per_thread_; ++i) {
     embb::base::Atomic<int>* allocated_object = object_pool_->Allocate(0);
+    PT_ASSERT(NULL != allocated_object);
 
     hazard_pointer_->Guard(0, allocated_object);
 
@@ -248,6 +249,7 @@ void HazardPointerTest2::HazardPointerTest2Master() {
   // while the hazard pointer guard array is not full
   int** allocatedLocal = static_cast<int**>(
   embb::base::Allocation::Allocate(sizeof(int*)*guaranteed_capacity_pool_));
+  PT_ASSERT(NULL != allocatedLocal);
 
   bool full = false;
   while (!full) {
@@ -295,16 +297,19 @@ void HazardPointerTest2::HazardPointerTest2Pre() {
   // first the test pool has to be created
   test_pool_ = embb::base::Allocation::New<IntObjectTestPool>
     (pool_size_using_hazard_pointer_);
+  PT_ASSERT(NULL != test_pool_);
 
   // after the pool has been created, we create the hp class
   hazard_pointer_ = embb::base::Allocation::New <
     embb::containers::internal::HazardPointer<int*> >
     (delete_pointer_callback_, static_cast<int*>(NULL),
     static_cast<int>(guards_per_phread_count_), n_threads);
+  PT_ASSERT(NULL != hazard_pointer_);
 
   shared_guarded_ = static_cast<embb::base::Atomic<int*>*>(
     embb::base::Allocation::Allocate(sizeof(embb::base::Atomic<int*>)*
     guaranteed_capacity_pool_));
+  PT_ASSERT(NULL != shared_guarded_);
 
   for (unsigned int i = 0; i != guaranteed_capacity_pool_; ++i) {
     // in-place new for each array cell
