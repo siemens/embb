@@ -179,7 +179,7 @@ void AllocTest::TestMixedAllocs() {
   void* cache_aligned = NULL;
   cache_aligned = embb_alloc_cache_aligned(2);
   PT_EXPECT_NE(cache_aligned, static_cast<void*>(NULL));
-  if (NULL == aligned) {
+  if (NULL == cache_aligned) {
     embb_free(plain);
     embb_free_aligned(aligned);
     return;
