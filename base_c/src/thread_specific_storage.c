@@ -68,5 +68,7 @@ void* embb_tss_get(const embb_tss_t* tss) {
 
 void embb_tss_delete(embb_tss_t* tss) {
   assert(tss != NULL);
-  embb_free_aligned(tss->values);
+  if (tss->values != NULL) {
+    embb_free_aligned(tss->values);
+  }
 }
