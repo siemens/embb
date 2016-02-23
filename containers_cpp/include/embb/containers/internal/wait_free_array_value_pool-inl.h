@@ -55,6 +55,7 @@ Allocate(Type & element) {
       return i;
     }
   }
+  element = Type();
   return -1;
 }
 
