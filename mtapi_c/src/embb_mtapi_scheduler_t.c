@@ -456,6 +456,10 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
   that->worker_contexts = (embb_mtapi_thread_context_t*)
     embb_mtapi_alloc_allocate(
       sizeof(embb_mtapi_thread_context_t)*that->worker_count);
+  if (NULL == that->worker_contexts) {
+    return MTAPI_FALSE;
+  }
+  mtapi_boolean_t isinit = MTAPI_TRUE;
   for (ii = 0; ii < that->worker_count; ii++) {
     unsigned int core_num = 0;
     mtapi_uint_t ll = 0;
@@ -467,8 +471,11 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
       }
       core_num++;
     }
-    embb_mtapi_thread_context_initialize_with_node_worker_and_core(
+    isinit &= embb_mtapi_thread_context_initialize_with_node_worker_and_core(
       &that->worker_contexts[ii], node, ii, core_num);
+  }
+  if (!isinit) {
+    return MTAPI_FALSE;
   }
   for (ii = 0; ii < that->worker_count; ii++) {
     if (MTAPI_FALSE == embb_mtapi_thread_context_start(
@@ -486,17 +493,19 @@ void embb_mtapi_scheduler_finalize(embb_mtapi_scheduler_t * that) {
 
   assert(MTAPI_NULL != that);
 
-  /* finalize all workers */
-  for (ii = 0; ii < that->worker_count; ii++) {
-    embb_mtapi_thread_context_stop(&that->worker_contexts[ii]);
-  }
-  for (ii = 0; ii < that->worker_count; ii++) {
-    embb_mtapi_thread_context_finalize(&that->worker_contexts[ii]);
-  }
+  if (MTAPI_NULL != that->worker_contexts) {
+    /* finalize all workers */
+    for (ii = 0; ii < that->worker_count; ii++) {
+      embb_mtapi_thread_context_stop(&that->worker_contexts[ii]);
+    }
+    for (ii = 0; ii < that->worker_count; ii++) {
+      embb_mtapi_thread_context_finalize(&that->worker_contexts[ii]);
+    }
 
-  that->worker_count = 0;
-  embb_mtapi_alloc_deallocate(that->worker_contexts);
-  that->worker_contexts = MTAPI_NULL;
+    that->worker_count = 0;
+    embb_mtapi_alloc_deallocate(that->worker_contexts);
+    that->worker_contexts = MTAPI_NULL;
+  }
 }
 
 embb_mtapi_scheduler_t * embb_mtapi_scheduler_new() {
@@ -506,6 +515,7 @@ embb_mtapi_scheduler_t * embb_mtapi_scheduler_new() {
   if (MTAPI_NULL != that) {
     if (MTAPI_FALSE == embb_mtapi_scheduler_initialize(that)) {
       /* on error delete and return MTAPI_NULL */
+      embb_mtapi_scheduler_finalize(that);
       embb_mtapi_scheduler_delete(that);
       return MTAPI_NULL;
     }
