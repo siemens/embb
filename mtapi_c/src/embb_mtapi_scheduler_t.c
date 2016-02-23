@@ -398,7 +398,8 @@ mtapi_boolean_t embb_mtapi_scheduler_wait_for_task(
     node->scheduler);
 
   /* now wait and schedule new tasks if we are on a worker */
-  mtapi_task_state_t task_state = embb_atomic_load_int(&task->state);
+  mtapi_task_state_t task_state =
+    (mtapi_task_state_t)embb_atomic_load_int(&task->state);
   while (
     (MTAPI_TASK_SCHEDULED == task_state) ||
     (MTAPI_TASK_RUNNING == task_state) ||
@@ -418,7 +419,7 @@ mtapi_boolean_t embb_mtapi_scheduler_wait_for_task(
       node,
       context);
 
-    task_state = embb_atomic_load_int(&task->state);
+    task_state = (mtapi_task_state_t)embb_atomic_load_int(&task->state);
   }
 
   return MTAPI_TRUE;

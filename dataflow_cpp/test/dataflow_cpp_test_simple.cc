@@ -56,12 +56,16 @@ embb::base::Atomic<int> source_counter;
 int source_array[TEST_COUNT];
 
 bool sourceFunc(int & out) {
-  out = source_counter;
+  if (source_counter < TEST_COUNT) {
+    out = source_counter;
 
-  source_array[source_counter] = out;
-  source_counter++;
+    source_array[source_counter] = out;
+    source_counter++;
 
-  return source_counter < TEST_COUNT;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 embb::base::Atomic<int> pred_counter;
@@ -188,11 +192,14 @@ void SimpleTest::TestBasic() {
 
     source.GetOutput<0>() >> sw.GetInput<1>();
 
-    source.GetOutput<0>() >> pred.GetInput<0>();
-    pred.GetOutput<0>() >> sw.GetInput<0>();
+    // connection chain representing the commented single connections below
+    source >> pred >> sw >> filter;
+
+    //source.GetOutput<0>() >> pred.GetInput<0>();
+    //pred.GetOutput<0>() >> sw.GetInput<0>();
     pred.GetOutput<0>() >> sel.GetInput<0>();
 
-    sw.GetOutput<0>() >> filter.GetInput<0>();
+    //sw.GetOutput<0>() >> filter.GetInput<0>();
     filter.GetOutput<0>() >> sel.GetInput<1>();
 
     constant.GetOutput<0>() >> mult.GetInput<0>();

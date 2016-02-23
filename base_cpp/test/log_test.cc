@@ -55,10 +55,18 @@ void LogTest::Test() {
   Log::SetLogLevel(EMBB_LOG_LEVEL_TRACE);
   logged_message = null;
   Log::Trace("chn", test_msg);
+#ifdef EMBB_DEBUG
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [TRACE] hello"));
+#else
+  PT_EXPECT_EQ(null, logged_message);
+#endif
   logged_message = null;
   Log::Info("chn", test_msg);
+#ifdef EMBB_DEBUG
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [INFO ] hello"));
+#else
+  PT_EXPECT_EQ(null, logged_message);
+#endif
   logged_message = null;
   Log::Warning("chn", test_msg);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));
@@ -72,7 +80,11 @@ void LogTest::Test() {
   PT_EXPECT_EQ(null, logged_message);
   logged_message = null;
   Log::Info("chn", test_msg);
+#ifdef EMBB_DEBUG
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [INFO ] hello"));
+#else
+  PT_EXPECT_EQ(null, logged_message);
+#endif
   logged_message = null;
   Log::Warning("chn", test_msg);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));

@@ -174,31 +174,40 @@ static void opencl_task_start(
 
         err = clSetKernelArg(opencl_action->kernel, 0, sizeof(cl_mem),
           (const void*)&opencl_task->arguments);
-        err = clSetKernelArg(opencl_action->kernel, 1, sizeof(cl_int),
+        err |= clSetKernelArg(opencl_action->kernel, 1, sizeof(cl_int),
           (const void*)&opencl_task->arguments_size);
 
-        err = clSetKernelArg(opencl_action->kernel, 2, sizeof(cl_mem),
+        err |= clSetKernelArg(opencl_action->kernel, 2, sizeof(cl_mem),
           (const void*)&opencl_task->result_buffer);
-        err = clSetKernelArg(opencl_action->kernel, 3, sizeof(cl_int),
+        err |= clSetKernelArg(opencl_action->kernel, 3, sizeof(cl_int),
           (const void*)&opencl_task->result_buffer_size);
 
-        err = clEnqueueWriteBuffer(plugin->command_queue,
+        err |= clEnqueueWriteBuffer(plugin->command_queue,
           opencl_task->arguments, CL_FALSE, 0,
           (size_t)opencl_task->arguments_size, local_task->arguments,
           0, NULL, NULL);
-        err = clEnqueueNDRangeKernel(plugin->command_queue,
-          opencl_action->kernel, 1, NULL,
-          &global_work_size, &opencl_action->local_work_size, 0, NULL, NULL);
-        err = clEnqueueReadBuffer(plugin->command_queue,
-          opencl_task->result_buffer, CL_FALSE, 0,
-          (size_t)opencl_task->result_buffer_size, local_task->result_buffer,
-          0, NULL, &opencl_task->kernel_finish_event);
-        err = clSetEventCallback(opencl_task->kernel_finish_event,
-          CL_COMPLETE, opencl_task_complete, opencl_task);
-        err = clFlush(plugin->command_queue);
 
-        embb_mtapi_task_set_state(local_task, MTAPI_TASK_RUNNING);
-        local_status = MTAPI_SUCCESS;
+        if (CL_SUCCESS == err) {
+          embb_mtapi_task_set_state(local_task, MTAPI_TASK_RUNNING);
+
+          err |= clEnqueueNDRangeKernel(plugin->command_queue,
+            opencl_action->kernel, 1, NULL,
+            &global_work_size, &opencl_action->local_work_size, 0, NULL, NULL);
+          err |= clEnqueueReadBuffer(plugin->command_queue,
+            opencl_task->result_buffer, CL_FALSE, 0,
+            (size_t)opencl_task->result_buffer_size, local_task->result_buffer,
+            0, NULL, &opencl_task->kernel_finish_event);
+          err |= clSetEventCallback(opencl_task->kernel_finish_event,
+            CL_COMPLETE, opencl_task_complete, opencl_task);
+        }
+
+        err |= clFlush(plugin->command_queue);
+        if (CL_SUCCESS != err) {
+          embb_mtapi_task_set_state(local_task, MTAPI_TASK_ERROR);
+          local_status = MTAPI_ERR_ACTION_FAILED;
+        } else {
+          local_status = MTAPI_SUCCESS;
+        }
       }
     }
   }
