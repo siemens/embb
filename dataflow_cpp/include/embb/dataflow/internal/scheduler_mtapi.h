@@ -66,15 +66,18 @@ class SchedulerMTAPI : public Scheduler {
     }
   }
   virtual ~SchedulerMTAPI() {
-    embb::tasks::Node & node = embb::tasks::Node::GetInstance();
-    for (int ii = 0; ii < slices_; ii++) {
-      group_[ii]->WaitAll(MTAPI_INFINITE);
-      node.DestroyGroup(*group_[ii]);
+    if (embb::tasks::Node::IsInitialized()) {
+      // only destroy groups and queues if there still is an instance
+      embb::tasks::Node & node = embb::tasks::Node::GetInstance();
+      for (int ii = 0; ii < slices_; ii++) {
+        group_[ii]->WaitAll(MTAPI_INFINITE);
+        node.DestroyGroup(*group_[ii]);
+      }
+      for (int ii = 0; ii < queue_count_; ii++) {
+        node.DestroyQueue(*queue_[ii]);
+      }
     }
     embb::base::Allocation::Free(group_);
-    for (int ii = 0; ii < queue_count_; ii++) {
-      node.DestroyQueue(*queue_[ii]);
-    }
     embb::base::Allocation::Free(queue_);
   }
   virtual void Spawn(Action & action) {
