@@ -842,9 +842,8 @@ class Network : public internal::ClockListener {
    */
   virtual void OnClock(int clock) {
     const int idx = clock % Slices;
-    const int cnt = --sink_counter_[idx];
-    assert(cnt == 0);
-    EMBB_UNUSED_IN_RELEASE(cnt);
+    assert(sink_counter_[idx] > 0);
+    --sink_counter_[idx];
   }
 
   /**
