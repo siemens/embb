@@ -27,6 +27,8 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SOURCE_H_
 #define EMBB_DATAFLOW_INTERNAL_SOURCE_H_
 
+#include <embb/base/atomic.h>
+
 #include <embb/dataflow/internal/node.h>
 #include <embb/dataflow/internal/outputs.h>
 #include <embb/dataflow/internal/source_executor.h>
@@ -81,14 +83,15 @@ class Source< Slices, Outputs<Slices, O1, O2, O3, O4, O5> >
   }
 
   template <typename T>
-  void operator >> (T & target) {
+  T & operator >> (T & target) {
     GetOutput<0>() >> target.template GetInput<0>();
+    return target;
   }
 
  private:
   OutputsType outputs_;
   ExecutorType executor_;
-  volatile bool not_done_;
+  embb::base::Atomic<bool> not_done_;
 };
 
 } // namespace internal

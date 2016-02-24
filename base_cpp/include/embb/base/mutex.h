@@ -191,6 +191,9 @@ class Spinlock {
   /**
    * Waits until the spinlock can be locked and locks it.
    *
+   * \note This method yields the current thread in regular,
+   *       implementation-defined intervals.
+   *
    * \pre The spinlock is not locked by the current thread.
    * \post The spinlock is locked.
    * \threadsafe

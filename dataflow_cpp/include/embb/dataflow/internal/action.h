@@ -39,29 +39,22 @@ namespace internal {
 
 class Action {
  public:
-  Action() : node_(NULL), clock_(0), pending_(0) {}
-  Action(Node * node, int clock) : node_(node), clock_(clock), pending_(2) {}
+  Action() : node_(NULL), clock_(0) {}
+  Action(Node * node, int clock) : node_(node), clock_(clock) {}
 
   void RunSequential() {
-    pending_ = 1;
     node_->Run(clock_);
-    pending_ = 0;
   }
 
   void RunMTAPI(embb::tasks::TaskContext & /*context*/) {
-    pending_ = 1;
     node_->Run(clock_);
-    pending_ = 0;
   }
-
-  bool IsPending() const { return pending_ > 0; }
 
   int GetClock() const { return clock_; }
 
  private:
   Node * node_;
   int clock_;
-  volatile int pending_;
 };
 
 } // namespace internal

@@ -263,7 +263,7 @@ int embb_mtapi_opencl_link_at_runtime() {
   void * opencl_dll_handle = dlopen("libOpenCL.so", RTLD_LAZY);
 #endif
   if (opencl_dll_handle == 0)
-    return 0;
+    return -1;
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(push)

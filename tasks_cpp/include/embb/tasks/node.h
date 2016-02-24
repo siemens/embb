@@ -29,6 +29,7 @@
 
 #include <list>
 #include <embb/base/core_set.h>
+#include <embb/base/mutex.h>
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/tasks/action.h>
 #include <embb/tasks/task.h>
@@ -118,6 +119,15 @@ class Node {
     * \notthreadsafe
     */
   static void Finalize();
+
+  /**
+    * Returns the number of available queues.
+    * \return The number of available queues
+    * \waitfree
+    */
+  mtapi_uint_t GetQueueCount() const {
+    return queue_count_;
+  }
 
   /**
     * Returns the number of available cores.
@@ -218,11 +228,14 @@ class Node {
     mtapi_size_t node_local_data_size,
     mtapi_task_context_t * context);
 
+  mtapi_uint_t queue_count_;
   mtapi_uint_t core_count_;
   mtapi_uint_t worker_thread_count_;
   mtapi_action_hndl_t action_handle_;
   std::list<Queue*> queues_;
   std::list<Group*> groups_;
+  embb::base::Spinlock queue_lock_;
+  embb::base::Spinlock group_lock_;
 };
 
 } // namespace tasks
