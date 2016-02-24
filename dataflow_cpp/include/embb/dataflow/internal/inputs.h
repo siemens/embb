@@ -143,10 +143,7 @@ class Inputs<Slices, T1, T2, embb::base::internal::Nil,
   }
   virtual void OnClock(int clock) {
     const int idx = clock % Slices;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] == 0);
     if (--count_[idx] == 0) {
       count_[idx] = 2;
       listener_->OnClock(clock);
@@ -260,10 +257,7 @@ class Inputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
   }
   virtual void OnClock(int clock) {
     const int idx = clock % Slices;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] == 0);
     if (--count_[idx] == 0) {
       count_[idx] = 4;
       listener_->OnClock(clock);
@@ -325,10 +319,7 @@ class Inputs
   }
   virtual void OnClock(int clock) {
     const int idx = clock % Slices;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] == 0);
     if (--count_[idx] == 0) {
       count_[idx] = 5;
       listener_->OnClock(clock);

@@ -843,9 +843,7 @@ class Network : public internal::ClockListener {
   virtual void OnClock(int clock) {
     const int idx = clock % Slices;
     const int cnt = --sink_counter_[idx];
-    if (cnt < 0)
-      EMBB_THROW(embb::base::ErrorException,
-        "More sinks than expected signaled reception of given clock.")
+    assert(cnt == 0);
   }
 
   /**

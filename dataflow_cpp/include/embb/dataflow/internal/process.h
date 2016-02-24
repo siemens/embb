@@ -108,10 +108,7 @@ class Process< Slices, Serial, Inputs<Slices, I1, I2, I3, I4, I5>,
   }
 
   virtual void OnClock(int clock) {
-    if (!inputs_.AreAtClock(clock)) {
-      EMBB_THROW(embb::base::ErrorException,
-        "Some inputs are not at expected clock.")
-    }
+    assert(inputs_.AreAtClock(clock));
 
     bool ordered = Serial;
     if (ordered) {
