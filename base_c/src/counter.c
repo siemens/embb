@@ -30,23 +30,31 @@
 #include <assert.h>
 
 int embb_counter_init(embb_counter_t* counter) {
-  assert(counter != NULL);
+  if (counter == NULL) {
+    return EMBB_ERROR;
+  }
   embb_atomic_store_unsigned_int(&(counter->value), 0);
   return EMBB_SUCCESS;
 }
 
 unsigned int embb_counter_get(embb_counter_t* counter) {
-  assert(counter != NULL);
+  if (counter == NULL) {
+    return EMBB_ERROR;
+  }
   return embb_atomic_load_unsigned_int(&(counter->value));
 }
 
 unsigned int embb_counter_increment(embb_counter_t* counter) {
-  assert(counter != NULL);
+  if (counter == NULL) {
+    return EMBB_ERROR;
+  }
   return embb_atomic_fetch_and_add_unsigned_int(&(counter->value), 1);
 }
 
 unsigned int embb_counter_decrement(embb_counter_t* counter) {
-  assert(counter != NULL);
+  if (counter == NULL) {
+    return EMBB_ERROR;
+  }
   return embb_atomic_fetch_and_add_unsigned_int(&(counter->value),
                                                 (unsigned int)-1);
 }
