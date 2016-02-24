@@ -844,6 +844,7 @@ class Network : public internal::ClockListener {
     const int idx = clock % Slices;
     const int cnt = --sink_counter_[idx];
     assert(cnt == 0);
+    EMBB_UNUSED_IN_RELEASE(cnt);
   }
 
   /**
