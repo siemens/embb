@@ -136,8 +136,10 @@ allocate_rec(int node, Type& element) {
   do {
     current = tree_[node];
     desired = current - 1;
-    if (desired < 0)
+    if (desired < 0) {
+      element = Type();
       return -1;
+    }
   } while (!tree_[node].CompareAndSwap(current, desired));
 
   int leftResult = allocate_rec(GetLeftChildIndex(node), element);
