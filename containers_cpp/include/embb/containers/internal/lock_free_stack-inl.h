@@ -123,8 +123,10 @@ bool LockFreeStack< Type, ValuePool >::TryPop(Type & element) {
     top_cached = top;
 
     // Stack empty, cannot pop
-    if (top_cached == NULL)
+    if (top_cached == NULL) {
+      element = Type();
       return false;
+    }
 
     // Guard top_cached
     hazardPointer.Guard(0, top_cached);
