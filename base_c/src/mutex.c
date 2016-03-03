@@ -69,9 +69,7 @@ int embb_mutex_unlock(embb_mutex_t* mutex) {
 }
 
 void embb_mutex_destroy(embb_mutex_t* mutex) {
-  if (NULL == mutex) {
-    return;
-  }
+  assert(NULL != mutex);
   DeleteCriticalSection(mutex);
 }
 
@@ -139,9 +137,7 @@ int embb_mutex_unlock(embb_mutex_t* mutex) {
 }
 
 void embb_mutex_destroy(embb_mutex_t* mutex) {
-  if (NULL == mutex) {
-    return;
-  }
+  assert(NULL != mutex);
   pthread_mutex_destroy(mutex);
 }
 
@@ -210,6 +206,7 @@ int embb_spin_unlock(embb_spinlock_t* spinlock) {
 }
 
 void embb_spin_destroy(embb_spinlock_t* spinlock) {
+  assert(NULL != spinlock);
   // for now, doing nothing here... in future, will call the respective
   // destroy function for atomics...
   EMBB_UNUSED(spinlock);

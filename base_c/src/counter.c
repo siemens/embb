@@ -38,23 +38,17 @@ int embb_counter_init(embb_counter_t* counter) {
 }
 
 unsigned int embb_counter_get(embb_counter_t* counter) {
-  if (counter == NULL) {
-    return EMBB_ERROR;
-  }
+  assert(counter != NULL);
   return embb_atomic_load_unsigned_int(&(counter->value));
 }
 
 unsigned int embb_counter_increment(embb_counter_t* counter) {
-  if (counter == NULL) {
-    return EMBB_ERROR;
-  }
+  assert(counter != NULL);
   return embb_atomic_fetch_and_add_unsigned_int(&(counter->value), 1);
 }
 
 unsigned int embb_counter_decrement(embb_counter_t* counter) {
-  if (counter == NULL) {
-    return EMBB_ERROR;
-  }
+  assert(counter != NULL);
   return embb_atomic_fetch_and_add_unsigned_int(&(counter->value),
                                                 (unsigned int)-1);
 }

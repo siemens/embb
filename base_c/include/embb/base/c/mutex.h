@@ -150,7 +150,7 @@ int embb_mutex_unlock(
 /**
  * Destroys a mutex and frees its resources.
  *
- * \pre \c mutex has been initialized
+ * \pre \c mutex has been initialized and is not NULL.
  * \post \c mutex is uninitialized
  * \notthreadsafe
  * \see embb_mutex_init()
@@ -233,7 +233,7 @@ int embb_spin_unlock(
 /**
  * Destroys a spinlock and frees its resources.
  *
- * \pre \c spinlock has been initialized
+ * \pre \c spinlock has been initialized and is not NULL.
  * \post \c spinlock is uninitialized
  * \notthreadsafe
  * \see embb_spin_init()

@@ -62,9 +62,7 @@ void* embb_alloc(size_t bytes) {
 }
 
 void embb_free(void * ptr) {
-  if (ptr == NULL) {
-    return;
-  }
+  assert(ptr != NULL);
 
   size_t * alloc_type = (size_t*)ptr - 1;
   size_t * bytes_allocated = (size_t*)ptr - 2;
@@ -136,9 +134,7 @@ void* embb_alloc_aligned(size_t alignment, size_t size) {
 }
 
 void embb_free_aligned(void* ptr) {
-  if (ptr == NULL) {
-    return;
-  }
+  assert(ptr != NULL);
 
   size_t* ptr_conv = (size_t*)ptr;
 
@@ -165,10 +161,7 @@ void * embb_alloc(size_t bytes) {
 }
 
 void embb_free(void * ptr) {
-  if (ptr == NULL) {
-    return;
-  }
-
+  assert(ptr != NULL);
   free(ptr);
 }
 
@@ -201,9 +194,7 @@ void *embb_alloc_aligned(size_t alignment, size_t size) {
 }
 
 void embb_free_aligned(void* ptr) {
-  if (ptr == NULL) {
-    return;
-  }
+  assert(ptr != NULL);
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
   _aligned_free(ptr);
