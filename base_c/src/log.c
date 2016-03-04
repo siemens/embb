@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@ void embb_log_set_log_function(
   embb_log_global_log_function = func;
 }
 
-static void embb_log_write_internal(
+void embb_log_write_internal(
   char const * channel,
   embb_log_level_t log_level,
   char const * message,
@@ -75,18 +75,20 @@ static void embb_log_write_internal(
       log_context = (void*)stdout;
     }
     switch (log_level) {
-    case EMBB_LOG_LEVEL_INFO:
-      log_level_str = "INFO ";
-      break;
     case EMBB_LOG_LEVEL_ERROR:
       log_level_str = "ERROR";
+      break;
+    case EMBB_LOG_LEVEL_WARNING:
+      log_level_str = "WARN ";
+      break;
+    case EMBB_LOG_LEVEL_INFO:
+      log_level_str = "INFO ";
       break;
     case EMBB_LOG_LEVEL_TRACE:
       log_level_str = "TRACE";
       break;
 
     case EMBB_LOG_LEVEL_NONE:
-    case EMBB_LOG_LEVEL_WARNING:
     default:
       log_level_str = "     ";
       break;

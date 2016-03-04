@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,8 +46,8 @@ namespace internal {
   }
 
   template< typename T >
-  void LockFreeStackNode< T >::SetNext(LockFreeStackNode< T >* next) {
-    this->next = next;
+  void LockFreeStackNode< T >::SetNext(LockFreeStackNode< T >* next_to_set) {
+    this->next = next_to_set;
   }
 
   template< typename T >

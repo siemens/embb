@@ -24,17 +24,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_BUFFER_H_
-#define MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_BUFFER_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
+#define MTAPI_PLUGINS_C_MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
 
-#include <partest/partest.h>
+#include <stdint.h>
 
-class NetworkBufferTest : public partest::TestCase {
- public:
-  NetworkBufferTest();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
- private:
-  void TestBasic();
-};
 
-#endif // MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_BUFFER_H_
+int embb_mtapi_network_initialize();
+
+void embb_mtapi_network_finalize();
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // MTAPI_PLUGINS_C_MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_

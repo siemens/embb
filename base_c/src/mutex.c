@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,6 +25,7 @@
  */
 
 #include <embb/base/c/mutex.h>
+#include <embb/base/c/thread.h>
 #include <assert.h>
 
 #include <embb/base/c/internal/unused.h>
@@ -125,10 +126,15 @@ int embb_spin_init(embb_spinlock_t* spinlock) {
 
 int embb_spin_lock(embb_spinlock_t* spinlock) {
   int expected = 0;
+  int spins = 1;
 
   // try to swap the
   while (0 == embb_atomic_compare_and_swap_int(
     &spinlock->atomic_spin_variable_, &expected, 1)) {
+    if (0 == (spins & 1023)) {
+      embb_thread_yield();
+    }
+    spins++;
     // reset expected, as CAS might change it...
     expected = 0;
   }

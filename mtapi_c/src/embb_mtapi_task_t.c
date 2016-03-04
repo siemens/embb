@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -79,7 +79,7 @@ void embb_mtapi_task_initialize(embb_mtapi_task_t* that) {
 
   that->action.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->job.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
-  that->state = MTAPI_TASK_ERROR;
+  embb_atomic_store_int(&that->state, MTAPI_TASK_ERROR);
   that->task_id = MTAPI_TASK_ID_NONE;
   that->group.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
@@ -159,7 +159,7 @@ void embb_mtapi_task_set_state(
   assert(MTAPI_NULL != that);
 
   embb_spin_lock(&that->state_lock);
-  that->state = state;
+  embb_atomic_store_int(&that->state, state);
   embb_atomic_memory_barrier();
   embb_spin_unlock(&that->state_lock);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -191,6 +191,9 @@ class Spinlock {
 
   /**
    * Waits until the spinlock can be locked and locks it.
+   *
+   * \note This method yields the current thread in regular,
+   *       implementation-defined intervals.
    *
    * \pre The spinlock is not locked by the current thread.
    * \post The spinlock is locked.

@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+# Copyright (c) 2014-2016, Siemens AG. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -90,10 +90,19 @@ function(SetVisualStudioCompilerFlags)
     # Locally suppressed warnings (should not be globally suppressed):
     # 4640 -> Information that local static variable initialization is not
     #         thread-safe.
+    #
+    # VS 2015 specific warnings:
+    # 5026 -> Move constructor was implicitly defined as deleted
+    # 5027 -> Move assignment operator was implicitly defined as deleted
+    #
     set(warning_flags "/Wall /wd4820 /wd4514 /wd4668 /wd4710 /wd4350 /wd4571 /wd4625 /wd4626 /wd4711 /wd4255")
-	if (WARNINGS_ARE_ERRORS STREQUAL ON)
+    if (WARNINGS_ARE_ERRORS STREQUAL ON)
       set(warning_flags "${warning_flags} /WX")
-	endif()
+    endif()
+    string(FIND "${CMAKE_GENERATOR}" "Visual Studio 14 2015" vs2015_state)
+    if (vs2015_state EQUAL 0)
+      set(warning_flags "${warning_flags} /wd5026 /wd5027")
+    endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warning_flags}" PARENT_SCOPE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${warning_flags}" PARENT_SCOPE)
   endif()

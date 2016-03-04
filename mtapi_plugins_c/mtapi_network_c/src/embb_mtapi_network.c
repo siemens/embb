@@ -162,7 +162,8 @@ static void embb_mtapi_network_task_complete(
           send_buf, (int32_t)local_task->result_size);
         assert(err == 4);
         err = embb_mtapi_network_buffer_push_back_rawdata(
-          send_buf, (int32_t)local_task->result_size, local_task->result_buffer);
+          send_buf, (int32_t)local_task->result_size,
+          local_task->result_buffer);
         assert(err == (int)local_task->result_size);
 
         err = embb_mtapi_network_socket_sendbuffer(
@@ -303,7 +304,8 @@ static int embb_mtapi_network_thread(void * args) {
         mtapi_taskattr_set(&task_attr, MTAPI_TASK_COMPLETE_FUNCTION,
           func_void, 0, &local_status);
         assert(local_status == MTAPI_SUCCESS);
-        job_hndl = mtapi_job_get((mtapi_job_id_t)job_id, (mtapi_domain_t)domain_id, &local_status);
+        job_hndl = mtapi_job_get((mtapi_job_id_t)job_id,
+          (mtapi_domain_t)domain_id, &local_status);
         assert(local_status == MTAPI_SUCCESS);
         mtapi_task_start(
           MTAPI_TASK_ID_NONE, job_hndl,
@@ -377,7 +379,7 @@ static int embb_mtapi_network_thread(void * args) {
               assert(err == results_size);
 
               local_task->error_code = (mtapi_status_t)task_status;
-              local_task->state = MTAPI_TASK_COMPLETED;
+              embb_atomic_store_int(&local_task->state, MTAPI_TASK_COMPLETED);
               embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
 
               /* is task associated with a group? */
@@ -530,7 +532,7 @@ static void network_task_start(
         assert(err == send_buf->size);
 
         embb_atomic_fetch_and_add_int(&local_action->num_tasks, 1);
-        local_task->state = MTAPI_TASK_RUNNING;
+        embb_atomic_store_int(&local_task->state, MTAPI_TASK_RUNNING);
 
         embb_mtapi_network_buffer_clear(send_buf);
 
