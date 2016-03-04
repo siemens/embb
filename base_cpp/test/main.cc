@@ -66,7 +66,7 @@ PT_MAIN("Base C++") {
   PT_RUN(AtomicTest);
   PT_RUN(MemoryAllocationTest);
   PT_RUN(ThreadTest);
-  PT_RUN(LogTest);
+  //PT_RUN(LogTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 
