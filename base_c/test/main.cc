@@ -39,6 +39,7 @@
 #include <embb/base/c/log.h>
 #include <iostream>
 
+#include <embb/base/c/atomic.h>
 #include <embb/base/c/memory_allocation.h>
 
 using embb::base::test::AllocTest;
@@ -54,6 +55,8 @@ using embb::base::test::ThreadTest;
 using embb::base::test::ThreadSpecificStorageTest;
 
 PT_MAIN("Base C") {
+  embb_atomic_initialize();
+
   embb_log_set_log_level(EMBB_LOG_LEVEL_WARNING);
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
@@ -71,4 +74,6 @@ PT_MAIN("Base C") {
   PT_RUN(ThreadTest);
   PT_RUN(ThreadSpecificStorageTest);
   PT_EXPECT(embb_get_bytes_allocated() == 0);
+
+  embb_atomic_finalize();
 }

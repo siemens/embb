@@ -56,10 +56,12 @@
 #define EMBB_DEFINE_OR_ASSIGN(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX) \
   EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_internal__atomic_or_assign_, EMBB_PARAMETER_SIZE_BYTE)(\
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value) { \
+  EMBB_ATOMIC_MUTEX_LOCK; \
   __asm__ __volatile__("lock or" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "+m" (*pointer_to_value), "+q" (value) \
   : \
   : "memory"); \
+  EMBB_ATOMIC_MUTEX_UNLOCK; \
   }
 
 #else

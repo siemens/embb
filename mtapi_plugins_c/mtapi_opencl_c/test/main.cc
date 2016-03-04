@@ -29,8 +29,13 @@
 #include <embb_mtapi_opencl_test_linker.h>
 #include <embb_mtapi_opencl_test_task.h>
 
+#include <embb/base/c/atomic.h>
 
 PT_MAIN("MTAPI OPENCL") {
+  embb_atomic_initialize();
+
   PT_RUN(LinkerTest);
   PT_RUN(TaskTest);
+
+  embb_atomic_finalize();
 }

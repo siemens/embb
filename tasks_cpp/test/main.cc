@@ -32,9 +32,15 @@
 #include <tasks_cpp_test_group.h>
 #include <tasks_cpp_test_queue.h>
 
+#include <embb/base/c/atomic.h>
+
 
 PT_MAIN("TASKS") {
+  embb_atomic_initialize();
+
   PT_RUN(TaskTest);
   PT_RUN(GroupTest);
   PT_RUN(QueueTest);
+
+  embb_atomic_finalize();
 }

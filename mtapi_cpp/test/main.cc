@@ -27,6 +27,7 @@
 #include <partest/partest.h>
 
 #include <embb/base/c/thread.h>
+#include <embb/base/c/atomic.h>
 
 #include <mtapi_cpp_test_task.h>
 #include <mtapi_cpp_test_group.h>
@@ -34,9 +35,13 @@
 
 
 PT_MAIN("MTAPI C++") {
+  embb_atomic_initialize();
+
   embb_thread_set_max_count(1024);
 
   PT_RUN(TaskTest);
   PT_RUN(GroupTest);
   PT_RUN(QueueTest);
+
+  embb_atomic_finalize();
 }

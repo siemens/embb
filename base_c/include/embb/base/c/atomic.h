@@ -292,11 +292,32 @@ void embb_atomic_xor_assign_TYPE(
 extern "C" {
 #endif
 
+#include <embb/base/c/internal/cmake_config.h>
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+#include <embb/base/c/internal/platform.h>
+
+int embb_mutex_lock(
+  embb_mutex_t* mutex
+  );
+
+int embb_mutex_unlock(
+  embb_mutex_t* mutex
+  );
+
+#define EMBB_ATOMIC_MUTEX_LOCK embb_mutex_lock(&embb_atomic_mutex)
+#define EMBB_ATOMIC_MUTEX_UNLOCK embb_mutex_unlock(&embb_atomic_mutex)
+
+#else
+
+#define EMBB_ATOMIC_MUTEX_LOCK
+#define EMBB_ATOMIC_MUTEX_UNLOCK
+
+#endif
+
 #include <embb/base/c/internal/platform.h>
 #include <embb/base/c/internal/atomic/atomic_sizes.h>
 #include <embb/base/c/internal/atomic/atomic_variables.h>
 #include <embb/base/c/internal/macro_helper.h>
-#include <embb/base/c/internal/atomic/init_destroy.h>
 #include <embb/base/c/internal/atomic/load.h>
 #include <embb/base/c/internal/atomic/and_assign.h>
 #include <embb/base/c/internal/atomic/store.h>

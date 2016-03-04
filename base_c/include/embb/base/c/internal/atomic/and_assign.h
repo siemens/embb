@@ -69,10 +69,12 @@
 #define EMBB_DEFINE_AND_ASSIGN(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX)\
   EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_internal__atomic_and_assign_, \
   EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value) { \
+  EMBB_ATOMIC_MUTEX_LOCK; \
   __asm__ __volatile__("lock and" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "+m" (*pointer_to_value), "+q" (value) \
   : \
   : "memory"); \
+  EMBB_ATOMIC_MUTEX_UNLOCK; \
   }
 #else
 #error "No atomic fetch and store implementation found"
@@ -133,7 +135,7 @@ EMBB_DEFINE_AND_ASSIGN(4, "")
 /*
  * Now, using the basic functions above, we generate the respective functions
  * for all basic data types, like "unsigned short". For that purpose, the
- * following generator macro is used. This macro is called by the macros in the
+ * following generator macro is used. This macro is calleuild-work-Desktop-Defaultd by the macros in the
  * generator header, defining the implementation for the basic data types.
  *
  * For unsigned short and for and_assign.h, the following method would be

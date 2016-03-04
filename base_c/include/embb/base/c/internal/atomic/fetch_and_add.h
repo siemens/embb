@@ -57,10 +57,12 @@
 #define EMBB_DEFINE_FETCH_AND_ADD(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX) \
   EMBB_PLATFORM_INLINE EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) EMBB_CAT2(embb_internal__atomic_fetch_and_add_, EMBB_PARAMETER_SIZE_BYTE) \
   (EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value) { \
+  EMBB_ATOMIC_MUTEX_LOCK; \
   __asm__ __volatile__ ("lock xadd" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "+m" (*pointer_to_value), "+q" (new_value) \
   : \
   : "memory", "cc" ); \
+  EMBB_ATOMIC_MUTEX_UNLOCK; \
   return new_value; \
   }
 #else

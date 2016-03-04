@@ -46,6 +46,8 @@
 #include <functional>
 
 #include <embb/base/c/memory_allocation.h>
+#include <embb/base/c/atomic.h>
+
 
 #define THIS_DOMAIN_ID 1
 #define THIS_NODE_ID 1
@@ -66,6 +68,8 @@ int compute1_() {
 }
 
 PT_MAIN("Algorithms") {
+  embb_atomic_initialize();
+
   embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
   PT_RUN(PartitionerTest);
@@ -82,6 +86,5 @@ PT_MAIN("Algorithms") {
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 
-  //  std::cout << "please press return to continue..." << std::endl;
-  //  std::cin.get();
+  embb_atomic_finalize();
 }

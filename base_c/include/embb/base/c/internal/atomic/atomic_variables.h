@@ -29,6 +29,7 @@
 
 #include <stddef.h>
 #include <embb/base/c/internal/macro_helper.h>
+#include <embb/base/c/internal/cmake_config.h>
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #include <intrin.h>
@@ -56,5 +57,17 @@ EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(uintptr_t, uintptr_t)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(size_t, size_t)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(ptrdiff_t, ptrdiff_t)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(uintmax_t, uintmax_t)
+
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+#include <embb/base/c/mutex.h>
+
+extern embb_mutex_t embb_atomic_mutex;
+
+void embb_atomic_initialize();
+void embb_atomic_finalize();
+#else
+#define embb_atomic_initialize()
+#define embb_atomic_finalize()
+#endif
 
 #endif //EMBB_BASE_C_INTERNAL_ATOMIC_ATOMIC_VARIABLES_H_

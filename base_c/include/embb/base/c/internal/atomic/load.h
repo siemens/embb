@@ -58,12 +58,14 @@
 #define EMBB_DEFINE_LOAD(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX) \
   EMBB_PLATFORM_INLINE EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
   EMBB_CAT2(embb_internal__atomic_load_, EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value) { \
+  EMBB_ATOMIC_MUTEX_LOCK; \
   /* no fence required for loads */ \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) result; \
   __asm__ __volatile__("mov" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "=q" (result) \
   : "m" (*pointer_to_value) \
   : "memory"); \
+  EMBB_ATOMIC_MUTEX_UNLOCK; \
   return result; \
   }
 #else

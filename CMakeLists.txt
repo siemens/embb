@@ -83,6 +83,7 @@ option(INSTALL_DOCS "Specify whether Doxygen docs should be installed" ON)
 option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors" OFF)
 option(USE_AUTOMATIC_INITIALIZATION "Specify whether the MTAPI C++ interface, algorithms and dataflow should automatically intialize the MTAPI node if no explicit initialization is present" ON)
 option(BUILD_OPENCL_PLUGIN "Specify whether the MTAPI OpenCL plugin should be built" OFF)
+option(THREADING_ANALYSIS_MODE "Replaces lock-free synchronization constructs by mutex-based implementations to support threading analysis tools" OFF)
 
 ## LOCAL INSTALLATION OF SUBPROJECT BINARIES
 #
@@ -103,6 +104,14 @@ else()
   message("-- MTAPI/Tasks automatic initialization disabled")
 endif()
 message("   (set with command line option -DUSE_AUTOMATIC_INITIALIZATION=ON/OFF)")
+
+if (THREADING_ANALYSIS_MODE STREQUAL ON)
+  set(EMBB_THREADING_ANALYSIS_MODE 1)
+  message("-- Threading analysis mode enabled")
+else()
+  message("-- Threading analysis mode disabled (default")
+endif()
+message("   (set with command line option -DTHREADING_ANALYSIS_MODE=ON/OFF)")
 
 include(CMakeCommon/SetCompilerFlags.cmake)
 SetGNUCompilerFlags(compiler_libs compiler_flags)
