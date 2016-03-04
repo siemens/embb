@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,17 +24,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
-#define MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
+#ifndef BASE_CPP_TEST_LOG_TEST_H_
+#define BASE_CPP_TEST_LOG_TEST_H_
 
 #include <partest/partest.h>
 
-class TaskTest : public partest::TestCase {
+namespace embb {
+namespace base {
+namespace test {
+
+/**
+ * Provides tests for Log.
+ */
+class LogTest : public partest::TestCase {
  public:
-  TaskTest();
+  /**
+   * Adds test methods.
+   */
+     LogTest();
 
  private:
-  void TestBasic();
+  /**
+   * Tests all functionalities.
+   */
+  void Test();
 };
 
-#endif // MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
+} // namespace test
+} // namespace base
+} // namespace embb
+
+#endif // BASE_CPP_TEST_LOG_TEST_H_

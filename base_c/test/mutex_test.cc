@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -74,6 +74,77 @@ void MutexTest::TestRecursiveMutex() {
     PT_EXPECT_EQ(status, EMBB_SUCCESS);
   }
   embb_mutex_destroy(&mutex);
+}
+
+SpinLockTest::SpinLockTest() : counter_(0),
+number_threads_(partest::TestSuite::GetDefaultNumThreads()),
+  number_iterations_(partest::TestSuite::GetDefaultNumIterations()),
+  counter_iterations_(10000) {
+  CreateUnit("Protected counter using Lock")
+  .Pre(&SpinLockTest::PreSpinLockInc, this)
+  .Add(&SpinLockTest::TestSpinLockIncUseLock, this,
+  number_threads_,
+  number_iterations_)
+  .Post(&SpinLockTest::PostSpinLockInc, this);
+
+  CreateUnit("Protected counter using TryLock")
+  .Pre(&SpinLockTest::PreSpinLockInc, this)
+  .Add(&SpinLockTest::TestSpinLockIncUseTryLock, this,
+  number_threads_,
+  number_iterations_)
+  .Post(&SpinLockTest::PostSpinLockInc, this);
+
+  CreateUnit("Test spinning (too many spins), single thread")
+    .Add(&SpinLockTest::TestSpinLockTooManySpins, this,
+    // one thread
+    1,
+    // one iteration
+    1);
+}
+
+void SpinLockTest::TestSpinLockTooManySpins() {
+  embb_spin_init(&spinlock_);
+  embb_spin_lock(&spinlock_);
+
+  int return_code = embb_spin_try_lock(&spinlock_, 100);
+  PT_ASSERT(return_code == EMBB_BUSY);
+
+  embb_spin_unlock(&spinlock_);
+
+  return_code = embb_spin_try_lock(&spinlock_, 100);
+  PT_ASSERT(return_code == EMBB_SUCCESS);
+
+  embb_spin_unlock(&spinlock_);
+
+  embb_spin_destroy(&spinlock_);
+}
+
+void SpinLockTest::PreSpinLockInc() {
+  embb_spin_init(&spinlock_);
+}
+
+void SpinLockTest::TestSpinLockIncUseLock() {
+  for (unsigned int i = 0; i != counter_iterations_; ++i) {
+    embb_spin_lock(&spinlock_);
+    counter_++;
+    embb_spin_unlock(&spinlock_);
+  }
+}
+
+void SpinLockTest::TestSpinLockIncUseTryLock() {
+  for (unsigned int i = 0; i != counter_iterations_; ++i) {
+    while (embb_spin_try_lock(&spinlock_, 100) != EMBB_SUCCESS) {}
+    counter_++;
+    embb_spin_unlock(&spinlock_);
+  }
+}
+
+void SpinLockTest::PostSpinLockInc() {
+  embb_spin_destroy(&spinlock_);
+  PT_EXPECT_EQ(counter_, number_iterations_ *
+    number_threads_*
+    counter_iterations_);
+  counter_ = 0;
 }
 
 } // namespace test

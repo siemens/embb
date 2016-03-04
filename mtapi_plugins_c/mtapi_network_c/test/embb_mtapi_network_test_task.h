@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,42 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_DATAFLOW_INTERNAL_SPINLOCK_H_
-#define EMBB_DATAFLOW_INTERNAL_SPINLOCK_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_TASK_H_
+#define MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_TASK_H_
 
-#include <embb/base/atomic.h>
+#include <partest/partest.h>
 
-namespace embb {
-namespace dataflow {
-namespace internal {
-
-class SpinLock {
+class NetworkTaskTest : public partest::TestCase {
  public:
-  SpinLock() : lock_(0) {}
-  void Lock() {
-    int expected = 0;
-    while (!lock_.CompareAndSwap(expected, 1)) {
-      expected = 0;
-    }
-  }
-  bool TryLock(int spins = 0) {
-    int expected = 0;
-    while (spins > 0 && !lock_.CompareAndSwap(expected, 1)) {
-      expected = 0;
-      spins--;
-    }
-    return spins > 0;
-  }
-  void Unlock() {
-    lock_ = 0;
-  }
+  NetworkTaskTest();
 
  private:
-  embb::base::Atomic<int> lock_;
+  void TestBasic();
 };
 
-} // namespace internal
-} // namespace dataflow
-} // namespace embb
-
-#endif // EMBB_DATAFLOW_INTERNAL_SPINLOCK_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_TASK_H_

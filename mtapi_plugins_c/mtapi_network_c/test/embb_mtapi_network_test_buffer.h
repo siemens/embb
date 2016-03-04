@@ -24,15 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb_mtapi_opencl_test_linker.h>
+#ifndef MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_BUFFER_H_
+#define MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_BUFFER_H_
 
-#include <embb_mtapi_opencl_runtimelinker.h>
+#include <partest/partest.h>
 
+class NetworkBufferTest : public partest::TestCase {
+ public:
+  NetworkBufferTest();
 
-LinkerTest::LinkerTest() {
-  CreateUnit("mtapi opencl linker test").Add(&LinkerTest::TestBasic, this);
-}
+ private:
+  void TestBasic();
+};
 
-void LinkerTest::TestBasic() {
-  PT_EXPECT(embb_mtapi_opencl_link_at_runtime() != 0);
-}
+#endif // MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_BUFFER_H_

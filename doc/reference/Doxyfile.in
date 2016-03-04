@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+# Copyright (c) 2014-2016, Siemens AG. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -153,8 +153,8 @@ INPUT                  = "@CMAKE_SOURCE_DIR@/doc/reference/embb.dox" \
                          "@CMAKE_SOURCE_DIR@/base_cpp/include" \
                          "@CMAKE_SOURCE_DIR@/mtapi_c/include" \
                          "@CMAKE_SOURCE_DIR@/base_c/include" \
-                         "@CMAKE_SOURCE_DIR@/mtapi_opencl_c/include" \
-                         "@CMAKE_SOURCE_DIR@/mtapi_network_c/include"
+                         "@CMAKE_SOURCE_DIR@/mtapi_plugins_c/mtapi_opencl_c/include" \
+                         "@CMAKE_SOURCE_DIR@/mtapi_plugins_c/mtapi_network_c/include"
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \

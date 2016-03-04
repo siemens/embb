@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -78,13 +78,19 @@ void TaskTest::TestBasic() {
   PT_EXPECT_EQ(policy.GetPriority(), 0u);
   policy.AddWorker(0u);
   PT_EXPECT_EQ(policy.GetAffinity(), 1u);
-  policy.AddWorker(1u);
-  PT_EXPECT_EQ(policy.GetAffinity(), 3u);
-  policy.RemoveWorker(0u);
-  PT_EXPECT_EQ(policy.GetAffinity(), 2u);
-  PT_EXPECT_EQ(policy.IsSetWorker(0), false);
-  PT_EXPECT_EQ(policy.IsSetWorker(1), true);
 
+  if (policy.GetCoreCount() > 1) {
+    policy.AddWorker(1u);
+    PT_EXPECT_EQ(policy.GetAffinity(), 3u);
+  }
+
+  policy.RemoveWorker(0u);
+  PT_EXPECT_EQ(policy.IsSetWorker(0), false);
+
+  if (policy.GetCoreCount() > 1) {
+    PT_EXPECT_EQ(policy.GetAffinity(), 2u);
+    PT_EXPECT_EQ(policy.IsSetWorker(1), true);
+  }
   std::string test;
   embb::tasks::Task task = node.Spawn(
     embb::base::Bind(

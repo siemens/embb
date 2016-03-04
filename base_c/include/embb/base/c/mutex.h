@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,12 +46,25 @@ extern "C" {
 
 #include <embb/base/c/internal/platform.h>
 #include <embb/base/c/errors.h>
+#include <embb/base/c/atomic.h>
 
 #ifdef DOXYGEN
 /**
  * Opaque type representing a mutex.
  */
 typedef opaque_type embb_mutex_t;
+
+/**
+ * Opaque type representing a spinlock.
+ */
+typedef opaque_type embb_spinlock_t;
+#else
+/**
+ * Spinlock type, treat as opaque.
+ */
+typedef struct {
+  embb_atomic_int atomic_spin_variable_;
+} embb_spinlock_t;
 #endif /* DOXYGEN */
 
 /**
@@ -145,6 +158,89 @@ int embb_mutex_unlock(
 void embb_mutex_destroy(
   embb_mutex_t* mutex
   /**< [IN/OUT] Pointer to mutex */
+  );
+
+/**
+ * Initializes a spinlock
+ *
+ * \pre \c spinlock is uninitialized
+ * \post \c spinlock is initialized
+ * \return EMBB_SUCCESS if spinlock could be initialized \n
+ *         EMBB_ERROR otherwise
+ * \memory (Potentially) allocates dynamic memory
+ * \notthreadsafe
+ * \see embb_spinlock_destroy()
+ */
+int embb_spin_init(
+  embb_spinlock_t* spinlock
+  /**< [OUT] Pointer to spinlock */
+  );
+
+/**
+ * Spins until the spinlock can be locked and locks it.
+ *
+ * \note This method yields the current thread in regular,
+ *       implementation-defined intervals.
+ *
+ * \pre \c spinlock is initialized \n
+ * \post If successful, \c spinlock is locked.
+ * \return EMBB_SUCCESS if spinlock could be locked. \n
+ *         EMBB_ERROR if an error occurred.
+ * \threadsafe
+ * \see embb_spinlock_try_lock(), embb_mutex_unlock()
+ */
+int embb_spin_lock(
+  embb_spinlock_t* spinlock
+  /**< [IN/OUT] Pointer to spinlock */
+  );
+
+/**
+ * Tries to lock the spinlock and returns if not successful.
+ *
+ * \pre \c spinlock is initialized
+ * \post If successful, \c spinlock is locked
+ *
+ * \return EMBB_SUCCESS if spinlock could be locked \n
+ *         EMBB_BUSY if spinlock could not be locked \n
+ *         EMBB_ERROR if an error occurred
+ * \threadsafe
+ * \see embb_spin_lock(), embb_spin_unlock()
+ */
+int embb_spin_try_lock(
+  embb_spinlock_t* spinlock,
+  /**< [IN/OUT] Pointer to spinlock */
+  unsigned int max_number_spins
+  /**< [IN] Maximal count of spins to perform, trying to acquire lock. Note that
+   * passing 0 here results in not trying to obtain the lock at all.
+   */
+  );
+
+/**
+ * Unlocks a locked spinlock.
+ *
+ * \pre \c spinlock has been locked by the current thread.
+ * \post If successful, \c spinlock is unlocked.
+ * \return EMBB_SUCCESS if the operation was successful \n
+ *         EMBB_ERROR otherwise
+ * \threadsafe
+ * \see embb_spin_lock(), embb_spin_try_lock()
+ */
+int embb_spin_unlock(
+  embb_spinlock_t* spinlock
+  /**< [IN/OUT] Pointer to spinlock */
+  );
+
+/**
+ * Destroys a spinlock and frees its resources.
+ *
+ * \pre \c spinlock has been initialized
+ * \post \c spinlock is uninitialized
+ * \notthreadsafe
+ * \see embb_spin_init()
+ */
+void embb_spin_destroy(
+  embb_spinlock_t* spinlock
+  /**< [IN/OUT] Pointer to spinlock */
   );
 
 #ifdef __cplusplus

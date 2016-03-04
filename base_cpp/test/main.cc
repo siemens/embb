@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,6 +34,7 @@
 #include <thread_specific_storage_test.h>
 #include <atomic_test.h>
 #include <memory_allocation_test.h>
+#include <log_test.h>
 
 #include <embb/base/c/memory_allocation.h>
 
@@ -41,23 +42,28 @@ using embb::base::test::CoreSetTest;
 using embb::base::test::DurationTest;
 using embb::base::test::ConditionVarTest;
 using embb::base::test::MutexTest;
+using embb::base::test::SpinLockTest;
 using embb::base::test::ThreadSpecificStorageTest;
 using embb::base::test::AtomicTest;
 using embb::base::test::MemoryAllocationTest;
 using embb::base::test::ThreadTest;
+using embb::base::test::LogTest;
 
 PT_MAIN("Base C++") {
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
+
   PT_RUN(CoreSetTest);
   PT_RUN(DurationTest);
   PT_RUN(ConditionVarTest);
   PT_RUN(MutexTest);
+  PT_RUN(SpinLockTest);
   PT_RUN(ThreadSpecificStorageTest);
   PT_RUN(AtomicTest);
   PT_RUN(MemoryAllocationTest);
   PT_RUN(ThreadTest);
+  PT_RUN(LogTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

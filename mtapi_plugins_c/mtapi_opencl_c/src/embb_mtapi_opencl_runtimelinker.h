@@ -24,17 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
-#define MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
+#define MTAPI_PLUGINS_C_MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
 
-#include <partest/partest.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class NetworkSocketTest : public partest::TestCase {
- public:
-  NetworkSocketTest();
+int embb_mtapi_opencl_link_at_runtime();
 
- private:
-  void TestBasic();
-};
+#ifdef __cplusplus
+}
+#endif
 
-#endif // MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_

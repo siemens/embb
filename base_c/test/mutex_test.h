@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -84,6 +84,64 @@ class MutexTest : public partest::TestCase {
    */
   size_t number_iterations_;
 };
+
+
+class SpinLockTest : public partest::TestCase {
+ public:
+  SpinLockTest();
+
+ private:
+  /**
+   * Check that the try lock fails, when lock is already set.
+   */
+  void TestSpinLockTooManySpins();
+
+  /**
+   * Prepares TestMutexIncCpp.
+   */
+  void PreSpinLockInc();
+
+  /**
+   * Tests mutex locking and unlocking to protect shared counter.
+   */
+  void TestSpinLockIncUseLock();
+
+  /**
+   * Tests mutex locking and unlocking to protect shared counter using trylock.
+   */
+  void TestSpinLockIncUseTryLock();
+
+  /**
+   * Checks and tears down TestMutexIncCpp.
+   */
+  void PostSpinLockInc();
+
+  /**
+   * Shared counter to check effectiveness of mutex.
+   */
+  size_t counter_;
+
+  /**
+   * Number of threads used to run tests.
+   */
+  size_t number_threads_;
+
+  /**
+   * Number of times the test method is called by each thread.
+   */
+  size_t number_iterations_;
+
+  /**
+   * Number of internal iterations, for incrementing the counter.
+   */
+  size_t counter_iterations_;
+
+  /**
+   * The used spinlock
+   */
+  embb_spinlock_t spinlock_;
+};
+
 
 } // namespace test
 } // namespace base

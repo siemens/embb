@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,9 +29,63 @@
 
 #include <embb/base/internal/platform.h>
 #include <embb/base/exceptions.h>
+#include <embb/base/c/mutex.h>
 
 namespace embb {
 namespace base {
+/**
+ * \defgroup CPP_CONCEPTS_MUTEX Mutex Concept
+ *
+ * \brief Concept for thread synchronization.
+ *
+ * \anchor CPP_CONCEPTS_MUTEX_ANCHOR
+ *
+ * \ingroup CPP_CONCEPT
+ * \{
+ * \par Description
+ *
+ 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+ * The mutex concept is used for thread synchronization and provides a lock.
+ * At any point in time, only one thread can exclusively hold the lock and
+ * the lock is held until the thread explicitly releases it.
+ *
+ * \par Requirements
+ * - Let \c Mutex be the mutex type
+ * - Let \c m be an object of type \c Mutex.
+ *
+ * \par Valid Expressions
+ *
+ * <table>
+ *   <tr>
+ *     <th>Expression</th>
+ *     <th>Return type</th>
+ *     <th>Description</th>
+ *   </tr>
+ *   <tr>
+ *     <td>Mutex()</td>
+ *     <td>\c void</td>
+ *     <td>Constructs a mutex.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>m.TryLock()</td>
+ *     <td>\c bool</td>
+ *     <td>Tries to lock the mutex and immediately returns. Returns \c false, if
+ *     the mutex could not be acquired (locked), otherwise \c true.
+ *   </tr>
+ *   <tr>
+ *     <td>m.Lock()</td>
+ *     <td>\c void</td>
+ *     <td>Locks the mutex. When the mutex is already locked, the current thread
+ *     is blocked until the mutex is unlocked.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>m.Unlock()</td>
+ *     <td>\c void</td>
+ *     <td>Unlocks the mutex.</td>
+ *   </tr>
+ * </table>
+ * \}
+ */
 
 /**
  * \defgroup CPP_BASE_MUTEX Mutex and Lock
@@ -47,7 +101,6 @@ namespace base {
 class ConditionVariable;
 
 namespace internal {
-
 /**
  * Provides main functionality for mutexes.
  */
@@ -111,8 +164,83 @@ class MutexBase {
    */
   friend class embb::base::ConditionVariable;
 };
-
 } // namespace internal
+
+/**
+ * Spinlock
+ *
+ * \concept{CPP_CONCEPTS_MUTEX}
+ *
+ * \ingroup CPP_BASE_MUTEX
+ */
+class Spinlock {
+ public:
+  /**
+   * Creates a spinlock which is in unlocked state.
+   *
+   * \notthreadsafe
+   */
+  Spinlock();
+
+  /**
+   * Destructs a spinlock.
+   *
+   * \notthreadsafe
+   */
+  ~Spinlock();
+
+  /**
+   * Waits until the spinlock can be locked and locks it.
+   *
+   * \note This method yields the current thread in regular,
+   *       implementation-defined intervals.
+   *
+   * \pre The spinlock is not locked by the current thread.
+   * \post The spinlock is locked.
+   * \threadsafe
+   * \see TryLock(), Unlock()
+   */
+  void Lock();
+
+  /**
+   * Tries to lock the spinlock for \c number_spins times and returns.
+   *
+   * \pre The spinlock is not locked by the current thread.
+   * \post If successful, the spinlock is locked.
+   * \return \c true if the spinlock could be locked, otherwise \c false.
+   * \threadsafe
+   * \see Lock(), Unlock()
+   */
+  bool TryLock(
+    unsigned int number_spins = 1
+    /**< [IN] Maximal number of spins when trying to acquire the lock.
+     * Note that passing 0 here results in not trying to obtain the lock at all.
+     * The default parameter is 1.
+     */
+    );
+
+  /**
+   * Unlocks the spinlock.
+   *
+   * \pre The spinlock is locked by the current thread.
+   * \post The spinlock is unlocked.
+   * \threadsafe
+   * \see Lock(), TryLock()
+   */
+  void Unlock();
+
+ private:
+  /**
+   * Disables copy construction and assignment.
+   */
+  Spinlock(const Spinlock&);
+  Spinlock& operator=(const Spinlock&);
+
+  /**
+   * Internal spinlock from base_c
+   */
+  embb_spinlock_t spinlock_;
+};
 
 /**
  * Non-recursive, exclusive mutex.
@@ -123,6 +251,8 @@ class MutexBase {
  *
  * \see RecursiveMutex
  * \ingroup CPP_BASE_MUTEX
+ *
+ * \concept{CPP_CONCEPTS_MUTEX}
  */
 class Mutex : public internal::MutexBase {
  public:
@@ -182,7 +312,6 @@ class Mutex : public internal::MutexBase {
   friend class ConditionVariable;
 };
 
-
 /**
  * Recursive, exclusive mutex.
  *
@@ -193,6 +322,8 @@ class Mutex : public internal::MutexBase {
  *
  * \see Mutex
  * \ingroup CPP_BASE_MUTEX
+ *
+ * \concept{CPP_CONCEPTS_MUTEX}
  */
 class RecursiveMutex : public internal::MutexBase {
  public:
@@ -246,15 +377,16 @@ class RecursiveMutex : public internal::MutexBase {
   RecursiveMutex& operator=(const RecursiveMutex&);
 };
 
-
 /**
  * Scoped lock (according to the RAII principle) using a mutex.
  *
  * The mutex is locked on construction and unlocked on leaving the scope of the
  * lock.
  *
- * \tparam Mutex Used mutex type
- * \see Mutex, UniqueLock
+ * \tparam Mutex Used mutex type. Has to fulfil the
+ *         \ref CPP_CONCEPTS_MUTEX_ANCHOR "Mutex Concept".
+ *
+ * \see UniqueLock
  * \ingroup CPP_BASE_MUTEX
  */
 template<typename Mutex = embb::base::Mutex>
@@ -352,7 +484,8 @@ const AdoptLockTag adopt_lock = AdoptLockTag();
  *
  * \notthreadsafe
  * \see Mutex, LockGuard
- * \tparam Mutex Used mutex type
+ * \tparam Mutex Used mutex type. Has to fulfil the
+ *         \ref CPP_CONCEPTS_MUTEX_ANCHOR "Mutex Concept".
  * \ingroup CPP_BASE_MUTEX
  */
 template<typename Mutex = embb::base::Mutex>
@@ -482,7 +615,6 @@ class UniqueLock {
    */
   friend class embb::base::ConditionVariable;
 };
-
 } // namespace base
 } // namespace embb
 

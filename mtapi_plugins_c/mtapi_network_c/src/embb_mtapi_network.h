@@ -24,17 +24,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
-#define MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
+#define MTAPI_PLUGINS_C_MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int embb_mtapi_opencl_link_at_runtime();
+
+int embb_mtapi_network_initialize();
+
+void embb_mtapi_network_finalize();
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // MTAPI_OPENCL_C_SRC_EMBB_MTAPI_OPENCL_RUNTIMELINKER_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_NETWORK_C_SRC_EMBB_MTAPI_NETWORK_H_

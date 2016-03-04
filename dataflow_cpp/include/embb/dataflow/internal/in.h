@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
 
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
 #include <vector>
-#include <embb/dataflow/internal/spinlock.h>
+#include <embb/base/mutex.h>
 #endif
 
 #include <embb/dataflow/internal/signal.h>
@@ -80,7 +80,7 @@ class In {
   ClockListener * listener_;
   bool connected_;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
-  SpinLock lock_;
+  embb::base::Spinlock lock_;
   std::vector<SignalType> history_;
 #endif
 

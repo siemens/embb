@@ -98,7 +98,8 @@ postfixed with either "_cpp" or "_c" for the C++ and C versions, respectively.
 Currently, EMB² contains the following components:
 
   - base: base_c, base_cpp
-  - mtapi: mtapi_c, mtapi_network_c, mtapi_opencl_c, mtapi_cpp
+  - mtapi: mtapi_c, mtapi_cpp and
+    mtapi_plugins_c (mtapi_network_c and mtapi_opencl_c)
   - tasks: tasks_cpp
   - algorithms: algorithms_cpp
   - dataflow: dataflow_cpp
@@ -270,8 +271,8 @@ If you want to use the C++ functionalities of EMB², you have to link the
 following libraries (names will be different on Windows and on Linux) in the
 given order:
 
-    embb_base, embb_base_cpp, embb_mtapi_c, embb_mtapi_cpp, embb_containers_cpp,
-    embb_algorithms_cpp, embb_dataflow_cpp
+    embb_dataflow_cpp, embb_algorithms_cpp, embb_containers_cpp,
+    embb_mtapi_cpp, embb_mtapi_c, embb_base_cpp, embb_base_c
 
 The C++ header files can be included as follows:
 
@@ -284,7 +285,7 @@ The C++ header files can be included as follows:
 
 The following libraries have to be linked in the given order:
 
-    embb_base_c, mtapi_c
+    embb_mtapi_c, embb_base_c
 
 The C header files can be included as follows:
 

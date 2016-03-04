@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -187,7 +187,8 @@ mtapi_task_state_t mtapi_context_taskstate_get(
         &(task_context->thread_context->tss_id));
 
     if (local_context == task_context->thread_context) {
-      task_state = task_context->task->state;
+      task_state = (mtapi_task_state_t)embb_atomic_load_int(
+        &task_context->task->state);
       local_status = MTAPI_SUCCESS;
     } else {
       local_status = MTAPI_ERR_CONTEXT_OUTOFCONTEXT;

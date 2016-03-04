@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,32 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_C_SRC_EMBB_MTAPI_SPINLOCK_T_H_
-#define MTAPI_C_SRC_EMBB_MTAPI_SPINLOCK_T_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
+#define MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_
 
-#include <embb/mtapi/c/mtapi.h>
-#include <embb/base/c/atomic.h>
+#include <partest/partest.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class TaskTest : public partest::TestCase {
+ public:
+  TaskTest();
 
+ private:
+  void TestBasic();
+};
 
-/* ---- CLASS DECLARATION -------------------------------------------------- */
-
-typedef embb_atomic_int embb_mtapi_spinlock_t;
-
-void embb_mtapi_spinlock_initialize(embb_mtapi_spinlock_t * that);
-void embb_mtapi_spinlock_finalize(embb_mtapi_spinlock_t * that);
-mtapi_boolean_t embb_mtapi_spinlock_acquire(embb_mtapi_spinlock_t * that);
-mtapi_boolean_t embb_mtapi_spinlock_acquire_with_spincount(
-  embb_mtapi_spinlock_t * that,
-  mtapi_uint_t max_spin_count);
-mtapi_boolean_t embb_mtapi_spinlock_release(embb_mtapi_spinlock_t * that);
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // MTAPI_C_SRC_EMBB_MTAPI_SPINLOCK_T_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_OPENCL_C_TEST_EMBB_MTAPI_OPENCL_TEST_TASK_H_

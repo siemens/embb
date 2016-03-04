@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,6 +32,8 @@
 #include <embb/tasks/node.h>
 #include <embb/base/function.h>
 
+#include <algorithm>
+
 namespace embb {
 namespace dataflow {
 namespace internal {
@@ -46,7 +48,9 @@ class SchedulerMTAPI : public Scheduler {
       group_[ii] = &group;
     }
 
-    queue_count_ = static_cast<int>(node.GetWorkerThreadCount());
+    queue_count_ = std::min(
+      static_cast<int>(node.GetQueueCount()),
+      static_cast<int>(node.GetWorkerThreadCount()) );
     queue_ = reinterpret_cast<embb::tasks::Queue**>(
       embb::base::Allocation::Allocate(
       sizeof(embb::tasks::Queue*)*queue_count_));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,7 +46,7 @@ void embb_mtapi_task_queue_initialize(embb_mtapi_task_queue_t* that) {
   that->get_task_position = 0;
   that->put_task_position = 0;
   mtapi_queueattr_init(&that->attributes, MTAPI_NULL);
-  embb_mtapi_spinlock_initialize(&that->lock);
+  embb_spin_init(&that->lock);
 }
 
 void embb_mtapi_task_queue_initialize_with_capacity(
@@ -61,7 +61,7 @@ void embb_mtapi_task_queue_initialize_with_capacity(
   that->put_task_position = 0;
   mtapi_queueattr_init(&that->attributes, MTAPI_NULL);
   that->attributes.limit = capacity;
-  embb_mtapi_spinlock_initialize(&that->lock);
+  embb_spin_init(&that->lock);
 }
 
 void embb_mtapi_task_queue_finalize(embb_mtapi_task_queue_t* that) {
@@ -70,7 +70,7 @@ void embb_mtapi_task_queue_finalize(embb_mtapi_task_queue_t* that) {
 
   embb_mtapi_task_queue_initialize(that);
 
-  embb_mtapi_spinlock_finalize(&that->lock);
+  embb_spin_destroy(&that->lock);
 }
 
 embb_mtapi_task_t * embb_mtapi_task_queue_pop(embb_mtapi_task_queue_t* that) {
@@ -78,7 +78,7 @@ embb_mtapi_task_t * embb_mtapi_task_queue_pop(embb_mtapi_task_queue_t* that) {
 
   assert(MTAPI_NULL != that);
 
-  if (embb_mtapi_spinlock_acquire_with_spincount(&that->lock, 128)) {
+  if (embb_spin_try_lock(&that->lock, 128) == EMBB_SUCCESS) {
     if (0 < that->tasks_available) {
       /* take away one task */
       that->tasks_available--;
@@ -96,7 +96,7 @@ embb_mtapi_task_t * embb_mtapi_task_queue_pop(embb_mtapi_task_queue_t* that) {
       /* make task entry invalid just in case */
       that->task_buffer[task_position] = MTAPI_NULL;
     }
-    embb_mtapi_spinlock_release(&that->lock);
+    embb_spin_unlock(&that->lock);
   }
 
   return task;
@@ -109,7 +109,7 @@ mtapi_boolean_t embb_mtapi_task_queue_push(
 
   assert(MTAPI_NULL != that);
 
-  if (embb_mtapi_spinlock_acquire(&that->lock)) {
+  if (embb_spin_lock(&that->lock) == EMBB_SUCCESS) {
     if (that->attributes.limit > that->tasks_available) {
       /* acquire position to put task into */
       mtapi_uint_t task_position = that->put_task_position;
@@ -126,7 +126,7 @@ mtapi_boolean_t embb_mtapi_task_queue_push(
 
       result = MTAPI_TRUE;
     }
-    embb_mtapi_spinlock_release(&that->lock);
+    embb_spin_unlock(&that->lock);
   }
 
   return result;
@@ -143,7 +143,7 @@ mtapi_boolean_t embb_mtapi_task_queue_process(
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != process);
 
-  if (embb_mtapi_spinlock_acquire(&that->lock)) {
+  if (embb_spin_lock(&that->lock) == EMBB_SUCCESS) {
     idx = that->get_task_position;
     for (ii = 0; ii < that->tasks_available; ii++) {
       result = process(that->task_buffer[ii], user_data);
@@ -152,7 +152,7 @@ mtapi_boolean_t embb_mtapi_task_queue_process(
       }
       idx = (idx + 1) % that->attributes.limit;
     }
-    embb_mtapi_spinlock_release(&that->lock);
+    embb_spin_unlock(&that->lock);
   }
 
   return result;

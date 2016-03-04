@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+# Copyright (c) 2014-2016, Siemens AG. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -40,13 +40,30 @@ function (CreateDoxygenDocumentationTarget)
     if (TARGET doxygen)
       # Do nothing, since the repeated adding causes an error
     else()
-      add_custom_target (
-        doxygen 
-        #ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile
-        SOURCES ${PROJECT_BINARY_DIR}/Doxyfile)
-        # IF you do NOT want the documentation to be generated EVERY time you build the project
-        # then leave out the 'ALL' keyword from the above command.
+
+    FILE(WRITE ${CMAKE_BINARY_DIR}/doxygen_makefile.cmake "
+MESSAGE(STATUS \"Running Doxygen\")
+EXECUTE_PROCESS(
+COMMAND \${EXE} \${IN}
+ERROR_VARIABLE  DOXYGEN_OUT_ERR
+RESULT_VARIABLE DOXYGEN_OUT_RESULT)
+STRING(LENGTH \"\${DOXYGEN_OUT_ERR}\" LENGTH_ERR)
+IF ( NOT \${LENGTH_ERR} STREQUAL \"0\" )
+  MESSAGE (WARNING \"Doxygen produced following warnings and or/errors: \${DOXYGEN_OUT_ERR}\")
+  IF ( \${WARNINGS_ARE_ERRORS} STREQUAL ON OR NOT \${DOXYGEN_OUT_RESULT} STREQUAL \"0\" )
+    MESSAGE (FATAL_ERROR \"Exiting doxygen generation due to errors (or warnings, if WARNINGS_ARE_ERRORS is enabled)\")
+  ENDIF ()
+ENDIF ()
+")
+
+      add_custom_target(doxygen)
+      add_custom_command(
+        TARGET doxygen
+        COMMAND ${CMAKE_COMMAND}
+          -DEXE=${DOXYGEN_EXECUTABLE}
+          -DIN=${PROJECT_BINARY_DIR}/Doxyfile
+          -DWARNINGS_ARE_ERRORS=${WARNINGS_ARE_ERRORS}
+          -P ${CMAKE_BINARY_DIR}/doxygen_makefile.cmake)
     endif()
   endif()
 endfunction()

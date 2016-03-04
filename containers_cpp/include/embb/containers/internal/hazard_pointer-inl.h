@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,386 +30,360 @@
 namespace embb {
 namespace containers {
 namespace internal {
-template< typename ElementT >
-FixedSizeList<ElementT>::FixedSizeList(size_t max_size) :
-  max_size(max_size),
-  size(0) {
-  elementsArray = static_cast<ElementT*>(
-    embb::base::Allocation::Allocate(sizeof(ElementT) *
-    max_size));
-}
-
-template< typename ElementT >
-inline size_t FixedSizeList<ElementT>::GetSize() const {
-  return size;
-}
-
-template< typename ElementT >
-inline size_t FixedSizeList<ElementT>::GetMaxSize() const {
-  return max_size;
-}
-
-template< typename ElementT >
-inline void FixedSizeList<ElementT>::clear() {
-  size = 0;
-}
-
-template< typename ElementT >
-typename FixedSizeList<ElementT>::iterator
-FixedSizeList<ElementT>::begin() const {
-  return &elementsArray[0];
-}
-
-template< typename ElementT >
-typename FixedSizeList<ElementT>::iterator
-FixedSizeList<ElementT>::end() const {
-  return &elementsArray[size];
-}
-
-template< typename ElementT >
-FixedSizeList< ElementT > &
-FixedSizeList<ElementT>::operator= (const FixedSizeList & other) {
-  size = 0;
-
-  if (max_size < other.size) {
-    EMBB_THROW(embb::base::ErrorException, "Copy target to small");
-  }
-
-  for (const_iterator it = other.begin(); it != other.end(); ++it) {
-    PushBack(*it);
-  }
-  return *this;
-}
-
-template< typename ElementT >
-bool FixedSizeList<ElementT>::PushBack(ElementT const el) {
-  if (size + 1 > max_size) {
-    return false;
-  }
-  elementsArray[size] = el;
-  size++;
-  return true;
-}
-
-template< typename ElementT >
-FixedSizeList<ElementT>::~FixedSizeList() {
-  embb::base::Allocation::Free(elementsArray);
-}
-
-template< typename GuardType >
-bool HazardPointerThreadEntry<GuardType>::IsActive() {
-  return is_active;
-}
-
-template< typename GuardType >
-bool HazardPointerThreadEntry<GuardType>::TryReserve() {
-  bool expected = false;
-  return is_active.CompareAndSwap(expected, true);
-}
-
-template< typename GuardType >
-void HazardPointerThreadEntry<GuardType>::Deactivate() {
-  is_active = false;
-}
-
-template< typename GuardType >
-size_t HazardPointerThreadEntry<GuardType>::GetRetiredCounter() {
-  return retired_list.GetSize();
-}
-
-template< typename GuardType >
-FixedSizeList< GuardType >& HazardPointerThreadEntry<GuardType>::
-GetRetired() {
-  return retired_list;
-}
-
-template< typename GuardType >
-FixedSizeList< GuardType >& HazardPointerThreadEntry<GuardType>::
-GetRetiredTemp() {
-  return retired_list_temp;
-}
-
-template< typename GuardType >
-FixedSizeList< GuardType >& HazardPointerThreadEntry<GuardType>::
-GetHazardTemp() {
-  return hazard_pointer_list_temp;
-}
-
-template< typename GuardType >
-void HazardPointerThreadEntry<GuardType>::
-SetRetired(internal::FixedSizeList< GuardType > const & retired_list) {
-  this->retired_list = retired_list;
-}
-
-template< typename GuardType >
-HazardPointerThreadEntry<GuardType>::
-HazardPointerThreadEntry(GuardType undefined_guard, int guards_per_thread,
-  size_t max_size_retired_list) :
-#ifdef EMBB_DEBUG
-  who_is_scanning(-1),
+// Visual Studio is complaining, that the return in the last line of this
+// function is not reachable. This is true, as long as exceptions are enabled.
+// Otherwise, the exception becomes an assertion and with disabling assertions,
+// the code becomes reachable. So, disabling this warning.
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4702)
 #endif
-  undefined_guard(undefined_guard),
-  guards_per_thread(guards_per_thread),
-  max_size_retired_list(max_size_retired_list),
-  // initially, each potential thread is active... if that is not the case
-  // another thread could call "HelpScan", and block this thread in making
-  // progress.
-  // Still, threads can be leave the hazard pointer processing (deactivation),
-  // but this can only be done once, i.e., this is not revertable...
-  is_active(1),
-  retired_list(max_size_retired_list),
-  retired_list_temp(max_size_retired_list),
-  hazard_pointer_list_temp(embb::base::Thread::GetThreadsMaxCount() *
-    guards_per_thread) {
-  // Initialize guarded pointer list
-  guarded_pointers = static_cast<embb::base::Atomic<GuardType>*>
-    (embb::base::Allocation::Allocate(
-    sizeof(embb::base::Atomic<GuardType>)*guards_per_thread));
+  template< typename GuardType >
+  unsigned int HazardPointer< GuardType >::GetObjectLocalThreadIndex() {
+    // first, get the EMBB native thread id.
+    unsigned int embb_thread_index;
 
-  for (int i = 0; i != guards_per_thread; ++i) {
-    new (static_cast<void*>(&guarded_pointers[i]))
-      embb::base::Atomic<GuardType>(undefined_guard);
-  }
-}
+    int return_val = embb_internal_thread_index(&embb_thread_index);
 
-template< typename GuardType >
-HazardPointerThreadEntry<GuardType>::~HazardPointerThreadEntry() {
-  for (int i = 0; i != guards_per_thread; ++i) {
-    guarded_pointers[i].~Atomic();
-  }
+    if (return_val != EMBB_SUCCESS) {
+      EMBB_THROW(embb::base::ErrorException, "Could not get thread id");
+    }
 
-  embb::base::Allocation::Free(guarded_pointers);
-}
-
-template< typename GuardType >
-GuardType HazardPointerThreadEntry<GuardType>::GetGuard(int pos) const {
-  return guarded_pointers[pos];
-}
-
-template< typename GuardType >
-void HazardPointerThreadEntry<GuardType>::AddRetired(GuardType pointerToGuard) {
-  retired_list.PushBack(pointerToGuard);
-}
-
-template< typename GuardType >
-void HazardPointerThreadEntry<GuardType>::
-GuardPointer(int guardNumber, GuardType pointerToGuard) {
-  guarded_pointers[guardNumber] = pointerToGuard;
-}
-
-template< typename GuardType >
-void HazardPointerThreadEntry<GuardType>::SetActive(bool active) {
-  is_active = active;
-}
-
-template< typename GuardType >
-unsigned int HazardPointer< GuardType >::GetCurrentThreadIndex() {
-  unsigned int thread_index;
-  int return_val = embb_internal_thread_index(&thread_index);
-
-  if (return_val != EMBB_SUCCESS)
-    EMBB_THROW(embb::base::ErrorException, "Could not get thread id!");
-
-  return thread_index;
-}
-template< typename GuardType >
-bool HazardPointer< GuardType >::IsThresholdExceeded() {
-  double retiredCounterLocThread =
-    static_cast<double>(GetHazardPointerElementForCurrentThread().
-    GetRetiredCounter());
-
-  return (retiredCounterLocThread >=
-    RETIRE_THRESHOLD *
-    static_cast<double>(active_hazard_pointer)*
-    static_cast<double>(guards_per_thread));
-}
-
-template< typename GuardType >
-size_t HazardPointer< GuardType >::GetActiveHazardPointers() {
-  return active_hazard_pointer;
-}
-template< typename GuardType >
-typename HazardPointer< GuardType >::HazardPointerThreadEntry_t &
-HazardPointer< GuardType >::GetHazardPointerElementForCurrentThread() {
-  // For each thread, there is a slot in the hazard pointer array.
-  // Initially, the active flag of a hazard pointer entry is false.
-  // Only the respective thread changes the flag from true to false.
-  // This means that the current thread tells that he is about to
-  // stop operating, and the others are responsible for his retired
-  // list.
-
-  return hazard_pointer_thread_entry_array[GetCurrentThreadIndex()];
-}
-
-template< typename GuardType >
-void HazardPointer< GuardType >::HelpScan() {
-  // This is a little bit different than in the paper. In the paper,
-  // the retired nodes from other threads are added to our retired list.
-  // To be able to give a bound on memory consumption, we execute scan
-  // for those threads, without moving elements. The effect shall be
-  // the same.
-
-  for (size_t i = 0; i != hazard_pointers; ++i) {
-    // Try to find non active lists...
-    if (!hazard_pointer_thread_entry_array[i].IsActive() &&
-      hazard_pointer_thread_entry_array[i].TryReserve()) {
-      // Here: grab retired things, first check if there are any...
-      if (hazard_pointer_thread_entry_array[i].GetRetiredCounter() > 0) {
-        Scan(&hazard_pointer_thread_entry_array[i]);
+    // iterate over the mappings array
+    for (unsigned int i = 0; i != max_accessors_count_; ++i) {
+      // end of mappings? then we need to write our id
+      if (thread_id_mapping_[i] == -1) {
+        // try to CAS the initial value with out thread id
+        int expected = -1;
+        if (thread_id_mapping_[i].CompareAndSwap(expected,
+          static_cast<int>(embb_thread_index))) {
+          //successful, return our mapping
+          return i;
+        }
       }
 
-      // We are done, mark it as deactivated again
-      hazard_pointer_thread_entry_array[i].Deactivate();
+      if (thread_id_mapping_[i] == static_cast<int>(embb_thread_index)) {
+        // found our mapping!
+        return i;
+      }
+    }
+
+    // when we reach this point, we have too many accessors
+    // (no mapping possible)
+    EMBB_THROW(embb::base::ErrorException, "Too many accessors");
+
+    return 0;
+  }
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
+  template< typename GuardType >
+  void HazardPointer< GuardType >::RemoveGuard(int guard_position) {
+    const unsigned int my_thread_id = GetObjectLocalThreadIndex();
+
+    // check invariants...
+    assert(guard_position < max_guards_per_thread_);
+    assert(my_thread_id < max_accessors_count_);
+
+    // set guard
+    guards_[guard_position*max_accessors_count_ + my_thread_id] =
+      undefined_guard_;
+  }
+
+  template< typename GuardType >
+  HazardPointer< GuardType >::HazardPointer(
+    embb::base::Function<void, GuardType> freeGuardCallback,
+    GuardType undefined_guard, int guardsPerThread, int accessors) :
+    max_accessors_count_(accessors < 0 ?
+    embb::base::Thread::GetThreadsMaxCount() : accessors),
+    undefined_guard_(undefined_guard),
+    max_guards_per_thread_(guardsPerThread),
+    release_object_callback_(freeGuardCallback),
+    thread_id_mapping_(static_cast<embb::base::Atomic<int>*>(
+      embb::base::Allocation::Allocate(sizeof(embb::base::Atomic<int>)
+      *max_accessors_count_))),
+    guards_(static_cast<embb::base::Atomic< GuardType >*>
+      (embb::base::Allocation::Allocate(
+      sizeof(embb::base::Atomic< GuardType >) * max_guards_per_thread_ *
+      max_accessors_count_))),
+    thread_local_retired_lists_temp_(static_cast<GuardType*>
+      (embb::base::Allocation::Allocate(
+      sizeof(GuardType) * max_guards_per_thread_ * max_accessors_count_ *
+      max_accessors_count_
+      ))),
+    thread_local_retired_lists_(static_cast<GuardType*>
+      (embb::base::Allocation::Allocate(
+      sizeof(GuardType) * max_guards_per_thread_ * max_accessors_count_ *
+      max_accessors_count_
+      ))) {
+    const unsigned int count_guards =
+      max_guards_per_thread_ * max_accessors_count_;
+
+    const unsigned int count_ret_elements =
+      count_guards * max_accessors_count_;
+
+    for (unsigned int i = 0; i != max_accessors_count_; ++i) {
+      //in-place new for each cell
+      new (&thread_id_mapping_[i]) embb::base::Atomic < int >(-1);
+    }
+
+    for (unsigned int i = 0; i != count_guards; ++i) {
+      //in-place new for each cell
+      new (&guards_[i]) embb::base::Atomic < GuardType >(undefined_guard);
+    }
+
+    for (unsigned int i = 0; i != count_ret_elements; ++i) {
+      //in-place new for each cell
+      new (&thread_local_retired_lists_temp_[i]) GuardType(undefined_guard);
+    }
+
+    for (unsigned int i = 0; i != count_ret_elements; ++i) {
+      //in-place new for each cell
+      new (&thread_local_retired_lists_[i]) GuardType(undefined_guard);
     }
   }
-}
 
-template< typename GuardType >
-void HazardPointer< GuardType >::
-Scan(HazardPointerThreadEntry_t* currentHazardPointerEntry) {
-#ifdef EMBB_DEBUG
-  // scan should only be executed by one thread at a time, otherwise we have
-  // a bug... this assertions checks that
-  int expected = -1;
-  if (!currentHazardPointerEntry->GetScanningThread().CompareAndSwap(
-    expected, static_cast<int>(GetCurrentThreadIndex()))) {
-    assert(false);
+  template< typename GuardType >
+  HazardPointer< GuardType >::~HazardPointer() {
+    const unsigned int count_guards =
+      max_guards_per_thread_ * max_accessors_count_;
+
+    const unsigned int count_ret_elements =
+      count_guards * max_accessors_count_;
+
+    // Release references from all retired lists. Note that for this to work,
+    // the data structure using hazard pointer has still to be active... So
+    // first, the hazard pointer class shall be destructed, then the memory
+    // management class (e.g. some pool). Otherwise, the hazard pointer class
+    // would try to return memory to an already destructed memory manager.
+    for (unsigned int i = 0; i != count_ret_elements; ++i) {
+      GuardType pointerToFree =
+          thread_local_retired_lists_[i];
+      if (pointerToFree == undefined_guard_) {
+        break;
+      }
+      release_object_callback_(pointerToFree);
+    }
+
+    for (unsigned int i = 0; i != max_accessors_count_; ++i) {
+      thread_id_mapping_[i].~Atomic();
+    }
+
+    embb::base::Allocation::Free(thread_id_mapping_);
+
+    for (unsigned int i = 0; i != count_guards; ++i) {
+      guards_[i].~Atomic();
+    }
+
+    embb::base::Allocation::Free(guards_);
+
+    for (unsigned int i = 0; i != count_ret_elements; ++i) {
+      thread_local_retired_lists_temp_[i].~GuardType();
+    }
+
+    embb::base::Allocation::Free(thread_local_retired_lists_temp_);
+
+    for (unsigned int i = 0; i != count_ret_elements; ++i) {
+      thread_local_retired_lists_[i].~GuardType();
+    }
+
+    embb::base::Allocation::Free(thread_local_retired_lists_);
   }
-#endif
-  // In this function, we compute the intersection between local retired
-  // pointers and all hazard pointers. This intersection cannot be deleted and
-  // forms the new local retired pointers list.
-  // It is assumed that the union of all retired pointers contains no two
-  // pointers with the same value. However, the union of all hazard guards
-  // might.
 
-  // Here, we store the temporary hazard pointers. We have to store them,
-  // as iterating multiple time over them might be expensive, as this
-  // atomic array is shared between threads.
-  currentHazardPointerEntry->GetHazardTemp().clear();
+  template< typename GuardType >
+  void HazardPointer< GuardType >::Guard(int guardPosition,
+    GuardType guardedElement) {
+    const unsigned int my_thread_id = GetObjectLocalThreadIndex();
 
-  // Get all active hazard pointers!
-  for (unsigned int i = 0; i != hazard_pointers; ++i) {
-    // Only consider guards of active threads
-    if (hazard_pointer_thread_entry_array[i].IsActive()) {
-      // For each guard in an hazard pointer entry
-      for (int pos = 0; pos != guards_per_thread; ++pos) {
-        GuardType guard = hazard_pointer_thread_entry_array[i].GetGuard(pos);
+    // check invariants...
+    assert(guardPosition < max_guards_per_thread_);
+    assert(my_thread_id < max_accessors_count_);
 
-        // UndefinedGuard means not guarded
-        if (guard == undefined_guard)
-          continue;
+    // set guard
+    guards_[guardPosition*max_accessors_count_ + my_thread_id] = guardedElement;
+  }
 
-        currentHazardPointerEntry->GetHazardTemp().PushBack(guard);
+  template< typename GuardType >
+  size_t HazardPointer< GuardType >::ComputeMaximumRetiredObjectCount(
+  size_t guardsPerThread, int accessors) {
+    unsigned int accessorCount = (accessors == -1 ?
+      embb::base::Thread::GetThreadsMaxCount() :
+      accessors);
+
+    return static_cast<size_t>(
+        guardsPerThread * accessorCount * accessorCount);
+  }
+
+  /**
+   * Remark: it might be faster to just swap pointers for temp retired list and
+   * retired list. However, with the current implementation (one array for all
+   * retired and retired temp lists, respectively) this is not possible. This is
+   * not changed until this copying accounts for a performance problem. The
+   * copying is not the bottleneck currently.
+   */
+  template< typename GuardType >
+  void HazardPointer< GuardType >::CopyRetiredList(GuardType* sourceList,
+    GuardType* targetList, unsigned int retiredListSize,
+    GuardType undefinedGuard) {
+    bool done = false;
+    for (unsigned int ii = 0; ii != retiredListSize; ++ii) {
+      if (!done) {
+        GuardType guardToCopy = sourceList[ii];
+
+        if (guardToCopy == undefinedGuard) {
+          done = true;
+
+          if (targetList[ii] == undefinedGuard) {
+            // end of target list
+            break;
+          }
+        }
+        targetList[ii] = guardToCopy;
+      } else {
+        // we copied the whole source list, remaining values in the target
+        // have to be zeroed.
+        if (targetList[ii] == undefinedGuard) {
+          // end of target list
+          break;
+        } else {
+          targetList[ii] = undefinedGuard;
+        }
       }
     }
   }
 
-  currentHazardPointerEntry->GetRetiredTemp().clear();
+  template< typename GuardType >
+  void HazardPointer< GuardType >::UpdateRetiredList(GuardType* retired_list,
+    GuardType* updated_retired_list, unsigned int retired_list_size,
+    GuardType guarded_element, GuardType considered_hazard,
+    GuardType undefined_guard) {
+    // no hazard set here
+    if (considered_hazard == undefined_guard)
+        return;
 
-  // Sort them, we will do a binary search on each entry from the retired list
-  std::sort(
-    currentHazardPointerEntry->GetHazardTemp().begin(),
-    currentHazardPointerEntry->GetHazardTemp().end());
+    // if this hazard is currently in the union of
+    // threadLocalRetiredLists and pointerToRetire, but not yet in
+    // threadLocalRetiredListsTemp, add it to that list
+    bool contained_in_union = false;
 
-  for (
-    EMBB_CONTAINERS_CPP_DEPENDANT_TYPENAME FixedSizeList< GuardType >::iterator
-      it = currentHazardPointerEntry->GetRetired().begin();
-  it != currentHazardPointerEntry->GetRetired().end(); ++it) {
-    if (false == ::std::binary_search(
-      currentHazardPointerEntry->GetHazardTemp().begin(),
-      currentHazardPointerEntry->GetHazardTemp().end(), *it)) {
-      this->free_guard_callback(*it);
-    } else {
-      currentHazardPointerEntry->GetRetiredTemp().PushBack(*it);
+    // first iterate over our retired list
+    for (unsigned int i = 0; i != retired_list_size; ++i) {
+      // when reaching 0, we can stop iterating (end of the "list")
+      if (retired_list[i] == 0)
+          break;
+
+      // the hazard is contained in the retired list... it shall go
+      // into the temp list, if not already there
+      if (retired_list[i] == considered_hazard) {
+        contained_in_union = true;
+        break;
+      }
+    }
+
+    // the union also contains pointerToRetire
+    if (!contained_in_union) {
+      contained_in_union = (considered_hazard == guarded_element);
+    }
+
+    // add the pointer to temp. retired list, if not already there
+    if (contained_in_union) {
+      for (unsigned int ii = 0; ii != retired_list_size; ++ii) {
+        // is it already there?
+        if (updated_retired_list[ii] == considered_hazard)
+            break;
+
+        // end of the list
+        if (updated_retired_list[ii] == undefined_guard) {
+          // add hazard
+          updated_retired_list[ii] = considered_hazard;
+
+          // we are done here...
+          break;
+        }
+      }
     }
   }
-  currentHazardPointerEntry->SetRetired(
-    currentHazardPointerEntry->GetRetiredTemp());
 
-#ifdef EMBB_DEBUG
-  currentHazardPointerEntry->GetScanningThread().Store(-1);
-#endif
-}
+  template< typename GuardType >
+  void HazardPointer< GuardType >::EnqueueForDeletion(GuardType toRetire) {
+    unsigned int my_thread_id = GetObjectLocalThreadIndex();
 
-template< typename GuardType >
-size_t HazardPointer< GuardType >::GetRetiredListMaxSize() const {
-  return static_cast<size_t>(RETIRE_THRESHOLD *
-        static_cast<double>(embb::base::Thread::GetThreadsMaxCount()) *
-        static_cast<double>(guards_per_thread)) + 1;
-}
+    // check for invariant
+    assert(my_thread_id < max_accessors_count_);
 
-template< typename GuardType >
-HazardPointer< GuardType >::HazardPointer(
-  embb::base::Function<void, GuardType> free_guard_callback,
-  GuardType undefined_guard, int guards_per_thread) :
-  undefined_guard(undefined_guard),
-  guards_per_thread(guards_per_thread),
-  //initially, all potential hazard pointers are active...
-  active_hazard_pointer(embb::base::Thread::GetThreadsMaxCount()),
-  free_guard_callback(free_guard_callback) {
-  hazard_pointers = embb::base::Thread::GetThreadsMaxCount();
+    const unsigned int retired_list_size = max_accessors_count_ *
+      max_guards_per_thread_;
 
-  hazard_pointer_thread_entry_array = static_cast<HazardPointerThreadEntry_t*>(
-    embb::base::Allocation::Allocate(sizeof(HazardPointerThreadEntry_t) *
-    hazard_pointers));
+    const unsigned int count_guards = max_accessors_count_ *
+      max_guards_per_thread_;
 
-  for (size_t i = 0; i != hazard_pointers; ++i) {
-    new (static_cast<void*>(&(hazard_pointer_thread_entry_array[i])))
-      HazardPointerThreadEntry_t(undefined_guard, guards_per_thread,
-      GetRetiredListMaxSize());
+    GuardType* retired_list =
+      &thread_local_retired_lists_[my_thread_id * retired_list_size];
+
+    GuardType* retired_list_temp =
+      &thread_local_retired_lists_temp_[my_thread_id * retired_list_size];
+
+    // wipe my temp. retired list...
+    for (unsigned int i = 0; i < retired_list_size; ++i) {
+      // the list is filled always from left to right, so occurring the first
+      // undefinedGuard, the remaining ones are also undefinedGuard...
+      if (retired_list_temp[i] == undefined_guard_)
+          break;
+
+      retired_list_temp[i] = undefined_guard_;
+    }
+
+    // we test each hazard if it is in the union of retiredList and
+    // guardedElement. If it is, it goes into the new retired list...
+    for (unsigned int i = 0; i != count_guards; ++i) {
+      // consider each current active guard
+      GuardType considered_hazard = guards_[i].Load();
+      UpdateRetiredList(retired_list, retired_list_temp, retired_list_size,
+        toRetire, considered_hazard, undefined_guard_);
+    }
+
+    int retired_list_size_signed = static_cast<int>(retired_list_size);
+    assert(retired_list_size_signed >= 0);
+
+    // now we created a a new retired list... the elements that are "removed"
+    // from the old retired list can be safely deleted now...
+    for (int i = -1; i != retired_list_size_signed; ++i) {
+      // we iterate over the current retired list... -1 is used as dummy element
+      // in the iteration, to also iterate over the pointerToRetire, which is
+      // logically also part of the current retired list...
+
+      // end of the list, stop iterating
+      if (i >= 0 && retired_list[i] == undefined_guard_)
+          break;
+
+      GuardType to_check_if_in_new_list = undefined_guard_;
+
+      to_check_if_in_new_list = (i == -1 ? toRetire : retired_list[i]);
+
+      // still in the new retired list?
+      bool still_in_list = false;
+      for (unsigned int ii = 0; ii != retired_list_size; ++ii) {
+        // end of list
+        if (retired_list_temp[ii] == undefined_guard_)
+            break;
+
+        if (to_check_if_in_new_list == retired_list_temp[ii]) {
+          // still in list, cannot delete element!
+          still_in_list = true;
+          break;
+        }
+      }
+
+      if (!still_in_list) {
+        this->release_object_callback_(to_check_if_in_new_list);
+      }
+    }
+
+    // copy the updated retired list (temp) to the retired list...
+    CopyRetiredList(retired_list_temp, retired_list, retired_list_size,
+      undefined_guard_);
   }
-}
-
-template< typename GuardType >
-HazardPointer< GuardType >::~HazardPointer() {
-  for (size_t i = 0; i != hazard_pointers; ++i) {
-    hazard_pointer_thread_entry_array[i].~HazardPointerThreadEntry_t();
-  }
-
-  embb::base::Allocation::Free(static_cast < void* >
-    (hazard_pointer_thread_entry_array));
-}
-
-template< typename GuardType >
-void HazardPointer< GuardType >::DeactivateCurrentThread() {
-  HazardPointerThreadEntry_t* current_thread_entry =
-    &hazard_pointer_thread_entry_array[GetCurrentThreadIndex()];
-
-  // Deactivating a non-active hazard pointer entry has no effect!
-  if (!current_thread_entry->IsActive()) {
-    return;
-  } else {
-    current_thread_entry->SetActive(false);
-    active_hazard_pointer--;
-  }
-}
-
-template< typename GuardType >
-void HazardPointer< GuardType >::GuardPointer(int guardPosition,
-  GuardType guardedElement) {
-  GetHazardPointerElementForCurrentThread().GuardPointer(
-    guardPosition, guardedElement);
-}
-
-template< typename GuardType >
-void HazardPointer< GuardType >::EnqueuePointerForDeletion(
-  GuardType guardedElement) {
-  GetHazardPointerElementForCurrentThread().AddRetired(guardedElement);
-  if (IsThresholdExceeded()) {
-    HazardPointerThreadEntry_t* currentHazardPointerEntry =
-      &GetHazardPointerElementForCurrentThread();
-
-    Scan(currentHazardPointerEntry);
-
-    // Help deactivated threads to clean their retired nodes.
-    HelpScan();
-  }
-}
-
-template<typename GuardType>
-const double embb::containers::internal::HazardPointer<GuardType>::
-  RETIRE_THRESHOLD = 1.25f;
 } // namespace internal
 } // namespace containers
 } // namespace embb

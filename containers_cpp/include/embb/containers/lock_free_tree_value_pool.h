@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -123,22 +123,25 @@ class LockFreeTreeValuePool {
   LockFreeTreeValuePool& operator=(const LockFreeTreeValuePool&);
 
   // See algorithm description above
-  int size;
+  int size_;
 
   // See algorithm description above
-  int tree_size;
+  int tree_size_;
 
   // See algorithm description above
-  int real_size;
+  int real_size_;
 
   // The tree above the pool
-  embb::base::Atomic<int>* tree;
+  embb::base::Atomic<int>* tree_;
 
   // The actual pool
-  embb::base::Atomic<Type>* pool;
+  embb::base::Atomic<Type>* pool_;
 
-  PoolAllocator poolAllocator;
-  TreeAllocator treeAllocator;
+  // respective allocator
+  PoolAllocator pool_allocator_;
+
+  // respective allocator
+  TreeAllocator tree_allocator_;
 
   /**
    * Computes smallest power of two fitting the specified value
@@ -276,6 +279,18 @@ class LockFreeTreeValuePool {
     /**< [IN] Iterator pointing to the last plus one element of the range the
               pool is filled with */
   );
+
+  /**
+   * Due to concurrency effects, a pool might provide less elements than managed
+   * by it. However, usually one wants to guarantee a minimal capacity. The
+   * count of elements, that must be given to the pool when to guarantee \c
+   * capacity elements is computed using this function.
+   *
+   * \return count of indices the pool has to be initialized with
+   */
+  static size_t GetMinimumElementCountForGuaranteedCapacity(
+    size_t capacity
+    /**< [IN] count of indices that shall be guaranteed */);
 
   /**
    * Destructs the pool.

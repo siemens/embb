@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -60,8 +60,42 @@ Mutex::Mutex() : MutexBase(EMBB_MUTEX_PLAIN) {
 RecursiveMutex::RecursiveMutex() : MutexBase(EMBB_MUTEX_RECURSIVE) {
 }
 
+Spinlock::Spinlock() {
+  embb_spin_init(&spinlock_);
+}
+
+Spinlock::~Spinlock() {
+  embb_spin_destroy(&spinlock_);
+}
+
+void Spinlock::Lock() {
+  int status = embb_spin_lock(&spinlock_);
+
+  // Currently, embb_spin_lock will always return EMBB_SUCCESS. However,
+  // This might change.
+  if (status != EMBB_SUCCESS) {
+    EMBB_THROW(ErrorException, "Error while locking spinlock");
+  }
+}
+
+bool Spinlock::TryLock(unsigned int number_spins) {
+  int status = embb_spin_try_lock(&spinlock_, number_spins);
+
+  if (status == EMBB_BUSY) {
+    return false;
+  } else if (status != EMBB_SUCCESS) {
+    EMBB_THROW(ErrorException, "Error while try-locking spinlock");
+  }
+
+  return true;
+}
+
+void Spinlock::Unlock() {
+  int status = embb_spin_unlock(&spinlock_);
+
+  if (status != EMBB_SUCCESS) {
+    EMBB_THROW(ErrorException, "Error while unlocking spinlock");
+  }
+}
 } // namespace base
 } // namespace embb
-
-
-

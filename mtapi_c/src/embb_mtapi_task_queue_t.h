@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,7 +30,7 @@
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/base/c/atomic.h>
 
-#include <embb_mtapi_spinlock_t.h>
+#include <embb/base/c/mutex.h>
 #include <embb_mtapi_task_visitor_function_t.h>
 
 #ifdef __cplusplus
@@ -57,7 +57,7 @@ struct embb_mtapi_task_queue_struct {
   mtapi_uint_t get_task_position;
   mtapi_uint_t put_task_position;
   mtapi_queue_attributes_t attributes;
-  embb_mtapi_spinlock_t lock;
+  embb_spinlock_t lock;
 };
 
 #include <embb_mtapi_task_queue_t_fwd.h>

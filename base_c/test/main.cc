@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -46,6 +46,7 @@ using embb::base::test::DurationTest;
 using embb::base::test::TimeTest;
 using embb::base::test::CounterTest;
 using embb::base::test::MutexTest;
+using embb::base::test::SpinLockTest;
 using embb::base::test::ThreadIndexTest;
 using embb::base::test::CoreSetTest;
 using embb::base::test::ConditionVarTest;
@@ -63,11 +64,11 @@ PT_MAIN("Base C") {
   PT_RUN(TimeTest);
   PT_RUN(CounterTest);
   PT_RUN(MutexTest);
+  PT_RUN(SpinLockTest);
   PT_RUN(ThreadIndexTest);
   PT_RUN(CoreSetTest);
   PT_RUN(ConditionVarTest);
   PT_RUN(ThreadTest);
   PT_RUN(ThreadSpecificStorageTest);
-
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

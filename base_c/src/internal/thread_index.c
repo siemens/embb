@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -128,6 +128,20 @@ void embb_internal_thread_index_set_max(unsigned int max) {
   *embb_max_number_thread_indices() = max;
 }
 
+/**
+ * \pre the calling thread is the only active thread
+ *
+ * \post the thread indices count and calling thread index is reset
+ */
 void embb_internal_thread_index_reset() {
+  /** This function is only called in tests, usually when all other threads
+   * except the main thread have terminated. However, the main thread still has
+   * potentially stored its old index value in its thread local storage,
+   * which might be assigned additionally to another thread (as the counter is
+   * reset), which may lead to hard to detect bugs. Therefore, reset the thread
+   * local thread id here.
+   */
+  embb_internal_thread_index_var = UINT_MAX;
+
   embb_counter_init(embb_thread_index_counter());
 }

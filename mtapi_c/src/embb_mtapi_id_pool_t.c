@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,6 +29,7 @@
 #include <embb_mtapi_alloc.h>
 #include <embb_mtapi_log.h>
 #include <embb_mtapi_id_pool_t.h>
+#include <embb/base/c/mutex.h>
 
 void embb_mtapi_id_pool_initialize(
   embb_mtapi_id_pool_t * that,
@@ -45,7 +46,7 @@ void embb_mtapi_id_pool_initialize(
   that->ids_available = capacity;
   that->put_id_position = 0;
   that->get_id_position = 1;
-  embb_mtapi_spinlock_initialize(&that->lock);
+  embb_spin_init(&that->lock);
 }
 
 void embb_mtapi_id_pool_finalize(embb_mtapi_id_pool_t * that) {
@@ -55,7 +56,7 @@ void embb_mtapi_id_pool_finalize(embb_mtapi_id_pool_t * that) {
   that->put_id_position = 0;
   embb_mtapi_alloc_deallocate(that->id_buffer);
   that->id_buffer = NULL;
-  embb_mtapi_spinlock_finalize(&that->lock);
+  embb_spin_destroy(&that->lock);
 }
 
 mtapi_uint_t embb_mtapi_id_pool_allocate(embb_mtapi_id_pool_t * that) {
@@ -63,7 +64,7 @@ mtapi_uint_t embb_mtapi_id_pool_allocate(embb_mtapi_id_pool_t * that) {
 
   assert(MTAPI_NULL != that);
 
-  if (embb_mtapi_spinlock_acquire(&that->lock)) {
+  if (embb_spin_lock(&that->lock) == EMBB_SUCCESS) {
     if (0 < that->ids_available) {
       /* take away one id */
       that->ids_available--;
@@ -81,7 +82,7 @@ mtapi_uint_t embb_mtapi_id_pool_allocate(embb_mtapi_id_pool_t * that) {
       /* make id entry invalid just in case */
       that->id_buffer[id_position] = EMBB_MTAPI_IDPOOL_INVALID_ID;
     }
-    embb_mtapi_spinlock_release(&that->lock);
+    embb_spin_unlock(&that->lock);
   }
 
   return id;
@@ -92,7 +93,7 @@ void embb_mtapi_id_pool_deallocate(
   mtapi_uint_t id) {
   assert(MTAPI_NULL != that);
 
-  if (embb_mtapi_spinlock_acquire(&that->lock)) {
+  if (embb_spin_lock(&that->lock) == EMBB_SUCCESS) {
     if (that->capacity > that->ids_available) {
       /* acquire position to put id to */
       mtapi_uint_t id_position = that->put_id_position;
@@ -107,7 +108,7 @@ void embb_mtapi_id_pool_deallocate(
       /* make it available */
       that->ids_available++;
     }
-    embb_mtapi_spinlock_release(&that->lock);
+    embb_spin_unlock(&that->lock);
   } else {
     embb_mtapi_log_error(
       "could not acquire lock in embb_mtapi_IdPool_deallocate\n");

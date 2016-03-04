@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -79,20 +79,20 @@ void embb_mtapi_task_initialize(embb_mtapi_task_t* that) {
 
   that->action.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->job.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
-  that->state = MTAPI_TASK_ERROR;
+  embb_atomic_store_int(&that->state, MTAPI_TASK_ERROR);
   that->task_id = MTAPI_TASK_ID_NONE;
   that->group.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->error_code = MTAPI_SUCCESS;
   embb_atomic_store_unsigned_int(&that->current_instance, 0);
-  embb_mtapi_spinlock_initialize(&that->state_lock);
+  embb_spin_init(&that->state_lock);
 }
 
 void embb_mtapi_task_finalize(embb_mtapi_task_t* that) {
   assert(MTAPI_NULL != that);
 
   embb_mtapi_task_initialize(that);
-  embb_mtapi_spinlock_finalize(&that->state_lock);
+  embb_spin_destroy(&that->state_lock);
 }
 
 mtapi_boolean_t embb_mtapi_task_execute(
@@ -158,10 +158,10 @@ void embb_mtapi_task_set_state(
   mtapi_task_state_t state) {
   assert(MTAPI_NULL != that);
 
-  embb_mtapi_spinlock_acquire(&that->state_lock);
-  that->state = state;
+  embb_spin_lock(&that->state_lock);
+  embb_atomic_store_int(&that->state, state);
   embb_atomic_memory_barrier();
-  embb_mtapi_spinlock_release(&that->state_lock);
+  embb_spin_unlock(&that->state_lock);
 }
 
 static mtapi_task_hndl_t embb_mtapi_task_start(
