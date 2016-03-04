@@ -250,6 +250,17 @@ extern "C" {
 #endif
 
 
+/* ---- MCA ORGANIZATION IDS ----------------------------------------------- */
+
+#define MCA_ORG_ID_PSI 0 /* PolyCore Software, Inc. */
+#define MCA_ORG_ID_FSL 1 /* Freescale, Inc. */
+#define MCA_ORG_ID_MGC 2 /* Mentor Graphics, Corp. */
+#define MCA_ORG_ID_ADI 3 /* Analog Devices */
+#define MCA_ORG_ID_SIE 4 /* Siemens */
+#define MCA_ORG_ID_EMB 5 /* EMB2 project */
+#define MCA_ORG_ID_TBD 6 /* TBD */
+
+
 /* ---- BASIC DEFINITIONS -------------------------------------------------- */
 
 /** marks input parameters */
