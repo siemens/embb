@@ -28,33 +28,12 @@
 #define EMBB_BASE_C_INTERNAL_ATOMIC_ATOMIC_VARIABLES_H_
 
 #include <stddef.h>
-#include <embb/base/c/internal/config.h>
 #include <embb/base/c/internal/macro_helper.h>
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #include <intrin.h>
 #endif
 
-#ifdef EMBB_THREADING_ANALYSIS_MODE
-
-#include <embb/base/c/mutex.h>
-
-// Flag value to indicate that an atomic variable has been initialized
-// Value 31426 corresponds to binary number 0111101011000010
-#define EMBB_ATOMIC_INTERNAL_INITIALIZED_VALUE 31426
-
-#define EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE( \
-  EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, \
-  EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX) \
-  typedef struct \
-{ \
-  EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
-  embb_mutex_t mutex; \
-  volatile int init_flag; \
-} EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
-
-#else // EMBB_THREADING_ANALYSIS_MODE
-
 #define EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE( \
   EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, \
   EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX) \
@@ -62,8 +41,6 @@
 { \
   EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
 } EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
-
-#endif // else EMBB_THREADING_ANALYSIS_MODE
 
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(char, char)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(short, short)

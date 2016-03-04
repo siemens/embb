@@ -25,7 +25,6 @@
  */
 
 #include <partest/partest.h>
-#include <atomic_test.h>
 #include <alloc_test.h>
 #include <duration_test.h>
 #include <time_test.h>
@@ -42,7 +41,6 @@
 
 #include <embb/base/c/memory_allocation.h>
 
-using embb::base::test::AtomicTest;
 using embb::base::test::AllocTest;
 using embb::base::test::DurationTest;
 using embb::base::test::TimeTest;
@@ -60,7 +58,6 @@ PT_MAIN("Base C") {
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
 
-  PT_RUN(AtomicTest);
   PT_RUN(AllocTest);
   PT_RUN(DurationTest);
   PT_RUN(TimeTest);
