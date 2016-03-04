@@ -110,9 +110,7 @@ class Switch
 
   virtual void OnClock(int clock) {
     //const int idx = clock % Slices;
-    if (!inputs_.AreAtClock(clock))
-      EMBB_THROW(embb::base::ErrorException,
-        "Some inputs are not at expected clock.")
+    assert(inputs_.AreAtClock(clock));
     Run(clock);
   }
 

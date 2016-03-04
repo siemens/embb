@@ -135,6 +135,7 @@ void* embb_alloc_aligned(size_t alignment, size_t size) {
 
 void embb_free_aligned(void* ptr) {
   assert(ptr != NULL);
+
   size_t* ptr_conv = (size_t*)ptr;
 
   // If embb_free_aligned is called, the memory block should have been allocated
@@ -193,6 +194,8 @@ void *embb_alloc_aligned(size_t alignment, size_t size) {
 }
 
 void embb_free_aligned(void* ptr) {
+  assert(ptr != NULL);
+
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
   _aligned_free(ptr);
 #else

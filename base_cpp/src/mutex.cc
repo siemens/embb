@@ -32,7 +32,10 @@ namespace base {
 namespace internal {
 
 MutexBase::MutexBase(int mutex_type) : mutex_() {
-  embb_mutex_init(&mutex_, mutex_type);
+  int result = embb_mutex_init(&mutex_, mutex_type);
+  if (EMBB_SUCCESS != result) {
+    EMBB_THROW(ErrorException, "Could not initialize mutex.");
+  }
 }
 
 MutexBase::~MutexBase() {
@@ -40,7 +43,10 @@ MutexBase::~MutexBase() {
 }
 
 void MutexBase::Lock() {
-  embb_mutex_lock(&mutex_);
+  int result = embb_mutex_lock(&mutex_);
+  if (EMBB_SUCCESS != result) {
+    EMBB_THROW(ErrorException, "Could not lock mutex.");
+  }
 }
 
 bool MutexBase::TryLock() {
@@ -49,7 +55,10 @@ bool MutexBase::TryLock() {
 }
 
 void MutexBase::Unlock() {
-  embb_mutex_unlock(&mutex_);
+  int result = embb_mutex_unlock(&mutex_);
+  if (EMBB_SUCCESS != result) {
+    EMBB_THROW(ErrorException, "Could not unlock mutex.");
+  }
 }
 
 } // namespace internal

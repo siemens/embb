@@ -80,7 +80,9 @@ void embb_thread_yield() {
 
 int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
                        embb_thread_start_t func, void *arg) {
-  assert(thread != NULL);
+  if (thread == NULL) {
+    return EMBB_ERROR;
+  }
   thread->embb_internal_arg = (embb_internal_thread_arg_t*)
                               embb_alloc(sizeof(embb_internal_thread_arg_t));
   if (thread->embb_internal_arg == NULL) return EMBB_NOMEM;
@@ -118,6 +120,9 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
 }
 
 int embb_thread_join(embb_thread_t* thread, int* result_code) {
+  if (thread == NULL) {
+    return EMBB_ERROR;
+  }
   BOOL success;
   DWORD result;
   result = WaitForSingleObject(thread->embb_internal_handle, INFINITE);
@@ -143,6 +148,9 @@ int embb_thread_join(embb_thread_t* thread, int* result_code) {
 }
 
 int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
+  if (lhs == NULL || rhs == NULL) {
+    return 0;
+  }
   embb_thread_id_t idLhs = GetThreadId(lhs->embb_internal_handle);
   embb_thread_id_t idRhs = GetThreadId(rhs->embb_internal_handle);
   if (idLhs == idRhs) {
@@ -203,6 +211,9 @@ void embb_thread_yield() {
 
 int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
                        embb_thread_start_t func, void* arg) {
+  if (thread == NULL) {
+    return EMBB_ERROR;
+  }
   pthread_attr_t attr; /* Used to set thread affinities */
   int status = pthread_attr_init(&attr);
   if (status != 0) return EMBB_ERROR;
@@ -250,6 +261,9 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
 }
 
 int embb_thread_join(embb_thread_t* thread, int *result_code) {
+  if (thread == NULL) {
+    return EMBB_ERROR;
+  }
   int status = 0;
   status = pthread_join(thread->embb_internal_handle, NULL);
   if (result_code != NULL) {
@@ -263,6 +277,9 @@ int embb_thread_join(embb_thread_t* thread, int *result_code) {
 }
 
 int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
+  if (lhs == NULL || rhs == NULL) {
+    return 0;
+  }
   return pthread_equal(lhs->embb_internal_handle, rhs->embb_internal_handle);
 }
 

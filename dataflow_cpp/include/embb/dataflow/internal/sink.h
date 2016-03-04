@@ -88,10 +88,8 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
   }
 
   virtual void OnClock(int clock) {
-    if (!inputs_.AreAtClock(clock)) {
-      EMBB_THROW(embb::base::ErrorException,
-        "Some inputs are not at expected clock.")
-    }
+    EMBB_UNUSED_IN_RELEASE(clock);
+    assert(inputs_.AreAtClock(clock));
 
     bool retry = true;
     while (retry) {

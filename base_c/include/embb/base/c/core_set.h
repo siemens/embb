@@ -81,6 +81,8 @@ unsigned int embb_core_count_available();
  * The second parameter specifies whether the set is initially empty or contains
  * all cores.
  *
+ * \pre \c core_set is not NULL.
+ *
  * \notthreadsafe
  */
 void embb_core_set_init(
@@ -96,6 +98,9 @@ void embb_core_set_init(
  *
  * If the core is already contained in the set, the operation has no effect.
  *
+ * \pre \c core_set is not NULL and \c core_number is smaller than
+ *      embb_core_count_available().
+ *
  * \notthreadsafe
  * \see embb_core_set_remove()
  */
@@ -107,13 +112,16 @@ void embb_core_set_add(
   );
 
 /**
-* Removes a core from the specified set.
-*
-* If the core is not in the set, the operation has no effect.
-*
-* \notthreadsafe
-* \see embb_core_set_add()
-*/
+ * Removes a core from the specified set.
+ *
+ * If the core is not in the set, the operation has no effect.
+ *
+ * \pre \c core_set is not NULL and \c core_number is smaller than
+ *      embb_core_count_available().
+ *
+ * \notthreadsafe
+ * \see embb_core_set_add()
+ */
 void embb_core_set_remove(
   embb_core_set_t* core_set,
   /**< [IN/OUT] Core set to be manipulated */
@@ -124,8 +132,11 @@ void embb_core_set_remove(
 /**
  * Determines whether a core is contained in the specified set.
  *
- * \return 0 if the core is not contained in the set, otherwise a number greater
- *         than zero.
+ * \pre \c core_set is not NULL and \c core_number is smaller than
+ *      embb_core_count_available().
+ *
+ * \return 0 if the core is not contained in the set, otherwise a number
+ *         greater than zero.
  * \notthreadsafe
  */
 int embb_core_set_contains(
@@ -139,6 +150,8 @@ int embb_core_set_contains(
  * Computes the intersection of core \c set1 and \c set2.
  *
  * The result is stored in \c set1.
+ *
+ * \pre \c set1 and \c set2 are not NULL.
  *
  * \notthreadsafe
  * \see embb_core_set_union()
@@ -155,6 +168,8 @@ void embb_core_set_intersection(
 *
 * The result is stored in \c set1.
 *
+* \pre \c set1 and \c set2 are not NULL.
+*
 * \notthreadsafe
 * \see embb_core_set_intersection()
 */
@@ -167,6 +182,8 @@ void embb_core_set_union(
 
 /**
  * Returns the number of cores contained in the specified set.
+ *
+ * \pre \c core_set is not NULL.
  *
  * \notthreadsafe
  * \return Number of cores in \c core_set

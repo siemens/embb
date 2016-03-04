@@ -30,7 +30,9 @@
 #include <assert.h>
 
 int embb_counter_init(embb_counter_t* counter) {
-  assert(counter != NULL);
+  if (counter == NULL) {
+    return EMBB_ERROR;
+  }
   embb_atomic_store_unsigned_int(&(counter->value), 0);
   return EMBB_SUCCESS;
 }

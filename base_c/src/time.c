@@ -33,10 +33,12 @@ void embb_time_now(embb_time_t* time) {
 }
 
 int embb_time_compare(const embb_time_t* lhs, const embb_time_t* rhs) {
-  assert(lhs != NULL);
-  assert(rhs != NULL);
-  assert(lhs->nanoseconds < 1000000000);
-  assert(rhs->nanoseconds < 1000000000);
+  if (lhs == NULL || rhs == NULL) {
+    return EMBB_ERROR;
+  }
+  if (lhs->nanoseconds >= 1000000000 || rhs->nanoseconds >= 1000000000) {
+    return EMBB_ERROR;
+  }
 
   if (lhs->seconds > rhs->seconds) {
     return 1;
@@ -56,8 +58,9 @@ int embb_time_compare(const embb_time_t* lhs, const embb_time_t* rhs) {
 #ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
-  assert(time != NULL);
-  assert(duration != NULL);
+  if (time == NULL || duration == NULL) {
+    return EMBB_ERROR;
+  }
   /* Get system time */
   SYSTEMTIME system_time;
   GetLocalTime(&system_time);
@@ -87,8 +90,9 @@ int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
-  assert(time != NULL);
-  assert(duration != NULL);
+  if (time == NULL || duration == NULL) {
+    return EMBB_ERROR;
+  }
   struct timespec unix_time;
   clock_gettime(CLOCK_REALTIME, &unix_time);
   time->seconds = unix_time.tv_sec;
