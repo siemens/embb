@@ -33,13 +33,8 @@ void embb_time_now(embb_time_t* time) {
 }
 
 int embb_time_compare(const embb_time_t* lhs, const embb_time_t* rhs) {
-  if (lhs == NULL || rhs == NULL) {
-    return EMBB_ERROR;
-  }
-  if (lhs->nanoseconds >= 1000000000 || rhs->nanoseconds >= 1000000000) {
-    return EMBB_ERROR;
-  }
-
+  assert(lhs != NULL && rhs != NULL);
+  assert(lhs->nanoseconds < 1000000000 && rhs->nanoseconds < 1000000000);
   if (lhs->seconds > rhs->seconds) {
     return 1;
   } else if (lhs->seconds < rhs->seconds) {

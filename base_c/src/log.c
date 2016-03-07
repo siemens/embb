@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <assert.h>
 
 #include <embb/base/c/log.h>
 
@@ -35,6 +36,7 @@
 void embb_log_write_file(
   void * context,
   char const * message) {
+  assert(context != NULL);
   FILE * ff = (FILE*)context;
   fprintf(ff, "%s", message);
   fflush(ff);
