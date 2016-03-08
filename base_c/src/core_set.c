@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -146,13 +146,18 @@ int embb_core_set_contains(const embb_core_set_t* core_set,
 
 void embb_core_set_intersection(embb_core_set_t* set1,
                                 const embb_core_set_t* set2) {
+  assert(set1 != NULL);
+  assert(set2 != NULL);
   embb_bitset_intersect(&set1->rep, set2->rep);
 }
 
 void embb_core_set_union(embb_core_set_t* set1, const embb_core_set_t* set2) {
+  assert(set1 != NULL);
+  assert(set2 != NULL);
   embb_bitset_union(&set1->rep, set2->rep);
 }
 
 unsigned int embb_core_set_count(const embb_core_set_t* core_set) {
+  assert(core_set != NULL);
   return embb_bitset_count(&core_set->rep);
 }

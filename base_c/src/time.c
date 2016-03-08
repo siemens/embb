@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,11 +33,8 @@ void embb_time_now(embb_time_t* time) {
 }
 
 int embb_time_compare(const embb_time_t* lhs, const embb_time_t* rhs) {
-  assert(lhs != NULL);
-  assert(rhs != NULL);
-  assert(lhs->nanoseconds < 1000000000);
-  assert(rhs->nanoseconds < 1000000000);
-
+  assert(lhs != NULL && rhs != NULL);
+  assert(lhs->nanoseconds < 1000000000 && rhs->nanoseconds < 1000000000);
   if (lhs->seconds > rhs->seconds) {
     return 1;
   } else if (lhs->seconds < rhs->seconds) {
@@ -56,8 +53,9 @@ int embb_time_compare(const embb_time_t* lhs, const embb_time_t* rhs) {
 #ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
-  assert(time != NULL);
-  assert(duration != NULL);
+  if (time == NULL || duration == NULL) {
+    return EMBB_ERROR;
+  }
   /* Get system time */
   SYSTEMTIME system_time;
   GetLocalTime(&system_time);
@@ -87,8 +85,9 @@ int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
-  assert(time != NULL);
-  assert(duration != NULL);
+  if (time == NULL || duration == NULL) {
+    return EMBB_ERROR;
+  }
   struct timespec unix_time;
   clock_gettime(CLOCK_REALTIME, &unix_time);
   time->seconds = unix_time.tv_sec;

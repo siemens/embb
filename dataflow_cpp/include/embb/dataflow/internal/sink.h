@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -101,10 +101,8 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   }
 
   virtual void OnClock(int clock) {
-    if (!inputs_.AreAtClock(clock)) {
-      EMBB_THROW(embb::base::ErrorException,
-        "Some inputs are not at expected clock.")
-    }
+    EMBB_UNUSED_IN_RELEASE(clock);
+    assert(inputs_.AreAtClock(clock));
 
     bool retry = true;
     while (retry) {

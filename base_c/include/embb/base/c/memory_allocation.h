@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -72,6 +72,8 @@ extern "C" {
    * \p ptr.
    *
    * Keeps track of freed memory in debug mode.
+   *
+   * \pre \c ptr is not NULL.
    *
    * \threadsafe
    *
@@ -160,6 +162,8 @@ extern "C" {
    * embb_alloc_cache_aligned().
    *
    * Keeps track of freed memory in debug mode.
+   *
+   * \pre \c ptr is not NULL and was allocated by an aligned method.
    *
    * \threadsafe
    *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -67,6 +67,7 @@ struct embb_mtapi_thread_context_struct {
   mtapi_uint_t core_num;
   embb_atomic_int run;
   mtapi_status_t status;
+  mtapi_boolean_t is_initialized;
 };
 
 #include <embb_mtapi_thread_context_t_fwd.h>
@@ -74,8 +75,9 @@ struct embb_mtapi_thread_context_struct {
 /**
  * Constructor using attributes from node and a given core number.
  * \memberof embb_mtapi_thread_context_struct
+ * \returns MTAPI_TRUE if successful, MTAPI_FALSE on error
  */
-void embb_mtapi_thread_context_initialize_with_node_worker_and_core(
+mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
   embb_mtapi_thread_context_t* that,
   embb_mtapi_node_t* node,
   mtapi_uint_t worker_index,

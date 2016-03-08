@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -113,9 +113,7 @@ class Select
 
   virtual void OnClock(int clock) {
     //const int idx = clock % Slices;
-    if (!inputs_.AreAtClock(clock))
-      EMBB_THROW(embb::base::ErrorException,
-        "Some inputs are not at expected clock.")
+    assert(inputs_.AreAtClock(clock));
     Run(clock);
   }
 

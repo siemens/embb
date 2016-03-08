@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -869,10 +869,8 @@ class Network : public internal::ClockListener {
    */
   virtual void OnClock(int clock) {
     const int idx = clock % slices_;
-    const int cnt = --sink_counter_[idx];
-    if (cnt < 0)
-      EMBB_THROW(embb::base::ErrorException,
-        "More sinks than expected signaled reception of given clock.")
+    assert(sink_counter_[idx] > 0);
+    --sink_counter_[idx];
   }
 
   /**

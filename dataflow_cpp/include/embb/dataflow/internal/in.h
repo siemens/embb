@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -66,9 +66,7 @@ class In {
 
   Type GetValue(int clock) const {
     SignalType const & signal = GetSignal(clock);
-    if (signal.IsBlank())
-      EMBB_THROW(embb::base::ErrorException,
-        "Signal is blank, cannot get a value.")
+    assert(!signal.IsBlank());
     return signal.GetValue();
   }
 
@@ -106,9 +104,7 @@ class In {
 
   void Receive(SignalType const & value) {
     const int idx = value.GetClock() % slices_;
-    if (values_[idx].GetClock() >= value.GetClock())
-      EMBB_THROW(embb::base::ErrorException,
-        "Received signal does not increase clock.");
+    assert(values_[idx].GetClock() < value.GetClock());
     values_[idx] = value;
     listener_->OnClock(value.GetClock());
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY

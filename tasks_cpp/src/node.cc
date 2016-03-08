@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -126,7 +126,7 @@ void Node::Initialize(
     mtapi_nodeattr_set(&attr, MTAPI_NODE_MAX_ACTIONS,
       &tmp, sizeof(tmp), &status);
     assert(MTAPI_SUCCESS == status);
-    tmp = 4;
+    // tmp = 4;
     mtapi_nodeattr_set(&attr, MTAPI_NODE_MAX_JOBS,
       &tmp, sizeof(tmp), &status);
     assert(MTAPI_SUCCESS == status);

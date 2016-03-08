@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -123,8 +123,10 @@ bool LockFreeStack< Type, ValuePool >::TryPop(Type & element) {
     top_cached = top;
 
     // Stack empty, cannot pop
-    if (top_cached == NULL)
+    if (top_cached == NULL) {
+      element = Type();
       return false;
+    }
 
     // Guard top_cached
     hazardPointer.Guard(0, top_cached);

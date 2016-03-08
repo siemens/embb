@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -67,6 +67,7 @@ typedef void(*embb_log_function_t)(void * context, char const * message);
 /**
  * Default logging function.
  * Writes to the given file (context needs to be a FILE*).
+ * \pre \c context is not NULL.
  * \ingroup C_LOG
  * \threadsafe
  */

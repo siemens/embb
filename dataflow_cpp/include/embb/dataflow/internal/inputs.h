@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -92,10 +92,7 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
   }
   virtual void OnClock(int clock) {
     const int idx = clock % slices_;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] > 0);
     if (--count_[idx] == 0) {
       count_[idx] = 1;
       listener_->OnClock(clock);
@@ -156,10 +153,7 @@ class Inputs<T1, T2, embb::base::internal::Nil,
   }
   virtual void OnClock(int clock) {
     const int idx = clock % slices_;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] > 0);
     if (--count_[idx] == 0) {
       count_[idx] = 2;
       listener_->OnClock(clock);
@@ -224,10 +218,7 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
   }
   virtual void OnClock(int clock) {
     const int idx = clock % slices_;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] > 0);
     if (--count_[idx] == 0) {
       count_[idx] = 3;
       listener_->OnClock(clock);
@@ -295,10 +286,7 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
   }
   virtual void OnClock(int clock) {
     const int idx = clock % slices_;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] > 0);
     if (--count_[idx] == 0) {
       count_[idx] = 4;
       listener_->OnClock(clock);
@@ -371,10 +359,7 @@ class Inputs
   }
   virtual void OnClock(int clock) {
     const int idx = clock % slices_;
-    if (count_[idx] == 0) {
-      EMBB_THROW(embb::base::ErrorException,
-        "All inputs already fired for this clock.");
-    }
+    assert(count_[idx] > 0);
     if (--count_[idx] == 0) {
       count_[idx] = 5;
       listener_->OnClock(clock);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -112,7 +112,7 @@ void* embb_tss_get(
  *
  * Does not delete the values pointed to.
  *
- * \pre TSS has been created successfully
+ * \pre \c tss has been created successfully and is not NULL.
  * \post All slots are deleted
  * \notthreadsafe
  * \see embb_tss_create()

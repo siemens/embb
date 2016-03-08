@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,6 +38,8 @@
 #include <embb_mtapi_queue_t.h>
 #include <embb_mtapi_scheduler_t.h>
 #include <embb_mtapi_attr.h>
+
+#include <embb/base/c/internal/cmake_config.h>
 
 
 static embb_mtapi_node_t* embb_mtapi_node_instance = NULL;
@@ -115,29 +117,39 @@ void mtapi_initialize(
           node->attributes.max_tasks);
         node->queue_pool = embb_mtapi_queue_pool_new(
           node->attributes.max_queues);
-
-        /* initialize scheduler for local node */
-        node->scheduler = embb_mtapi_scheduler_new();
-        if (MTAPI_NULL != node->scheduler) {
-          /* fill information structure */
-          node->info.hardware_concurrency = embb_core_count_available();
-          node->info.used_memory = embb_mtapi_alloc_get_bytes_allocated();
-          if (MTAPI_NULL != mtapi_info) {
-            *mtapi_info = node->info;
-          }
-
-          /* initialization succeeded, tell workers to start working */
-          embb_atomic_store_int(&node->is_scheduler_running, MTAPI_TRUE);
-
-          if (MTAPI_SUCCESS != local_status) {
-            mtapi_finalize(MTAPI_NULL);
-            local_status = MTAPI_ERR_NODE_INITFAILED;
-          }
-        } else {
-          mtapi_finalize(MTAPI_NULL);
+        if (MTAPI_NULL == node->job_list ||
+          MTAPI_NULL == node->action_pool ||
+          MTAPI_NULL == node->group_pool ||
+          MTAPI_NULL == node->task_pool ||
+          MTAPI_NULL == node->queue_pool) {
+          mtapi_finalize(NULL);
           local_status = MTAPI_ERR_NODE_INITFAILED;
         }
 
+        if (local_status == MTAPI_SUCCESS) {
+          /* initialize scheduler for local node */
+          node->scheduler = embb_mtapi_scheduler_new();
+          if (MTAPI_NULL != node->scheduler) {
+            /* fill information structure */
+          node->info.mtapi_version = 0x1000; // mtapi version 1.0
+          node->info.organization_id = MCA_ORG_ID_EMB;
+          node->info.implementation_version =
+            EMBB_BASE_VERSION_MAJOR * 0x1000 + EMBB_BASE_VERSION_MINOR;
+          node->info.number_of_domains = ~0u;
+          node->info.number_of_nodes = ~0u;
+            node->info.hardware_concurrency = embb_core_count_available();
+            node->info.used_memory = embb_mtapi_alloc_get_bytes_allocated();
+            if (MTAPI_NULL != mtapi_info) {
+              *mtapi_info = node->info;
+            }
+
+            /* initialization succeeded, tell workers to start working */
+            embb_atomic_store_int(&node->is_scheduler_running, MTAPI_TRUE);
+          } else {
+            mtapi_finalize(MTAPI_NULL);
+            local_status = MTAPI_ERR_NODE_INITFAILED;
+          }
+        }
       } else {
         embb_mtapi_alloc_deallocate(node);
         local_status = MTAPI_ERR_PARAMETER;
@@ -163,19 +175,29 @@ void mtapi_finalize(MTAPI_OUT mtapi_status_t* status) {
     }
 
     /* finalize storage in reverse order */
-    embb_mtapi_queue_pool_delete(node->queue_pool);
-    node->queue_pool = MTAPI_NULL;
+    if (MTAPI_NULL != node->queue_pool) {
+      embb_mtapi_queue_pool_delete(node->queue_pool);
+      node->queue_pool = MTAPI_NULL;
+    }
 
-    embb_mtapi_task_pool_delete(node->task_pool);
-    node->task_pool = MTAPI_NULL;
+    if (MTAPI_NULL != node->task_pool) {
+      embb_mtapi_task_pool_delete(node->task_pool);
+      node->task_pool = MTAPI_NULL;
+    }
 
-    embb_mtapi_group_pool_delete(node->group_pool);
-    node->group_pool = MTAPI_NULL;
+    if (MTAPI_NULL != node->group_pool) {
+      embb_mtapi_group_pool_delete(node->group_pool);
+      node->group_pool = MTAPI_NULL;
+    }
 
-    embb_mtapi_action_pool_delete(node->action_pool);
-    node->action_pool = MTAPI_NULL;
+    if (MTAPI_NULL != node->action_pool) {
+      embb_mtapi_action_pool_delete(node->action_pool);
+      node->action_pool = MTAPI_NULL;
+    }
 
-    embb_mtapi_job_finalize_list(node);
+    if (MTAPI_NULL != node->job_list) {
+      embb_mtapi_job_finalize_list(node);
+    }
 
     /* free system instance */
     embb_mtapi_alloc_deallocate(node);

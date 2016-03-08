@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -56,6 +56,7 @@ void LogTest::Test() {
   logged_message = null;
   Log::Trace("chn", test_msg);
 #ifdef EMBB_DEBUG
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [TRACE] hello"));
 #else
   PT_EXPECT_EQ(null, logged_message);
@@ -63,15 +64,18 @@ void LogTest::Test() {
   logged_message = null;
   Log::Info("chn", test_msg);
 #ifdef EMBB_DEBUG
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [INFO ] hello"));
 #else
   PT_EXPECT_EQ(null, logged_message);
 #endif
   logged_message = null;
   Log::Warning("chn", test_msg);
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));
   logged_message = null;
   Log::Error("chn", test_msg);
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_INFO);
@@ -81,15 +85,18 @@ void LogTest::Test() {
   logged_message = null;
   Log::Info("chn", test_msg);
 #ifdef EMBB_DEBUG
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [INFO ] hello"));
 #else
   PT_EXPECT_EQ(null, logged_message);
 #endif
   logged_message = null;
   Log::Warning("chn", test_msg);
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));
   logged_message = null;
   Log::Error("chn", test_msg);
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_WARNING);
@@ -101,9 +108,11 @@ void LogTest::Test() {
   PT_EXPECT_EQ(null, logged_message);
   logged_message = null;
   Log::Warning("chn", test_msg);
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));
   logged_message = null;
   Log::Error("chn", test_msg);
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_ERROR);
@@ -118,6 +127,7 @@ void LogTest::Test() {
   PT_EXPECT_EQ(null, logged_message);
   logged_message = null;
   Log::Error("chn", test_msg);
+  PT_ASSERT_NE(logged_message, null);
   PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_NONE);

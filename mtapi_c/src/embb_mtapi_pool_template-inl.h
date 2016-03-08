@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -61,13 +61,18 @@ mtapi_boolean_t embb_mtapi_##TYPE##_pool_initialize( \
   embb_mtapi_id_pool_initialize(&that->id_pool, capacity); \
   that->storage = (embb_mtapi_##TYPE##_t*)embb_mtapi_alloc_allocate( \
     sizeof(embb_mtapi_##TYPE##_t)*(capacity + 1)); \
-  for (ii = 0; ii <= capacity; ii++) { \
-    that->storage[ii].handle.id = EMBB_MTAPI_IDPOOL_INVALID_ID; \
-    that->storage[ii].handle.tag = 0; \
+  if (NULL != that->storage) { \
+    for (ii = 0; ii <= capacity; ii++) { \
+      that->storage[ii].handle.id = EMBB_MTAPI_IDPOOL_INVALID_ID; \
+      that->storage[ii].handle.tag = 0; \
+    } \
+    /* use entry 0 as invalid */ \
+    embb_mtapi_##TYPE##_initialize(that->storage); \
+    return MTAPI_TRUE; \
+  } else { \
+    that->id_pool.ids_available = 0; \
+    return MTAPI_FALSE; \
   } \
-  /* use entry 0 as invalid */ \
-  embb_mtapi_##TYPE##_initialize(that->storage); \
-  return MTAPI_TRUE; \
 } \
 \
 void embb_mtapi_##TYPE##_pool_finalize(embb_mtapi_##TYPE##_pool_t * that) { \

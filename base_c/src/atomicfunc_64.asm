@@ -107,7 +107,7 @@ define_or_assign embb_internal__atomic_or_assign_1_asm, byte, dl
 define_store macro name, size, value
 	public name
 	name proc
-		mov size ptr [rcx], value
+		xchg size ptr [rcx], value
 		ret
 	name endp
 endm

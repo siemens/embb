@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -50,7 +50,11 @@ void ThreadSpecificStorageTest::Test() {
   size_t rank = partest::TestSuite::GetCurrentThreadID();
   void* value = embb_tss_get(&tss_);
   if (value == NULL) {
-    int status = embb_tss_set(&tss_, new size_t(rank));
+    size_t * prank = new size_t(rank);
+    int status = embb_tss_set(&tss_, prank);
+    if (EMBB_SUCCESS != status) {
+        delete prank;
+    }
     PT_EXPECT_EQ(status, EMBB_SUCCESS);
   } else {
     size_t stored_rank = *static_cast<size_t*>(value);

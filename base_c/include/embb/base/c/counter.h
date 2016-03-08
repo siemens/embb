@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -67,6 +67,8 @@ int embb_counter_init(
 /**
  * Returns the current value of \c counter.
  *
+ * \pre \c counter is not NULL.
+ *
  * \return Current value 
  *
  * \waitfree
@@ -79,6 +81,8 @@ unsigned int embb_counter_get(
 /**
  * Increments \c counter and returns the old value.
  *
+ * \pre \c counter is not NULL.
+ *
  * \return Old, non-incremented value
  * \waitfree
  */
@@ -89,6 +93,8 @@ unsigned int embb_counter_increment(
 
 /**
  * Decrements \c counter and returns the old value.
+ *
+ * \pre \c counter is not NULL.
  *
  * \return Old, non-decremented value
  * \waitfree
@@ -101,8 +107,8 @@ unsigned int embb_counter_decrement(
 /**
  * Destroys an initialized counter.
  *
- * \pre Counter is initialized
- * \post Counter is invalid and cannot be used anymore
+ * \pre \c counter is initialized and not NULL.
+ * \post \c counter is invalid and cannot be used anymore
  * \waitfree
  */
 void embb_counter_destroy(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,7 +32,9 @@
 #include <assert.h>
 
 int embb_tss_create(embb_tss_t* tss) {
-  assert(tss != NULL);
+  if (tss == NULL) {
+    return EMBB_ERROR;
+  }
   tss->size = embb_thread_get_max_count();
   tss->values = (void**) embb_alloc_cache_aligned(tss->size * sizeof(void*));
   if (tss->values == NULL) {
@@ -45,7 +47,9 @@ int embb_tss_create(embb_tss_t* tss) {
 }
 
 int embb_tss_set(embb_tss_t* tss, void* value) {
-  assert(tss != NULL);
+  if (tss == NULL) {
+    return EMBB_ERROR;
+  }
   unsigned int index = 0;
   int status = embb_internal_thread_index(&index);
   if ((status != EMBB_SUCCESS) || (index >= tss->size)) {
@@ -56,8 +60,12 @@ int embb_tss_set(embb_tss_t* tss, void* value) {
 }
 
 void* embb_tss_get(const embb_tss_t* tss) {
-  assert(tss != NULL);
-  assert(tss->values != NULL);
+  if (tss == NULL) {
+    return NULL;
+  }
+  if (tss->values == NULL) {
+    return NULL;
+  }
   unsigned int index = 0;
   int status = embb_internal_thread_index(&index);
   if ((status != EMBB_SUCCESS) || (index >= tss->size)) {
@@ -68,5 +76,7 @@ void* embb_tss_get(const embb_tss_t* tss) {
 
 void embb_tss_delete(embb_tss_t* tss) {
   assert(tss != NULL);
-  embb_free_aligned(tss->values);
+  if (tss->values != NULL) {
+    embb_free_aligned(tss->values);
+  }
 }
