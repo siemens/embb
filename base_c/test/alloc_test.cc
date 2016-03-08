@@ -152,6 +152,9 @@ void AllocTest::TestMixedAllocs() {
   void* plain = NULL;
   plain = embb_alloc(2);
   PT_EXPECT_NE(plain, static_cast<void*>(NULL));
+  if (NULL == plain) {
+    return;
+  }
   allocated = embb_get_bytes_allocated();
 #ifdef EMBB_DEBUG
   expected += 2 + 2*sizeof(size_t);
@@ -162,6 +165,10 @@ void AllocTest::TestMixedAllocs() {
   void* aligned = NULL;
   aligned = embb_alloc_aligned(2*sizeof(void*), 2);
   PT_EXPECT_NE(aligned, static_cast<void*>(NULL));
+  if (NULL == aligned) {
+    embb_free(plain);
+    return;
+  }
   allocated = embb_get_bytes_allocated();
 #ifdef EMBB_DEBUG
   expected += (1 + 1) * 2 * sizeof(void*) + 3 * sizeof(size_t) - 1;
@@ -172,6 +179,11 @@ void AllocTest::TestMixedAllocs() {
   void* cache_aligned = NULL;
   cache_aligned = embb_alloc_cache_aligned(2);
   PT_EXPECT_NE(cache_aligned, static_cast<void*>(NULL));
+  if (NULL == cache_aligned) {
+    embb_free(plain);
+    embb_free_aligned(aligned);
+    return;
+  }
   allocated = embb_get_bytes_allocated();
 #ifdef EMBB_DEBUG
   expected += (1 + 1) * EMBB_PLATFORM_CACHE_LINE_SIZE + 3 * sizeof(size_t) - 1;

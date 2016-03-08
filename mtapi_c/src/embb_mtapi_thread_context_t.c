@@ -38,12 +38,13 @@
 
 /* ---- CLASS MEMBERS ------------------------------------------------------ */
 
-void embb_mtapi_thread_context_initialize_with_node_worker_and_core(
+mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
   embb_mtapi_thread_context_t* that,
   embb_mtapi_node_t* node,
   mtapi_uint_t worker_index,
   mtapi_uint_t core_num) {
   mtapi_uint_t ii;
+  mtapi_boolean_t result = MTAPI_TRUE;
 
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != node);
@@ -52,25 +53,55 @@ void embb_mtapi_thread_context_initialize_with_node_worker_and_core(
   that->worker_index = worker_index;
   that->core_num = core_num;
   that->priorities = node->attributes.max_priorities;
+  that->is_initialized = MTAPI_FALSE;
   embb_atomic_store_int(&that->run, 0);
+
   that->queue = (embb_mtapi_task_queue_t**)embb_mtapi_alloc_allocate(
     sizeof(embb_mtapi_task_queue_t)*that->priorities);
-  that->private_queue = (embb_mtapi_task_queue_t**)embb_mtapi_alloc_allocate(
-    sizeof(embb_mtapi_task_queue_t)*that->priorities);
+  if (that->queue == NULL) {
+    that->private_queue = NULL;
+    return MTAPI_FALSE;
+  }
   for (ii = 0; ii < that->priorities; ii++) {
     that->queue[ii] = (embb_mtapi_task_queue_t*)
       embb_mtapi_alloc_allocate(sizeof(embb_mtapi_task_queue_t));
-    embb_mtapi_task_queue_initialize_with_capacity(
-      that->queue[ii], node->attributes.queue_limit);
+    if (that->queue[ii] != NULL) {
+      embb_mtapi_task_queue_initialize_with_capacity(
+        that->queue[ii], node->attributes.queue_limit);
+    } else {
+      result = MTAPI_FALSE;
+    }
+  }
+  if (!result) {
+    return MTAPI_FALSE;
+  }
+
+  that->private_queue = (embb_mtapi_task_queue_t**)embb_mtapi_alloc_allocate(
+    sizeof(embb_mtapi_task_queue_t)*that->priorities);
+  if (that->private_queue == NULL) {
+    return MTAPI_FALSE;
+  }
+  for (ii = 0; ii < that->priorities; ii++) {
     that->private_queue[ii] = (embb_mtapi_task_queue_t*)
       embb_mtapi_alloc_allocate(sizeof(embb_mtapi_task_queue_t));
-    embb_mtapi_task_queue_initialize_with_capacity(
-      that->private_queue[ii], node->attributes.queue_limit);
+    if (that->private_queue[ii] != NULL) {
+      embb_mtapi_task_queue_initialize_with_capacity(
+        that->private_queue[ii], node->attributes.queue_limit);
+    } else {
+      result = MTAPI_FALSE;
+    }
+  }
+  if (!result) {
+    return MTAPI_FALSE;
   }
 
   embb_mutex_init(&that->work_available_mutex, EMBB_MUTEX_PLAIN);
   embb_condition_init(&that->work_available);
   embb_atomic_store_int(&that->is_sleeping, 0);
+
+  that->is_initialized = MTAPI_TRUE;
+
+  return MTAPI_TRUE;
 }
 
 mtapi_boolean_t embb_mtapi_thread_context_start(
@@ -126,22 +157,37 @@ void embb_mtapi_thread_context_finalize(embb_mtapi_thread_context_t* that) {
 
   embb_mtapi_log_trace("embb_mtapi_thread_context_finalize() called\n");
 
-  embb_condition_destroy(&that->work_available);
-  embb_mutex_destroy(&that->work_available_mutex);
-
-  for (ii = 0; ii < that->priorities; ii++) {
-    embb_mtapi_task_queue_finalize(that->queue[ii]);
-    embb_mtapi_alloc_deallocate(that->queue[ii]);
-    that->queue[ii] = MTAPI_NULL;
-    embb_mtapi_task_queue_finalize(that->private_queue[ii]);
-    embb_mtapi_alloc_deallocate(that->private_queue[ii]);
-    that->private_queue[ii] = MTAPI_NULL;
+  if (that->is_initialized) {
+    embb_condition_destroy(&that->work_available);
+    embb_mutex_destroy(&that->work_available_mutex);
   }
-  embb_mtapi_alloc_deallocate(that->queue);
-  that->queue = MTAPI_NULL;
-  embb_mtapi_alloc_deallocate(that->private_queue);
-  that->private_queue = MTAPI_NULL;
+
+  if (that->queue != NULL) {
+    for (ii = 0; ii < that->priorities; ii++) {
+      if (that->queue[ii] != NULL) {
+        embb_mtapi_task_queue_finalize(that->queue[ii]);
+        embb_mtapi_alloc_deallocate(that->queue[ii]);
+        that->queue[ii] = MTAPI_NULL;
+      }
+    }
+    embb_mtapi_alloc_deallocate(that->queue);
+    that->queue = MTAPI_NULL;
+  }
+
+  if (that->private_queue != NULL) {
+    for (ii = 0; ii < that->priorities; ii++) {
+      if (that->private_queue[ii] != NULL) {
+        embb_mtapi_task_queue_finalize(that->private_queue[ii]);
+        embb_mtapi_alloc_deallocate(that->private_queue[ii]);
+        that->private_queue[ii] = MTAPI_NULL;
+      }
+    }
+    embb_mtapi_alloc_deallocate(that->private_queue);
+    that->private_queue = MTAPI_NULL;
+  }
+
   that->priorities = 0;
+  that->is_initialized = MTAPI_FALSE;
 
   that->node = MTAPI_NULL;
 }

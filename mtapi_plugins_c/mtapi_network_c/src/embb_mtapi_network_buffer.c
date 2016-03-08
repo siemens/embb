@@ -107,6 +107,7 @@ int embb_mtapi_network_buffer_pop_front_int8(
   embb_mtapi_network_buffer_t * that,
   int8_t * value) {
   if (that->position + 1 > that->size) {
+    *value = 0;
     return 0;
   }
   memcpy(value, that->data + that->position, 1);
@@ -118,6 +119,7 @@ int embb_mtapi_network_buffer_pop_front_int16(
   embb_mtapi_network_buffer_t * that,
   int16_t * value) {
   if (that->position + 2 > that->size) {
+    *value = 0;
     return 0;
   }
   memcpy(value, that->data + that->position, 2);
@@ -129,6 +131,7 @@ int embb_mtapi_network_buffer_pop_front_int32(
   embb_mtapi_network_buffer_t * that,
   int32_t * value) {
   if (that->position + 4 > that->size) {
+    *value = 0;
     return 0;
   }
   memcpy(value, that->data + that->position, 4);
@@ -141,6 +144,7 @@ int embb_mtapi_network_buffer_pop_front_rawdata(
   int32_t size,
   void * rawdata) {
   if (that->position + size > that->size) {
+    memset(rawdata, 0, (size_t)size);
     return 0;
   }
   memcpy(rawdata, that->data + that->position, (size_t)size);

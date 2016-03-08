@@ -126,7 +126,7 @@ void Node::Initialize(
     mtapi_nodeattr_set(&attr, MTAPI_NODE_MAX_ACTIONS,
       &tmp, sizeof(tmp), &status);
     assert(MTAPI_SUCCESS == status);
-    tmp = 4;
+    // tmp = 4;
     mtapi_nodeattr_set(&attr, MTAPI_NODE_MAX_JOBS,
       &tmp, sizeof(tmp), &status);
     assert(MTAPI_SUCCESS == status);

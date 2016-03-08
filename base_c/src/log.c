@@ -90,7 +90,6 @@ void embb_log_write_internal(
 
     case EMBB_LOG_LEVEL_NONE:
     default:
-      log_level_str = "     ";
       break;
     }
 #if defined(EMBB_PLATFORM_COMPILER_MSVC)

@@ -85,7 +85,10 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   }
   thread->embb_internal_arg = (embb_internal_thread_arg_t*)
                               embb_alloc(sizeof(embb_internal_thread_arg_t));
-  if (thread->embb_internal_arg == NULL) return EMBB_NOMEM;
+  if (thread->embb_internal_arg == NULL) {
+    thread->embb_internal_handle = NULL;
+    return EMBB_NOMEM;
+  }
   thread->embb_internal_arg->func = func;
   thread->embb_internal_arg->arg = arg;
 
@@ -97,6 +100,8 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
       0,                                  /* no creation arguments */
       0);                                 /* no system thread ID */
   if (thread->embb_internal_handle == NULL) {
+    embb_free(thread->embb_internal_arg);
+    thread->embb_internal_arg = NULL;
     return EMBB_ERROR;
   }
 
@@ -234,7 +239,11 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
       }
     }
     status = pthread_attr_setaffinity_np(&attr, sizeof(cpuset), &cpuset);
-    if (status != 0) return EMBB_ERROR;
+    if (status != 0) {
+      thread->embb_internal_arg = NULL;
+      thread->embb_internal_handle = NULL;
+      return EMBB_ERROR;
+    }
 #else
     embb_log_write("base_c", EMBB_LOG_LEVEL_WARNING, "Could not set thread "
                    "affinity, since no implementation available!\n");
@@ -244,6 +253,11 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   /* Dynamic allocation of thread arguments. Freed on call of join. */
   thread->embb_internal_arg = (embb_internal_thread_arg_t*)
                               embb_alloc(sizeof(embb_internal_thread_arg_t));
+  if (thread->embb_internal_arg == NULL) {
+    thread->embb_internal_handle = NULL;
+    pthread_attr_destroy(&attr);
+    return EMBB_NOMEM;
+  }
   thread->embb_internal_arg->func = func;
   thread->embb_internal_arg->arg = arg;
 
@@ -265,11 +279,14 @@ int embb_thread_join(embb_thread_t* thread, int *result_code) {
     return EMBB_ERROR;
   }
   int status = 0;
+  if (thread == NULL) return EMBB_ERROR;
   status = pthread_join(thread->embb_internal_handle, NULL);
-  if (result_code != NULL) {
-    *result_code = thread->embb_internal_arg->result;
+  if (thread->embb_internal_arg != NULL) {
+    if (result_code != NULL) {
+      *result_code = thread->embb_internal_arg->result;
+    }
+    embb_free(thread->embb_internal_arg);
   }
-  embb_free(thread->embb_internal_arg);
   if (status != 0) {
     return EMBB_ERROR;
   }

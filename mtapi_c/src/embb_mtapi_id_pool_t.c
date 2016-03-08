@@ -36,14 +36,19 @@ void embb_mtapi_id_pool_initialize(
   mtapi_uint_t capacity) {
   mtapi_uint_t ii;
 
-  that->capacity = capacity;
   that->id_buffer = (mtapi_uint_t*)
     embb_mtapi_alloc_allocate(sizeof(mtapi_uint_t)*(capacity + 1));
-  that->id_buffer[0] = EMBB_MTAPI_IDPOOL_INVALID_ID;
-  for (ii = 1; ii <= capacity; ii++) {
-    that->id_buffer[ii] = ii;
+  if (NULL != that->id_buffer) {
+    that->capacity = capacity;
+    that->id_buffer[0] = EMBB_MTAPI_IDPOOL_INVALID_ID;
+    for (ii = 1; ii <= capacity; ii++) {
+      that->id_buffer[ii] = ii;
+    }
+    that->ids_available = capacity;
+  } else {
+    that->capacity = 0;
+    that->ids_available = 0;
   }
-  that->ids_available = capacity;
   that->put_id_position = 0;
   that->get_id_position = 1;
   embb_spin_init(&that->lock);
