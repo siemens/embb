@@ -279,7 +279,6 @@ int embb_thread_join(embb_thread_t* thread, int *result_code) {
     return EMBB_ERROR;
   }
   int status = 0;
-  if (thread == NULL) return EMBB_ERROR;
   status = pthread_join(thread->embb_internal_handle, NULL);
   if (thread->embb_internal_arg != NULL) {
     if (result_code != NULL) {
