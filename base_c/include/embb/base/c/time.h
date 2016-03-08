@@ -89,6 +89,8 @@ int embb_time_in(
 /**
  * Compares two time points.
  *
+ * \pre \c lhs and \c rhs are not NULL and properly initialized.
+ *
  * \return -1 if \c lhs < \c rhs \n
  *         0 if \c lhs == \c rhs \n
  *         1 if \c lhs > \c rhs

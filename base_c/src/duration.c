@@ -201,7 +201,6 @@ int embb_duration_as_seconds(const embb_duration_t* duration,
   if (duration->nanoseconds % 1000000000 > 0) {
     return EMBB_UNDERFLOW;
   }
-  assert(duration->nanoseconds % 1000000000 == 0);
   if (duration->seconds > ULLONG_MAX) {
     return EMBB_OVERFLOW;
   }
@@ -211,12 +210,8 @@ int embb_duration_as_seconds(const embb_duration_t* duration,
 
 int embb_duration_compare(const embb_duration_t* lhs,
                           const embb_duration_t* rhs) {
-  if (lhs == NULL || rhs == NULL) {
-    return EMBB_ERROR;
-  }
-  if (lhs->nanoseconds >= 1000000000 || rhs->nanoseconds >= 1000000000) {
-    return EMBB_ERROR;
-  }
+  assert(lhs != NULL && rhs != NULL);
+  assert(lhs->nanoseconds < 1000000000 && rhs->nanoseconds < 1000000000);
   if (lhs->seconds > rhs->seconds) {
     return 1;
   } else if (lhs->seconds < rhs->seconds) {

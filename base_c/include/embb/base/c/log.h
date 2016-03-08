@@ -67,6 +67,7 @@ typedef void(*embb_log_function_t)(void * context, char const * message);
 /**
  * Default logging function.
  * Writes to the given file (context needs to be a FILE*).
+ * \pre \c context is not NULL.
  * \ingroup C_LOG
  * \threadsafe
  */
