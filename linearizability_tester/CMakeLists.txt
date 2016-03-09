@@ -12,7 +12,7 @@ endif()
 # setting directories
 # link_directories(/home/lucapegolotti/embb/build)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../base_cpp/include ${CMAKE_CURRENT_SOURCE_DIR}/../base_c/include ${CMAKE_CURRENT_SOURCE_DIR}/../containers_cpp/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../base_cpp/include ${CMAKE_CURRENT_SOURCE_DIR}/../build/base_cpp/include ${CMAKE_CURRENT_SOURCE_DIR}/../base_c/include ${CMAKE_CURRENT_SOURCE_DIR}/../build/base_c/include ${CMAKE_CURRENT_SOURCE_DIR}/../containers_cpp/include ${CMAKE_CURRENT_SOURCE_DIR}/../build/containers_cpp/include)
 
 # setting names of libraries
 set(PROJECT_LINK_LIBS 
