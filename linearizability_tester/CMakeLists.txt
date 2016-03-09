@@ -11,7 +11,7 @@ endif()
 
 # setting directories
 # link_directories(/home/lucapegolotti/embb/build)
-include_directories(../)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 
 
 # setting names of libraries
