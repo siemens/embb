@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (Linearizability-checker C CXX)
+project (Linearizability_tester C CXX)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lrt")
 find_package(Threads REQUIRED)
