@@ -16,9 +16,9 @@ include_directories(../)
 
 # setting names of libraries
 set(PROJECT_LINK_LIBS 
-../build/base_cpp/libembb_base_cpp.a 
-../build/base_c/libembb_base_c.a 
-../build/containers_cpp/libembb_containers_cpp.a
+${CMAKE_CURRENT_SOURCE_DIR}/../build/base_cpp/libembb_base_cpp.a 
+${CMAKE_CURRENT_SOURCE_DIR}/../build/base_c/libembb_base_c.a 
+${CMAKE_CURRENT_SOURCE_DIR}/../build/containers_cpp/libembb_containers_cpp.a
 )
 
 

@@ -51,8 +51,6 @@
 #include <embb/base/thread.h>
 #include <embb/containers/lock_free_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
-#include <locked_mpmc_queue.h>
-// #include <locked_stack.h>
 
 
 #ifdef _LT_TIMEOUT_
@@ -2797,7 +2795,7 @@ namespace lt
 
 			~Queue()
 			{   
-				dec_ref_counter();
+			         dec_ref_counter();
 			}
 
 			Queue(const Queue& other)
@@ -5040,7 +5038,7 @@ static void embb_worker_queue(
 	{
 		value = value_dist(rd);
 		percentage = percentage_dist(rd);
-		if (percentage < 30)
+		if (percentage < 20)
 		{
 			call_entry_ptr = concurrent_log.push_back(state::Queue<N>::make_try_enqueue_call(value));
 			ret = concurrent_queue.TryEnqueue(value);
@@ -5154,6 +5152,7 @@ static void embb_experiment_queue(bool is_linearizable)
 
 int main()
 {	
+
   test_lru_cache();
   test_atomic_op();
   test_stack();
@@ -5231,11 +5230,11 @@ int main()
 
   embb::base::Thread::SetThreadsMaxCount(255);
   
-  std::cout << "Linearizability experiment on LockFreeStack" << std::endl;
-  // embb_experiment_stack<embb::containers::LockFreeStack<char>>(true);
   std::cout << "Linearizability experiment on LockFreeMPMCQueue" << std::endl;
   embb_experiment_queue<embb::containers::LockFreeMPMCQueue<char>>(true);
 
-	return 0;
+  std::cout << "Linearizability experiment on LockFreeStack" << std::endl;
+  embb_experiment_stack<embb::containers::LockFreeStack<char>>(true);
+  return 0;
 }
 
