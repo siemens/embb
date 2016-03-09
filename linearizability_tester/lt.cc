@@ -5117,7 +5117,7 @@ static void embb_experiment_queue(bool is_linearizable)
 	ConcurrentLog<state::Queue<N>> concurrent_log{ 2U * log_size };
 	S concurrent_queue(N);
 
-	if (is_linearizable)
+	if (!is_linearizable)
 	{
 		bool ok = concurrent_queue.TryEnqueue(5);
 		assert(ok);
