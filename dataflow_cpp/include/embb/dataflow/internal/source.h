@@ -48,9 +48,9 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
   typedef SourceExecutor< OutputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  explicit Source(Network & network, FunctionType function)
+  Source(Scheduler * sched, FunctionType function)
     : executor_(function), not_done_(true) {
-    SetScheduler(network.GetScheduler());
+    SetScheduler(sched);
   }
 
   virtual bool HasOutputs() const {

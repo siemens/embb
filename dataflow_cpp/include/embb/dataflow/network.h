@@ -60,7 +60,7 @@ class Network {
    * Constructs an empty network.
    * \param slices Number of concurrent tokens allowed in the network.
    */
-  Network(int slices) {}
+  explicit Network(int slices) {}
 
   /**
    * Input port class.
@@ -681,7 +681,8 @@ class Network {
 
 class Network : public internal::ClockListener {
  public:
-  Network(int slices) : sink_counter_(NULL), slices_(slices), sched_(NULL) {
+  explicit Network(int slices)
+    : sink_counter_(NULL), slices_(slices), sched_(NULL) {
     sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
     sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
       embb::base::Allocation::Allocate(
@@ -709,7 +710,8 @@ class Network : public internal::ClockListener {
     typename T5 = embb::base::internal::Nil>
   class Inputs : public internal::Inputs<T1, T2, T3, T4, T5> {
    public:
-    explicit Inputs(int slices) : internal::Inputs(slices) {}
+    explicit Inputs(int slices)
+      : internal::Inputs<T1, T2, T3, T4, T5>(slices) {}
   };
 
   template <typename T1, typename T2 = embb::base::internal::Nil,
@@ -718,7 +720,8 @@ class Network : public internal::ClockListener {
     typename T5 = embb::base::internal::Nil>
   class Outputs : public internal::Outputs<T1, T2, T3, T4, T5> {
    public:
-    explicit Outputs() : internal::Outputs() {}
+    explicit Outputs()
+      : internal::Outputs<T1, T2, T3, T4, T5>() {}
   };
 
   template <class Inputs, class Outputs> class SerialProcess;
@@ -739,7 +742,8 @@ class Network : public internal::ClockListener {
     explicit SerialProcess(Network & network, FunctionType function)
       : internal::Process< true,
           internal::Inputs<I1, I2, I3, I4, I5>,
-          internal::Outputs<O1, O2, O3, O4, O5> >(network, function) {
+          internal::Outputs<O1, O2, O3, O4, O5> >(
+            network.slices_, network.sched_, function) {
       network.processes_.push_back(this);
     }
   };
@@ -762,7 +766,8 @@ class Network : public internal::ClockListener {
     explicit ParallelProcess(Network & network, FunctionType function)
       : internal::Process< false,
           internal::Inputs<I1, I2, I3, I4, I5>,
-          internal::Outputs<O1, O2, O3, O4, O5> >(network, function) {
+          internal::Outputs<O1, O2, O3, O4, O5> >(
+            network.slices_, network.sched_, function) {
       network.processes_.push_back(this);
     }
   };
@@ -771,7 +776,7 @@ class Network : public internal::ClockListener {
   class Switch : public internal::Switch<Type> {
    public:
     explicit Switch(Network & network)
-      : internal::Switch<Type>(network) {
+      : internal::Switch<Type>(network.slices_, network.sched_) {
       network.processes_.push_back(this);
     }
   };
@@ -780,7 +785,7 @@ class Network : public internal::ClockListener {
   class Select : public internal::Select<Type> {
    public:
     explicit Select(Network & network)
-      : internal::Select<Type>(network) {
+      : internal::Select<Type>(network.slices_, network.sched_) {
       network.processes_.push_back(this);
     }
   };
@@ -797,7 +802,8 @@ class Network : public internal::ClockListener {
 
     explicit Sink(Network & network, FunctionType function)
       : internal::Sink<
-          internal::Inputs<I1, I2, I3, I4, I5> >(network, function) {
+          internal::Inputs<I1, I2, I3, I4, I5> >(
+            network.slices_, network.sched_, &network, function) {
       network.sinks_.push_back(this);
       network.sink_count_++;
     }
@@ -816,7 +822,7 @@ class Network : public internal::ClockListener {
 
     explicit Source(Network & network, FunctionType function)
       : internal::Source<
-          internal::Outputs<O1, O2, O3, O4, O5> >(network, function) {
+          internal::Outputs<O1, O2, O3, O4, O5> >(network.sched_, function) {
       network.sources_.push_back(this);
     }
   };
@@ -825,18 +831,10 @@ class Network : public internal::ClockListener {
   class ConstantSource : public internal::ConstantSource<Type> {
    public:
     explicit ConstantSource(Network & network, Type value)
-      : internal::ConstantSource<Type>(network, value) {
+      : internal::ConstantSource<Type>(network.sched_, value) {
       network.sources_.push_back(this);
     }
   };
-
-  int GetSlices() const {
-    return slices_;
-  }
-
-  internal::Scheduler * GetScheduler() const {
-    return sched_;
-  }
 
   bool IsValid() {
     bool valid = true;

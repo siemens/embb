@@ -46,9 +46,9 @@ class ConstantSource
   Type value_;
 
  public:
-  explicit ConstantSource(Network & network, Type value)
+  ConstantSource(Scheduler * sched, Type value)
     : value_(value) {
-    SetScheduler(network.GetScheduler());
+    SetScheduler(sched);
   }
 
   virtual bool HasOutputs() const {

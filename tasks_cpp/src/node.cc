@@ -41,7 +41,7 @@ namespace {
 
 static embb::tasks::Node * node_instance = NULL;
 #if TASKS_CPP_AUTOMATIC_INITIALIZE
-static embb_spinlock_t init_mutex = { 0 };
+static embb_spinlock_t init_mutex = { { 0 } };
 #endif
 
 }

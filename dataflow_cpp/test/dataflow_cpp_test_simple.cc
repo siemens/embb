@@ -170,7 +170,8 @@ void SimpleTest::TestBasic() {
     MySource source(network, embb::base::MakeFunction(sourceFunc));
     MyFilter filter(network, embb::base::MakeFunction(filterFunc));
     MyMult mult(network, embb::base::MakeFunction(multFunc));
-    MySink sink(network, embb::base::MakeFunction(asink, &ArraySink<TEST_COUNT>::Run));
+    MySink sink(network,
+      embb::base::MakeFunction(asink, &ArraySink<TEST_COUNT>::Run));
     MyPred pred(network, embb::base::MakeFunction(predFunc));
     MySwitch sw(network);
     MySelect sel(network);
@@ -207,11 +208,6 @@ void SimpleTest::TestBasic() {
     mult.GetOutput<0>() >> sel.GetInput<2>();
 
     sel.GetOutput<0>() >> sink.GetInput<0>();
-
-//    network.AddSource(constant);
-//    network.AddSource(source);
-
-//    network.Initialize(NUM_SLICES);
 
     try {
       if (!network.IsValid()) {

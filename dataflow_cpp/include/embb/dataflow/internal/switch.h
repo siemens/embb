@@ -34,9 +34,6 @@
 
 namespace embb {
 namespace dataflow {
-
-class Network;
-
 namespace internal {
 
 template <typename Type>
@@ -47,9 +44,9 @@ class Switch
   typedef Inputs<bool, Type> InputsType;
   typedef Outputs<Type, Type> OutputsType;
 
-  Switch(Network & network) : inputs_(network.GetSlices()) {
+  Switch(int slices, Scheduler * sched) : inputs_(slices) {
     inputs_.SetListener(this);
-    SetScheduler(network.GetScheduler());
+    SetScheduler(sched);
   }
 
   virtual bool HasInputs() const {

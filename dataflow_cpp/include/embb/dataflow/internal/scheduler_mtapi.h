@@ -40,7 +40,7 @@ namespace internal {
 
 class SchedulerMTAPI : public Scheduler {
  public:
-  SchedulerMTAPI(int slices)
+  explicit SchedulerMTAPI(int slices)
     : slices_(slices) {
     embb::tasks::Node & node = embb::tasks::Node::GetInstance();
 

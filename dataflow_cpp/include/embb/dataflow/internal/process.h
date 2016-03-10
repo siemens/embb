@@ -53,11 +53,11 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   typedef ProcessExecutor< InputsType, OutputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  explicit Process(Network & network, FunctionType function)
-    : inputs_(network.GetSlices())
+  Process(int slices, Scheduler * sched, FunctionType function)
+    : inputs_(slices)
     , executor_(function)
     , action_(NULL)
-    , slices_(network.GetSlices()) {
+    , slices_(slices) {
     next_clock_ = 0;
     queued_clock_ = 0;
     bool ordered = Serial;
@@ -73,7 +73,7 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     for (int ii = 0; ii < slices_; ii++) {
       action_[ii] = Action();
     }
-    SetScheduler(network.GetScheduler());
+    SetScheduler(sched);
   }
 
   ~Process() {

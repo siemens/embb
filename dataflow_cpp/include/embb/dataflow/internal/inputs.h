@@ -168,7 +168,7 @@ class Inputs<T1, T2, embb::base::internal::Nil,
     return this->template Get<0>().IsConnected() &
       this->template Get<1>().IsConnected();
   }
-private:
+ private:
   embb::base::Atomic<int> * count_;
   ClockListener * listener_;
   int slices_;
@@ -233,7 +233,7 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
       this->template Get<1>().IsConnected() &
       this->template Get<2>().IsConnected();
   }
-private:
+ private:
   embb::base::Atomic<int> * count_;
   ClockListener * listener_;
   int slices_;

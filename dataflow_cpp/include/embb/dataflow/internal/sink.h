@@ -48,11 +48,12 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   typedef SinkExecutor< InputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  explicit Sink(Network & network, FunctionType function)
-    : inputs_(network.GetSlices())
+  Sink(int slices, Scheduler * sched, ClockListener * listener,
+    FunctionType function)
+    : inputs_(slices)
     , executor_(function)
     , action_(NULL)
-    , slices_(network.GetSlices()) {
+    , slices_(slices) {
     next_clock_ = 0;
     queued_clock_ = 0;
     queue_id_ = GetNextProcessID();
@@ -63,8 +64,8 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     for (int ii = 0; ii < slices_; ii++) {
       action_[ii] = Action();
     }
-    SetListener(&network);
-    SetScheduler(network.GetScheduler());
+    SetListener(listener);
+    SetScheduler(sched);
   }
 
   ~Sink() {
