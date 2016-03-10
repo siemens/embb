@@ -241,7 +241,7 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
     status = pthread_attr_setaffinity_np(&attr, sizeof(cpuset), &cpuset);
     if (status != 0) {
       thread->embb_internal_arg = NULL;
-      thread->embb_internal_handle = NULL;
+      thread->embb_internal_handle = 0;
       return EMBB_ERROR;
     }
 #else
@@ -254,7 +254,7 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   thread->embb_internal_arg = (embb_internal_thread_arg_t*)
                               embb_alloc(sizeof(embb_internal_thread_arg_t));
   if (thread->embb_internal_arg == NULL) {
-    thread->embb_internal_handle = NULL;
+    thread->embb_internal_handle = 0;
     pthread_attr_destroy(&attr);
     return EMBB_NOMEM;
   }
