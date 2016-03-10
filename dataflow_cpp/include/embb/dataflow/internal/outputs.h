@@ -50,6 +50,9 @@ class Outputs<embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil> {
  public:
+  bool IsFullyConnected() {
+    return true;
+  }
 };
 
 template <typename T1>
@@ -59,6 +62,9 @@ class Outputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil> {
  public:
+  bool IsFullyConnected() {
+    return this->template Get<0>().IsConnected();
+  }
 };
 
 template <typename T1, typename T2>
@@ -67,6 +73,10 @@ class Outputs<T1, T2, embb::base::internal::Nil,
   : public Tuple<Out<T1>, Out<T2>, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil> {
  public:
+  bool IsFullyConnected() {
+    return this->template Get<0>().IsConnected() &&
+      this->template Get<1>().IsConnected();
+  }
 };
 
 template <typename T1, typename T2, typename T3>

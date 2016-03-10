@@ -52,12 +52,6 @@ class Out {
     }
   }
 
-  void SendInit(InitData * init_data) {
-    for (size_t ii = 0; ii < targets_.size(); ii++) {
-      targets_[ii]->ReceiveInit(init_data);
-    }
-  }
-
   void Connect(InType & input) {
     if (input.IsConnected()) {
       EMBB_THROW(embb::base::ErrorException,
@@ -70,6 +64,10 @@ class Out {
 
   void operator >> (InType & input) {
     Connect(input);
+  }
+
+  bool IsConnected() const {
+    return targets_.size() > 0;
   }
 
  private:

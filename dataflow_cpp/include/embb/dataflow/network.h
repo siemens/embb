@@ -58,8 +58,9 @@ class Network {
  public:
   /**
    * Constructs an empty network.
+   * \param slices Number of concurrent tokens allowed in the network.
    */
-  Network() {}
+  Network(int slices) {}
 
   /**
    * Input port class.
@@ -196,9 +197,10 @@ class Network {
 
     /**
      * Constructs a SerialProcess with a user specified processing function.
+     * \param network The network this node is going to be part of.
      * \param function The Function to call to process a token.
      */
-    explicit SerialProcess(FunctionType function);
+    explicit SerialProcess(Network & network, FunctionType function);
 
     /**
      * \returns \c true if the SerialProcess has any inputs, \c false
@@ -277,9 +279,10 @@ class Network {
 
     /**
     * Constructs a ParallelProcess with a user specified processing function.
+    * \param network The network this node is going to be part of.
     * \param function The Function to call to process a token.
     */
-    explicit ParallelProcess(FunctionType function);
+    explicit ParallelProcess(Network & network, FunctionType function);
 
     /**
     * \returns \c true if the ParallelProcess has any inputs, \c false
@@ -339,6 +342,7 @@ class Network {
    */
   template<typename Type>
   class Switch {
+   public:
     /**
      * Function type to use when processing tokens.
      */
@@ -353,6 +357,12 @@ class Network {
      * Output port type list.
      */
     typedef Outputs<Type> OutputsType;
+
+    /**
+     * Constructs a Switch process.
+     * \param network The network this node is going to be part of.
+     */
+    explicit Select(Network & network);
 
     /**
      * \returns Always \c true.
@@ -410,6 +420,7 @@ class Network {
    */
   template<typename Type>
   class Select {
+   public:
     /**
      * Function type to use when processing tokens.
      */
@@ -424,6 +435,12 @@ class Network {
      * Output port type list.
      */
     typedef Outputs<Type> OutputsType;
+
+    /**
+     * Constructs a Select process.
+     * \param network The network this node is going to be part of.
+     */
+    explicit Select(Network & network);
 
     /**
      * \returns Always \c true.
@@ -500,9 +517,10 @@ class Network {
 
     /**
      * Constructs a Sink with a user specified processing function.
+     * \param network The network this node is going to be part of.
      * \param function The Function to call to process a token.
      */
-    explicit Sink(FunctionType function);
+    explicit Sink(Network & network, FunctionType function);
 
     /**
      * \returns Always \c true.
@@ -559,9 +577,10 @@ class Network {
 
     /**
      * Constructs a Source with a user specified processing function.
+     * \param network The network this node is going to be part of.
      * \param function The Function to call to emit a token.
      */
-    explicit Source(FunctionType function);
+    explicit Source(Network & network, FunctionType function);
 
     /**
      * \returns Always \c false.
@@ -594,13 +613,6 @@ class Network {
   };
 
   /**
-   * Adds a new source process to the network.
-   * \param source The source process to add.
-   */
-  template<typename O1, typename O2, typename O3, typename O4, typename O5>
-  void AddSource(Source<O1, O2, O3, O4, O5> & source);
-
-  /**
    * Constant source process template.
    *
    * A constant source has one output port and emits a constant value given
@@ -618,9 +630,10 @@ class Network {
 
     /**
      * Constructs a ConstantSource with a value to emit on each token.
+     * \param network The network this node is going to be part of.
      * \param value The value to emit.
      */
-    explicit ConstantSource(Type value);
+    explicit ConstantSource(Network & network, Type value);
 
     /**
      * \returns Always \c false.
@@ -653,19 +666,10 @@ class Network {
   };
 
   /**
-   * Adds a new constant source process to the network.
-   * \param source The constant source process to add.
+   * Checks whether the network is completely connected and free of cycles.
+   * \returns \c true if everything is in order, \c false if not.
    */
-  template<typename Type>
-  void AddSource(ConstantSource<Type> & source);
-
-  /**
-   * Builds the network for usage with \c slices concurrent tokens. This
-   * function needs to be called after adding all sources and before
-   * executing the network.
-   * \param slices Number of concurrent tokens allowed in the network.
-   */
-  void Make(int slices);
+  bool IsValid();
 
   /**
    * Executes the network until one of the the sources returns \c false.
@@ -677,12 +681,25 @@ class Network {
 
 class Network : public internal::ClockListener {
  public:
-  Network() : sched_(NULL) {}
+  Network(int slices) : sink_counter_(NULL), slices_(slices), sched_(NULL) {
+    sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
+    sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
+      embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      sink_counter_[ii] = 0;
+    }
+    sink_count_ = 0;
+  }
 
   ~Network() {
     if (NULL != sched_) {
-      embb::base::Allocation::Delete<internal::Scheduler>(sched_);
+      embb::base::Allocation::Delete(sched_);
+      sched_ = NULL;
+    }
+    if (NULL != sink_counter_) {
       embb::base::Allocation::Free(sink_counter_);
+      sink_counter_ = NULL;
     }
   }
 
@@ -690,16 +707,18 @@ class Network : public internal::ClockListener {
     typename T3 = embb::base::internal::Nil,
     typename T4 = embb::base::internal::Nil,
     typename T5 = embb::base::internal::Nil>
-  struct Inputs {
-    typedef internal::Inputs<T1, T2, T3, T4, T5> Type;
+  class Inputs : public internal::Inputs<T1, T2, T3, T4, T5> {
+   public:
+    explicit Inputs(int slices) : internal::Inputs(slices) {}
   };
 
   template <typename T1, typename T2 = embb::base::internal::Nil,
     typename T3 = embb::base::internal::Nil,
     typename T4 = embb::base::internal::Nil,
     typename T5 = embb::base::internal::Nil>
-  struct Outputs {
-    typedef internal::Outputs<T1, T2, T3, T4, T5> Type;
+  class Outputs : public internal::Outputs<T1, T2, T3, T4, T5> {
+   public:
+    explicit Outputs() : internal::Outputs() {}
   };
 
   template <class Inputs, class Outputs> class SerialProcess;
@@ -707,8 +726,8 @@ class Network : public internal::ClockListener {
   template <
     typename I1, typename I2, typename I3, typename I4, typename I5,
     typename O1, typename O2, typename O3, typename O4, typename O5>
-  class SerialProcess< internal::Inputs<I1, I2, I3, I4, I5>,
-    internal::Outputs<O1, O2, O3, O4, O5> >
+  class SerialProcess< Inputs<I1, I2, I3, I4, I5>,
+    Outputs<O1, O2, O3, O4, O5> >
     : public internal::Process< true,
         internal::Inputs<I1, I2, I3, I4, I5>,
         internal::Outputs<O1, O2, O3, O4, O5> > {
@@ -717,11 +736,11 @@ class Network : public internal::ClockListener {
       internal::Inputs<I1, I2, I3, I4, I5>,
       internal::Outputs<O1, O2, O3, O4, O5> >::FunctionType
         FunctionType;
-    explicit SerialProcess(FunctionType function)
+    explicit SerialProcess(Network & network, FunctionType function)
       : internal::Process< true,
           internal::Inputs<I1, I2, I3, I4, I5>,
-          internal::Outputs<O1, O2, O3, O4, O5> >(function) {
-      //empty
+          internal::Outputs<O1, O2, O3, O4, O5> >(network, function) {
+      network.processes_.push_back(this);
     }
   };
 
@@ -730,8 +749,8 @@ class Network : public internal::ClockListener {
   template <
     typename I1, typename I2, typename I3, typename I4, typename I5,
     typename O1, typename O2, typename O3, typename O4, typename O5>
-  class ParallelProcess< internal::Inputs<I1, I2, I3, I4, I5>,
-    internal::Outputs<O1, O2, O3, O4, O5> >
+  class ParallelProcess< Inputs<I1, I2, I3, I4, I5>,
+    Outputs<O1, O2, O3, O4, O5> >
     : public internal::Process< false,
         internal::Inputs<I1, I2, I3, I4, I5>,
         internal::Outputs<O1, O2, O3, O4, O5> >{
@@ -740,22 +759,30 @@ class Network : public internal::ClockListener {
       internal::Inputs<I1, I2, I3, I4, I5>,
       internal::Outputs<O1, O2, O3, O4, O5> >::FunctionType
         FunctionType;
-    explicit ParallelProcess(FunctionType function)
+    explicit ParallelProcess(Network & network, FunctionType function)
       : internal::Process< false,
           internal::Inputs<I1, I2, I3, I4, I5>,
-          internal::Outputs<O1, O2, O3, O4, O5> >(function) {
-      //empty
+          internal::Outputs<O1, O2, O3, O4, O5> >(network, function) {
+      network.processes_.push_back(this);
     }
   };
 
   template<typename Type>
   class Switch : public internal::Switch<Type> {
    public:
+    explicit Switch(Network & network)
+      : internal::Switch<Type>(network) {
+      network.processes_.push_back(this);
+    }
   };
 
   template<typename Type>
   class Select : public internal::Select<Type> {
    public:
+    explicit Select(Network & network)
+      : internal::Select<Type>(network) {
+      network.processes_.push_back(this);
+    }
   };
 
   template<typename I1, typename I2 = embb::base::internal::Nil,
@@ -768,10 +795,11 @@ class Network : public internal::ClockListener {
     typedef typename internal::Sink<
       internal::Inputs<I1, I2, I3, I4, I5> >::FunctionType FunctionType;
 
-    explicit Sink(FunctionType function)
+    explicit Sink(Network & network, FunctionType function)
       : internal::Sink<
-          internal::Inputs<I1, I2, I3, I4, I5> >(function) {
-      //empty
+          internal::Inputs<I1, I2, I3, I4, I5> >(network, function) {
+      network.sinks_.push_back(this);
+      network.sink_count_++;
     }
   };
 
@@ -786,62 +814,45 @@ class Network : public internal::ClockListener {
       internal::Outputs<O1, O2, O3, O4, O5> >::FunctionType
         FunctionType;
 
-    explicit Source(FunctionType function)
+    explicit Source(Network & network, FunctionType function)
       : internal::Source<
-          internal::Outputs<O1, O2, O3, O4, O5> >(function) {
-      //empty
+          internal::Outputs<O1, O2, O3, O4, O5> >(network, function) {
+      network.sources_.push_back(this);
     }
   };
-
-  template<typename O1, typename O2, typename O3, typename O4, typename O5>
-  void AddSource(Source<O1, O2, O3, O4, O5> & source) {
-    sources_.push_back(&source);
-  }
 
   template<typename Type>
   class ConstantSource : public internal::ConstantSource<Type> {
    public:
-    explicit ConstantSource(Type value)
-      : internal::ConstantSource<Type>(value) {
-      //empty
+    explicit ConstantSource(Network & network, Type value)
+      : internal::ConstantSource<Type>(network, value) {
+      network.sources_.push_back(this);
     }
   };
 
-  template<typename Type>
-  void AddSource(ConstantSource<Type> & source) {
-    sources_.push_back(&source);
+  int GetSlices() const {
+    return slices_;
   }
 
-  void Make(int slices) {
-    slices_ = slices;
-    sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
+  internal::Scheduler * GetScheduler() const {
+    return sched_;
+  }
 
-    internal::InitData init_data;
-    init_data.slices = slices_;
-    init_data.sched = sched_;
-    init_data.sink_listener = this;
-
-    sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
-      embb::base::Allocation::Allocate(
-        sizeof(embb::base::Atomic<int>)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      sink_counter_[ii] = 0;
+  bool IsValid() {
+    bool valid = true;
+    for (size_t ii = 0; ii < sources_.size(); ii++) {
+      valid = valid & sources_[ii]->IsFullyConnected();
     }
-
-    sink_count_ = 0;
-    for (size_t it = 0; it < sources_.size(); it++)
-      sources_[it]->Init(&init_data);
-
-    for (int ii = 0; ii < slices_; ii++) {
-      sink_counter_[ii] = 0;
+    for (size_t ii = 0; ii < processes_.size(); ii++) {
+      valid = valid & processes_[ii]->IsFullyConnected();
     }
+    for (size_t ii = 0; ii < sinks_.size(); ii++) {
+      valid = valid & sinks_[ii]->IsFullyConnected();
+    }
+    return valid;
   }
 
   void operator () () {
-    if (NULL == sched_) {
-      throw embb::base::ErrorException("Network was not properly prepared");
-    }
-
     int clock = 0;
     while (clock >= 0) {
       const int idx = clock % slices_;
@@ -871,15 +882,6 @@ class Network : public internal::ClockListener {
     const int idx = clock % slices_;
     assert(sink_counter_[idx] > 0);
     --sink_counter_[idx];
-  }
-
-  /**
-   * Internal.
-   * \internal
-   * Gets called when an init token has reached all sinks.
-   */
-  virtual void OnInit(internal::InitData * /*sched*/) {
-    sink_count_++;
   }
 
  private:

@@ -43,11 +43,11 @@ class Node {
   virtual bool HasInputs() const { return false; }
   virtual bool HasOutputs() const { return false; }
   virtual void Run(int clock) = 0;
+  virtual bool IsFullyConnected() = 0;
   virtual bool Start(int /*clock*/) {
     EMBB_THROW(embb::base::ErrorException,
       "Nodes are started implicitly.");
   }
-  virtual void Init(InitData * init_data) = 0;
 
  protected:
   Scheduler * sched_;

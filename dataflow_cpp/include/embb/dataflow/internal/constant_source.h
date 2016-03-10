@@ -46,7 +46,10 @@ class ConstantSource
   Type value_;
 
  public:
-  explicit ConstantSource(Type value) : value_(value) {}
+  explicit ConstantSource(Network & network, Type value)
+    : value_(value) {
+    SetScheduler(network.GetScheduler());
+  }
 
   virtual bool HasOutputs() const {
     return outputs_.Size() > 0;
@@ -56,9 +59,8 @@ class ConstantSource
     GetOutput<0>().Send(Signal<Type>(clock, value_));
   }
 
-  virtual void Init(InitData * init_data) {
-    SetScheduler(init_data->sched);
-    GetOutput<0>().SendInit(init_data);
+  virtual bool IsFullyConnected() {
+    return outputs_.IsFullyConnected();
   }
 
   virtual bool Start(int clock) {

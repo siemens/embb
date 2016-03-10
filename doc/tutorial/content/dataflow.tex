@@ -108,6 +108,10 @@ Then, we have to construct a \emph{network}. A network consists of a set of proc
 %
 \\\inputlisting{../examples/dataflow/dataflow_network-snippet.h}
 %
+We need to prepare the network for the desired maximum number of elements that can be in the network at a time. The number of elements is limited to avoid that the network is flooded with new elements before the previous elements have been processed. In a linear pipeline, for example, this may happen if the source is faster than the sink. In our example, at most four elements may be processed simultaneously: one in the source, one in the sink, and two in the middle stage (see below). Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput:
+%
+\\\inputlisting{../examples/dataflow/dataflow_make-snippet.h}
+%
 As the next step, we have to construct the processes shown in Figure~\ref{fig:replace_par}. The easiest way to construct a process is to wrap the user-defined code in a lambda function and to pass it to the network. The network constructs an object for that process and executes the lambda function whenever new data is available. There are several methods for constructing processes depending on their type. The process \textbf{read} is a \emph{source} process, since it produces data (by reading it from the specified file) but does not consume any data. Source processes are constructed from a function object
 %
 \\\inputlisting{../examples/dataflow/dataflow_source_function-snippet.h}
@@ -142,18 +146,9 @@ is used to construct the sink:
 
 \emph{\textbf{Note:} If you parallelize your own application using \embb and your compiler emits a lengthy error message containing lots of templates, it is very likely that for at least one process, the ports and their directions do not match the signature of the given function.}
 
-The network needs to know about the source declared above, so we add it to our network:
-%
-\\\inputlisting{../examples/dataflow/dataflow_add-snippet.h}
-%
-
 As the last step, we have to connect the processes (ports). This is straightforward using the C++ stream operator:
 %
 \\\inputlisting{../examples/dataflow/dataflow_connect-snippet.h}
-%
-Once all connections have been established, we need to prepare the network for the desired maximum number of elements that can be in the network at a time. The number of elements is limited to avoid that the network is flooded with new elements before the previous elements have been processed. In a linear pipeline, for example, this may happen if the source is faster than the sink. In our example, at most four elements may be processed simultaneously: one in the source, one in the sink, and two in the middle stage (see above). Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput:
-%
-\\\inputlisting{../examples/dataflow/dataflow_make-snippet.h}
 %
 Then we can start the network:
 %

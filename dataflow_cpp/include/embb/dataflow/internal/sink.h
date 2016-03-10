@@ -48,13 +48,23 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   typedef SinkExecutor< InputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  explicit Sink(FunctionType function)
-    : executor_(function)
-    , action_(NULL) {
+  explicit Sink(Network & network, FunctionType function)
+    : inputs_(network.GetSlices())
+    , executor_(function)
+    , action_(NULL)
+    , slices_(network.GetSlices()) {
     next_clock_ = 0;
     queued_clock_ = 0;
     queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
+    action_ = reinterpret_cast<Action*>(
+      embb::base::Allocation::Allocate(
+        sizeof(Action)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      action_[ii] = Action();
+    }
+    SetListener(&network);
+    SetScheduler(network.GetScheduler());
   }
 
   ~Sink() {
@@ -78,17 +88,8 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     listener_->OnClock(clock);
   }
 
-  virtual void Init(InitData * init_data) {
-    slices_ = init_data->slices;
-    action_ = reinterpret_cast<Action*>(
-      embb::base::Allocation::Allocate(
-      sizeof(Action)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      action_[ii] = Action();
-    }
-    SetListener(init_data->sink_listener);
-    SetScheduler(init_data->sched);
-    listener_->OnInit(init_data);
+  virtual bool IsFullyConnected() {
+    return inputs_.IsFullyConnected();
   }
 
   InputsType & GetInputs() {
@@ -130,10 +131,6 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
         retry = false;
       }
     }
-  }
-
-  virtual void OnInit(InitData * init_data) {
-    Init(init_data);
   }
 
  private:

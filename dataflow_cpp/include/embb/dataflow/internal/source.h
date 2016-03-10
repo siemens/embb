@@ -48,8 +48,9 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
   typedef SourceExecutor< OutputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  explicit Source(FunctionType function)
+  explicit Source(Network & network, FunctionType function)
     : executor_(function), not_done_(true) {
+    SetScheduler(network.GetScheduler());
   }
 
   virtual bool HasOutputs() const {
@@ -60,9 +61,8 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
     not_done_ = executor_.Execute(clock, outputs_);
   }
 
-  virtual void Init(InitData * init_data) {
-    SetScheduler(init_data->sched);
-    executor_.Init(init_data, outputs_);
+  virtual bool IsFullyConnected() {
+    return outputs_.IsFullyConnected();
   }
 
   virtual bool Start(int clock) {

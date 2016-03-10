@@ -42,12 +42,12 @@
 typedef embb::dataflow::Network MyNetwork;
 typedef MyNetwork::ConstantSource< int > MyConstantSource;
 typedef MyNetwork::Source< int > MySource;
-typedef MyNetwork::SerialProcess< MyNetwork::Inputs<int>::Type,
-  MyNetwork::Outputs<bool>::Type > MyPred;
-typedef MyNetwork::ParallelProcess< MyNetwork::Inputs<int>::Type,
-  MyNetwork::Outputs<int>::Type > MyFilter;
-typedef MyNetwork::ParallelProcess< MyNetwork::Inputs<int, int>::Type,
-  MyNetwork::Outputs<int>::Type > MyMult;
+typedef MyNetwork::SerialProcess< MyNetwork::Inputs<int>,
+  MyNetwork::Outputs<bool> > MyPred;
+typedef MyNetwork::ParallelProcess< MyNetwork::Inputs<int>,
+  MyNetwork::Outputs<int> > MyFilter;
+typedef MyNetwork::ParallelProcess< MyNetwork::Inputs<int, int>,
+  MyNetwork::Outputs<int> > MyMult;
 typedef MyNetwork::Sink< int > MySink;
 typedef MyNetwork::Switch< int > MySwitch;
 typedef MyNetwork::Select< int > MySelect;
@@ -165,15 +165,15 @@ void SimpleTest::TestBasic() {
 
   for (int ii = 0; ii < 10000; ii++) {
     ArraySink<TEST_COUNT> asink;
-    MyNetwork network;
-    MyConstantSource constant(4);
-    MySource source(embb::base::MakeFunction(sourceFunc));
-    MyFilter filter(embb::base::MakeFunction(filterFunc));
-    MyMult mult(embb::base::MakeFunction(multFunc));
-    MySink sink(embb::base::MakeFunction(asink, &ArraySink<TEST_COUNT>::Run));
-    MyPred pred(embb::base::MakeFunction(predFunc));
-    MySwitch sw;
-    MySelect sel;
+    MyNetwork network(NUM_SLICES);
+    MyConstantSource constant(network, 4);
+    MySource source(network, embb::base::MakeFunction(sourceFunc));
+    MyFilter filter(network, embb::base::MakeFunction(filterFunc));
+    MyMult mult(network, embb::base::MakeFunction(multFunc));
+    MySink sink(network, embb::base::MakeFunction(asink, &ArraySink<TEST_COUNT>::Run));
+    MyPred pred(network, embb::base::MakeFunction(predFunc));
+    MySwitch sw(network);
+    MySelect sel(network);
 
     for (int kk = 0; kk < TEST_COUNT; kk++) {
       source_array[kk] = -1;
@@ -208,12 +208,15 @@ void SimpleTest::TestBasic() {
 
     sel.GetOutput<0>() >> sink.GetInput<0>();
 
-    network.AddSource(constant);
-    network.AddSource(source);
+//    network.AddSource(constant);
+//    network.AddSource(source);
 
-    network.Make(NUM_SLICES);
+//    network.Initialize(NUM_SLICES);
 
     try {
+      if (!network.IsValid()) {
+        EMBB_THROW(embb::base::ErrorException, "network is invalid");
+      }
       network();
     } catch (embb::base::ErrorException & e) {
       PT_ASSERT_MSG(false, e.What());

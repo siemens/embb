@@ -53,10 +53,11 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   typedef ProcessExecutor< InputsType, OutputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  explicit Process(FunctionType function)
-    : executor_(function)
+  explicit Process(Network & network, FunctionType function)
+    : inputs_(network.GetSlices())
+    , executor_(function)
     , action_(NULL)
-    , slices_(0) {
+    , slices_(network.GetSlices()) {
     next_clock_ = 0;
     queued_clock_ = 0;
     bool ordered = Serial;
@@ -66,6 +67,13 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
       queue_id_ = 0;
     }
     inputs_.SetListener(this);
+    action_ = reinterpret_cast<Action*>(
+      embb::base::Allocation::Allocate(
+        sizeof(Action)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      action_[ii] = Action();
+    }
+    SetScheduler(network.GetScheduler());
   }
 
   ~Process() {
@@ -86,17 +94,8 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     executor_.Execute(clock, inputs_, outputs_);
   }
 
-  virtual void Init(InitData * init_data) {
-    slices_ = init_data->slices;
-    //inputs_.SetSlices(init_data->slices);
-    action_ = reinterpret_cast<Action*>(
-      embb::base::Allocation::Allocate(
-      sizeof(Action)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      action_[ii] = Action();
-    }
-    SetScheduler(init_data->sched);
-    executor_.Init(init_data, outputs_);
+  virtual bool IsFullyConnected() {
+    return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
   InputsType & GetInputs() {
@@ -159,10 +158,6 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
       action_[idx] = Action(this, clock);
       sched_->Spawn(action_[idx]);
     }
-  }
-
-  virtual void OnInit(InitData * init_data) {
-    Init(init_data);
   }
 
  private:

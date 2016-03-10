@@ -113,11 +113,6 @@ class In {
     lock_.Unlock();
 #endif
   }
-
-  void ReceiveInit(InitData * init_data) {
-    SetSlices(init_data->slices);
-    listener_->OnInit(init_data);
-  }
 };
 
 } // namespace internal

@@ -1,1 +1,1 @@
-  nw.Make(4);
+  Network network(4);

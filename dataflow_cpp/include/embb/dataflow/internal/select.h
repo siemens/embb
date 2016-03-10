@@ -34,6 +34,9 @@
 
 namespace embb {
 namespace dataflow {
+
+class Network;
+
 namespace internal {
 
 template <typename Type>
@@ -44,8 +47,10 @@ class Select
   typedef Inputs<bool, Type, Type> InputsType;
   typedef Outputs<Type> OutputsType;
 
-  Select() {
+  Select(Network & network) : inputs_(network.GetSlices()) {
     inputs_.SetListener(this);
+    slices_ = network.GetSlices();
+    SetScheduler(network.GetScheduler());
   }
 
   virtual bool HasInputs() const {
@@ -80,11 +85,8 @@ class Select
     }
   }
 
-  virtual void Init(InitData * init_data) {
-    slices_ = init_data->slices;
-    //inputs_.SetSlices(slices_);
-    SetScheduler(init_data->sched);
-    GetOutput<0>().SendInit(init_data);
+  virtual bool IsFullyConnected() {
+    return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
   InputsType & GetInputs() {
@@ -115,10 +117,6 @@ class Select
     //const int idx = clock % Slices;
     assert(inputs_.AreAtClock(clock));
     Run(clock);
-  }
-
-  virtual void OnInit(InitData * init_data) {
-    Init(init_data);
   }
 
  private:
