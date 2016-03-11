@@ -720,7 +720,7 @@ class Network : public internal::ClockListener {
     typename T5 = embb::base::internal::Nil>
   class Outputs : public internal::Outputs<T1, T2, T3, T4, T5> {
    public:
-    explicit Outputs()
+    Outputs()
       : internal::Outputs<T1, T2, T3, T4, T5>() {}
   };
 
