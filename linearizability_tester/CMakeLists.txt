@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (Linearizability_tester C CXX)
+project (EMBB_linearizability_test C CXX)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lrt")
 find_package(Threads REQUIRED)
@@ -42,7 +42,7 @@ set(PROJECT_LINK_LIBS
 	)
 ENDIF (WIN32)
 
-add_executable(${PROJECT_NAME} lt.cc)
+add_executable(${PROJECT_NAME} main.cc)
 # target_link_libraries(${PROJECT_NAME} ${CMAKE_THREADS_LIBS_INIT})
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${PROJECT_LINK_LIBS}) # ${CMAKE_THREADS_LIBS_INIT})
 
