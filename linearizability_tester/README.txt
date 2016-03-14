@@ -17,14 +17,14 @@ The src folder contains a large part of the code by Alex Horn.
 COMPILE INSTRUCTIONS
 
 * On Linux system
-Suppose that the embb library was build in ../build (relative path to the current
+We suppose that the embb library was build in ../build (relative path to the current
 folder of the linearizability test).
 From within the linearizability_tester folder, cd (or mkdir->cd) into the build directory,
 then run "cmake .." and "make". The executable of the test should be placed in the
 same folder with the name EMBB_linearizability_test.
 
 * On Windows system
-Suppose that the embb library was build in ../build (relative path to the current
+We suppose that the embb library was build in ../build (relative path to the current
 folder of the linearizability test).
 NOTE: the embb library should be build in Release mode, i.e. by running the command
 "cmake --build . --config Release" from inside the correct directory.
@@ -34,6 +34,20 @@ be used.
 The executable of the test should be placed in the folder Release 
 with the name EMBB_linearizability_test.exe.
 
-HOW TO IMPLEMENT TESTS FOR OTHER DATASTRUCTURES
+HOW TO IMPLEMENT TESTS FOR OTHER DATA STRUCTURES
 
 Data structures that support the following functions: 
+- check if structure is empty
+- check if structure contains a specific element
+- insert an element in the structure
+- erase an element from the structure
+should be easily checkable using the Set specification contained in the 
+src/sequential_datastructures.h file.
+In general, the checker needs a sequential implementation test against the
+concurrent one (the EMBB one). The implementation should support efficient equality checks
+and efficient memory management. Stick to the implementation of the already integrated
+structures (stacks, queues..) for future integration. 
+After adding the implementation of the datastructure, it is necessary to add a worker and
+experiment for the newly created datastructure in main.cc. Stick again to the already
+implemented functions (it should be sufficient to change the name of the methods that are called
+on the EMBB structure).

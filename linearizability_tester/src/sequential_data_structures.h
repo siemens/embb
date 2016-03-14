@@ -1,8 +1,9 @@
+/**
+/* Sequential implementation of the datastractures to test
+*/
+
 #ifndef __SEQUENTIAL_DATASTRUCTURES
 #define __SEQUENTIAL_DATASTRUCTURES
-
-#include <linearizability_tester.h>
-
 
 namespace lt{
 namespace state{

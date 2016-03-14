@@ -1,3 +1,7 @@
+/**
+/* Internal tests for the linearizability checker
+*/
+
 #include <linearizability_tester.h>
 #include <sequential_data_structures.h>
 
