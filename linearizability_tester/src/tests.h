@@ -1,4 +1,5 @@
 #include <linearizability_tester.h>
+#include <sequential_data_structures.h>
 
 using namespace lt;
 
