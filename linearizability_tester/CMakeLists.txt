@@ -14,13 +14,25 @@ endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../base_cpp/include ${CMAKE_CURRENT_SOURCE_DIR}/../build/base_cpp/include ${CMAKE_CURRENT_SOURCE_DIR}/../base_c/include ${CMAKE_CURRENT_SOURCE_DIR}/../build/base_c/include ${CMAKE_CURRENT_SOURCE_DIR}/../containers_cpp/include ${CMAKE_CURRENT_SOURCE_DIR}/../build/containers_cpp/include)
 
-# setting names of libraries
-set(PROJECT_LINK_LIBS 
-${CMAKE_CURRENT_SOURCE_DIR}/../build/base_cpp/libembb_base_cpp.a 
-${CMAKE_CURRENT_SOURCE_DIR}/../build/base_c/libembb_base_c.a 
-${CMAKE_CURRENT_SOURCE_DIR}/../build/containers_cpp/libembb_containers_cpp.a
-)
+# setting libraries to link
 
+#linux build
+IF (CMAKE_COMPILER_IS_GNUCXXX)
+	set(PROJECT_LINK_LIBS
+	${CMAKE_CURRENT_SOURCE_DIR}/../build/base_cpp/libembb_base_cpp.a 
+	${CMAKE_CURRENT_SOURCE_DIR}/../build/base_c/libembb_base_c.a 
+	${CMAKE_CURRENT_SOURCE_DIR}/../build/containers_cpp/libembb_containers_cpp.a
+	)
+ENDIF (CMAKE_COMPILER_IS_GNUCXXX)
+
+# windows build 
+IF (WIN32)
+set(PROJECT_LINK_LIBS
+	${CMAKE_CURRENT_SOURCE_DIR}/../build/base_cpp/Release/embb_base_cpp.lib 
+	${CMAKE_CURRENT_SOURCE_DIR}/../build/base_c/Release/embb_base_c.lib
+	${CMAKE_CURRENT_SOURCE_DIR}/../build/containers_cpp/Release/embb_containers_cpp.lib
+	)
+ENDIF (WIN32)
 
 add_executable(${PROJECT_NAME} lt.cc)
 # target_link_libraries(${PROJECT_NAME} ${CMAKE_THREADS_LIBS_INIT})
