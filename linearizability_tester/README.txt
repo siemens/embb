@@ -43,11 +43,11 @@ Data structures that support the following functions:
 - erase an element from the structure
 should be easily checkable using the Set specification contained in the 
 src/sequential_datastructures.h file.
-In general, the checker needs a sequential implementation test against the
+In general, the checker needs a sequential implementation to test against the
 concurrent one (the EMBB one). The implementation should support efficient equality checks
 and efficient memory management. Stick to the implementation of the already integrated
 structures (stacks, queues..) for future integration. 
 After adding the implementation of the datastructure, it is necessary to add a worker and
 experiment for the newly created datastructure in main.cc. Stick again to the already
 implemented functions (it should be sufficient to change the name of the methods that are called
-on the EMBB structure).
+on the structures).

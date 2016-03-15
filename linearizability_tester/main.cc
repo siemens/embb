@@ -1,10 +1,17 @@
+/* 
+ * Main script that applies the linearizability tester on embb data structures.
+ */
+
 #include <linearizability_tester.h>
+#include <sequential_data_structures.h>
 #include <tests.h>
 
 #include <embb/base/thread.h>
 #include <embb/containers/lock_free_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
 
+// Each thread executes quasi randomly operations (TryEqneueu, TryDequeue)
+// on the concurrent data structure and construct the history.
 template<std::size_t N, class S>
 static void embb_worker_stack(
   const WorkerConfiguration& worker_configuration,
@@ -16,7 +23,6 @@ static void embb_worker_stack(
   std::uniform_int_distribution<> value_dist('\0', worker_configuration.max_value);
   std::uniform_int_distribution<> percentage_dist(0, 100);
 
-  // each operation returns false
   bool ret;
 
   char value;
@@ -28,6 +34,8 @@ static void embb_worker_stack(
   {
     value = value_dist(rd);
     percentage = percentage_dist(rd);
+    // Note: this threshold affects considerably the running time of the test
+    // increasing threshold -> increasing running time
     if (percentage < 30)
     {
       call_entry_ptr = concurrent_log.push_back(state::Stack<N>::make_try_push_call(value));
@@ -43,6 +51,8 @@ static void embb_worker_stack(
   }
 }
 
+// Each thread executes quasi randomly operations (TryEqneueu, TryDequeue)
+// on the concurrent data structure and construct the history.
 template<std::size_t N, class S>
 static void embb_worker_queue(
   const WorkerConfiguration& worker_configuration,
@@ -54,7 +64,6 @@ static void embb_worker_queue(
   std::uniform_int_distribution<> value_dist('\0', worker_configuration.max_value);
   std::uniform_int_distribution<> percentage_dist(0, 100);
 
-  // each operation returns false
   bool ret;
 
   char value;
@@ -66,6 +75,8 @@ static void embb_worker_queue(
   {
     value = value_dist(rd);
     percentage = percentage_dist(rd);
+    // Note: this threshold affects considerably the running time of the test
+    // increasing threshold -> increasing running time
     if (percentage < 20)
     {
       call_entry_ptr = concurrent_log.push_back(state::Queue<N>::make_try_enqueue_call(value));
@@ -81,6 +92,7 @@ static void embb_worker_queue(
   }
 }
 
+// Creates the history and apply the tester on it
 template <class S>
 static void embb_experiment_stack(bool is_linearizable)
 {
@@ -127,6 +139,7 @@ static void embb_experiment_stack(bool is_linearizable)
     << seconds.count() << " s " << std::endl;
 }
 
+// Creates the history and apply the tester on it
 template <class S>
 static void embb_experiment_queue(bool is_linearizable)
 {
@@ -152,7 +165,6 @@ static void embb_experiment_queue(bool is_linearizable)
     std::ref(concurrent_log), std::ref(concurrent_queue));
   const std::size_t number_of_entries{ concurrent_log.number_of_entries() };
   const LogInfo<state::Queue<N>> log_info{ concurrent_log.info() };
-  // std::cout << log_info << std::endl;
 
   auto start = std::chrono::system_clock::now();
   auto end = std::chrono::system_clock::now();
@@ -177,7 +189,7 @@ static void embb_experiment_queue(bool is_linearizable)
 int main()
 {  
 
-  // Test functions and structures in linearizability_tester.h
+  // Test functions and structures in linearizability_tester.h and sequential_data_structures.h
   run_tests();
 
   embb::base::Thread::SetThreadsMaxCount(255);
