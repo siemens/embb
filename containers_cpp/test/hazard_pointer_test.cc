@@ -74,7 +74,7 @@ int* IntObjectTestPool::Allocate() {
 }
 
 void IntObjectTestPool::Release(int* object_pointer) {
-  int cell = object_pointer - simplePoolObjects;
+  int cell = (int) (object_pointer - simplePoolObjects);
   simplePool[cell].Store(FREE_MARKER);
 }
 
