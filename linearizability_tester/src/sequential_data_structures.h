@@ -314,7 +314,6 @@ class Stack
       if (m_vector.size() < value + 1U)
         m_vector.resize(value + 1U);
 
-      assert(value < m_vector.size());
 
       NodePtr& node_ptr = m_vector[value];
       if (node_ptr == nullptr)

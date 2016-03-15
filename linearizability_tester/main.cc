@@ -2,6 +2,12 @@
  * Main script that applies the linearizability tester on embb data structures.
  */
 
+// Enable assertions even in Release mode
+#ifdef NDEBUG
+#undef NDEBUG
+#include <assert.h>
+#endif
+
 #include <linearizability_tester.h>
 #include <sequential_data_structures.h>
 #include <tests.h>
@@ -51,7 +57,7 @@ static void embb_worker_stack(
   }
 }
 
-// Each thread executes quasi randomly operations (TryEqneueu, TryDequeue)
+// Each thread executes quasi randomly operations (TryEnqueue, TryDequeue)
 // on the concurrent data structure and construct the history.
 template<std::size_t N, class S>
 static void embb_worker_queue(
@@ -94,7 +100,7 @@ static void embb_worker_queue(
 
 // Creates the history and apply the tester on it
 template <class S>
-static void embb_experiment_stack(bool is_linearizable)
+static void embb_experiment_stack()
 {
   constexpr std::chrono::hours max_duration{ 1 };
   constexpr std::size_t N = 560000U;
@@ -106,12 +112,11 @@ static void embb_experiment_stack(bool is_linearizable)
   ConcurrentLog<state::Stack<N>> concurrent_log{ 2U * log_size };
   S concurrent_stack(N);
 
-  if (!is_linearizable)
-  {
-    bool ok = concurrent_stack.TryPush(5);
-    assert(ok);
-  }
-
+  // Check if push and pop operations are possible
+  char value;
+  assert(concurrent_stack.TryPush(5));
+  assert(concurrent_stack.TryPop(value));
+  
   // create history
   start_threads(number_of_threads, embb_worker_stack<N, S>, std::cref(worker_configuration),
     std::ref(concurrent_log), std::ref(concurrent_stack));
@@ -130,7 +135,8 @@ static void embb_experiment_stack(bool is_linearizable)
 
     LinearizabilityTester<state::Stack<N>, Option::LRU_CACHE> tester{ log_copy.info(), max_duration };
     tester.check(result);
-    assert(result.is_timeout() || result.is_linearizable() == is_linearizable);
+    // If structure is not linearizabile break run using assertion
+    assert(result.is_timeout() || result.is_linearizable());
   }
   end = std::chrono::system_clock::now();
   seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start);
@@ -141,7 +147,7 @@ static void embb_experiment_stack(bool is_linearizable)
 
 // Creates the history and apply the tester on it
 template <class S>
-static void embb_experiment_queue(bool is_linearizable)
+static void embb_experiment_queue()
 {
   constexpr std::chrono::hours max_duration{ 1 };
   constexpr std::size_t N = 560000U;
@@ -154,11 +160,10 @@ static void embb_experiment_queue(bool is_linearizable)
   ConcurrentLog<state::Queue<N>> concurrent_log{ 2U * log_size };
   S concurrent_queue(N);
 
-  if (!is_linearizable)
-  {
-    bool ok = concurrent_queue.TryEnqueue(5);
-    assert(ok);
-  }
+  // check if enqueue and dequeue operations are possible
+  char value;
+  assert(concurrent_queue.TryEnqueue(5));
+  assert(concurrent_queue.TryDequeue(value));
 
   // create history
   start_threads(number_of_threads, embb_worker_queue<N, S>, std::cref(worker_configuration),
@@ -176,7 +181,8 @@ static void embb_experiment_queue(bool is_linearizable)
     assert(log_copy.number_of_entries() == number_of_entries);
     LinearizabilityTester<state::Queue<N>, Option::LRU_CACHE> tester{ log_copy.info(), max_duration };
     tester.check(result);
-    assert(result.is_timeout() || result.is_linearizable() == is_linearizable);
+    // If structure is not linearizabile break run using assertion
+    assert(result.is_timeout() || result.is_linearizable());
   }
   end = std::chrono::system_clock::now();
   seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start);
@@ -191,14 +197,13 @@ int main()
 
   // Test functions and structures in linearizability_tester.h and sequential_data_structures.h
   run_tests();
-
   embb::base::Thread::SetThreadsMaxCount(255);
   
   std::cout << "Linearizability test on LockFreeMPMCQueue" << std::endl;
-  embb_experiment_queue<embb::containers::LockFreeMPMCQueue<char>>(true);
+  embb_experiment_queue<embb::containers::LockFreeMPMCQueue<char>>();
 
   std::cout << "Linearizability test on LockFreeStack" << std::endl;
-  embb_experiment_stack<embb::containers::LockFreeStack<char>>(true);
+  embb_experiment_stack<embb::containers::LockFreeStack<char>>();
   return 0;
 }
 

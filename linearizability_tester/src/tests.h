@@ -2039,7 +2039,6 @@ void run_tests(){
   test_state_set_op();
   test_state_stack();
   test_state_stack_op();
-  
   test_state_queue();
   test_state_queue_op();
   
