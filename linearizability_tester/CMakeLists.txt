@@ -4,14 +4,16 @@ project (EMBB_linearizability_test C CXX)
 find_package(Threads REQUIRED)
 
 #linux build
-IF (CMAKE_COMPILER_IS_GNUCXXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lrt")
+
+IF (NOT WIN32)
+  
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lrt")
 	set(PROJECT_LINK_LIBS
 	${CMAKE_CURRENT_SOURCE_DIR}/../build/base_cpp/libembb_base_cpp.a 
 	${CMAKE_CURRENT_SOURCE_DIR}/../build/base_c/libembb_base_c.a 
 	${CMAKE_CURRENT_SOURCE_DIR}/../build/containers_cpp/libembb_containers_cpp.a
 	)
-ENDIF (CMAKE_COMPILER_IS_GNUCXXX)
+ENDIF (NOT WIN32)
 
 # windows build 
 IF (WIN32)
