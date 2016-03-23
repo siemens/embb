@@ -144,33 +144,40 @@ static void embb_mtapi_network_task_complete(
         embb_mutex_lock(&plugin->send_mutex);
         embb_mtapi_network_buffer_clear(send_buf);
 
+        // actual counts bytes actually put into the buffer
+        int actual = 0;
+        // expected counts bytes we intended to put into the buffer
+        int expected = 0;
+
         // operation is "return result"
-        err = embb_mtapi_network_buffer_push_back_int8(
+        actual += embb_mtapi_network_buffer_push_back_int8(
           send_buf, EMBB_MTAPI_NETWORK_RETURN_RESULT);
-        assert(err == 1);
+        expected += 1;
         // remote task id
-        err = embb_mtapi_network_buffer_push_back_int32(
+        actual += embb_mtapi_network_buffer_push_back_int32(
           send_buf, network_task->remote_task_id);
-        assert(err == 4);
-        err = embb_mtapi_network_buffer_push_back_int32(
+        expected += 4;
+        actual += embb_mtapi_network_buffer_push_back_int32(
           send_buf, network_task->remote_task_tag);
-        assert(err == 4);
+        expected += 4;
         // status
-        err = embb_mtapi_network_buffer_push_back_int32(
+        actual += embb_mtapi_network_buffer_push_back_int32(
           send_buf, local_task->error_code);
-        assert(err == 4);
+        expected += 4;
         // result size
-        err = embb_mtapi_network_buffer_push_back_int32(
+        actual += embb_mtapi_network_buffer_push_back_int32(
           send_buf, (int32_t)local_task->result_size);
-        assert(err == 4);
-        err = embb_mtapi_network_buffer_push_back_rawdata(
+        expected += 4;
+        actual += embb_mtapi_network_buffer_push_back_rawdata(
           send_buf, (int32_t)local_task->result_size,
           local_task->result_buffer);
-        assert(err == (int)local_task->result_size);
+        expected += (int)local_task->result_size;
 
-        err = embb_mtapi_network_socket_sendbuffer(
-          &network_task->socket, send_buf);
-        assert(err == send_buf->size);
+        if (expected == actual) {
+          int sent = embb_mtapi_network_socket_sendbuffer(
+            &network_task->socket, send_buf);
+          assert(sent == send_buf->size);
+        }
 
         // sending done
         embb_mutex_unlock(&plugin->send_mutex);
