@@ -681,8 +681,11 @@ class Network {
 
 class Network : public internal::ClockListener {
  public:
-  explicit Network(int slices)
+  explicit Network(int slices = 0)
     : sink_counter_(NULL), slices_(slices), sched_(NULL) {
+    if (0 >= slices) {
+      slices_ = int(embb_core_count_available())*4;
+    }
     sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
     sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
       embb::base::Allocation::Allocate(
