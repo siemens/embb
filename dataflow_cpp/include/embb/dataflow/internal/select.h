@@ -85,6 +85,15 @@ class Select
     return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
+  virtual bool OnHasCycle(ClockListener * node) {
+    ClockListener * this_node = this;
+    if (this_node == node) {
+      return true;
+    } else {
+      return outputs_.HasCycle(node);
+    }
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }

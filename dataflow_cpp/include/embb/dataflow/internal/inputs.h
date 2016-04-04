@@ -106,6 +106,9 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
       listener_->OnClock(clock);
     }
   }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected();
   }
@@ -163,6 +166,9 @@ class Inputs<T1, T2, embb::base::internal::Nil,
       count_[idx] = 2;
       listener_->OnClock(clock);
     }
+  }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
   }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &
@@ -227,6 +233,9 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
       count_[idx] = 3;
       listener_->OnClock(clock);
     }
+  }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
   }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &
@@ -296,6 +305,9 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
       count_[idx] = 4;
       listener_->OnClock(clock);
     }
+  }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
   }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &
@@ -372,6 +384,9 @@ class Inputs
       count_[idx] = 5;
       listener_->OnClock(clock);
     }
+  }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
   }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &&

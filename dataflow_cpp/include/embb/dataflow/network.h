@@ -838,14 +838,19 @@ class Network : public internal::ClockListener {
 
   bool IsValid() {
     bool valid = true;
-    for (size_t ii = 0; ii < sources_.size(); ii++) {
-      valid = valid & sources_[ii]->IsFullyConnected();
+    // check connectivity
+    for (size_t ii = 0; ii < sources_.size() && valid; ii++) {
+      valid = valid && sources_[ii]->IsFullyConnected();
     }
-    for (size_t ii = 0; ii < processes_.size(); ii++) {
-      valid = valid & processes_[ii]->IsFullyConnected();
+    for (size_t ii = 0; ii < processes_.size() && valid; ii++) {
+      valid = valid && processes_[ii]->IsFullyConnected();
     }
-    for (size_t ii = 0; ii < sinks_.size(); ii++) {
-      valid = valid & sinks_[ii]->IsFullyConnected();
+    for (size_t ii = 0; ii < sinks_.size() && valid; ii++) {
+      valid = valid && sinks_[ii]->IsFullyConnected();
+    }
+    // check for cycles
+    for (size_t ii = 0; ii < processes_.size() && valid; ii++) {
+      valid = valid && !processes_[ii]->HasCycle();
     }
     return valid;
   }
