@@ -31,9 +31,12 @@
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/mtapi/status_exception.h>
 #include <embb/mtapi/node_attributes.h>
+#include <embb/mtapi/group.h>
+#include <embb/mtapi/queue.h>
 #include <embb/mtapi/task.h>
 #include <embb/mtapi/task_attributes.h>
 #include <embb/mtapi/job.h>
+#include <embb/mtapi/action.h>
 
 namespace embb {
 
@@ -69,16 +72,7 @@ class Node {
   static void Initialize(
     mtapi_domain_t domain_id,          /**< [in] The domain id to use */
     mtapi_node_t node_id               /**< [in] The node id to use */
-    ) {
-    if (IsInitialized()) {
-      EMBB_THROW(StatusException,
-        "MTAPI: node was already initialized.");
-    } else {
-      NodeAttributes attributes; // default attributes
-      node_instance_ = embb::base::Allocation::New<Node>(
-        domain_id, node_id, attributes);
-    }
-  }
+  );
 
   /**
    * Initializes the runtime singleton.
@@ -91,15 +85,7 @@ class Node {
     mtapi_domain_t domain_id,          /**< [in] The domain id to use */
     mtapi_node_t node_id,              /**< [in] The node id to use */
     NodeAttributes const & attributes  /**< [in] Attributes to use */
-    ) {
-    if (IsInitialized()) {
-      EMBB_THROW(StatusException,
-        "MTAPI: node was already initialized.");
-    } else {
-      node_instance_ = embb::base::Allocation::New<Node>(
-        domain_id, node_id, attributes);
-    }
-  }
+    );
 
   /**
    * Checks if runtime is initialized.
@@ -116,29 +102,14 @@ class Node {
    * \return Reference to the Node singleton
    * \threadsafe
    */
-  static Node & GetInstance() {
-    if (IsInitialized()) {
-      return *node_instance_;
-    } else {
-      EMBB_THROW(StatusException,
-        "MTAPI: node is not initialized.");
-    }
-  }
+  static Node & GetInstance();
 
   /**
    * Shuts the runtime system down.
    * \throws ErrorException if the singleton is not initialized.
    * \notthreadsafe
    */
-  static void Finalize() {
-    if (IsInitialized()) {
-      embb::base::Allocation::Delete(node_instance_);
-      node_instance_ = NULL;
-    } else {
-      EMBB_THROW(StatusException,
-        "MTAPI: node is not initialized.");
-    }
-  }
+  static void Finalize();
 
   /**
    * Returns the number of available cores.
@@ -159,6 +130,15 @@ class Node {
   }
 
   /**
+   * Returns the number of available queues.
+   * \return The number of available queues
+   * \waitfree
+   */
+  mtapi_uint_t GetQueueCount() const {
+    return queue_count_;
+  }
+
+  /**
    * Starts a new Task.
    *
    * \returns The handle to the started Task.
@@ -236,6 +216,123 @@ class Node {
       arguments, internal::SizeOfType<ARGS>(),
       results, internal::SizeOfType<RES>(),
       MTAPI_DEFAULT_TASK_ATTRIBUTES);
+  }
+
+#ifdef GetJob
+#undef GetJob
+#endif
+
+  Job GetJob(mtapi_job_id_t job_id) {
+    return Job(job_id, domain_id_);
+  }
+
+  Job GetJob(mtapi_job_id_t job_id, mtapi_domain_t domain_id) {
+    return Job(job_id, domain_id);
+  }
+
+  /**
+   * Constructs an Action.
+   */
+  Action CreateAction(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func,      /**< The action function */
+    const void * node_local_data,      /**< Node local data available to all
+                                       Tasks using this Action */
+    mtapi_size_t node_local_data_size, /**< Size of node local data */
+    ActionAttributes const & attributes
+    /**< Attributes of the Action */
+    ) {
+    return Action(job_id, func, node_local_data, node_local_data_size,
+      &attributes.GetInternal());
+  }
+
+  /**
+   * Constructs an Action.
+   */
+  Action CreateAction(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func,      /**< The action function */
+    const void * node_local_data,      /**< Node local data available to all
+                                       Tasks using this Action */
+    mtapi_size_t node_local_data_size  /**< Size of node local data */
+    ) {
+    return Action(job_id, func, node_local_data, node_local_data_size,
+      MTAPI_DEFAULT_ACTION_ATTRIBUTES);
+  }
+
+  /**
+   * Constructs an Action.
+   */
+  Action CreateAction(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func,      /**< The action function */
+    ActionAttributes const & attributes
+    /**< Attributes of the Action */
+    ) {
+    return Action(job_id, func, MTAPI_NULL, 0, &attributes.GetInternal());
+  }
+
+  /**
+   * Constructs an Action.
+   */
+  Action CreateAction(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func       /**< The action function */
+    ) {
+    return Action(job_id, func, MTAPI_NULL, 0, MTAPI_DEFAULT_ACTION_ATTRIBUTES);
+  }
+
+  /**
+   * Constructs a Group object with default attributes.
+   */
+  Group CreateGroup() {
+    return Group(MTAPI_GROUP_ID_NONE, MTAPI_DEFAULT_GROUP_ATTRIBUTES);
+  }
+
+  /**
+   * Constructs a Group object with default attributes and the given ID.
+   */
+  Group CreateGroup(
+    mtapi_group_id_t id                /**< A user defined ID of the Group. */
+    ) {
+    return Group(id, MTAPI_DEFAULT_GROUP_ATTRIBUTES);
+  }
+
+  /**
+   * Constructs a Group object using the given Attributes.
+   */
+  Group CreateGroup(
+    GroupAttributes const & group_attr) {
+    return Group(MTAPI_GROUP_ID_NONE, &group_attr.GetInternal());
+  }
+
+  /**
+   * Constructs a Group object with given attributes and ID.
+   */
+  Group CreateGroup(
+    mtapi_group_id_t id,               /**< A user defined ID of the Group. */
+    GroupAttributes const & group_attr /**< The GroupAttributes to use. */
+    ) {
+    return Group(id, &group_attr.GetInternal());
+  }
+
+  /**
+   * Constructs a Queue with the given Job and default attributes.
+   */
+  Queue CreateQueue(
+    Job & job                          /**< The Job to use for the Queue. */
+    ) {
+    return Queue(MTAPI_QUEUE_ID_NONE, job, MTAPI_DEFAULT_QUEUE_ATTRIBUTES);
+  }
+
+  /**
+   * Constructs a Queue with the given Job and QueueAttributes.
+   */
+  Queue CreateQueue(
+    Job const & job,                   /**< The Job to use for the Queue. */
+    QueueAttributes const & attr       /**< The attributes to use. */
+    ) {
+    return Queue(MTAPI_QUEUE_ID_NONE, job, &attr.GetInternal());
   }
 
   friend class embb::base::Allocation;
@@ -251,21 +348,15 @@ class Node {
     NodeAttributes const & attr) {
     mtapi_status_t status;
     mtapi_info_t info;
+    queue_count_ = attr.GetInternal().max_queues;
     mtapi_initialize(domain_id, node_id, &attr.GetInternal(), &info, &status);
-    needs_finalize_ = status == MTAPI_SUCCESS;
     internal::CheckStatus(status);
 
     core_count_ = info.hardware_concurrency;
     worker_thread_count_ = embb_core_set_count(
       &attr.GetInternal().core_affinity);
-  }
 
-  ~Node() {
-    if (needs_finalize_) {
-      mtapi_status_t status;
-      mtapi_finalize(&status);
-      internal::CheckStatus(status);
-    }
+    domain_id_ = domain_id;
   }
 
   Task Start(
@@ -288,9 +379,10 @@ class Node {
 
   static embb::mtapi::Node * node_instance_;
 
+  mtapi_domain_t domain_id_;
   mtapi_uint_t core_count_;
   mtapi_uint_t worker_thread_count_;
-  bool needs_finalize_;
+  mtapi_uint_t queue_count_;
 };
 
 } // namespace mtapi

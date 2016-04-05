@@ -54,13 +54,14 @@ QueueTest::QueueTest() {
 
 void QueueTest::TestBasic() {
   embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
 
-  embb::mtapi::Job job(JOB_TEST_QUEUE, THIS_DOMAIN_ID);
-  embb::mtapi::Action action(JOB_TEST_QUEUE, testQueueAction,
-    MTAPI_NULL, 0);
+  embb::mtapi::Job job = node.GetJob(JOB_TEST_QUEUE);
+  embb::mtapi::Action action = node.CreateAction(
+    JOB_TEST_QUEUE, testQueueAction, MTAPI_NULL, 0);
 
   {
-    embb::mtapi::Queue queue(job);
+    embb::mtapi::Queue queue = node.CreateQueue(job);
 
     int result = 0;
     embb::mtapi::Task task = queue.Enqueue<void, int>(MTAPI_NULL, &result);

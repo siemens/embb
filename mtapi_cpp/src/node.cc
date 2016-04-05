@@ -30,6 +30,74 @@ namespace embb {
 namespace mtapi {
 
 embb::mtapi::Node * embb::mtapi::Node::node_instance_ = NULL;
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+static embb_spinlock_t init_mutex = { { 0 } };
+#endif
+
+void Node::Initialize(
+  mtapi_domain_t domain_id,
+  mtapi_node_t node_id
+  ) {
+  if (IsInitialized()) {
+    EMBB_THROW(StatusException,
+      "MTAPI: node was already initialized.");
+  }
+  else {
+    NodeAttributes attributes; // default attributes
+    node_instance_ = embb::base::Allocation::New<Node>(
+      domain_id, node_id, attributes);
+  }
+}
+
+void Node::Initialize(
+  mtapi_domain_t domain_id,
+  mtapi_node_t node_id,
+  NodeAttributes const & attributes
+  ) {
+  if (IsInitialized()) {
+    EMBB_THROW(StatusException,
+      "MTAPI: node was already initialized.");
+  }
+  else {
+    node_instance_ = embb::base::Allocation::New<Node>(
+      domain_id, node_id, attributes);
+  }
+}
+
+Node & Node::GetInstance() {
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
+  if (!IsInitialized()) {
+    embb_spin_lock(&init_mutex);
+    if (!IsInitialized()) {
+      Node::Initialize(
+        MTAPI_CPP_AUTOMATIC_DOMAIN_ID, MTAPI_CPP_AUTOMATIC_NODE_ID);
+      atexit(Node::Finalize);
+    }
+    embb_spin_unlock(&init_mutex);
+  }
+  return *node_instance;
+#else
+  if (IsInitialized()) {
+    return *node_instance_;
+  }
+  else {
+    EMBB_THROW(StatusException,
+      "MTAPI: node is not initialized.");
+  }
+#endif
+}
+
+void Node::Finalize() {
+  if (IsInitialized()) {
+    mtapi_finalize(MTAPI_NULL);
+    embb::base::Allocation::Delete(node_instance_);
+    node_instance_ = NULL;
+  }
+  else {
+    EMBB_THROW(StatusException,
+      "MTAPI: node is not initialized.");
+  }
+}
 
 } // namespace mtapi
 } // namespace embb

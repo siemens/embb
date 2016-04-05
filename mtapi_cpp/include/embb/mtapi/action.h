@@ -43,60 +43,26 @@ class Action {
  public:
   /**
    * Constructs an Action.
+   * The Action object will be invalid.
    */
-  Action(
-    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
-    mtapi_action_function_t func,      /**< The action function */
-    const void * node_local_data,      /**< Node local data available to all
-                                            Tasks using this Action */
-    mtapi_size_t node_local_data_size, /**< Size of node local data */
-    ActionAttributes const & attributes
-                                       /**< Attributes of the Action */
-    ) {
-    Create(job_id, func, node_local_data, node_local_data_size,
-      &attributes.GetInternal());
+  Action() {
+    handle_.id = 0;
+    handle_.tag = 0;
+  }
+
+  Action(Action const & other) : handle_(other.handle_) {
+    // empty
+  }
+
+  Action & operator=(Action const & other) {
+    handle_ = other.handle_;
+    return *this;
   }
 
   /**
-   * Constructs an Action.
+   * Deletes an Action.
    */
-  Action(
-    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
-    mtapi_action_function_t func,      /**< The action function */
-    const void * node_local_data,      /**< Node local data available to all
-                                            Tasks using this Action */
-    mtapi_size_t node_local_data_size  /**< Size of node local data */
-    ) {
-    Create(job_id, func, node_local_data, node_local_data_size,
-      MTAPI_DEFAULT_ACTION_ATTRIBUTES);
-  }
-
-  /**
-   * Constructs an Action.
-   */
-  Action(
-    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
-    mtapi_action_function_t func,      /**< The action function */
-    ActionAttributes const & attributes
-                                       /**< Attributes of the Action */
-    ) {
-    Create(job_id, func, MTAPI_NULL, 0, &attributes.GetInternal());
-  }
-
-  /**
-   * Constructs an Action.
-   */
-  Action(
-    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
-    mtapi_action_function_t func       /**< The action function */
-    ) {
-    Create(job_id, func, MTAPI_NULL, 0, MTAPI_DEFAULT_ACTION_ATTRIBUTES);
-  }
-
-  /**
-   * Destroys an Action.
-   */
-  ~Action() {
+  void Delete() {
     mtapi_action_delete(handle_, MTAPI_INFINITE, MTAPI_NULL);
   }
 
@@ -111,20 +77,20 @@ class Action {
     return handle_;
   }
 
+  friend class Node;
+
  private:
-  // no default constructor
-  Action();
-
-  // not copyable
-  Action(Action const & other);
-  void operator=(Action const & other);
-
-  void Create(
-    mtapi_job_id_t job_id,
-    mtapi_action_function_t func,
-    const void * node_local_data,
-    mtapi_size_t node_local_data_size,
+  /**
+   * Constructs an Action.
+   */
+  Action(
+    mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
+    mtapi_action_function_t func,      /**< The action function */
+    const void * node_local_data,      /**< Node local data available to all
+                                            Tasks using this Action */
+    mtapi_size_t node_local_data_size, /**< Size of node local data */
     mtapi_action_attributes_t const * attributes
+                                       /**< Attributes of the Action */
     ) {
     mtapi_status_t status;
     handle_ = mtapi_action_create(job_id, func,
