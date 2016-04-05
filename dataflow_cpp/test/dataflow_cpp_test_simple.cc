@@ -29,7 +29,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <embb/tasks/tasks.h>
+#include <embb/mtapi/mtapi.h>
 
 #include <embb/base/function.h>
 #include <embb/base/c/memory_allocation.h>
@@ -153,15 +153,14 @@ SimpleTest::SimpleTest() {
 void SimpleTest::TestBasic() {
   // All available cores
   embb::base::CoreSet core_set(true);
-  embb::tasks::Node::Initialize(
+  embb::mtapi::NodeAttributes node_attr;
+  node_attr
+    .SetCoreAffinity(core_set)
+    .SetQueueLimit(2);
+  embb::mtapi::Node::Initialize(
     MTAPI_DOMAIN_ID,
     MTAPI_NODE_ID,
-    core_set,
-    1024, // max tasks (default: 1024)
-    128,  // max groups (default: 128)
-    2, // max queues (default: 16)
-    1024, // queue capacity (default: 1024)
-    4);   // num priorities (default: 4)
+    node_attr);
 
   for (int ii = 0; ii < 10000; ii++) {
     ArraySink<TEST_COUNT> asink;
@@ -221,7 +220,7 @@ void SimpleTest::TestBasic() {
     PT_EXPECT(asink.Check());
   }
 
-  embb::tasks::Node::Finalize();
+  embb::mtapi::Node::Finalize();
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }

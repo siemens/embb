@@ -38,7 +38,7 @@ class SchedulerSequential : public Scheduler {
  public:
   SchedulerSequential() {}
   virtual ~SchedulerSequential() {}
-  virtual void Spawn(Action & action) {
+  virtual void Start(Action & action) {
     action.RunSequential();
   }
   virtual void Enqueue(int, Action & action) {
