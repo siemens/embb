@@ -687,6 +687,9 @@ class Network : public internal::ClockListener {
       slices_ = int(embb_core_count_available())*4;
     }
     sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
+    if (sched_->GetSlices() != slices_) {
+      slices_ = sched_->GetSlices();
+    }
     sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
       embb::base::Allocation::Allocate(
         sizeof(embb::base::Atomic<int>)*slices_));

@@ -78,6 +78,9 @@ Node::Node(
   mtapi_node_get_attribute(node_id, MTAPI_NODE_MAX_QUEUES, &queue_count_,
     sizeof(queue_count_), &status);
   assert(MTAPI_SUCCESS == status);
+  mtapi_node_get_attribute(node_id, MTAPI_NODE_MAX_GROUPS, &group_count_,
+    sizeof(group_count_), &status);
+  assert(MTAPI_SUCCESS == status);
   mtapi_node_get_attribute(node_id, MTAPI_NODE_MAX_TASKS, &task_limit_,
     sizeof(queue_count_), &status);
   assert(MTAPI_SUCCESS == status);

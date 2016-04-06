@@ -98,6 +98,10 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
+  virtual bool IsSequential() {
+    return Serial;
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }
