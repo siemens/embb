@@ -71,9 +71,9 @@ void embb_mtapi_network_finalize() {
 }
 
 enum embb_mtapi_network_operation_enum {
-  EMBB_MTAPI_NETWORK_START_TASK,
-  EMBB_MTAPI_NETWORK_RETURN_RESULT,
-  EMBB_MTAPI_NETWORK_RETURN_FAILURE
+  EMBB_MTAPI_NETWORK_START_TASK = 0x01AFFE01,
+  EMBB_MTAPI_NETWORK_RETURN_RESULT = 0x02AFFE02,
+  EMBB_MTAPI_NETWORK_RETURN_FAILURE = 0x03AFFE03
 };
 
 struct embb_mtapi_network_plugin_struct {
@@ -152,7 +152,7 @@ static void embb_mtapi_network_task_complete(
         int actual = 0;
         // expected counts bytes we intended to put into the buffer
         int expected =
-          1 +                               // operation
+          4 +                               // operation
           4 + 4 +                           // remote task handle
           4 +                               // status
           4 + (int)local_task->result_size; // result buffer
@@ -163,7 +163,7 @@ static void embb_mtapi_network_task_complete(
         expected += 4;
 
         // operation is "return result"
-        actual += embb_mtapi_network_buffer_push_back_int8(
+        actual += embb_mtapi_network_buffer_push_back_int32(
           send_buf, EMBB_MTAPI_NETWORK_RETURN_RESULT);
 
         // remote task id
@@ -212,12 +212,22 @@ static void embb_mtapi_network_return_failure(
   embb_mtapi_network_buffer_t * buffer)
 {
   embb_mtapi_network_buffer_clear(buffer);
+
+  // packet size
   embb_mtapi_network_buffer_push_back_int32(
-    buffer, 12);
+    buffer, 16);
+
+  // operation
+  embb_mtapi_network_buffer_push_back_int32(
+    buffer, EMBB_MTAPI_NETWORK_RETURN_FAILURE);
+
+  // task handle
   embb_mtapi_network_buffer_push_back_int32(
     buffer, remote_task_id);
   embb_mtapi_network_buffer_push_back_int32(
     buffer, remote_task_tag);
+
+  // status
   embb_mtapi_network_buffer_push_back_int32(
     buffer, (int32_t)status);
 
@@ -520,7 +530,7 @@ static int embb_mtapi_network_thread(void * args) {
         plugin->socket_count++;
       }
     } else if (0 < err) {
-      int8_t operation;
+      int32_t operation;
       int32_t packet_size;
       embb_mtapi_network_socket_t * socket = &plugin->sockets[err];
 
@@ -537,10 +547,10 @@ static int embb_mtapi_network_thread(void * args) {
         err = embb_mtapi_network_socket_recvbuffer_sized(
           socket, buffer, packet_size);
         if (err == packet_size) {
-          err = embb_mtapi_network_buffer_pop_front_int8(
+          err = embb_mtapi_network_buffer_pop_front_int32(
             buffer, &operation);
-          assert(err == 1);
-          packet_size--;
+          assert(err == 4);
+          packet_size -= 4;
 
           switch (operation) {
           case EMBB_MTAPI_NETWORK_START_TASK:
@@ -553,7 +563,7 @@ static int embb_mtapi_network_thread(void * args) {
             embb_mtapi_network_handle_return_failure(buffer, packet_size);
             break;
           default:
-            // eh?
+            // invalid, ignore
             break;
           }
         }
@@ -728,7 +738,7 @@ static void network_task_start(
         int actual = 0;
         // expected counts bytes we intended to put into the buffer
         int expected =
-          1 +                             // operation
+          4 +                             // operation
           4 +                             // domain_id
           4 +                             // job_id
           4 +                             // priority
@@ -742,7 +752,7 @@ static void network_task_start(
         expected += 4;
 
         // operation is "start task"
-        actual += embb_mtapi_network_buffer_push_back_int8(
+        actual += embb_mtapi_network_buffer_push_back_int32(
           send_buf, EMBB_MTAPI_NETWORK_START_TASK);
 
         // domain_id
