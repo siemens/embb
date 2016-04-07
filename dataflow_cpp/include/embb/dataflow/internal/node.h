@@ -49,13 +49,21 @@ class Node {
     EMBB_THROW(embb::base::ErrorException,
       "Nodes are started implicitly.");
   }
+  void SetScheduler(Scheduler * sched) {
+    sched_ = sched;
+    if (NULL != sched_) {
+      SetSlices(sched_->GetSlices());
+    } else {
+      SetSlices(0);
+    }
+  }
 
  protected:
   Scheduler * sched_;
   static int next_process_id_;
 
-  void SetScheduler(Scheduler * sched) { sched_ = sched; }
   static int GetNextProcessID() { return next_process_id_++; }
+  virtual void SetSlices(int /*slices*/) {};
 };
 
 } // namespace internal

@@ -58,6 +58,14 @@ class Network {
  public:
   /**
    * Constructs an empty network.
+   * \note The number of concurrent tokens will be derived from the structure
+   * of the network automatically on the first call to operator () and the
+   * corresponding resources will be allocated then.
+   */
+  Network() {}
+
+  /**
+   * Constructs an empty network.
    * \param slices Number of concurrent tokens allowed in the network.
    */
   explicit Network(int slices) {}
@@ -673,6 +681,10 @@ class Network {
 
   /**
    * Executes the network until one of the the sources returns \c false.
+   * \note If the network was default constructed the number of concurrent
+   * tokens will be derived from the structure of the network automatically
+   * on the first call of the operator and the corresponding resources will
+   * be allocated then.
    */
   void operator () ();
 };
@@ -681,22 +693,14 @@ class Network {
 
 class Network : public internal::ClockListener {
  public:
-  explicit Network(int slices = 0)
-    : sink_counter_(NULL), slices_(slices), sched_(NULL) {
-    if (0 >= slices) {
-      slices_ = int(embb_core_count_available())*4;
-    }
-    sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
-    if (sched_->GetSlices() != slices_) {
-      slices_ = sched_->GetSlices();
-    }
-    sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
-      embb::base::Allocation::Allocate(
-        sizeof(embb::base::Atomic<int>)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      sink_counter_[ii] = 0;
-    }
-    sink_count_ = 0;
+  Network()
+    : sink_counter_(NULL), sink_count_(0), slices_(0), sched_(NULL) {
+    // empty
+  }
+
+  explicit Network(int slices)
+    : sink_counter_(NULL), sink_count_(0), slices_(slices), sched_(NULL) {
+    PrepareSlices();
   }
 
   ~Network() {
@@ -710,24 +714,22 @@ class Network : public internal::ClockListener {
     }
   }
 
-  template <typename T1, typename T2 = embb::base::internal::Nil,
+  template <typename T1,
+    typename T2 = embb::base::internal::Nil,
     typename T3 = embb::base::internal::Nil,
     typename T4 = embb::base::internal::Nil,
     typename T5 = embb::base::internal::Nil>
-  class Inputs : public internal::Inputs<T1, T2, T3, T4, T5> {
-   public:
-    explicit Inputs(int slices)
-      : internal::Inputs<T1, T2, T3, T4, T5>(slices) {}
+  class Inputs {
+    // empty
   };
 
-  template <typename T1, typename T2 = embb::base::internal::Nil,
+  template <typename T1,
+    typename T2 = embb::base::internal::Nil,
     typename T3 = embb::base::internal::Nil,
     typename T4 = embb::base::internal::Nil,
     typename T5 = embb::base::internal::Nil>
-  class Outputs : public internal::Outputs<T1, T2, T3, T4, T5> {
-   public:
-    Outputs()
-      : internal::Outputs<T1, T2, T3, T4, T5>() {}
+  class Outputs {
+    // empty
   };
 
   template <class Inputs, class Outputs> class SerialProcess;
@@ -749,7 +751,7 @@ class Network : public internal::ClockListener {
       : internal::Process< true,
           internal::Inputs<I1, I2, I3, I4, I5>,
           internal::Outputs<O1, O2, O3, O4, O5> >(
-            network.slices_, network.sched_, function) {
+            network.sched_, function) {
       network.processes_.push_back(this);
     }
   };
@@ -773,7 +775,7 @@ class Network : public internal::ClockListener {
       : internal::Process< false,
           internal::Inputs<I1, I2, I3, I4, I5>,
           internal::Outputs<O1, O2, O3, O4, O5> >(
-            network.slices_, network.sched_, function) {
+            network.sched_, function) {
       network.processes_.push_back(this);
     }
   };
@@ -782,7 +784,7 @@ class Network : public internal::ClockListener {
   class Switch : public internal::Switch<Type> {
    public:
     explicit Switch(Network & network)
-      : internal::Switch<Type>(network.slices_, network.sched_) {
+      : internal::Switch<Type>(network.sched_) {
       network.processes_.push_back(this);
     }
   };
@@ -791,7 +793,7 @@ class Network : public internal::ClockListener {
   class Select : public internal::Select<Type> {
    public:
     explicit Select(Network & network)
-      : internal::Select<Type>(network.slices_, network.sched_) {
+      : internal::Select<Type>(network.sched_) {
       network.processes_.push_back(this);
     }
   };
@@ -809,7 +811,7 @@ class Network : public internal::ClockListener {
     explicit Sink(Network & network, FunctionType function)
       : internal::Sink<
           internal::Inputs<I1, I2, I3, I4, I5> >(
-            network.slices_, network.sched_, &network, function) {
+            network.sched_, &network, function) {
       network.sinks_.push_back(this);
       network.sink_count_++;
     }
@@ -857,6 +859,27 @@ class Network : public internal::ClockListener {
   }
 
   void operator () () {
+    if (0 >= slices_) {
+      slices_ = static_cast<int>(
+        sources_.size() +
+        sinks_.size());
+      for (size_t ii = 0; ii < processes_.size(); ii++) {
+        int tt = processes_[ii]->IsSequential() ? 1 :
+          static_cast<int>(embb_core_count_available());
+        slices_ += tt;
+      }
+      PrepareSlices();
+      for (size_t ii = 0; ii < sources_.size(); ii++) {
+        sources_[ii]->SetScheduler(sched_);
+      }
+      for (size_t ii = 0; ii < processes_.size(); ii++) {
+        processes_[ii]->SetScheduler(sched_);
+      }
+      for (size_t ii = 0; ii < sinks_.size(); ii++) {
+        sinks_[ii]->SetScheduler(sched_);
+      }
+    }
+
     int clock = 0;
     while (clock >= 0) {
       const int idx = clock % slices_;
@@ -912,6 +935,19 @@ class Network : public internal::ClockListener {
       result &= sources_[kk]->Start(clock);
     }
     return result;
+  }
+
+  void PrepareSlices() {
+    sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
+    if (sched_->GetSlices() != slices_) {
+      slices_ = sched_->GetSlices();
+    }
+    sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
+      embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      sink_counter_[ii] = 0;
+    }
   }
 };
 

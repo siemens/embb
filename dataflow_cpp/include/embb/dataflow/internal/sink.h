@@ -48,23 +48,17 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   typedef SinkExecutor< InputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  Sink(int slices, Scheduler * sched, ClockListener * listener,
+  Sink(Scheduler * sched, ClockListener * listener,
     FunctionType function)
-    : inputs_(slices)
+    : inputs_()
     , executor_(function)
     , action_(NULL)
-    , slices_(slices) {
+    , slices_(0) {
     next_clock_ = 0;
     queued_clock_ = 0;
     queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
-    action_ = reinterpret_cast<Action*>(
-      embb::base::Allocation::Allocate(
-        sizeof(Action)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      action_[ii] = Action();
-    }
-    SetListener(listener);
+    listener_ = listener;
     SetScheduler(sched);
   }
 
@@ -72,10 +66,6 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     if (NULL != action_) {
       embb::base::Allocation::Free(action_);
     }
-  }
-
-  void SetListener(ClockListener * listener) {
-    listener_ = listener;
   }
 
   virtual bool HasInputs() const {
@@ -143,6 +133,23 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   embb::base::Atomic<int> queued_clock_;
   int queue_id_;
   int slices_;
+
+  virtual void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(action_);
+      action_ = NULL;
+    }
+    slices_ = slices;
+    inputs_.SetSlices(slices);
+    if (0 < slices_) {
+      action_ = reinterpret_cast<Action*>(
+        embb::base::Allocation::Allocate(
+          sizeof(Action)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        action_[ii] = Action();
+      }
+    }
+  }
 };
 
 } // namespace internal
