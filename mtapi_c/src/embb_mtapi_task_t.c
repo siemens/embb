@@ -501,7 +501,6 @@ void mtapi_task_cancel(
     if (embb_mtapi_task_pool_is_handle_valid(node->task_pool, task)) {
       embb_mtapi_task_t* local_task =
         embb_mtapi_task_pool_get_storage_for_handle(node->task_pool, task);
-      embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
 
       /* call plugin action cancel function */
       if (embb_mtapi_action_pool_is_handle_valid(
@@ -511,8 +510,14 @@ void mtapi_task_cancel(
           node->action_pool, local_task->action);
         if (local_action->is_plugin_action) {
           local_action->plugin_task_cancel_function(task, &local_status);
+        } else {
+          embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
+          local_task->error_code = MTAPI_ERR_ACTION_CANCELLED;
+          local_status = MTAPI_SUCCESS;
         }
       } else {
+        embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
+        local_task->error_code = MTAPI_ERR_ACTION_CANCELLED;
         local_status = MTAPI_SUCCESS;
       }
     } else {
