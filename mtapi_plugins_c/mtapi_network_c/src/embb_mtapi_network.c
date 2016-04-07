@@ -73,7 +73,8 @@ void embb_mtapi_network_finalize() {
 enum embb_mtapi_network_operation_enum {
   EMBB_MTAPI_NETWORK_START_TASK = 0x01AFFE01,
   EMBB_MTAPI_NETWORK_RETURN_RESULT = 0x02AFFE02,
-  EMBB_MTAPI_NETWORK_RETURN_FAILURE = 0x03AFFE03
+  EMBB_MTAPI_NETWORK_RETURN_FAILURE = 0x03AFFE03,
+  EMBB_MTAPI_NETWORK_CANCEL_TASK = 0x04AFFE04
 };
 
 struct embb_mtapi_network_plugin_struct {
@@ -115,95 +116,6 @@ struct embb_mtapi_network_task_struct {
 
 typedef struct embb_mtapi_network_task_struct embb_mtapi_network_task_t;
 
-static void embb_mtapi_network_task_failure(
-  ) {
-
-}
-
-static void embb_mtapi_network_task_complete(
-  MTAPI_IN mtapi_task_hndl_t task,
-  MTAPI_OUT mtapi_status_t* status) {
-  mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
-
-  if (embb_mtapi_node_is_initialized()) {
-    embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
-
-    if (embb_mtapi_task_pool_is_handle_valid(node->task_pool, task)) {
-      embb_mtapi_task_t * local_task =
-        embb_mtapi_task_pool_get_storage_for_handle(node->task_pool, task);
-
-      if (embb_mtapi_action_pool_is_handle_valid(
-        node->action_pool, local_task->action)) {
-        /* not needed right now
-        embb_mtapi_action_t * local_action =
-          embb_mtapi_action_pool_get_storage_for_handle(
-          node->action_pool, local_task->action);*/
-
-        embb_mtapi_network_plugin_t * plugin = &embb_mtapi_network_plugin;
-        embb_mtapi_network_task_t * network_task =
-          (embb_mtapi_network_task_t*)local_task->attributes.user_data;
-        embb_mtapi_network_buffer_t * send_buf = &plugin->send_buffer;
-
-        // serialize sending of results
-        embb_mutex_lock(&plugin->send_mutex);
-        embb_mtapi_network_buffer_clear(send_buf);
-
-        // actual counts bytes actually put into the buffer
-        int actual = 0;
-        // expected counts bytes we intended to put into the buffer
-        int expected =
-          4 +                               // operation
-          4 + 4 +                           // remote task handle
-          4 +                               // status
-          4 + (int)local_task->result_size; // result buffer
-
-        // packet size
-        actual += embb_mtapi_network_buffer_push_back_int32(
-            send_buf, expected);
-        expected += 4;
-
-        // operation is "return result"
-        actual += embb_mtapi_network_buffer_push_back_int32(
-          send_buf, EMBB_MTAPI_NETWORK_RETURN_RESULT);
-
-        // remote task id
-        actual += embb_mtapi_network_buffer_push_back_int32(
-          send_buf, network_task->remote_task_id);
-        actual += embb_mtapi_network_buffer_push_back_int32(
-          send_buf, network_task->remote_task_tag);
-
-        // status
-        actual += embb_mtapi_network_buffer_push_back_int32(
-          send_buf, local_task->error_code);
-
-        // result size
-        actual += embb_mtapi_network_buffer_push_back_int32(
-          send_buf, (int32_t)local_task->result_size);
-        actual += embb_mtapi_network_buffer_push_back_rawdata(
-          send_buf, (int32_t)local_task->result_size,
-          local_task->result_buffer);
-
-        if (expected == actual) {
-          int sent = embb_mtapi_network_socket_sendbuffer(
-            &network_task->socket, send_buf);
-          assert(sent == send_buf->size);
-        }
-
-        // sending done
-        embb_mutex_unlock(&plugin->send_mutex);
-
-        // we allocated arguments and results on receive, so free them here
-        embb_free((void*)local_task->arguments);
-        embb_free(local_task->result_buffer);
-
-        local_status = MTAPI_SUCCESS;
-      }
-    }
-  }
-
-  mtapi_status_set(status, local_status);
-}
-
 static void embb_mtapi_network_return_failure(
   int32_t remote_task_id,
   int32_t remote_task_tag,
@@ -233,6 +145,117 @@ static void embb_mtapi_network_return_failure(
 
   embb_mtapi_network_socket_sendbuffer(
     socket, buffer);
+}
+
+static void embb_mtapi_network_task_complete(
+  MTAPI_IN mtapi_task_hndl_t task,
+  MTAPI_OUT mtapi_status_t* status) {
+  mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
+
+  if (embb_mtapi_node_is_initialized()) {
+    embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
+
+    if (embb_mtapi_task_pool_is_handle_valid(node->task_pool, task)) {
+      embb_mtapi_task_t * local_task =
+        embb_mtapi_task_pool_get_storage_for_handle(node->task_pool, task);
+
+      if (embb_mtapi_action_pool_is_handle_valid(
+        node->action_pool, local_task->action)) {
+        /* not needed right now
+        embb_mtapi_action_t * local_action =
+          embb_mtapi_action_pool_get_storage_for_handle(
+          node->action_pool, local_task->action);*/
+
+        embb_mtapi_network_plugin_t * plugin = &embb_mtapi_network_plugin;
+        embb_mtapi_network_task_t * network_task =
+          (embb_mtapi_network_task_t*)local_task->attributes.user_data;
+        embb_mtapi_network_buffer_t * send_buf = &plugin->send_buffer;
+
+        embb_atomic_memory_barrier();
+        local_task->attributes.complete_func = NULL;
+        embb_atomic_memory_barrier();
+
+        // serialize sending of results
+        embb_mutex_lock(&plugin->send_mutex);
+        embb_mtapi_network_buffer_clear(send_buf);
+
+        if (local_task->error_code == MTAPI_SUCCESS) {
+          // actual counts bytes actually put into the buffer
+          int actual = 0;
+          // expected counts bytes we intended to put into the buffer
+          int expected =
+            4 +                               // operation
+            4 + 4 +                           // remote task handle
+            4 +                               // status
+            4 + (int)local_task->result_size; // result buffer
+
+                                              // packet size
+          actual += embb_mtapi_network_buffer_push_back_int32(
+            send_buf, expected);
+          expected += 4;
+
+          // operation is "return result"
+          actual += embb_mtapi_network_buffer_push_back_int32(
+            send_buf, EMBB_MTAPI_NETWORK_RETURN_RESULT);
+
+          // remote task id
+          actual += embb_mtapi_network_buffer_push_back_int32(
+            send_buf, network_task->remote_task_id);
+          actual += embb_mtapi_network_buffer_push_back_int32(
+            send_buf, network_task->remote_task_tag);
+
+          // status
+          actual += embb_mtapi_network_buffer_push_back_int32(
+            send_buf, local_task->error_code);
+
+          // result size
+          actual += embb_mtapi_network_buffer_push_back_int32(
+            send_buf, (int32_t)local_task->result_size);
+          actual += embb_mtapi_network_buffer_push_back_rawdata(
+            send_buf, (int32_t)local_task->result_size,
+            local_task->result_buffer);
+
+          if (expected == actual) {
+            int sent = embb_mtapi_network_socket_sendbuffer(
+              &network_task->socket, send_buf);
+            assert(sent == send_buf->size);
+          }
+          else {
+            embb_mtapi_network_return_failure(
+              network_task->remote_task_id,
+              network_task->remote_task_tag,
+              MTAPI_ERR_UNKNOWN,
+              &network_task->socket, send_buf);
+          }
+        } else {
+          embb_mtapi_network_return_failure(
+            network_task->remote_task_id,
+            network_task->remote_task_tag,
+            local_task->error_code,
+            &network_task->socket, send_buf);
+        }
+
+        // sending done
+        embb_mutex_unlock(&plugin->send_mutex);
+
+        // we allocated arguments and results on receive, so free them here
+        embb_free((void*)local_task->arguments);
+        embb_free(local_task->result_buffer);
+
+        void * data = local_task->attributes.user_data;
+
+        embb_atomic_memory_barrier();
+        local_task->attributes.user_data = NULL;
+        embb_atomic_memory_barrier();
+
+        embb_free(data);
+
+        local_status = MTAPI_SUCCESS;
+      }
+    }
+  }
+
+  mtapi_status_set(status, local_status);
 }
 
 static mtapi_status_t embb_mtapi_network_handle_start_task(
@@ -365,9 +388,9 @@ static mtapi_status_t embb_mtapi_network_handle_return_result(
   embb_mtapi_network_buffer_t * buffer,
   int packet_size) {
 
-  int task_status;
-  int task_id;
-  int task_tag;
+  int32_t task_status;
+  int32_t task_id;
+  int32_t task_tag;
 
   int32_t results_size;
   int err;
@@ -447,9 +470,9 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
   embb_mtapi_network_buffer_t * buffer,
   int packet_size) {
 
-  int task_status;
-  int task_id;
-  int task_tag;
+  int32_t task_status;
+  int32_t task_id;
+  int32_t task_tag;
 
   int err;
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
@@ -485,9 +508,13 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
             embb_mtapi_action_pool_get_storage_for_handle(
               node->action_pool, local_task->action);
 
-          local_task->error_code = (mtapi_status_t)task_status;
-          embb_atomic_store_int(&local_task->state, MTAPI_TASK_ERROR);
           embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
+          local_task->error_code = (mtapi_status_t)task_status;
+          if (MTAPI_ERR_ACTION_CANCELLED == task_status) {
+            embb_atomic_store_int(&local_task->state, MTAPI_TASK_CANCELLED);
+          } else {
+            embb_atomic_store_int(&local_task->state, MTAPI_TASK_ERROR);
+          }
 
           /* is task associated with a group? */
           if (embb_mtapi_group_pool_is_handle_valid(
@@ -503,6 +530,48 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
 
       }
 
+    }
+  }
+
+  return local_status;
+}
+
+static mtapi_status_t embb_mtapi_network_handle_cancel_task(
+  embb_mtapi_network_buffer_t * buffer,
+  int packet_size) {
+
+  mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
+  int32_t remote_task_id;
+  int32_t remote_task_tag;
+  int err;
+  EMBB_UNUSED_IN_RELEASE(err);
+
+  // do we have 8 bytes?
+  if (packet_size == 8) {
+    // get task handle
+    err = embb_mtapi_network_buffer_pop_front_int32(buffer, &remote_task_id);
+    assert(err == 4);
+    err = embb_mtapi_network_buffer_pop_front_int32(buffer, &remote_task_tag);
+    assert(err == 4);
+
+    if (embb_mtapi_node_is_initialized()) {
+      embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
+
+      // search for task to cancel
+      for (mtapi_uint_t ii = 0; ii < node->attributes.max_tasks; ii++) {
+        embb_mtapi_task_t * task = &node->task_pool->storage[ii];
+        // is this our task?
+        if (embb_mtapi_network_task_complete == task->attributes.complete_func) {
+          embb_mtapi_network_task_t * network_task =
+            (embb_mtapi_network_task_t*)task->attributes.user_data;
+          // is this task the one matching the given remote task?
+          if (remote_task_id == network_task->remote_task_id &&
+            remote_task_tag == network_task->remote_task_tag) {
+            mtapi_task_cancel(task->handle, &local_status);
+            break;
+          }
+        }
+      }
     }
   }
 
@@ -561,6 +630,9 @@ static int embb_mtapi_network_thread(void * args) {
             break;
           case EMBB_MTAPI_NETWORK_RETURN_FAILURE:
             embb_mtapi_network_handle_return_failure(buffer, packet_size);
+            break;
+          case EMBB_MTAPI_NETWORK_CANCEL_TASK:
+            embb_mtapi_network_handle_cancel_task(buffer, packet_size);
             break;
           default:
             // invalid, ignore
@@ -785,17 +857,18 @@ static void network_task_start(
 
         // check if everything fit into the buffer
         if (actual == expected) {
+          embb_atomic_fetch_and_add_int(&local_action->num_tasks, 1);
+          embb_atomic_store_int(&local_task->state, MTAPI_TASK_RUNNING);
           int sent = embb_mtapi_network_socket_sendbuffer(
             &network_action->socket, send_buf);
           // was everything sent?
           if (sent == send_buf->size) {
-            embb_atomic_fetch_and_add_int(&local_action->num_tasks, 1);
-            embb_atomic_store_int(&local_task->state, MTAPI_TASK_RUNNING);
             // we've done it, success!
             mtapi_status_set(status, MTAPI_SUCCESS);
           } else {
             // could not send the whole task, this will fail on the remote side,
             // so we can safely assume that the task is in error
+            embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
             embb_atomic_store_int(&local_task->state, MTAPI_TASK_ERROR);
           }
         }
@@ -810,11 +883,73 @@ static void network_task_start(
 static void network_task_cancel(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status) {
-  mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
 
-  EMBB_UNUSED(task);
+  // assume failure
+  mtapi_status_set(status, MTAPI_ERR_UNKNOWN);
 
-  mtapi_status_set(status, local_status);
+  if (embb_mtapi_node_is_initialized()) {
+    embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
+
+    if (embb_mtapi_task_pool_is_handle_valid(node->task_pool, task)) {
+      embb_mtapi_task_t * local_task =
+        embb_mtapi_task_pool_get_storage_for_handle(node->task_pool, task);
+
+      if (embb_mtapi_action_pool_is_handle_valid(
+        node->action_pool, local_task->action)) {
+        embb_mtapi_action_t * local_action =
+          embb_mtapi_action_pool_get_storage_for_handle(
+            node->action_pool, local_task->action);
+
+        embb_mtapi_network_action_t * network_action =
+          (embb_mtapi_network_action_t*)local_action->plugin_data;
+        embb_mtapi_network_buffer_t * send_buf = &network_action->send_buffer;
+
+        // serialize sending
+        embb_mutex_lock(&network_action->send_mutex);
+        embb_mtapi_network_buffer_clear(send_buf);
+
+        // actual counts bytes actually put into the buffer
+        int actual = 0;
+        // expected counts bytes we intended to put into the buffer
+        int expected =
+          4 +    // operation
+          4 + 4; // task handle
+
+        // packet size
+        actual += embb_mtapi_network_buffer_push_back_int32(
+          send_buf, (int32_t)expected);
+        expected += 4;
+
+        // operation is "cancel task"
+        actual += embb_mtapi_network_buffer_push_back_int32(
+          send_buf, EMBB_MTAPI_NETWORK_CANCEL_TASK);
+
+        // task handle
+        actual += embb_mtapi_network_buffer_push_back_int32(
+          send_buf, (int32_t)local_task->handle.id);
+        actual += embb_mtapi_network_buffer_push_back_int32(
+          send_buf, (int32_t)local_task->handle.tag);
+
+        // check if everything fit into the buffer
+        if (actual == expected) {
+          int sent = embb_mtapi_network_socket_sendbuffer(
+            &network_action->socket, send_buf);
+          // was everything sent?
+          if (sent == send_buf->size) {
+            // we've done it, success!
+            mtapi_status_set(status, MTAPI_SUCCESS);
+          } else {
+            embb_atomic_store_int(&local_task->state, MTAPI_TASK_ERROR);
+          }
+        } else {
+          embb_atomic_store_int(&local_task->state, MTAPI_TASK_ERROR);
+        }
+
+        embb_mtapi_network_buffer_clear(send_buf);
+        embb_mutex_unlock(&network_action->send_mutex);
+      }
+    }
+  }
 }
 
 static void network_action_finalize(
