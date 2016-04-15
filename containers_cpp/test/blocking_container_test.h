@@ -35,7 +35,7 @@ namespace containers {
 namespace test {
 template<typename Container_t>
 class BlockingContainerTest : public partest::TestCase {
- private:
+ protected:
   int n_threads;
   int n_iterations;
   int n_container_elements_per_thread;
@@ -43,6 +43,10 @@ class BlockingContainerTest : public partest::TestCase {
   Container_t container;
   std::vector<int> expected_container_elements;
   std::vector<int>* thread_local_vectors;
+
+  virtual void SpecializedPush(const int& element) = 0;
+
+  virtual void SpecializedPop(int& element) = 0;
 
  public:
   BlockingContainerTest();
@@ -53,11 +57,6 @@ class BlockingContainerTest : public partest::TestCase {
 
   void BlockingContainerTest1_ThreadMethod();
 
- protected:
-
-   virtual void SpecializedPush(const int& element) = 0;
-
-   virtual void SpecializedPop(int& element) = 0;
 };
 } // namespace test
 } // namespace containers

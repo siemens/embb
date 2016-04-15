@@ -104,7 +104,7 @@ void BlockingContainerTest<Container_t>::BlockingContainerTest1_ThreadMethod() {
   for (std::vector<int>::iterator it = my_elements.begin();
     it != my_elements.end();
     ++it) {
-    SpecializezdPush(*it);
+    SpecializedPush(*it);
   }
 
   my_elements.clear();
