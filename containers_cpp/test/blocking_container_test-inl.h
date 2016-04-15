@@ -41,7 +41,6 @@ n_threads(static_cast<int>
   n_container_elements_per_thread(100),
   n_container_elements(n_container_elements_per_thread*n_threads),
   container(){
-  std::cout << "num thread = " << n_threads << std::endl;
   CreateUnit("BlockingContainerTestThreadsPushAndPopToGlobalBlockingContainer").
   Pre(&BlockingContainerTest::BlockingContainerTest1_Pre, this).
   Add(&BlockingContainerTest::BlockingContainerTest1_ThreadMethod, this,
