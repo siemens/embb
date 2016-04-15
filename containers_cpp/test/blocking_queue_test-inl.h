@@ -23,45 +23,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
-#define CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
+
+#ifndef CONTAINERS_CPP_TEST_BLOCKING_QUEUE_TEST_INL_H_
+#define CONTAINERS_CPP_TEST_BLOCKING_QUEUE_TEST_INL_H_
 
 #include <vector>
-#include <partest/partest.h>
-#include <embb/base/duration.h>
+#include <algorithm>
 
 namespace embb {
 namespace containers {
 namespace test {
-template<typename Container_t>
-class BlockingContainerTest : public partest::TestCase {
- protected:
-  int n_threads;
-  int n_iterations;
-  int n_container_elements_per_thread;
-  int n_container_elements;
-  Container_t container;
-  std::vector<int> expected_container_elements;
-  std::vector<int>* thread_local_vectors;
 
-  virtual void SpecializedPush(const int& element) = 0;
+template <typename Container_t>
+void BlockingQueueTest<Container_t>::SpecializedPush(const int& element){
+  container.Enqueue(element);
+}
 
-  virtual void SpecializedPop(int& element) = 0;
+template <typename Container_t>
+void BlockingQueueTest<Container_t>::SpecializedPop(int& element){
+  container.Dequeue(element);
+}
 
- public:
-  BlockingContainerTest();
-
-  void BlockingContainerTest1_Pre();
-
-  void BlockingContainerTest1_Post();
-
-  void BlockingContainerTest1_ThreadMethod();
-
-};
 } // namespace test
 } // namespace containers
 } // namespace embb
 
-#include "./blocking_container_test-inl.h"
-
-#endif  // CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
+#endif  // CONTAINERS_CPP_TEST_BLOCKING_QUEUE_TEST_INL_H_

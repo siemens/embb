@@ -23,45 +23,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
-#define CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
+#ifndef CONTAINERS_CPP_TEST_BLOCKING_QUEUE_TEST_H_
+#define CONTAINERS_CPP_TEST_BLOCKING_QUEUE_TEST_H_
 
 #include <vector>
 #include <partest/partest.h>
 #include <embb/base/duration.h>
+#include <./blocking_container_test.h>
 
 namespace embb {
 namespace containers {
 namespace test {
 template<typename Container_t>
-class BlockingContainerTest : public partest::TestCase {
+class BlockingQueueTest : public BlockingContainerTest<Container_t> {
  protected:
-  int n_threads;
-  int n_iterations;
-  int n_container_elements_per_thread;
-  int n_container_elements;
-  Container_t container;
-  std::vector<int> expected_container_elements;
-  std::vector<int>* thread_local_vectors;
+  virtual void SpecializedPush(const int& element);
 
-  virtual void SpecializedPush(const int& element) = 0;
-
-  virtual void SpecializedPop(int& element) = 0;
-
- public:
-  BlockingContainerTest();
-
-  void BlockingContainerTest1_Pre();
-
-  void BlockingContainerTest1_Post();
-
-  void BlockingContainerTest1_ThreadMethod();
-
+  virtual void SpecializedPop(int& element);
 };
 } // namespace test
 } // namespace containers
 } // namespace embb
 
-#include "./blocking_container_test-inl.h"
+#include "./blocking_queue_test-inl.h"
 
-#endif  // CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
+#endif  // CONTAINERS_CPP_TEST_BLOCKING_QUEUE_TEST_H_
