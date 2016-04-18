@@ -58,8 +58,8 @@ class Network {
  public:
   /**
    * Constructs an empty network.
-   * \note The number of concurrent tokens will be derived from the structure
-   * of the network automatically on the first call to operator () and the
+   * \note The number of concurrent tokens will automatically be derived from
+   * the structure of the network on the first call to operator(), and the
    * corresponding resources will be allocated then.
    */
   Network() {}
@@ -681,9 +681,9 @@ class Network {
 
   /**
    * Executes the network until one of the the sources returns \c false.
-   * \note If the network was default constructed the number of concurrent
-   * tokens will be derived from the structure of the network automatically
-   * on the first call of the operator and the corresponding resources will
+   * \note If the network was default constructed, the number of concurrent
+   * tokens will automatically be derived from the structure of the network 
+   * on the first call of the operator, and the corresponding resources will
    * be allocated then.
    */
   void operator () ();
