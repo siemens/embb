@@ -28,9 +28,10 @@
 #include <embb/base/c/memory_allocation.h>
 #include <string.h>
 
-void embb_mtapi_network_buffer_initialize(
+int embb_mtapi_network_buffer_initialize(
   embb_mtapi_network_buffer_t * that,
   int capacity) {
+  int result = 1;
   that->position = 0;
   that->size = 0;
   that->data = (char*)embb_alloc((size_t)capacity);
@@ -38,7 +39,9 @@ void embb_mtapi_network_buffer_initialize(
     that->capacity = capacity;
   } else {
     that->capacity = 0;
+    result = 0;
   }
+  return result;
 }
 
 void embb_mtapi_network_buffer_finalize(

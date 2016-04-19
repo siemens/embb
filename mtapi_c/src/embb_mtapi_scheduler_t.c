@@ -40,6 +40,7 @@
 #include <embb_mtapi_action_t.h>
 #include <embb_mtapi_alloc.h>
 #include <embb_mtapi_queue_t.h>
+#include <embb_mtapi_group_t.h>
 
 
 /* ---- CLASS MEMBERS ------------------------------------------------------ */
@@ -293,6 +294,8 @@ int embb_mtapi_scheduler_worker(void * arg) {
     /* check if there was work */
     if (MTAPI_NULL != task) {
       embb_mtapi_queue_t * local_queue = MTAPI_NULL;
+      embb_mtapi_group_t * local_group = MTAPI_NULL;
+      embb_mtapi_action_t * local_action = MTAPI_NULL;
 
       /* is task associated with a queue? */
       if (embb_mtapi_queue_pool_is_handle_valid(
@@ -300,6 +303,21 @@ int embb_mtapi_scheduler_worker(void * arg) {
         local_queue =
           embb_mtapi_queue_pool_get_storage_for_handle(
             node->queue_pool, task->queue);
+      }
+
+      /* is task associated with a group? */
+      if (embb_mtapi_group_pool_is_handle_valid(
+        node->group_pool, task->group)) {
+        local_group =
+          embb_mtapi_group_pool_get_storage_for_handle(
+            node->group_pool, task->group);
+      }
+
+      if (embb_mtapi_action_pool_is_handle_valid(
+        node->action_pool, task->action)) {
+        local_action =
+          embb_mtapi_action_pool_get_storage_for_handle(
+            node->action_pool, task->action);
       }
 
       switch (embb_atomic_load_int(&task->state)) {
@@ -328,7 +346,7 @@ int embb_mtapi_scheduler_worker(void * arg) {
         break;
 
       case MTAPI_TASK_CANCELLED:
-        /* set return value to canceled */
+        /* set return value to cancelled */
         task->error_code = MTAPI_ERR_ACTION_CANCELLED;
         if (embb_atomic_fetch_and_add_unsigned_int(
           &task->instances_todo, (unsigned int)-1) == 0) {
@@ -336,6 +354,12 @@ int embb_mtapi_scheduler_worker(void * arg) {
           if (MTAPI_NULL != local_queue) {
             embb_mtapi_queue_task_finished(local_queue);
           }
+          if (MTAPI_NULL != local_group) {
+            embb_mtapi_task_queue_push(&local_group->queue, task);
+          }
+        }
+        if (MTAPI_NULL != local_action) {
+          embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
         }
         break;
 

@@ -116,7 +116,8 @@ int embb_mtapi_network_socket_connect(
   if (SOCKET_ERROR == connect(that->handle, (struct sockaddr *)&addr,
     sizeof(addr))) {
 #ifdef _WIN32
-    if (WSAEWOULDBLOCK != WSAGetLastError())
+    int err = WSAGetLastError();
+    if (WSAEWOULDBLOCK != err)
 #else
     if (EAGAIN != errno)
 #endif
