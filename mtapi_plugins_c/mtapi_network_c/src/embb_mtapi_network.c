@@ -219,6 +219,7 @@ static void embb_mtapi_network_task_complete(
             int sent = embb_mtapi_network_socket_sendbuffer(
               &network_task->socket, send_buf);
             assert(sent == send_buf->size);
+            EMBB_UNUSED_IN_RELEASE(sent);
           }
           else {
             embb_mtapi_network_return_failure(
@@ -268,6 +269,7 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
   int32_t results_size;
   void * results;
   int err;
+  EMBB_UNUSED_IN_RELEASE(err);
 
   int32_t arguments_size;
   int32_t remote_task_id;
@@ -394,6 +396,7 @@ static mtapi_status_t embb_mtapi_network_handle_return_result(
 
   int32_t results_size;
   int err;
+  EMBB_UNUSED_IN_RELEASE(err);
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
 
   if (embb_mtapi_node_is_initialized()) {
@@ -475,6 +478,7 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
   int32_t task_tag;
 
   int err;
+  EMBB_UNUSED_IN_RELEASE(err);
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
 
   if (embb_mtapi_node_is_initialized()) {
