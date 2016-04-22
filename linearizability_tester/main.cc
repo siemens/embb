@@ -15,6 +15,7 @@
 #include <embb/base/thread.h>
 #include <embb/containers/lock_free_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
+#include <embb/containers/wait_free_spsc_queue.h>
 
 // Each thread executes quasi randomly operations (TryEqneueu, TryDequeue)
 // on the concurrent data structure and construct the history.
@@ -201,6 +202,9 @@ int main()
   
   std::cout << "Linearizability test on LockFreeMPMCQueue" << std::endl;
   embb_experiment_queue<embb::containers::LockFreeMPMCQueue<char>>();
+
+  std::cout << "Linearizability test on WaitFreeSPSCQueue" << std::endl;
+  embb_experiment_queue<embb::containers::WaitFreeSPSCQueue<char>>();
 
   std::cout << "Linearizability test on LockFreeStack" << std::endl;
   embb_experiment_stack<embb::containers::LockFreeStack<char>>();
