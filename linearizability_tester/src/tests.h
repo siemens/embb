@@ -1885,33 +1885,6 @@ static void test_slice_001()
   assert(tester_1.check());
 }
 
-static void debug()
-{
-  constexpr char x = '\1';
-
-  Log<state::Set> log{ 2U };
-
-  EntryPtr<state::Set> contains_call_entry_ptr, contains_ret_entry_ptr;
-  contains_call_entry_ptr = log.add_call(state::Set::make_contains_call(x));
-  contains_ret_entry_ptr = log.add_ret(contains_call_entry_ptr, state::Set::make_ret(true));
-
-  LinearizabilityTester<state::Set> t{ log.info() };
-  Result<state::Set> result;
-
-  t.check(result);
-  assert(!result.is_linearizable());
-
-  std::stringstream os;
-  result.debug(os);
-
-  assert(os.str() == "Linearizable: No\n"
-    "entry id: 0, thread id: 0, call: contains(1)\n"
-    "^ previous entries cannot be linearized\n"
-    "entry id: 0, thread id: 0, return: ret: 1\n"
-    "^ previous entries cannot be linearized\n");
-}
-
-
 static void concurrent_log()
 {
   constexpr unsigned number_of_partitions = 1U;
@@ -2097,9 +2070,6 @@ void run_tests(){
   test_slice_000();
   test_slice_001();
 
-  #ifdef _LT_DEBUG_
-    debug();
-  #endif
 
   concurrent_log();
   fuzzy_functional_test();
