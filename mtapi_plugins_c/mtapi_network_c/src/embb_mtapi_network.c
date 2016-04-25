@@ -121,8 +121,7 @@ static void embb_mtapi_network_return_failure(
   int32_t remote_task_tag,
   mtapi_status_t status,
   embb_mtapi_network_socket_t * socket,
-  embb_mtapi_network_buffer_t * buffer)
-{
+  embb_mtapi_network_buffer_t * buffer) {
   embb_mtapi_network_buffer_clear(buffer);
 
   // packet size
@@ -220,8 +219,7 @@ static void embb_mtapi_network_task_complete(
               &network_task->socket, send_buf);
             assert(sent == send_buf->size);
             EMBB_UNUSED_IN_RELEASE(sent);
-          }
-          else {
+          } else {
             embb_mtapi_network_return_failure(
               network_task->remote_task_id,
               network_task->remote_task_tag,
@@ -263,7 +261,6 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
   embb_mtapi_network_socket_t * socket,
   embb_mtapi_network_buffer_t * buffer,
   int packet_size) {
-
   int32_t domain_id;
   int32_t job_id;
   int32_t results_size;
@@ -284,7 +281,6 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
 
   // check if we have at least 28 bytes
   if (packet_size >= 28) {
-
     // domain id
     err = embb_mtapi_network_buffer_pop_front_int32(buffer, &domain_id);
     assert(err == 4);
@@ -389,7 +385,6 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
 static mtapi_status_t embb_mtapi_network_handle_return_result(
   embb_mtapi_network_buffer_t * buffer,
   int packet_size) {
-
   int32_t task_status;
   int32_t task_id;
   int32_t task_tag;
@@ -405,7 +400,6 @@ static mtapi_status_t embb_mtapi_network_handle_return_result(
 
     // do we have at least 16 bytes?
     if (packet_size >= 16) {
-
       // local task id
       err = embb_mtapi_network_buffer_pop_front_int32(buffer, &task_id);
       assert(err == 4);
@@ -460,9 +454,7 @@ static mtapi_status_t embb_mtapi_network_handle_return_result(
             local_status = MTAPI_SUCCESS;
           }
         }
-
       }
-
     }
   }
 
@@ -472,7 +464,6 @@ static mtapi_status_t embb_mtapi_network_handle_return_result(
 static mtapi_status_t embb_mtapi_network_handle_return_failure(
   embb_mtapi_network_buffer_t * buffer,
   int packet_size) {
-
   int32_t task_status;
   int32_t task_id;
   int32_t task_tag;
@@ -487,7 +478,6 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
 
     // do we have 12 bytes?
     if (packet_size == 12) {
-
       // local task id
       err = embb_mtapi_network_buffer_pop_front_int32(buffer, &task_id);
       assert(err == 4);
@@ -531,9 +521,7 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
 
           local_status = MTAPI_SUCCESS;
         }
-
       }
-
     }
   }
 
@@ -543,7 +531,6 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
 static mtapi_status_t embb_mtapi_network_handle_cancel_task(
   embb_mtapi_network_buffer_t * buffer,
   int packet_size) {
-
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
   int32_t remote_task_id;
   int32_t remote_task_tag;
@@ -565,7 +552,8 @@ static mtapi_status_t embb_mtapi_network_handle_cancel_task(
       for (mtapi_uint_t ii = 0; ii < node->attributes.max_tasks; ii++) {
         embb_mtapi_task_t * task = &node->task_pool->storage[ii];
         // is this our task?
-        if (embb_mtapi_network_task_complete == task->attributes.complete_func) {
+        if (embb_mtapi_network_task_complete ==
+            task->attributes.complete_func) {
           embb_mtapi_network_task_t * network_task =
             (embb_mtapi_network_task_t*)task->attributes.user_data;
           // is this task the one matching the given remote task?
@@ -646,7 +634,6 @@ static int embb_mtapi_network_thread(void * args) {
       }
 
       embb_mtapi_network_buffer_clear(buffer);
-
     }
   }
 
@@ -785,7 +772,6 @@ void mtapi_network_plugin_finalize(
 static void network_task_start(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status) {
-
   // assume failure
   mtapi_status_set(status, MTAPI_ERR_UNKNOWN);
 
@@ -887,7 +873,6 @@ static void network_task_start(
 static void network_task_cancel(
   MTAPI_IN mtapi_task_hndl_t task,
   MTAPI_OUT mtapi_status_t* status) {
-
   // assume failure
   mtapi_status_set(status, MTAPI_ERR_UNKNOWN);
 
