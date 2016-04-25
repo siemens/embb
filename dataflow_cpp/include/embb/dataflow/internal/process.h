@@ -96,6 +96,10 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     return Serial;
   }
 
+  virtual bool HasCycle() {
+    return outputs_.HasCycle(this);
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }
@@ -155,6 +159,15 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
       const int idx = clock % slices_;
       action_[idx] = Action(this, clock);
       sched_->Spawn(action_[idx]);
+    }
+  }
+
+  virtual bool OnHasCycle(ClockListener * node) {
+    ClockListener * this_node = this;
+    if (this_node == node) {
+      return true;
+    } else {
+      return outputs_.HasCycle(node);
     }
   }
 

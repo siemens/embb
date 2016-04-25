@@ -73,6 +73,10 @@ class In {
   bool IsConnected() const { return connected_; }
   void SetConnected() { connected_ = true; }
 
+  bool HasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
+
   void SetSlices(int slices) {
     if (0 < slices_) {
       for (int ii = 0; ii < slices_; ii++) {

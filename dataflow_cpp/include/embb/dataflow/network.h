@@ -676,6 +676,8 @@ class Network {
   /**
    * Checks whether the network is completely connected and free of cycles.
    * \returns \c true if everything is in order, \c false if not.
+   * \note Executing an invalid network results in an exception. For this
+   * reason, it is recommended to first check the network using IsValid().
    */
   bool IsValid();
 
@@ -685,6 +687,8 @@ class Network {
    * tokens will automatically be derived from the structure of the network 
    * on the first call of the operator, and the corresponding resources will
    * be allocated then.
+   * \note Executing an invalid network results in an exception. For this
+   * reason, it is recommended to first check the network using IsValid().
    */
   void operator () ();
 };
@@ -846,14 +850,19 @@ class Network : public internal::ClockListener {
 
   bool IsValid() {
     bool valid = true;
-    for (size_t ii = 0; ii < sources_.size(); ii++) {
-      valid = valid & sources_[ii]->IsFullyConnected();
+    // check connectivity
+    for (size_t ii = 0; ii < sources_.size() && valid; ii++) {
+      valid = valid && sources_[ii]->IsFullyConnected();
     }
-    for (size_t ii = 0; ii < processes_.size(); ii++) {
-      valid = valid & processes_[ii]->IsFullyConnected();
+    for (size_t ii = 0; ii < processes_.size() && valid; ii++) {
+      valid = valid && processes_[ii]->IsFullyConnected();
     }
-    for (size_t ii = 0; ii < sinks_.size(); ii++) {
-      valid = valid & sinks_[ii]->IsFullyConnected();
+    for (size_t ii = 0; ii < sinks_.size() && valid; ii++) {
+      valid = valid && sinks_[ii]->IsFullyConnected();
+    }
+    // check for cycles
+    for (size_t ii = 0; ii < processes_.size() && valid; ii++) {
+      valid = valid && !processes_[ii]->HasCycle();
     }
     return valid;
   }
