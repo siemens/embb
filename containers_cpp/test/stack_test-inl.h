@@ -35,19 +35,19 @@ namespace containers {
 namespace test {
 template<typename Stack_t>
 StackTest<Stack_t>::StackTest() :
-n_threads(static_cast<int>
-  (partest::TestSuite::GetDefaultNumThreads())),
+  n_threads(static_cast<int>
+    (partest::TestSuite::GetDefaultNumThreads())),
   n_iterations(200),
   n_stack_elements_per_thread(100),
   n_stack_elements(n_stack_elements_per_thread*n_threads),
   stack(static_cast<size_t>(n_stack_elements)),
   stackSize(0) {
   CreateUnit("StackTestThreadsPushAndPopToGlobalStack").
-  Pre(&StackTest::StackTest1_Pre, this).
-  Add(&StackTest::StackTest1_ThreadMethod, this,
-  static_cast<size_t>(n_threads),
-  static_cast<size_t>(n_iterations)).
-  Post(&StackTest::StackTest1_Post, this);
+    Pre(&StackTest::StackTest1_Pre, this).
+    Add(&StackTest::StackTest1_ThreadMethod, this,
+      static_cast<size_t>(n_threads),
+      static_cast<size_t>(n_iterations)).
+    Post(&StackTest::StackTest1_Post, this);
 }
 
 template<typename Stack_t>
