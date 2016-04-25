@@ -101,6 +101,7 @@ class SchedulerMTAPI : public Scheduler {
     group_[slice]->WaitAll(MTAPI_INFINITE);
   }
   virtual int GetSlices() { return slices_; }
+
  private:
   embb::tasks::Group ** group_;
   embb::tasks::Queue ** queue_;

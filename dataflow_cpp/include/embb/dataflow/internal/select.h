@@ -44,7 +44,7 @@ class Select
   typedef Inputs<bool, Type, Type> InputsType;
   typedef Outputs<Type> OutputsType;
 
-  Select(Scheduler * sched) : inputs_(), slices_(0) {
+  explicit Select(Scheduler * sched) : inputs_(), slices_(0) {
     inputs_.SetListener(this);
     SetScheduler(sched);
   }

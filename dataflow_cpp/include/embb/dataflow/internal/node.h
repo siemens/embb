@@ -64,7 +64,7 @@ class Node {
   static int next_process_id_;
 
   static int GetNextProcessID() { return next_process_id_++; }
-  virtual void SetSlices(int /*slices*/) {};
+  virtual void SetSlices(int /*slices*/) {}
 };
 
 } // namespace internal

@@ -44,7 +44,7 @@ class Switch
   typedef Inputs<bool, Type> InputsType;
   typedef Outputs<Type, Type> OutputsType;
 
-  Switch(Scheduler * sched) : inputs_() {
+  explicit Switch(Scheduler * sched) : inputs_() {
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
