@@ -156,7 +156,7 @@ void SimpleTest::TestBasic() {
   embb::mtapi::NodeAttributes node_attr;
   node_attr
     .SetCoreAffinity(core_set)
-    .SetQueueLimit(2);
+    .SetMaxQueues(2);
   embb::mtapi::Node::Initialize(
     MTAPI_DOMAIN_ID,
     MTAPI_NODE_ID,
