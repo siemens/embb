@@ -668,11 +668,15 @@ class Network {
   /**
    * Checks whether the network is completely connected and free of cycles.
    * \returns \c true if everything is in order, \c false if not.
+   * \note Executing an invalid network results in an exception. For this
+   * reason, it is recommended to first check the network using IsValid().
    */
   bool IsValid();
 
   /**
    * Executes the network until one of the the sources returns \c false.
+   * \note Executing an invalid network results in an exception. For this
+   * reason, it is recommended to first check the network using IsValid().
    */
   void operator () ();
 };
