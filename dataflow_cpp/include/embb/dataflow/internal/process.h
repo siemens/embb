@@ -53,11 +53,11 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   typedef ProcessExecutor< InputsType, OutputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  Process(int slices, Scheduler * sched, FunctionType function)
-    : inputs_(slices)
+  Process(Scheduler * sched, FunctionType function)
+    : inputs_()
     , executor_(function)
     , action_(NULL)
-    , slices_(slices) {
+    , slices_(0) {
     next_clock_ = 0;
     queued_clock_ = 0;
     bool ordered = Serial;
@@ -67,12 +67,6 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
       queue_id_ = 0;
     }
     inputs_.SetListener(this);
-    action_ = reinterpret_cast<Action*>(
-      embb::base::Allocation::Allocate(
-        sizeof(Action)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      action_[ii] = Action();
-    }
     SetScheduler(sched);
   }
 
@@ -96,6 +90,10 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
 
   virtual bool IsFullyConnected() {
     return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
+  }
+
+  virtual bool IsSequential() {
+    return Serial;
   }
 
   InputsType & GetInputs() {
@@ -169,6 +167,23 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   embb::base::Atomic<int> queued_clock_;
   int queue_id_;
   int slices_;
+
+  virtual void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(action_);
+      action_ = NULL;
+    }
+    slices_ = slices;
+    inputs_.SetSlices(slices);
+    if (0 < slices_) {
+      action_ = reinterpret_cast<Action*>(
+        embb::base::Allocation::Allocate(
+          sizeof(Action)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        action_[ii] = Action();
+      }
+    }
+  }
 };
 
 } // namespace internal

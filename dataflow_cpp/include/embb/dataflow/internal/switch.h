@@ -44,7 +44,7 @@ class Switch
   typedef Inputs<bool, Type> InputsType;
   typedef Outputs<Type, Type> OutputsType;
 
-  Switch(int slices, Scheduler * sched) : inputs_(slices) {
+  Switch(Scheduler * sched) : inputs_() {
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
@@ -115,6 +115,10 @@ class Switch
  private:
   InputsType inputs_;
   OutputsType outputs_;
+
+  virtual void SetSlices(int slices) {
+    inputs_.SetSlices(slices);
+  }
 };
 
 } // namespace internal

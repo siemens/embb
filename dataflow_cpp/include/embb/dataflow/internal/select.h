@@ -44,7 +44,7 @@ class Select
   typedef Inputs<bool, Type, Type> InputsType;
   typedef Outputs<Type> OutputsType;
 
-  Select(int slices, Scheduler * sched) : inputs_(slices), slices_(slices) {
+  Select(Scheduler * sched) : inputs_(), slices_(0) {
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
@@ -119,6 +119,11 @@ class Select
   InputsType inputs_;
   OutputsType outputs_;
   int slices_;
+
+  virtual void SetSlices(int slices) {
+    slices_ = slices;
+    inputs_.SetSlices(slices);
+  }
 };
 
 } // namespace internal

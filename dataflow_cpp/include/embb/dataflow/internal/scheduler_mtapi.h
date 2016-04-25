@@ -44,6 +44,13 @@ class SchedulerMTAPI : public Scheduler {
     : slices_(slices) {
     embb::tasks::Node & node = embb::tasks::Node::GetInstance();
 
+    int tl = std::min(
+      static_cast<int>(node.GetTaskLimit()),
+      static_cast<int>(node.GetGroupCount()));
+    if (tl < slices_) {
+      slices_ = tl;
+    }
+
     group_ = reinterpret_cast<embb::tasks::Group**>(
       embb::base::Allocation::Allocate(
       sizeof(embb::tasks::Group*)*slices_));
@@ -93,7 +100,7 @@ class SchedulerMTAPI : public Scheduler {
   virtual void WaitForSlice(int slice) {
     group_[slice]->WaitAll(MTAPI_INFINITE);
   }
-
+  virtual int GetSlices() { return slices_; }
  private:
   embb::tasks::Group ** group_;
   embb::tasks::Queue ** queue_;
