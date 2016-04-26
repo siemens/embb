@@ -82,6 +82,8 @@ class SchedulerMTAPI : public Scheduler {
       for (int ii = 0; ii < queue_count_; ii++) {
         queue_[ii].Delete();
       }
+      // delete action as well
+      action_.Delete();
     }
     embb::base::Allocation::Free(group_);
     embb::base::Allocation::Free(queue_);
@@ -97,6 +99,9 @@ class SchedulerMTAPI : public Scheduler {
   }
   virtual void WaitForSlice(int slice) {
     group_[slice].WaitAll(MTAPI_INFINITE);
+    // group is invalid now, recreate
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    group_[slice] = node.CreateGroup();
   }
 
  private:
