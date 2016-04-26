@@ -181,7 +181,7 @@ void NetworkTaskTest::TestCancel() {
   float argument = 1.0f;
   float result;
 
-  mtapi_network_plugin_initialize("127.0.0.1", 12345, 5,
+  mtapi_network_plugin_initialize("127.0.0.1", 12346, 5,
     4 * 3 + 32, &status);
   MTAPI_CHECK_STATUS(status);
 
@@ -198,7 +198,7 @@ void NetworkTaskTest::TestCancel() {
     NETWORK_DOMAIN,
     NETWORK_LOCAL_JOB,
     NETWORK_REMOTE_JOB,
-    "127.0.0.1", 12345,
+    "127.0.0.1", 12346,
     &status);
   MTAPI_CHECK_STATUS(status);
 
