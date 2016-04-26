@@ -25,6 +25,7 @@
  */
 
 #include <embb/mtapi/execution_policy.h>
+#include <embb/mtapi/node.h>
 #include <embb/base/exceptions.h>
 #include <embb/base/c/internal/bitset.h>
 #include <cassert>

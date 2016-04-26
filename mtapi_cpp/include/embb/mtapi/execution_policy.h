@@ -28,6 +28,7 @@
 #define EMBB_MTAPI_EXECUTION_POLICY_H_
 
 #include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/internal/cmake_config.h>
 
 namespace embb {
 namespace mtapi {

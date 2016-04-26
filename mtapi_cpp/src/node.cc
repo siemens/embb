@@ -25,6 +25,7 @@
  */
 
 #include <embb/mtapi/node.h>
+#include <embb/base/c/mutex.h>
 
 namespace embb {
 namespace mtapi {
@@ -76,7 +77,7 @@ Node & Node::GetInstance() {
     }
     embb_spin_unlock(&init_mutex);
   }
-  return *node_instance;
+  return *node_instance_;
 #else
   if (IsInitialized()) {
     return *node_instance_;

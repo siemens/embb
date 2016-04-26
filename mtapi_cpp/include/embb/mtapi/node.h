@@ -30,6 +30,7 @@
 #include <embb/base/memory_allocation.h>
 #include <embb/base/function.h>
 #include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/mtapi/status_exception.h>
 #include <embb/mtapi/node_attributes.h>
 #include <embb/mtapi/group.h>
@@ -44,6 +45,10 @@
 #undef GetJob
 #endif
 
+#ifdef MTAPI_CPP_AUTOMATIC_INITIALIZE
+#define MTAPI_CPP_AUTOMATIC_DOMAIN_ID 1
+#define MTAPI_CPP_AUTOMATIC_NODE_ID 1
+#endif
 #define EMBB_MTAPI_FUNCTION_JOB_ID 2
 
 namespace embb {
