@@ -28,6 +28,7 @@
 #define EMBB_MTAPI_NODE_H_
 
 #include <embb/base/memory_allocation.h>
+#include <embb/base/function.h>
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/mtapi/status_exception.h>
 #include <embb/mtapi/node_attributes.h>
@@ -37,6 +38,13 @@
 #include <embb/mtapi/task_attributes.h>
 #include <embb/mtapi/job.h>
 #include <embb/mtapi/action.h>
+#include <embb/mtapi/task_context.h>
+
+#ifdef GetJob
+#undef GetJob
+#endif
+
+#define EMBB_MTAPI_FUNCTION_JOB_ID 2
 
 namespace embb {
 
@@ -55,6 +63,8 @@ namespace mtapi {
  */
 class Node {
  public:
+  typedef embb::base::Function<void, TaskContext &> SMPFunction;
+
   /**
    * Initializes the runtime singleton using default values:
    *   - all available cores will be used
@@ -156,6 +166,27 @@ class Node {
     return task_limit_;
   }
 
+  Task Start(
+    SMPFunction const & func
+    ) {
+    Job job = GetJob(EMBB_MTAPI_FUNCTION_JOB_ID);
+    void * res = NULL;
+    return Start(
+      job, embb::base::Allocation::New<SMPFunction>(func), res);
+  }
+
+  Task Start(
+    SMPFunction const & func,
+    ExecutionPolicy const & policy
+  ) {
+    Job job = GetJob(EMBB_MTAPI_FUNCTION_JOB_ID);
+    void * res = NULL;
+    TaskAttributes task_attr;
+    task_attr.SetPolicy(policy);
+    return Start(
+      job, embb::base::Allocation::New<SMPFunction>(func), res, task_attr);
+  }
+
   /**
    * Starts a new Task.
    *
@@ -235,10 +266,6 @@ class Node {
       results, internal::SizeOfType<RES>(),
       MTAPI_DEFAULT_TASK_ATTRIBUTES);
   }
-
-#ifdef GetJob
-#undef GetJob
-#endif
 
   Job GetJob(mtapi_job_id_t job_id) {
     return Job(job_id, domain_id_);
@@ -397,6 +424,21 @@ class Node {
     return Task(task_hndl);
   }
 
+  static void ActionFunction(
+    const void* args,
+    mtapi_size_t /*args_size*/,
+    void* /*result_buffer*/,
+    mtapi_size_t /*result_buffer_size*/,
+    const void* /*node_local_data*/,
+    mtapi_size_t /*node_local_data_size*/,
+    mtapi_task_context_t * context) {
+    TaskContext task_context(context);
+    embb::base::Function<void, TaskContext &> * func =
+      reinterpret_cast<embb::base::Function<void, TaskContext &>*>(const_cast<void*>(args));
+    (*func)(task_context);
+    embb::base::Allocation::Delete(func);
+  }
+
   static embb::mtapi::Node * node_instance_;
 
   mtapi_domain_t domain_id_;
@@ -405,6 +447,7 @@ class Node {
   mtapi_uint_t queue_count_;
   mtapi_uint_t group_count_;
   mtapi_uint_t task_limit_;
+  Action function_action_;
 };
 
 } // namespace mtapi

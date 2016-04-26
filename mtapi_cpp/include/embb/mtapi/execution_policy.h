@@ -118,7 +118,7 @@ class ExecutionPolicy{
    *
    * \return the affinity
    */
-  const mtapi_affinity_t &GetAffinity() const;
+  mtapi_affinity_t GetAffinity() const;
 
   /** Returns the priority
    *

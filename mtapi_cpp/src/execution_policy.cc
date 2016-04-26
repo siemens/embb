@@ -109,7 +109,7 @@ unsigned int ExecutionPolicy::GetCoreCount() const {
   return embb_bitset_count(&affinity_);
 }
 
-const mtapi_affinity_t &ExecutionPolicy::GetAffinity() const {
+mtapi_affinity_t ExecutionPolicy::GetAffinity() const {
   return affinity_;
 }
 

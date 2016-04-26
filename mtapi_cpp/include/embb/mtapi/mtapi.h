@@ -35,6 +35,7 @@
  * \ingroup CPP
  */
 
+#include <embb/mtapi/execution_policy.h>
 #include <embb/mtapi/job.h>
 #include <embb/mtapi/action.h>
 #include <embb/mtapi/group.h>
