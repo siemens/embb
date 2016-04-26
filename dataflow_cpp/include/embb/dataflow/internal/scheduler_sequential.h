@@ -45,6 +45,7 @@ class SchedulerSequential : public Scheduler {
     action.RunSequential();
   }
   virtual void WaitForSlice(int /*slice*/) {}
+  virtual int GetSlices() { return 1; }
 };
 
 } // namespace internal

@@ -73,13 +73,26 @@ class In {
   bool IsConnected() const { return connected_; }
   void SetConnected() { connected_ = true; }
 
+  bool HasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
+
   void SetSlices(int slices) {
+    if (0 < slices_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        values_[ii].~SignalType();
+      }
+      embb::base::Allocation::Free(values_);
+      values_ = NULL;
+    }
     slices_ = slices;
-    values_ = reinterpret_cast<SignalType*>(
-      embb::base::Allocation::Allocate(
-      sizeof(SignalType)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      new (&values_[ii]) SignalType();
+    if (0 < slices_) {
+      values_ = reinterpret_cast<SignalType*>(
+        embb::base::Allocation::Allocate(
+          sizeof(SignalType)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        new (&values_[ii]) SignalType();
+      }
     }
   }
 

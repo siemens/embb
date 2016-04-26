@@ -46,6 +46,13 @@ class SchedulerMTAPI : public Scheduler {
     : slices_(slices) {
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
 
+    int tl = std::min(
+      static_cast<int>(node.GetTaskLimit()),
+      static_cast<int>(node.GetGroupCount()));
+    if (tl < slices_) {
+      slices_ = tl;
+    }
+
     job_ = node.GetJob(EMBB_DATAFLOW_JOB_ID);
     action_ = node.CreateAction(EMBB_DATAFLOW_JOB_ID, SchedulerMTAPI::action_func);
 
@@ -103,6 +110,7 @@ class SchedulerMTAPI : public Scheduler {
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     group_[slice] = node.CreateGroup();
   }
+  virtual int GetSlices() { return slices_; }
 
  private:
   static void action_func(

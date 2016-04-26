@@ -40,6 +40,7 @@ class Scheduler {
   virtual void Start(Action & action) = 0;
   virtual void Enqueue(int process_id, Action & action) = 0;
   virtual void WaitForSlice(int slice) = 0;
+  virtual int GetSlices() = 0;
 };
 
 } // namespace internal

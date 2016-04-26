@@ -59,6 +59,7 @@ class Inputs<embb::base::internal::Nil, embb::base::internal::Nil,
   bool IsFullyConnected() {
     return true;
   }
+  void SetSlices(int /*slices*/) {}
 };
 
 template <typename T1>
@@ -69,12 +70,22 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil>
   , public ClockListener {
  public:
-  explicit Inputs(int slices) : count_(NULL), slices_(slices) {
-    count_ = reinterpret_cast<embb::base::Atomic<int>*>(
-      embb::base::Allocation::Allocate(
-        sizeof(embb::base::Atomic<int>)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      count_[ii] = 1;
+  Inputs() : count_(NULL), slices_(0) {
+    // empty
+  }
+  void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(count_);
+      count_ = NULL;
+    }
+    slices_ = slices;
+    if (0 < slices_) {
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+          sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 1;
+      }
     }
     this->template Get<0>().SetSlices(slices_);
   }
@@ -106,6 +117,9 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
       listener_->OnClock(clock);
     }
   }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected();
   }
@@ -122,12 +136,22 @@ class Inputs<T1, T2, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  explicit Inputs(int slices) : count_(NULL), slices_(slices) {
-    count_ = reinterpret_cast<embb::base::Atomic<int>*>(
-      embb::base::Allocation::Allocate(
-        sizeof(embb::base::Atomic<int>)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      count_[ii] = 2;
+  Inputs() : count_(NULL), slices_(0) {
+    // empty
+  }
+  void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(count_);
+      count_ = NULL;
+    }
+    slices_ = slices;
+    if (0 < slices_) {
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+          sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 2;
+      }
     }
     this->template Get<0>().SetSlices(slices_);
     this->template Get<1>().SetSlices(slices_);
@@ -164,6 +188,9 @@ class Inputs<T1, T2, embb::base::internal::Nil,
       listener_->OnClock(clock);
     }
   }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &
       this->template Get<1>().IsConnected();
@@ -181,12 +208,22 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  explicit Inputs(int slices) : count_(NULL), slices_(slices) {
-    count_ = reinterpret_cast<embb::base::Atomic<int>*>(
-      embb::base::Allocation::Allocate(
-        sizeof(embb::base::Atomic<int>)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      count_[ii] = 3;
+  Inputs() : count_(NULL), slices_(0) {
+    // empty
+  }
+  void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(count_);
+      count_ = NULL;
+    }
+    slices_ = slices;
+    if (0 < slices_) {
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+          sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 3;
+      }
     }
     this->template Get<0>().SetSlices(slices_);
     this->template Get<1>().SetSlices(slices_);
@@ -228,6 +265,9 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
       listener_->OnClock(clock);
     }
   }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &
       this->template Get<1>().IsConnected() &
@@ -245,12 +285,22 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
       In<T4>, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  explicit Inputs(int slices) : count_(NULL), slices_(slices) {
-    count_ = reinterpret_cast<embb::base::Atomic<int>*>(
-      embb::base::Allocation::Allocate(
-        sizeof(embb::base::Atomic<int>)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      count_[ii] = 4;
+  Inputs() : count_(NULL), slices_(0) {
+    // empty
+  }
+  void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(count_);
+      count_ = NULL;
+    }
+    slices_ = slices;
+    if (0 < slices_) {
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+          sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 4;
+      }
     }
     this->template Get<0>().SetSlices(slices_);
     this->template Get<1>().SetSlices(slices_);
@@ -297,6 +347,9 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
       listener_->OnClock(clock);
     }
   }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &
       this->template Get<1>().IsConnected() &
@@ -316,12 +369,22 @@ class Inputs
       In<T4>, In<T5> >
   , public ClockListener {
  public:
-  explicit Inputs(int slices) : count_(NULL), slices_(slices) {
-    count_ = reinterpret_cast<embb::base::Atomic<int>*>(
-      embb::base::Allocation::Allocate(
-        sizeof(embb::base::Atomic<int>)*slices_));
-    for (int ii = 0; ii < slices_; ii++) {
-      count_[ii] = 5;
+  Inputs() : count_(NULL), slices_(0) {
+    // empty
+  }
+  void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(count_);
+      count_ = NULL;
+    }
+    slices_ = slices;
+    if (0 < slices_) {
+      count_ = reinterpret_cast<embb::base::Atomic<int>*>(
+        embb::base::Allocation::Allocate(
+          sizeof(embb::base::Atomic<int>)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii] = 5;
+      }
     }
     this->template Get<0>().SetSlices(slices_);
     this->template Get<1>().SetSlices(slices_);
@@ -372,6 +435,9 @@ class Inputs
       count_[idx] = 5;
       listener_->OnClock(clock);
     }
+  }
+  virtual bool OnHasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
   }
   bool IsFullyConnected() {
     return this->template Get<0>().IsConnected() &&

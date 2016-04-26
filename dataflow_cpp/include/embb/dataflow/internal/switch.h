@@ -44,7 +44,7 @@ class Switch
   typedef Inputs<bool, Type> InputsType;
   typedef Outputs<Type, Type> OutputsType;
 
-  Switch(int slices, Scheduler * sched) : inputs_(slices) {
+  explicit Switch(Scheduler * sched) : inputs_() {
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
@@ -82,6 +82,15 @@ class Switch
     return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
+  virtual bool OnHasCycle(ClockListener * node) {
+    ClockListener * this_node = this;
+    if (this_node == node) {
+      return true;
+    } else {
+      return outputs_.HasCycle(node);
+    }
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }
@@ -115,6 +124,10 @@ class Switch
  private:
   InputsType inputs_;
   OutputsType outputs_;
+
+  virtual void SetSlices(int slices) {
+    inputs_.SetSlices(slices);
+  }
 };
 
 } // namespace internal

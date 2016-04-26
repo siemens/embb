@@ -36,6 +36,7 @@ namespace dataflow {
 namespace internal {
 
 class Scheduler;
+class ClockListener;
 
 template <typename Type>
 class Out {
@@ -68,6 +69,14 @@ class Out {
 
   bool IsConnected() const {
     return targets_.size() > 0;
+  }
+
+  bool HasCycle(ClockListener * node) {
+    bool result = false;
+    for (size_t ii = 0; ii < targets_.size() && !result; ii++) {
+      result = result || targets_[ii]->HasCycle(node);
+    }
+    return result;
   }
 
  private:

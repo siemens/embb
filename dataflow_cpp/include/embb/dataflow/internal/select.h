@@ -44,7 +44,7 @@ class Select
   typedef Inputs<bool, Type, Type> InputsType;
   typedef Outputs<Type> OutputsType;
 
-  Select(int slices, Scheduler * sched) : inputs_(slices), slices_(slices) {
+  explicit Select(Scheduler * sched) : inputs_(), slices_(0) {
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
@@ -85,6 +85,15 @@ class Select
     return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
+  virtual bool OnHasCycle(ClockListener * node) {
+    ClockListener * this_node = this;
+    if (this_node == node) {
+      return true;
+    } else {
+      return outputs_.HasCycle(node);
+    }
+  }
+
   InputsType & GetInputs() {
     return inputs_;
   }
@@ -119,6 +128,11 @@ class Select
   InputsType inputs_;
   OutputsType outputs_;
   int slices_;
+
+  virtual void SetSlices(int slices) {
+    slices_ = slices;
+    inputs_.SetSlices(slices);
+  }
 };
 
 } // namespace internal

@@ -61,12 +61,51 @@ static void test(
   }
 }
 
+static void cancel_test(
+  void const * /*arguments*/,
+  mtapi_size_t /*arguments_size*/,
+  void * /*result_buffer*/,
+  mtapi_size_t /*result_buffer_size*/,
+  void const * /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * context) {
+  mtapi_status_t status;
+  while (true) {
+    mtapi_task_state_t state = mtapi_context_taskstate_get(context, &status);
+    if (status != MTAPI_SUCCESS) {
+      break;
+    } else {
+      if (state == MTAPI_TASK_CANCELLED) {
+        break;
+      }
+    }
+  }
+}
 
 NetworkTaskTest::NetworkTaskTest() {
-  CreateUnit("mtapi network task test").Add(&NetworkTaskTest::TestBasic, this);
+  CreateUnit("mtapi network task test")
+    .Add(&NetworkTaskTest::TestBasic, this);
 }
 
 void NetworkTaskTest::TestBasic() {
+  mtapi_status_t status;
+
+  mtapi_initialize(
+    NETWORK_DOMAIN,
+    NETWORK_LOCAL_NODE,
+    MTAPI_NULL,
+    MTAPI_NULL,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  TestSimple();
+  TestCancel();
+
+  mtapi_finalize(&status);
+  MTAPI_CHECK_STATUS(status);
+}
+
+void NetworkTaskTest::TestSimple() {
   mtapi_status_t status;
   mtapi_job_hndl_t job;
   mtapi_task_hndl_t task;
@@ -80,14 +119,6 @@ void NetworkTaskTest::TestBasic() {
     arguments[ii] = static_cast<float>(ii);
     arguments[ii + kElements] = static_cast<float>(ii);
   }
-
-  mtapi_initialize(
-    NETWORK_DOMAIN,
-    NETWORK_LOCAL_NODE,
-    MTAPI_NULL,
-    MTAPI_NULL,
-    &status);
-  MTAPI_CHECK_STATUS(status);
 
   mtapi_network_plugin_initialize("127.0.0.1", 12345, 5,
     kElements * 4 * 3 + 32, &status);
@@ -139,7 +170,68 @@ void NetworkTaskTest::TestBasic() {
 
   mtapi_network_plugin_finalize(&status);
   MTAPI_CHECK_STATUS(status);
+}
 
-  mtapi_finalize(&status);
+void NetworkTaskTest::TestCancel() {
+  mtapi_status_t status;
+  mtapi_job_hndl_t job;
+  mtapi_task_hndl_t task;
+  mtapi_action_hndl_t network_action, local_action;
+
+  float argument = 1.0f;
+  float result;
+
+  mtapi_network_plugin_initialize("127.0.0.1", 12345, 5,
+    4 * 3 + 32, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  float node_remote = 1.0f;
+  local_action = mtapi_action_create(
+    NETWORK_REMOTE_JOB,
+    cancel_test,
+    &node_remote, sizeof(float),
+    MTAPI_DEFAULT_ACTION_ATTRIBUTES,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  network_action = mtapi_network_action_create(
+    NETWORK_DOMAIN,
+    NETWORK_LOCAL_JOB,
+    NETWORK_REMOTE_JOB,
+    "127.0.0.1", 12345,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  job = mtapi_job_get(NETWORK_LOCAL_JOB, NETWORK_DOMAIN, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  task = mtapi_task_start(
+    MTAPI_TASK_ID_NONE,
+    job,
+    &argument, sizeof(float),
+    &result, sizeof(float),
+    MTAPI_DEFAULT_TASK_ATTRIBUTES,
+    MTAPI_GROUP_NONE,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_task_wait(task, 1, &status);
+  PT_ASSERT_EQ(status, MTAPI_TIMEOUT);
+
+  mtapi_task_cancel(task, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_task_wait(task, MTAPI_INFINITE, &status);
+  PT_ASSERT_NE(status, MTAPI_TIMEOUT);
+  PT_ASSERT_EQ(status, MTAPI_ERR_ACTION_CANCELLED);
+
+  mtapi_action_delete(network_action, MTAPI_INFINITE, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_action_delete(local_action, MTAPI_INFINITE, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_network_plugin_finalize(&status);
   MTAPI_CHECK_STATUS(status);
 }

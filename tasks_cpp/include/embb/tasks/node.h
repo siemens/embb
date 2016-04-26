@@ -130,6 +130,24 @@ class Node {
   }
 
   /**
+   * Returns the number of available groups.
+   * \return The number of available groups
+   * \waitfree
+   */
+  mtapi_uint_t GetGroupCount() const {
+    return group_count_;
+  }
+
+  /**
+    * Returns the number of available tasks.
+    * \return The number of available tasks
+    * \waitfree
+    */
+  mtapi_uint_t GetTaskLimit() const {
+    return task_limit_;
+  }
+
+  /**
     * Returns the number of available cores.
     * \return The number of available cores
     * \waitfree
@@ -229,6 +247,8 @@ class Node {
     mtapi_task_context_t * context);
 
   mtapi_uint_t queue_count_;
+  mtapi_uint_t group_count_;
+  mtapi_uint_t task_limit_;
   mtapi_uint_t core_count_;
   mtapi_uint_t worker_thread_count_;
   mtapi_action_hndl_t action_handle_;

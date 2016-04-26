@@ -139,6 +139,24 @@ class Node {
   }
 
   /**
+   * Returns the number of available groups.
+   * \return The number of available groups
+   * \waitfree
+   */
+  mtapi_uint_t GetGroupCount() const {
+    return group_count_;
+  }
+
+  /**
+    * Returns the number of available tasks.
+    * \return The number of available tasks
+    * \waitfree
+    */
+  mtapi_uint_t GetTaskLimit() const {
+    return task_limit_;
+  }
+
+  /**
    * Starts a new Task.
    *
    * \returns The handle to the started Task.
@@ -349,6 +367,8 @@ class Node {
     mtapi_status_t status;
     mtapi_info_t info;
     queue_count_ = attr.GetInternal().max_queues;
+    group_count_ = attr.GetInternal().max_groups;
+    task_limit_ = attr.GetInternal().max_tasks;
     mtapi_initialize(domain_id, node_id, &attr.GetInternal(), &info, &status);
     internal::CheckStatus(status);
 
@@ -383,6 +403,8 @@ class Node {
   mtapi_uint_t core_count_;
   mtapi_uint_t worker_thread_count_;
   mtapi_uint_t queue_count_;
+  mtapi_uint_t group_count_;
+  mtapi_uint_t task_limit_;
 };
 
 } // namespace mtapi
