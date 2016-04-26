@@ -109,6 +109,7 @@ void GroupTest::TestBasic() {
     PT_EXPECT_EQ(status, MTAPI_GROUP_COMPLETED);
   }
 
+  action.Delete();
   embb::mtapi::Node::Finalize();
 
   PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);

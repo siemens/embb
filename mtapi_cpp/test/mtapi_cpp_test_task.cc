@@ -107,6 +107,8 @@ void TaskTest::TestBasic() {
     mtapi_status_t status = task.Wait();
     PT_EXPECT_EQ(status, MTAPI_SUCCESS);
     PT_EXPECT(test == "simple");
+
+    action_task.Delete();
   }
 
   {
@@ -120,6 +122,8 @@ void TaskTest::TestBasic() {
     testDoSomethingElse();
     mtapi_status_t status = task.Wait();
     PT_EXPECT_EQ(status, MTAPI_ERR_ACTION_FAILED);
+
+    action_error.Delete();
   }
 
   embb::mtapi::Node::Finalize();
