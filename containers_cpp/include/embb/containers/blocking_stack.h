@@ -29,7 +29,7 @@
 
 #include <stack>
 
-#include <embb/containers/blocking_container.h>
+#include <embb/containers/internal/blocking_push_and_pop_container.h>
 
 namespace embb {
 namespace containers {
@@ -40,7 +40,7 @@ namespace containers {
 * \tparam T Element type
 */
 template< typename Type>
-class BlockingStack : public BlockingContainer<Type> {
+class BlockingStack : public BlockingPushAndPopContainer<Type> {
  private:
   /**
   * Internal stack from the standard library.

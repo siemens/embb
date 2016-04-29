@@ -29,7 +29,7 @@
    
 #include <queue>
    
-#include <embb/containers/blocking_container.h>
+#include <embb/containers/internal/blocking_push_and_pop_container.h>
    
 namespace embb {
 namespace containers {
@@ -42,7 +42,7 @@ namespace containers {
 template< typename Type, 
           class Container = std::vector<Type>, 
           class Compare = std::less<typename Container::value_type>>
-class BlockingPriorityQueue : public BlockingContainer<Type> {
+class BlockingPriorityQueue : public BlockingPushAndPopContainer<Type> {
  
  private:
   /**

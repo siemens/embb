@@ -1,4 +1,3 @@
-#include "..\blocking_container.h"
 /*
 * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
 *
@@ -25,25 +24,42 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EMBB_CONTAINERS_BLOCKING_CONTAINER_INL_H_
-#define EMBB_CONTAINERS_BLOCKING_CONTAINER_INL_H_
+#ifndef EMBB_CONTAINERS_BLOCKING_PUSH_AND_POP_CONTAINER_H_
+#define EMBB_CONTAINERS_BLOCKING_PUSH_AND_POP_CONTAINER_H_
 
+
+#include <embb/base/base.h>
 
 
 namespace embb {
 namespace containers {
 
-template<typename T>
-void BlockingContainer<T>::PushAndWakeUp(const T& element) {
+template < typename Type >
+class BlockingPushAndPopContainer {
+
+  typedef embb::base::Mutex Mutex;
+
+ protected:
+
+  Mutex mutex;
+
+  embb::base::ConditionVariable condition;
+
+  virtual void SpecializedPush(const Type& element) = 0;
+
+  virtual void SpecializedPop(Type& element) = 0;
+
+  virtual bool IsEmpty() = 0;
+
+  void PushAndWakeUp(const Type&  element) {
   embb::base::LockGuard<Mutex> lock(mutex);
 
   SpecializedPush(element);
 
   condition.NotifyOne();
-}
+  }
 
-template<typename T>
-void BlockingContainer<T>::BlockingPop(T& element) {
+  void BlockingPop( Type & element) {
   embb::base::UniqueLock<Mutex> lock(mutex);
 
   while (IsEmpty()) {
@@ -51,9 +67,12 @@ void BlockingContainer<T>::BlockingPop(T& element) {
   }
 
   SpecializedPop(element);
-}
+  }
+
+
+};
 
 }
 }
 
-#endif // EMBB_CONTAINERS_BLOCKING_CONTAINER_INL_H_
+#endif  // EMBB_CONTAINERS_BLOCKING_PUSH_AND_POP_CONTAINER_

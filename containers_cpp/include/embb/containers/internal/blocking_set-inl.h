@@ -1,4 +1,3 @@
-#include "..\blocking_set.h"
 /*
 * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
 *
@@ -25,8 +24,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EMBB_CONTAINERS_BLOCKING_SET_INL_H_
-#define EMBB_CONTAINERS_BLOCKING_SET_INL_H_
+#ifndef EMBB_CONTAINERS_INTERNAL_BLOCKING_SET_INL_H_
+#define EMBB_CONTAINERS_INTERNAL_BLOCKING_SET_INL_H_
 
 
 namespace embb {
@@ -57,4 +56,4 @@ namespace containers {
 }
 }
 
-#endif // EMBB_CONTAINERS_BLOCKING_SET_INL_H_
+#endif // EMBB_CONTAINERS_INTERNAL_BLOCKING_SET_INL_H_
