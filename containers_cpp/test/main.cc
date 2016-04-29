@@ -32,6 +32,7 @@
 #include <embb/containers/blocking_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
 #include <embb/containers/blocking_queue.h>
+#include <embb/containers/blocking_set.h>
 #include <embb/base/c/memory_allocation.h>
 
 #include <partest/partest.h>
@@ -44,6 +45,7 @@
 #include "./blocking_stack_test.h"
 #include "./hazard_pointer_test.h"
 #include "./object_pool_test.h"
+#include "./set_test.h"
 
 #define COMMA ,
 
@@ -56,20 +58,22 @@ using embb::containers::LockFreeStack;
 using embb::containers::BlockingStack;
 using embb::containers::LockFreeTreeValuePool;
 using embb::containers::WaitFreeArrayValuePool;
+using embb::containers::BlockingSet;
 using embb::containers::test::PoolTest;
 using embb::containers::test::HazardPointerTest;
 using embb::containers::test::QueueTest;
 using embb::containers::test::BlockingQueueTest;
 using embb::containers::test::StackTest;
 using embb::containers::test::BlockingStackTest;
+using embb::containers::test::SetTest;
 using embb::containers::test::ObjectPoolTest;
 using embb::containers::test::HazardPointerTest2;
 
 PT_MAIN("Data Structures C++") {
+ 
   unsigned int max_threads = static_cast<unsigned int>(
     2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
-
   PT_RUN(PoolTest< WaitFreeArrayValuePool<int COMMA -1> >);
   PT_RUN(PoolTest< LockFreeTreeValuePool<int COMMA -1> >);
   PT_RUN(HazardPointerTest);
@@ -80,8 +84,9 @@ PT_MAIN("Data Structures C++") {
   PT_RUN(BlockingQueueTest< BlockingQueue<int> >);
   PT_RUN(StackTest< LockFreeStack<int> >);
   PT_RUN(BlockingStackTest< BlockingStack<int> >);
+  PT_RUN(SetTest< BlockingSet<int> >);
   PT_RUN(ObjectPoolTest< LockFreeTreeValuePool<bool COMMA false > >);
   PT_RUN(ObjectPoolTest< WaitFreeArrayValuePool<bool COMMA false> >);
-
   PT_EXPECT(embb_get_bytes_allocated() == 0);
+  
 }
