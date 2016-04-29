@@ -78,7 +78,8 @@ void MapTest<T>::MapTest1_Post() {
   for (unsigned int i = 0; i < map_elements; i++) {
     PT_ASSERT(map_contain_vector[i] == map.Contains(static_cast<int>(i)));
     if (map_contain_vector[i])
-      PT_ASSERT((map[i] == i * 2));
+      PT_ASSERT(map[static_cast<int>(i)] ==
+        static_cast<const int>(i * 2));
   }
 }
 
@@ -89,7 +90,7 @@ void MapTest<T>::MapTest1_ThreadMethod() {
 
   PT_ASSERT((EMBB_SUCCESS == return_val));
 
-  srand(time(NULL));
+  srand(static_cast<unsigned int>(time(NULL)));
 
   std::vector<int>& my_values = thread_local_vectors_value[thread_index];
   std::vector<int>& my_keys = thread_local_vectors_key[thread_index];

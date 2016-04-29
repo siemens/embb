@@ -89,7 +89,7 @@ void SetTest<T>::SetTest1_ThreadMethod() {
 
   PT_ASSERT(EMBB_SUCCESS == return_val);
 
-  srand(time(NULL));
+  srand(static_cast<unsigned int>(time(NULL)));
 
   std::vector<int>& my_elements = thread_local_vectors[thread_index];
 

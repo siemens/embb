@@ -67,6 +67,9 @@ class BlockingPushAndPopContainer {
 
   SpecializedPop(element);
   }
+
+ public:
+  virtual ~BlockingPushAndPopContainer() {}
 };
 
 }  // namespace containers
