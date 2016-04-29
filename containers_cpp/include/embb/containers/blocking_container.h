@@ -34,7 +34,6 @@
 namespace embb {
 namespace containers {
 
-using namespace base;
 
 /*
 * Abstract class to use for the implementation of blocking datastructure.
@@ -44,6 +43,7 @@ using namespace base;
 */
 template < typename Type >
 class BlockingContainer {
+  typedef embb::base::Mutex Mutex;
  protected:
   /*
   * Mutex for thread synchronization.
@@ -54,7 +54,7 @@ class BlockingContainer {
   * Condition variable for notifying threads that are waiting
   * for popping elements that new elements are available.
   */
-  ConditionVariable condition;
+  embb::base::ConditionVariable condition;
 
   /**
   * Pure virtual method to be implemented in derived classes.

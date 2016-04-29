@@ -32,6 +32,7 @@
 #include <embb/containers/blocking_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
 #include <embb/containers/blocking_queue.h>
+#include <embb/containers/blocking_priority_queue.h>
 #include <embb/containers/blocking_set.h>
 #include <embb/containers/blocking_map.h>
 #include <embb/base/c/memory_allocation.h>
@@ -56,6 +57,7 @@ using embb::containers::LockFreeTreeValuePool;
 using embb::containers::WaitFreeSPSCQueue;
 using embb::containers::LockFreeMPMCQueue;
 using embb::containers::BlockingQueue;
+using embb::containers::BlockingPriorityQueue;
 using embb::containers::LockFreeStack;
 using embb::containers::BlockingStack;
 using embb::containers::LockFreeTreeValuePool;
@@ -86,6 +88,7 @@ PT_MAIN("Data Structures C++") {
   PT_RUN(QueueTest< LockFreeMPMCQueue< ::std::pair<size_t COMMA int> >
     COMMA true COMMA true >);
   PT_RUN(BlockingQueueTest< BlockingQueue<int> >);
+  PT_RUN(BlockingQueueTest< BlockingPriorityQueue<int> >);
   PT_RUN(StackTest< LockFreeStack<int> >);
   PT_RUN(BlockingStackTest< BlockingStack<int> >);
   PT_RUN(SetTest< BlockingSet<int> >);

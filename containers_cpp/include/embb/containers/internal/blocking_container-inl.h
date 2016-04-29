@@ -35,7 +35,7 @@ namespace containers {
 
 template<typename T>
 void BlockingContainer<T>::PushAndWakeUp(const T& element) {
-  LockGuard<Mutex> lock(mutex);
+  embb::base::LockGuard<Mutex> lock(mutex);
 
   SpecializedPush(element);
 
@@ -44,7 +44,7 @@ void BlockingContainer<T>::PushAndWakeUp(const T& element) {
 
 template<typename T>
 void BlockingContainer<T>::BlockingPop(T& element) {
-  UniqueLock<Mutex> lock(mutex);
+  embb::base::UniqueLock<Mutex> lock(mutex);
 
   while (IsEmpty()) {
     condition.Wait(lock);
