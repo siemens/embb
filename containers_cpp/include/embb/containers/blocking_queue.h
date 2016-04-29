@@ -1,5 +1,5 @@
- /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+/*
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,55 +28,68 @@
 #define EMBB_CONTAINERS_BLOCKING_QUEUE_H_
 
 #include <queue>
-
 #include <embb/containers/internal/blocking_push_and_pop_container.h>
 
 namespace embb {
 namespace containers {
 
 /**
-* Wrapper for the standard library queue.
-*
-* \tparam T Element type
-*/
+ * Blocking queue.
+ *
+ * \concept{CPP_CONCEPTS_QUEUE}
+ *
+ * \ingroup CPP_CONTAINERS_QUEUES
+ *
+ * \see WaitFreeSPSCQueue, LockFreeMPMCQueue, BlockingPriorityQueue
+ *
+ * \tparam Type Element type
+ */
 template< typename Type>
 class BlockingQueue : public BlockingPushAndPopContainer<Type> {
  private:
   /**
-  * Internal queue from the standard library.
-  */
+   * Internal queue from the standard library.
+   */
   std::queue<Type> internalQueue;
+
+  /**
+   * Wrapper for push_back method in the standard library queue.
+   * Implements the corresponding pure virtual method
+   * in the super class.
+   */
+  void SpecializedPush(const Type& element);
+  
+  /**
+   * Wrapper for pop_front method in the standard library queue.
+   * Implements the corresponding pure virtual method
+   * in the super class.
+   */
+  void SpecializedPop(Type& element);
+
+  /** 
+   * Wrapper for the empty method in the standard queue.
+   * Implements the corresponding pure virtual method
+   * in the super class.
+   */
+  bool IsEmpty();
+
  public:
   /**
-  * Enqueues an element in the internal queue.
-  */
+   * Enqueues an element in the priority queue.
+   */
   void Enqueue(
     const Type& element
     /**< [IN] Constant reference to element to enqueue*/);
 
+  /**
+   * Dequeues the next element from the priority queue.
+   * What element will be dequeued is determined by the Compare
+   * template parameter. By default, the next returned element is
+   * the one with the largest key.
+   */
   void Dequeue(
     Type& element
-    /**< [IN] Reference to dequeued element*/);
-
- protected:
-   /*
-   * Wrapper for the push method in the standard queue.
-   */
-  virtual void SpecializedPush(
-    const Type& element
-    /**< [IN] Constant reference to element to push.*/);
-
-  /**
-  * Wrapper for the pop method in the standard queue.
-  */
-  virtual void SpecializedPop(
-    Type& element
-    /**< [IN,OUT] Reference to element to the popped element*/);
-
-  /**
-  * Wrapper for the empty method in the standard queue.
-  */
-  virtual bool IsEmpty();
+    /**< [IN, OUT] Reference to dequeued element*/);
 
 };
  

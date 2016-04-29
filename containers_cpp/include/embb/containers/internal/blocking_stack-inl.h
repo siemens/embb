@@ -1,6 +1,5 @@
-#include "..\blocking_stack.h"
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,7 +26,6 @@
 
 #ifndef EMBB_CONTAINERS_INTERNAL_BLOCKING_STACK_INL_H_
 #define EMBB_CONTAINERS_INTERNAL_BLOCKING_STACK_INL_H_
-
 
 namespace embb {
 namespace containers {
