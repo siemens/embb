@@ -27,10 +27,11 @@
 #ifndef CONTAINERS_CPP_TEST_MAP_TEST_H_
 #define CONTAINERS_CPP_TEST_MAP_TEST_H_
 
-#include <vector>
 #include <partest/partest.h>
 #include <time.h>
 #include <embb/base/duration.h>
+
+#include <vector>
 
 namespace embb {
 namespace containers {
@@ -55,12 +56,11 @@ class MapTest : public partest::TestCase {
   void MapTest1_Post();
 
   void MapTest1_ThreadMethod();
-
 };
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
-#include "./blocking_map_test-inl.h"
+#include "./map_test-inl.h"
 
-#endif
+#endif  // CONTAINERS_CPP_TEST_MAP_TEST_H_

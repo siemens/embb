@@ -27,9 +27,11 @@
 #ifndef CONTAINERS_CPP_TEST_MAP_TEST_INL_H_
 #define CONTAINERS_CPP_TEST_MAP_TEST_INL_H_
 
+#include <vector>
+
 namespace embb {
-  namespace containers {
-    namespace test {
+namespace containers {
+namespace test {
 
 template <typename T>
 MapTest<T>::MapTest() :
@@ -47,7 +49,6 @@ MapTest<T>::MapTest() :
         static_cast<size_t>(n_threads),
         static_cast<size_t>(n_iterations)).
       Post(&MapTest::MapTest1_Post, this);
-
 }
 
 template <typename T>
@@ -68,7 +69,6 @@ void MapTest<T>::MapTest1_Pre() {
       thread_local_vectors_value[i].push_back(insert_element * 2);
       map_contain_vector[static_cast<unsigned int>(insert_element)] = false;
     }
-
   }
 }
 
@@ -103,24 +103,24 @@ void MapTest<T>::MapTest1_ThreadMethod() {
     int value = my_values[static_cast<unsigned int>(random_number)];
 
     if (inserting) {
-      PT_ASSERT(map.Insert(key, value) != map_contain_vector[static_cast<unsigned int>(key)]);
+      PT_ASSERT(map.Insert(key, value) !=
+        map_contain_vector[static_cast<unsigned int>(key)]);
       map_contain_vector[static_cast<unsigned int>(key)] = true;
 
-    }
-    else {
-      PT_ASSERT(map.Erase(key) == map_contain_vector[static_cast<unsigned int>(key)]);
+    } else {
+      PT_ASSERT(map.Erase(key) ==
+        map_contain_vector[static_cast<unsigned int>(key)]);
       map_contain_vector[static_cast<unsigned int>(key)] = false;
     }
   }
-
 }
 
 
 
 
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 
-#endif // CONTAINERS_CPP_TEST_MAP_TEST_INL_H_
+#endif  // CONTAINERS_CPP_TEST_MAP_TEST_INL_H_

@@ -28,9 +28,10 @@
 #ifndef CONTAINERS_CPP_TEST_SET_TEST_INL_H_
 #define CONTAINERS_CPP_TEST_SET_TEST_INL_H_
 
-#include <vector>
-#include <algorithm>
 #include <time.h>
+
+#include <algorithm>
+#include <vector>
 
 namespace embb {
 namespace containers {
@@ -55,7 +56,7 @@ SetTest<T>::SetTest() :
 }
 
 template <typename T>
-void SetTest<T>::SetTest1_Pre(){
+void SetTest<T>::SetTest1_Pre() {
   embb_internal_thread_index_reset();
   thread_local_vectors =
     new std::vector<int>[static_cast<unsigned int>(n_threads)];
@@ -72,7 +73,7 @@ void SetTest<T>::SetTest1_Pre(){
 }
 
 template <typename T>
-void SetTest<T>::SetTest1_Post(){
+void SetTest<T>::SetTest1_Post() {
   unsigned int set_elements = set_contain_vector.size();
   for (unsigned int i = 0; i < set_elements; i++) {
     PT_ASSERT(set_contain_vector[i] == set.Contains(static_cast<int>(i)));
@@ -87,7 +88,7 @@ void SetTest<T>::SetTest1_ThreadMethod() {
   int return_val = embb_internal_thread_index(&thread_index);
 
   PT_ASSERT(EMBB_SUCCESS == return_val);
-  
+
   srand(time(NULL));
 
   std::vector<int>& my_elements = thread_local_vectors[thread_index];
@@ -99,19 +100,20 @@ void SetTest<T>::SetTest1_ThreadMethod() {
     int element = my_elements[static_cast<unsigned int>(random_number)];
 
     if (inserting) {
-      PT_ASSERT(set.Insert(element) != set_contain_vector[static_cast<unsigned int>(element)]);
+      PT_ASSERT(set.Insert(element) !=
+        set_contain_vector[static_cast<unsigned int>(element)]);
       set_contain_vector[static_cast<unsigned int>(element)] = true;
-    }
-    else {
-      PT_ASSERT(set.Erase(element) == set_contain_vector[static_cast<unsigned int>(element)]);
+    } else {
+      PT_ASSERT(set.Erase(element) ==
+        set_contain_vector[static_cast<unsigned int>(element)]);
       set_contain_vector[static_cast<unsigned int>(element)] = false;
     }
   }
 }
 
-      
-} // namespace test
-} // namespace containers
-} // namespace embb
+
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #endif  // CONTAINERS_CPP_TEST_SET_TEST_INL_H_

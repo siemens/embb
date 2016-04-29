@@ -26,24 +26,25 @@
 #ifndef CONTAINERS_CPP_TEST_BLOCKING_STACK_TEST_H_
 #define CONTAINERS_CPP_TEST_BLOCKING_STACK_TEST_H_
 
-#include <vector>
 #include <partest/partest.h>
 #include <embb/base/duration.h>
-#include <./blocking_container_test.h>
+#include <./blocking_push_and_pop_container_test.h>
+
+#include <vector>
 
 namespace embb {
 namespace containers {
 namespace test {
 template<typename Stack_t>
 class BlockingStackTest : public BlockingContainerTest<Stack_t> {
- protected:
-   virtual void SpecializedPush(const int& element);
+ private:
+  void SpecializedPush(const int& element);
 
-   virtual void SpecializedPop(int& element);
+  void SpecializedPop(int& element);
 };
-} // namespace test
-} // namespace stacks
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #include "./blocking_stack_test-inl.h"
 

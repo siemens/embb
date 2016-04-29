@@ -35,17 +35,17 @@ namespace containers {
 namespace test {
 
 template <typename Container_t>
-void BlockingQueueTest<Container_t>::SpecializedPush(const int& element){
+void BlockingQueueTest<Container_t>::SpecializedPush(const int& element) {
   container.Enqueue(element);
 }
 
 template <typename Container_t>
-void BlockingQueueTest<Container_t>::SpecializedPop(int& element){
+void BlockingQueueTest<Container_t>::SpecializedPop(int& element) {
   container.Dequeue(element);
 }
 
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #endif  // CONTAINERS_CPP_TEST_BLOCKING_QUEUE_TEST_INL_H_

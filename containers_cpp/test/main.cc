@@ -48,7 +48,7 @@
 #include "./hazard_pointer_test.h"
 #include "./object_pool_test.h"
 #include "./set_test.h"
-#include "./blocking_map_test.h"
+#include "./map_test.h"
 
 #define COMMA ,
 
@@ -76,7 +76,6 @@ using embb::containers::test::HazardPointerTest2;
 using embb::containers::test::MapTest;
 
 PT_MAIN("Data Structures C++") {
- 
   unsigned int max_threads = static_cast<unsigned int>(
     2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
@@ -96,5 +95,4 @@ PT_MAIN("Data Structures C++") {
   PT_RUN(ObjectPoolTest< LockFreeTreeValuePool<bool COMMA false > >);
   PT_RUN(ObjectPoolTest< WaitFreeArrayValuePool<bool COMMA false> >);
   PT_EXPECT(embb_get_bytes_allocated() == 0);
-  
 }

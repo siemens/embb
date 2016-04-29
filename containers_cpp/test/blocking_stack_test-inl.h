@@ -44,9 +44,8 @@ void BlockingStackTest<Stack_t>::SpecializedPop(int& element) {
   container.Pop(element);
 }
 
-
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #endif  // CONTAINERS_CPP_TEST_BLOCKING_STACK_TEST_INL_H_

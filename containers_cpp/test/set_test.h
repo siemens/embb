@@ -26,16 +26,17 @@
 #ifndef CONTAINERS_CPP_TEST_SET_TEST_H_
 #define CONTAINERS_CPP_TEST_SET_TEST_H_
 
-#include <vector>
 #include <partest/partest.h>
 #include <embb/base/duration.h>
+
+#include <vector>
 
 namespace embb {
 namespace containers {
 namespace test {
 template<typename Set_t>
 class SetTest : public partest::TestCase {
-private:
+ private:
   int n_threads;
   int n_iterations;
   int n_operations_per_iteration;
@@ -44,7 +45,7 @@ private:
   std::vector<int>* thread_local_vectors;
   std::vector<bool> set_contain_vector;
 
-public:
+ public:
   SetTest();
 
   void SetTest1_Pre();
@@ -53,9 +54,9 @@ public:
 
   void SetTest1_ThreadMethod();
 };
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #include "./set_test-inl.h"
 

@@ -40,7 +40,7 @@ n_threads(static_cast<int>
   n_iterations(200),
   n_container_elements_per_thread(100),
   n_container_elements(n_container_elements_per_thread*n_threads),
-  container(){
+  container() {
   CreateUnit("BlockingContainerTestThreadsPushAndPopToGlobalBlockingContainer").
   Pre(&BlockingContainerTest::BlockingContainerTest1_Pre, this).
   Add(&BlockingContainerTest::BlockingContainerTest1_ThreadMethod, this,
@@ -80,7 +80,8 @@ void BlockingContainerTest<Container_t>::BlockingContainerTest1_Post() {
 
   PT_ASSERT(produced.size() == expected_container_elements.size());
 
-  std::sort(expected_container_elements.begin(), expected_container_elements.end());
+  std::sort(expected_container_elements.begin(),
+    expected_container_elements.end());
   std::sort(produced.begin(), produced.end());
 
   for (unsigned int i = 0;
@@ -114,8 +115,8 @@ void BlockingContainerTest<Container_t>::BlockingContainerTest1_ThreadMethod() {
     my_elements.push_back(return_elem);
   }
 }
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
 #endif  // CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_INL_H_

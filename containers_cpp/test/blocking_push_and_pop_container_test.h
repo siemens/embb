@@ -26,9 +26,9 @@
 #ifndef CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
 #define CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
 
+#include <embb/base/duration.h>
 #include <vector>
 #include <partest/partest.h>
-#include <embb/base/duration.h>
 
 namespace embb {
 namespace containers {
@@ -56,12 +56,11 @@ class BlockingContainerTest : public partest::TestCase {
   void BlockingContainerTest1_Post();
 
   void BlockingContainerTest1_ThreadMethod();
-
 };
-} // namespace test
-} // namespace containers
-} // namespace embb
+}  // namespace test
+}  // namespace containers
+}  // namespace embb
 
-#include "./blocking_container_test-inl.h"
+#include "./blocking_push_and_pop_container_test-inl.h"
 
 #endif  // CONTAINERS_CPP_TEST_BLOCKING_CONTAINER_TEST_H_
