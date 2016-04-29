@@ -25,7 +25,9 @@
  */
 
 #ifndef EMBB_CONTAINERS_INTERNAL_BLOCKING_MAP_INL_H_
-#define EMBB_CONTAINERS_INTERNAL_BLOCKING_SET_INL_H_
+#define EMBB_CONTAINERS_INTERNAL_BLOCKING_MAP_INL_H_
+
+#include <map>
 
 namespace embb {
 namespace containers {
@@ -58,7 +60,7 @@ V& BlockingMap<K, V>::operator[](const K& key) {
   return internalMap[key];
 }
 
-}
-}
+}  // namespace containers
+}  // namespace embb
 
-#endif // EMBB_CONTAINERS_INTERNAL_BLOCKING_MAP_INL_H_
+#endif  // EMBB_CONTAINERS_INTERNAL_BLOCKING_MAP_INL_H_

@@ -27,8 +27,8 @@
 #ifndef EMBB_CONTAINERS_BLOCKING_STACK_H_
 #define EMBB_CONTAINERS_BLOCKING_STACK_H_
 
-#include <stack>
 #include <embb/containers/internal/blocking_push_and_pop_container.h>
+#include <stack>
 
 namespace embb {
 namespace containers {
@@ -86,9 +86,8 @@ class BlockingStack : public BlockingPushAndPopContainer<Type> {
   void Pop(
     Type& element
     /**< [IN, OUT] Reference to popped element*/);
-
 };
- 
+
 }  // namespace containers
 }  // namespace embb
 

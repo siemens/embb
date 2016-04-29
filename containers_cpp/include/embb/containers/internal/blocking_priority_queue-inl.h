@@ -31,7 +31,8 @@ namespace embb {
 namespace containers {
 
 template<typename T, class Container, class Compare>
-void BlockingPriorityQueue<T, Container, Compare>::SpecializedPush(const T& element) {
+void BlockingPriorityQueue<T, Container, Compare>::SpecializedPush(
+                                                    const T& element) {
   internalQueue.push(element);
 }
 
@@ -56,7 +57,7 @@ bool BlockingPriorityQueue<T, Container, Compare>::IsEmpty() {
   return internalQueue.empty();
 }
 
-}
-}
+}  // namespace containers
+}  // namespace embb
 
-#endif // EMBB_CONTAINERS_INTERNAL_BLOCKING_PRIORITY_QUEUE_INL_H_
+#endif  // EMBB_CONTAINERS_INTERNAL_BLOCKING_PRIORITY_QUEUE_INL_H_

@@ -92,11 +92,10 @@ class BlockingSet {
   bool Contains(
     const Type& element
     /**< [IN] Reference to the element to search for. */);
-  
 };
 
-}
-}
+}  // namespace containers
+}  // namespace embb
 
 #include <embb/containers/internal/blocking_set-inl.h>
 

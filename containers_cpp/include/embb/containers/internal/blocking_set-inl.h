@@ -35,24 +35,24 @@ BlockingSet<T>::BlockingSet() :
   internalSet() {}
 
 template<typename T>
-bool BlockingSet<T>::Insert(const T& element){
+bool BlockingSet<T>::Insert(const T& element) {
   LockGuard lock(mutex);
   return internalSet.insert(element).second;
 }
 
 template<typename T>
-bool BlockingSet<T>::Erase(const T& element){
+bool BlockingSet<T>::Erase(const T& element) {
   LockGuard lock(mutex);
   return  internalSet.erase(element) > 0;
 }
 
 template<typename T>
-bool BlockingSet<T>::Contains(const T& element){
+bool BlockingSet<T>::Contains(const T& element) {
   LockGuard lock(mutex);
   return internalSet.find(element) != internalSet.end();
 }
 
-}
-}
+}  // namespace containers
+}  // namespace embb
 
-#endif // EMBB_CONTAINERS_INTERNAL_BLOCKING_SET_INL_H_
+#endif  // EMBB_CONTAINERS_INTERNAL_BLOCKING_SET_INL_H_

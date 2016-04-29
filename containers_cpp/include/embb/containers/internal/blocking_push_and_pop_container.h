@@ -33,15 +33,13 @@
 namespace embb {
 namespace containers {
 
-// Abstract class, provides a synchronization mechanism for 
+// Abstract class, provides a synchronization mechanism for
 // data structures that support push/pop-like methods (e.g. stacks, queues)
 template < typename Type >
 class BlockingPushAndPopContainer {
-
   typedef embb::base::Mutex Mutex;
 
  protected:
-
   Mutex mutex;
 
   embb::base::ConditionVariable condition;
@@ -60,7 +58,7 @@ class BlockingPushAndPopContainer {
   condition.NotifyOne();
   }
 
-  void BlockingPop( Type & element) {
+  void BlockingPop(Type & element) {
   embb::base::UniqueLock<Mutex> lock(mutex);
 
   while (IsEmpty()) {
@@ -69,10 +67,9 @@ class BlockingPushAndPopContainer {
 
   SpecializedPop(element);
   }
-
 };
 
-}
-}
+}  // namespace containers
+}  // namespace embb
 
-#endif  // EMBB_CONTAINERS_BLOCKING_PUSH_AND_POP_CONTAINER_
+#endif  // EMBB_CONTAINERS_BLOCKING_PUSH_AND_POP_CONTAINER_H_

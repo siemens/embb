@@ -27,8 +27,8 @@
 #ifndef EMBB_CONTAINERS_BLOCKING_QUEUE_H_
 #define EMBB_CONTAINERS_BLOCKING_QUEUE_H_
 
-#include <queue>
 #include <embb/containers/internal/blocking_push_and_pop_container.h>
+#include <queue>
 
 namespace embb {
 namespace containers {
@@ -58,7 +58,7 @@ class BlockingQueue : public BlockingPushAndPopContainer<Type> {
    * in the super class.
    */
   void SpecializedPush(const Type& element);
-  
+
   /**
    * Wrapper for pop_front method in the standard library queue.
    * Implements the corresponding pure virtual method
@@ -90,9 +90,8 @@ class BlockingQueue : public BlockingPushAndPopContainer<Type> {
   void Dequeue(
     Type& element
     /**< [IN, OUT] Reference to dequeued element*/);
-
 };
- 
+
 }  // namespace containers
 }  // namespace embb
 

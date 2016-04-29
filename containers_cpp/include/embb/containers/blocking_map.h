@@ -45,72 +45,71 @@ class BlockingMap {
   typedef embb::base::LockGuard<> LockGuard;
 
  private:
-   /**
-    * Internal map from the standard library.
-    */
-   std::map<Key, Value> internalMap;
+  /**
+   * Internal map from the standard library.
+   */
+  std::map<Key, Value> internalMap;
 
-   /**
-    * Mutex for synchronizing concurrent accesses to the structure.
-    */
-   Mutex mutex;
+  /**
+   * Mutex for synchronizing concurrent accesses to the structure.
+   */
+  Mutex mutex;
 
  public:
-   /**
-    * Creates an empty map.
-    */
-   BlockingMap();
+  /**
+   * Creates an empty map.
+   */
+  BlockingMap();
 
-   /**
-    * Inserts a new element (key,value) in the map, if no elements
-    * with the same key already exists.
-    * 
-    * \return \c true if the inserting succeeded,
-    * \c false otherwise.
-    */
-   bool Insert(
-     const Key& key,
-     /**< [IN] Constant reference to key of the element to insert*/
-     const Value& value
-     /**< [IN] Constant reference to value of the element to insert*/
-     );
+  /**
+   * Inserts a new element (key,value) in the map, if no elements
+   * with the same key already exists.
+   * 
+   * \return \c true if the inserting succeeded,
+   * \c false otherwise.
+   */
+  bool Insert(
+    const Key& key,
+    /**< [IN] Constant reference to key of the element to insert*/
+    const Value& value
+    /**< [IN] Constant reference to value of the element to insert*/
+    );
 
-   /**
-    * Erases the element with the specified key, if such an element exists.
-    *
-    * \return \c true if erasing was successfull, \c false otherwise.
-    */
-   bool Erase(
-     const Key& key
-     /**< [IN] Constant reference to the key of the element to erase*/);
+  /**
+   * Erases the element with the specified key, if such an element exists.
+   *
+   * \return \c true if erasing was successfull, \c false otherwise.
+   */
+  bool Erase(
+    const Key& key
+    /**< [IN] Constant reference to the key of the element to erase*/);
 
-   /*
-    * Checks if the map contains an element with the specified key.
-    *
-    * \return \c true if the the map contains the element, \c false
-    * otherwise
-    */
-   bool Contains(
-     const Key& key
-     /**< [IN] Constant reference to key of the element
-     to search for*/);
+  /*
+   * Checks if the map contains an element with the specified key.
+   *
+   * \return \c true if the the map contains the element, \c false
+   * otherwise
+   */
+  bool Contains(
+    const Key& key
+    /**< [IN] Constant reference to key of the element
+    to search for*/);
 
-   /**
+  /**
    * Accesses the element with the specified key, if such an element exists.
    * If it does not exists, creates an element with the specified key.
    *
    * \return Reference to the value with the specified key.
    */
-   Value& operator[](
-     const Key& key
-     /**< [IN] Constant reference to key of the element to access*/);
-
+  Value& operator[](
+    const Key& key
+    /**< [IN] Constant reference to key of the element to access*/);
 };
 
-}
-}
+}  // namespace containers
+}  // namespace embb
 
 #include <embb/containers/internal/blocking_map-inl.h>
 
-#endif // EMBB_CONTAINERS_BLOCKING_MAP_H_
+#endif  // EMBB_CONTAINERS_BLOCKING_MAP_H_
 

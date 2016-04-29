@@ -23,16 +23,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-   
+
 #ifndef EMBB_CONTAINERS_BLOCKING_PRIORITY_QUEUE_H_
 #define EMBB_CONTAINERS_BLOCKING_PRIORITY_QUEUE_H_
-   
-#include <queue>
+
 #include <embb/containers/internal/blocking_push_and_pop_container.h>
-   
+#include <functional>
+#include <vector>
+#include <queue>
+
 namespace embb {
 namespace containers {
-     
+
 /**
  * Blocking priority queue.
  *
@@ -48,15 +50,15 @@ namespace containers {
  *                 which determines what element will be
  *                 dequeued next.
  */
-template< typename Type, 
-          class Container = std::vector<Type>, 
+template< typename Type,
+          class Container = std::vector<Type>,
           class Compare = std::less<typename Container::value_type>>
 class BlockingPriorityQueue : public BlockingPushAndPopContainer<Type> {
  private:
   /**
    * Internal priority_queue from the standard library.
    */
-  std::priority_queue<Type, Container,Compare> internalQueue;
+  std::priority_queue<Type, Container, Compare> internalQueue;
 
   /**
    * Wrapper for the push method in the standard priority_queue.
@@ -86,15 +88,15 @@ class BlockingPriorityQueue : public BlockingPushAndPopContainer<Type> {
   void Enqueue(
     const Type& element
         /**< [IN] Constant reference to element to enqueue*/);
-           
+
   void Dequeue(
     Type& element
         /**< [IN] Reference to dequeued element*/);
 };
-      
-}  // namespace containers   
+
+}  // namespace containers
 }  // namespace embb
 
 #include <embb/containers/internal/blocking_priority_queue-inl.h>
 
-#endif // EMBB_CONTAINERS_BLOCKING_PRIORITY_QUEUE
+#endif  // EMBB_CONTAINERS_BLOCKING_PRIORITY_QUEUE_H_
