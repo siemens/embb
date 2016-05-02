@@ -58,7 +58,7 @@ void NetworkSocketTest::TestBasic() {
     port++;
     err = embb_mtapi_network_socket_bind_and_listen(
       &server_sock, "127.0.0.1", port, 5);
-  } while(err == 0 && port < 4800);
+  } while (err == 0 && port < 4800);
   PT_EXPECT(err != 0);
 
   err = embb_mtapi_network_socket_select(&server_sock, 1, 1);
