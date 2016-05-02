@@ -35,18 +35,21 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, typename Type>
+template <typename Type>
 class ConstantSource
   : public Node {
  public:
-  typedef Outputs<Slices, Type> OutputsType;
+  typedef Outputs<Type> OutputsType;
 
  private:
   OutputsType outputs_;
   Type value_;
 
  public:
-  explicit ConstantSource(Type value) : value_(value) {}
+  ConstantSource(Scheduler * sched, Type value)
+    : value_(value) {
+    SetScheduler(sched);
+  }
 
   virtual bool HasOutputs() const {
     return outputs_.Size() > 0;
@@ -56,9 +59,8 @@ class ConstantSource
     GetOutput<0>().Send(Signal<Type>(clock, value_));
   }
 
-  virtual void Init(InitData * init_data) {
-    SetScheduler(init_data->sched);
-    GetOutput<0>().SendInit(init_data);
+  virtual bool IsFullyConnected() {
+    return outputs_.IsFullyConnected();
   }
 
   virtual bool Start(int clock) {

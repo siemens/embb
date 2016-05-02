@@ -279,6 +279,7 @@ void mtapi_group_wait_any(
   MTAPI_IN mtapi_timeout_t timeout,
   MTAPI_OUT mtapi_status_t* status) {
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
+  void* local_result = MTAPI_NULL;
 
   embb_mtapi_log_trace("mtapi_group_wait_any() called\n");
 
@@ -335,10 +336,7 @@ void mtapi_group_wait_any(
         }
         /* was there a timeout, or is there a result? */
         if (MTAPI_NULL != local_task) {
-          /* store result */
-          if (MTAPI_NULL != result) {
-            *result = local_task->result_buffer;
-          }
+          local_result = local_task->result_buffer;
 
           /* return error code set by the task */
           local_status = local_task->error_code;
@@ -354,6 +352,11 @@ void mtapi_group_wait_any(
   } else {
     embb_mtapi_log_error("mtapi not initialized\n");
     local_status = MTAPI_ERR_NODE_NOTINIT;
+  }
+
+  /* store result */
+  if (MTAPI_NULL != result) {
+      *result = local_result;
   }
 
   mtapi_status_set(status, local_status);

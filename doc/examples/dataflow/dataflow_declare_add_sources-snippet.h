@@ -6,15 +6,14 @@
 
   Network::Source<int>
     source1(
+      network,
       embb::base::MakeFunction(producer1, &Producer<int>::Run) ),
     source2(
+      network,
       embb::base::MakeFunction(producer2, &Producer<int>::Run) ),
     source3(
+      network,
       embb::base::MakeFunction(producer3, &Producer<int>::Run) ),
     source4(
+      network,
       embb::base::MakeFunction(producer4, &Producer<int>::Run) );
-
-  nw.AddSource(source1);
-  nw.AddSource(source2);
-  nw.AddSource(source3);
-  nw.AddSource(source4);

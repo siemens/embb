@@ -112,7 +112,7 @@ void* embb_tss_get(
  *
  * Does not delete the values pointed to.
  *
- * \pre TSS has been created successfully
+ * \pre \c tss has been created successfully and is not NULL.
  * \post All slots are deleted
  * \notthreadsafe
  * \see embb_tss_create()

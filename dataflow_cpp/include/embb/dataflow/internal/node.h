@@ -43,18 +43,28 @@ class Node {
   virtual bool HasInputs() const { return false; }
   virtual bool HasOutputs() const { return false; }
   virtual void Run(int clock) = 0;
+  virtual bool IsFullyConnected() = 0;
+  virtual bool IsSequential() { return true; }
+  virtual bool HasCycle() { return false; }
   virtual bool Start(int /*clock*/) {
     EMBB_THROW(embb::base::ErrorException,
       "Nodes are started implicitly.");
   }
-  virtual void Init(InitData * init_data) = 0;
+  void SetScheduler(Scheduler * sched) {
+    sched_ = sched;
+    if (NULL != sched_) {
+      SetSlices(sched_->GetSlices());
+    } else {
+      SetSlices(0);
+    }
+  }
 
  protected:
   Scheduler * sched_;
   static int next_process_id_;
 
-  void SetScheduler(Scheduler * sched) { sched_ = sched; }
   static int GetNextProcessID() { return next_process_id_++; }
+  virtual void SetSlices(int /*slices*/) {}
 };
 
 } // namespace internal

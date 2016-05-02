@@ -35,7 +35,6 @@ namespace dataflow {
 namespace internal {
 
 template <
-  int,
   typename = embb::base::internal::Nil,
   typename = embb::base::internal::Nil,
   typename = embb::base::internal::Nil,
@@ -43,54 +42,112 @@ template <
   typename = embb::base::internal::Nil >
 class Outputs;
 
-template <int Slices>
-class Outputs<Slices, embb::base::internal::Nil, embb::base::internal::Nil,
+class ClockListener;
+
+template <>
+class Outputs<embb::base::internal::Nil, embb::base::internal::Nil,
   embb::base::internal::Nil, embb::base::internal::Nil,
   embb::base::internal::Nil>
   : public Tuple<embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil> {
  public:
+  bool IsFullyConnected() {
+    return true;
+  }
+  bool HasCycle(ClockListener * /*node*/) {
+    return false;
+  }
 };
 
-template <int Slices, typename T1>
-class Outputs<Slices, T1, embb::base::internal::Nil, embb::base::internal::Nil,
+template <typename T1>
+class Outputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
   embb::base::internal::Nil, embb::base::internal::Nil>
-  : public Tuple<Out<T1, Slices>, embb::base::internal::Nil,
+  : public Tuple<Out<T1>, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil> {
  public:
+  bool IsFullyConnected() {
+    return this->template Get<0>().IsConnected();
+  }
+  bool HasCycle(ClockListener * node) {
+    return this->template Get<0>().HasCycle(node);
+  }
 };
 
-template <int Slices, typename T1, typename T2>
-class Outputs<Slices, T1, T2, embb::base::internal::Nil,
+template <typename T1, typename T2>
+class Outputs<T1, T2, embb::base::internal::Nil,
   embb::base::internal::Nil, embb::base::internal::Nil>
-  : public Tuple<Out<T1, Slices>, Out<T2, Slices>, embb::base::internal::Nil,
+  : public Tuple<Out<T1>, Out<T2>, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil> {
  public:
+  bool IsFullyConnected() {
+    return this->template Get<0>().IsConnected() &&
+      this->template Get<1>().IsConnected();
+  }
+  bool HasCycle(ClockListener * node) {
+    return this->template Get<0>().HasCycle(node) ||
+      this->template Get<1>().HasCycle(node);
+  }
 };
 
-template <int Slices, typename T1, typename T2, typename T3>
-class Outputs<Slices, T1, T2, T3, embb::base::internal::Nil,
+template <typename T1, typename T2, typename T3>
+class Outputs<T1, T2, T3, embb::base::internal::Nil,
   embb::base::internal::Nil>
-  : public Tuple<Out<T1, Slices>, Out<T2, Slices>, Out<T3, Slices>,
+  : public Tuple<Out<T1>, Out<T2>, Out<T3>,
     embb::base::internal::Nil, embb::base::internal::Nil> {
  public:
+  bool IsFullyConnected() {
+    return this->template Get<0>().IsConnected() &&
+      this->template Get<1>().IsConnected() &&
+      this->template Get<2>().IsConnected();
+  }
+  bool HasCycle(ClockListener * node) {
+    return this->template Get<0>().HasCycle(node) ||
+      this->template Get<1>().HasCycle(node) ||
+      this->template Get<2>().HasCycle(node);
+  }
 };
 
-template <int Slices, typename T1, typename T2, typename T3, typename T4>
-class Outputs<Slices, T1, T2, T3, T4, embb::base::internal::Nil>
-  : public Tuple<Out<T1, Slices>, Out<T2, Slices>, Out<T3, Slices>,
-      Out<T4, Slices>, embb::base::internal::Nil>{
+template <typename T1, typename T2, typename T3, typename T4>
+class Outputs<T1, T2, T3, T4, embb::base::internal::Nil>
+  : public Tuple<Out<T1>, Out<T2>, Out<T3>,
+      Out<T4>, embb::base::internal::Nil>{
  public:
+  bool IsFullyConnected() {
+    return this->template Get<0>().IsConnected() &&
+      this->template Get<1>().IsConnected() &&
+      this->template Get<2>().IsConnected() &&
+      this->template Get<3>().IsConnected();
+  }
+  bool HasCycle(ClockListener * node) {
+    return this->template Get<0>().HasCycle(node) ||
+      this->template Get<1>().HasCycle(node) ||
+      this->template Get<2>().HasCycle(node) ||
+      this->template Get<3>().HasCycle(node);
+  }
 };
 
-template <int Slices, typename T1, typename T2, typename T3, typename T4,
+template <typename T1, typename T2, typename T3, typename T4,
   typename T5>
 class Outputs
-  : public Tuple<Out<T1, Slices>, Out<T2, Slices>, Out<T3, Slices>,
-      Out<T4, Slices>, Out<T5, Slices> > {
+  : public Tuple<Out<T1>, Out<T2>, Out<T3>,
+      Out<T4>, Out<T5> > {
  public:
+  bool IsFullyConnected() {
+    return this->template Get<0>().IsConnected() &&
+      this->template Get<1>().IsConnected() &&
+      this->template Get<2>().IsConnected() &&
+      this->template Get<3>().IsConnected() &&
+      this->template Get<4>().IsConnected();
+  }
+  bool HasCycle(ClockListener * node) {
+    return this->template Get<0>().HasCycle(node) ||
+      this->template Get<1>().HasCycle(node) ||
+      this->template Get<2>().HasCycle(node) ||
+      this->template Get<3>().HasCycle(node) ||
+      this->template Get<4>().HasCycle(node);
+  }
 };
 
 } // namespace internal

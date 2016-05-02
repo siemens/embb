@@ -48,22 +48,28 @@ static int SimpleRand(int & seed) {
 #include "dataflow/dataflow_network-snippet.h"
 
 void RunDataflowNonLinear() {
+#include "dataflow/dataflow_make-snippet.h"
 #include "dataflow/dataflow_declare_add_sources-snippet.h"
 
   Comparator<int> comparator;
 
   Network::ParallelProcess<
-    Network::Inputs<int, int>::Type, Network::Outputs<int, int>::Type>
-    process1( embb::base::MakeFunction(comparator, &Comparator<int>::Run) ),
-    process2( embb::base::MakeFunction(comparator, &Comparator<int>::Run) ),
-    process3( embb::base::MakeFunction(comparator, &Comparator<int>::Run) ),
-    process4( embb::base::MakeFunction(comparator, &Comparator<int>::Run) ),
-    process5( embb::base::MakeFunction(comparator, &Comparator<int>::Run) );
+    Network::Inputs<int, int>, Network::Outputs<int, int> >
+    process1(network,
+      embb::base::MakeFunction(comparator, &Comparator<int>::Run)),
+    process2(network,
+      embb::base::MakeFunction(comparator, &Comparator<int>::Run)),
+    process3(network,
+      embb::base::MakeFunction(comparator, &Comparator<int>::Run)),
+    process4(network,
+      embb::base::MakeFunction(comparator, &Comparator<int>::Run)),
+    process5(network,
+      embb::base::MakeFunction(comparator, &Comparator<int>::Run));
 
   Consumer<int> consumer;
 
   Network::Sink<int, int, int, int>
-    sink1(embb::base::MakeFunction(consumer, &Consumer<int>::Run));
+    sink1(network, embb::base::MakeFunction(consumer, &Consumer<int>::Run));
 
   source1.GetOutput<0>() >> process1.GetInput<0>();
   source2.GetOutput<0>() >> process2.GetInput<0>();
@@ -83,5 +89,5 @@ void RunDataflowNonLinear() {
   process5.GetOutput<1>() >> sink1.GetInput<2>();
   process4.GetOutput<1>() >> sink1.GetInput<3>();
 
-  nw();
+#include "dataflow/dataflow_run-snippet.h"
 }

@@ -38,12 +38,24 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices>
 class SchedulerMTAPI : public Scheduler {
  public:
-  SchedulerMTAPI() {
+  explicit SchedulerMTAPI(int slices)
+    : slices_(slices) {
     embb::tasks::Node & node = embb::tasks::Node::GetInstance();
-    for (int ii = 0; ii < Slices; ii++) {
+
+    int tl = std::min(
+      static_cast<int>(node.GetTaskLimit()),
+      static_cast<int>(node.GetGroupCount()));
+    if (tl < slices_) {
+      slices_ = tl;
+    }
+
+    group_ = reinterpret_cast<embb::tasks::Group**>(
+      embb::base::Allocation::Allocate(
+      sizeof(embb::tasks::Group*)*slices_));
+
+    for (int ii = 0; ii < slices_; ii++) {
       embb::tasks::Group & group = node.CreateGroup();
       group_[ii] = &group;
     }
@@ -61,22 +73,26 @@ class SchedulerMTAPI : public Scheduler {
     }
   }
   virtual ~SchedulerMTAPI() {
-    embb::tasks::Node & node = embb::tasks::Node::GetInstance();
-    for (int ii = 0; ii < Slices; ii++) {
-      group_[ii]->WaitAll(MTAPI_INFINITE);
-      node.DestroyGroup(*group_[ii]);
+    if (embb::tasks::Node::IsInitialized()) {
+      // only destroy groups and queues if there still is an instance
+      embb::tasks::Node & node = embb::tasks::Node::GetInstance();
+      for (int ii = 0; ii < slices_; ii++) {
+        group_[ii]->WaitAll(MTAPI_INFINITE);
+        node.DestroyGroup(*group_[ii]);
+      }
+      for (int ii = 0; ii < queue_count_; ii++) {
+        node.DestroyQueue(*queue_[ii]);
+      }
     }
-    for (int ii = 0; ii < queue_count_; ii++) {
-      node.DestroyQueue(*queue_[ii]);
-    }
+    embb::base::Allocation::Free(group_);
     embb::base::Allocation::Free(queue_);
   }
   virtual void Spawn(Action & action) {
-    const int idx = action.GetClock() % Slices;
+    const int idx = action.GetClock() % slices_;
     group_[idx]->Spawn(embb::base::MakeFunction(action, &Action::RunMTAPI));
   }
   virtual void Enqueue(int process_id, Action & action) {
-    const int idx = action.GetClock() % Slices;
+    const int idx = action.GetClock() % slices_;
     const int queue_id = process_id % queue_count_;
     queue_[queue_id]->Spawn(group_[idx],
       embb::base::MakeFunction(action, &Action::RunMTAPI));
@@ -84,11 +100,13 @@ class SchedulerMTAPI : public Scheduler {
   virtual void WaitForSlice(int slice) {
     group_[slice]->WaitAll(MTAPI_INFINITE);
   }
+  virtual int GetSlices() { return slices_; }
 
  private:
-  embb::tasks::Group * group_[Slices];
+  embb::tasks::Group ** group_;
   embb::tasks::Queue ** queue_;
   int queue_count_;
+  int slices_;
 };
 
 } // namespace internal

@@ -36,29 +36,36 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, class Inputs> class Sink;
+template <class Inputs> class Sink;
 
 template <
-  int Slices,
   typename I1, typename I2, typename I3, typename I4, typename I5>
-class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
+class Sink< Inputs<I1, I2, I3, I4, I5> >
   : public Node
   , public ClockListener {
  public:
-  typedef Inputs<Slices, I1, I2, I3, I4, I5> InputsType;
+  typedef Inputs<I1, I2, I3, I4, I5> InputsType;
   typedef SinkExecutor< InputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  explicit Sink(FunctionType function)
-    : executor_(function) {
+  Sink(Scheduler * sched, ClockListener * listener,
+    FunctionType function)
+    : inputs_()
+    , executor_(function)
+    , action_(NULL)
+    , slices_(0) {
     next_clock_ = 0;
     queued_clock_ = 0;
     queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
+    listener_ = listener;
+    SetScheduler(sched);
   }
 
-  void SetListener(ClockListener * listener) {
-    listener_ = listener;
+  ~Sink() {
+    if (NULL != action_) {
+      embb::base::Allocation::Free(action_);
+    }
   }
 
   virtual bool HasInputs() const {
@@ -72,10 +79,8 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
     listener_->OnClock(clock);
   }
 
-  virtual void Init(InitData * init_data) {
-    SetListener(init_data->sink_listener);
-    SetScheduler(init_data->sched);
-    listener_->OnInit(init_data);
+  virtual bool IsFullyConnected() {
+    return inputs_.IsFullyConnected();
   }
 
   InputsType & GetInputs() {
@@ -88,15 +93,13 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
   }
 
   virtual void OnClock(int clock) {
-    if (!inputs_.AreAtClock(clock)) {
-      EMBB_THROW(embb::base::ErrorException,
-        "Some inputs are not at expected clock.")
-    }
+    EMBB_UNUSED_IN_RELEASE(clock);
+    assert(inputs_.AreAtClock(clock));
 
     bool retry = true;
     while (retry) {
       int clk = next_clock_;
-      int clk_end = clk + Slices;
+      int clk_end = clk + slices_;
       int clk_res = clk;
       for (int ii = clk; ii < clk_end; ii++) {
         if (!inputs_.AreAtClock(ii)) {
@@ -108,7 +111,7 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
         if (next_clock_.CompareAndSwap(clk, clk_res)) {
           while (queued_clock_.Load() < clk) continue;
           for (int ii = clk; ii < clk_res; ii++) {
-            const int idx = ii % Slices;
+            const int idx = ii % slices_;
             action_[idx] = Action(this, ii);
             sched_->Enqueue(queue_id_, action_[idx]);
           }
@@ -121,18 +124,32 @@ class Sink< Slices, Inputs<Slices, I1, I2, I3, I4, I5> >
     }
   }
 
-  virtual void OnInit(InitData * init_data) {
-    Init(init_data);
-  }
-
  private:
   InputsType inputs_;
   ExecutorType executor_;
-  Action action_[Slices];
+  Action * action_;
   ClockListener * listener_;
   embb::base::Atomic<int> next_clock_;
   embb::base::Atomic<int> queued_clock_;
   int queue_id_;
+  int slices_;
+
+  virtual void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(action_);
+      action_ = NULL;
+    }
+    slices_ = slices;
+    inputs_.SetSlices(slices);
+    if (0 < slices_) {
+      action_ = reinterpret_cast<Action*>(
+        embb::base::Allocation::Allocate(
+          sizeof(Action)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        action_[ii] = Action();
+      }
+    }
+  }
 };
 
 } // namespace internal

@@ -40,6 +40,7 @@
 #include <embb_mtapi_action_t.h>
 #include <embb_mtapi_alloc.h>
 #include <embb_mtapi_queue_t.h>
+#include <embb_mtapi_group_t.h>
 
 
 /* ---- CLASS MEMBERS ------------------------------------------------------ */
@@ -78,8 +79,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_vhpf(
   embb_mtapi_node_t * node,
   embb_mtapi_thread_context_t * thread_context) {
   embb_mtapi_task_t * task = MTAPI_NULL;
-  mtapi_uint_t ii = 0;
-  mtapi_uint_t kk = 0;
+  mtapi_uint_t ii;
 
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != node);
@@ -102,6 +102,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_vhpf(
         */
         mtapi_uint_t context_index =
           (thread_context->worker_index + 1) % that->worker_count;
+        mtapi_uint_t kk;
         for (kk = 0;
           kk < that->worker_count - 1 && MTAPI_NULL == task;
           kk++) {
@@ -121,8 +122,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_lf(
   embb_mtapi_node_t * node,
   embb_mtapi_thread_context_t * thread_context) {
   embb_mtapi_task_t * task = MTAPI_NULL;
-  mtapi_uint_t prio = 0;
-  mtapi_uint_t kk = 0;
+  mtapi_uint_t prio;
 
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != node);
@@ -153,6 +153,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task_lf(
     prio++) {
     mtapi_uint_t context_index =
       (thread_context->worker_index + 1) % that->worker_count;
+    mtapi_uint_t kk;
     for (kk = 0;
       kk < that->worker_count - 1 && MTAPI_NULL == task;
       kk++) {
@@ -195,7 +196,7 @@ embb_mtapi_task_t * embb_mtapi_scheduler_get_next_task(
 
 embb_mtapi_thread_context_t * embb_mtapi_scheduler_get_current_thread_context(
   embb_mtapi_scheduler_t * that) {
-  mtapi_uint_t ii = 0;
+  mtapi_uint_t ii;
   embb_mtapi_thread_context_t * context = NULL;
 
   assert(MTAPI_NULL != that);
@@ -293,6 +294,8 @@ int embb_mtapi_scheduler_worker(void * arg) {
     /* check if there was work */
     if (MTAPI_NULL != task) {
       embb_mtapi_queue_t * local_queue = MTAPI_NULL;
+      embb_mtapi_group_t * local_group = MTAPI_NULL;
+      embb_mtapi_action_t * local_action = MTAPI_NULL;
 
       /* is task associated with a queue? */
       if (embb_mtapi_queue_pool_is_handle_valid(
@@ -300,6 +303,21 @@ int embb_mtapi_scheduler_worker(void * arg) {
         local_queue =
           embb_mtapi_queue_pool_get_storage_for_handle(
             node->queue_pool, task->queue);
+      }
+
+      /* is task associated with a group? */
+      if (embb_mtapi_group_pool_is_handle_valid(
+        node->group_pool, task->group)) {
+        local_group =
+          embb_mtapi_group_pool_get_storage_for_handle(
+            node->group_pool, task->group);
+      }
+
+      if (embb_mtapi_action_pool_is_handle_valid(
+        node->action_pool, task->action)) {
+        local_action =
+          embb_mtapi_action_pool_get_storage_for_handle(
+            node->action_pool, task->action);
       }
 
       switch (embb_atomic_load_int(&task->state)) {
@@ -328,7 +346,7 @@ int embb_mtapi_scheduler_worker(void * arg) {
         break;
 
       case MTAPI_TASK_CANCELLED:
-        /* set return value to canceled */
+        /* set return value to cancelled */
         task->error_code = MTAPI_ERR_ACTION_CANCELLED;
         if (embb_atomic_fetch_and_add_unsigned_int(
           &task->instances_todo, (unsigned int)-1) == 0) {
@@ -336,6 +354,12 @@ int embb_mtapi_scheduler_worker(void * arg) {
           if (MTAPI_NULL != local_queue) {
             embb_mtapi_queue_task_finished(local_queue);
           }
+          if (MTAPI_NULL != local_group) {
+            embb_mtapi_task_queue_push(&local_group->queue, task);
+          }
+        }
+        if (MTAPI_NULL != local_action) {
+          embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
         }
         break;
 
@@ -434,7 +458,7 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
   embb_mtapi_scheduler_t * that,
   embb_mtapi_scheduler_mode_t mode) {
   embb_mtapi_node_t* node = embb_mtapi_node_get_instance();
-  mtapi_uint_t ii = 0;
+  mtapi_uint_t ii;
 
   embb_mtapi_log_trace("embb_mtapi_scheduler_initialize() called\n");
 
@@ -456,6 +480,10 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
   that->worker_contexts = (embb_mtapi_thread_context_t*)
     embb_mtapi_alloc_allocate(
       sizeof(embb_mtapi_thread_context_t)*that->worker_count);
+  if (NULL == that->worker_contexts) {
+    return MTAPI_FALSE;
+  }
+  mtapi_boolean_t isinit = MTAPI_TRUE;
   for (ii = 0; ii < that->worker_count; ii++) {
     unsigned int core_num = 0;
     mtapi_uint_t ll = 0;
@@ -467,8 +495,11 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
       }
       core_num++;
     }
-    embb_mtapi_thread_context_initialize_with_node_worker_and_core(
+    isinit &= embb_mtapi_thread_context_initialize_with_node_worker_and_core(
       &that->worker_contexts[ii], node, ii, core_num);
+  }
+  if (!isinit) {
+    return MTAPI_FALSE;
   }
   for (ii = 0; ii < that->worker_count; ii++) {
     if (MTAPI_FALSE == embb_mtapi_thread_context_start(
@@ -481,22 +512,24 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
 }
 
 void embb_mtapi_scheduler_finalize(embb_mtapi_scheduler_t * that) {
-  mtapi_uint_t ii = 0;
+  mtapi_uint_t ii;
   embb_mtapi_log_trace("embb_mtapi_scheduler_finalize() called\n");
 
   assert(MTAPI_NULL != that);
 
-  /* finalize all workers */
-  for (ii = 0; ii < that->worker_count; ii++) {
-    embb_mtapi_thread_context_stop(&that->worker_contexts[ii]);
-  }
-  for (ii = 0; ii < that->worker_count; ii++) {
-    embb_mtapi_thread_context_finalize(&that->worker_contexts[ii]);
-  }
+  if (MTAPI_NULL != that->worker_contexts) {
+    /* finalize all workers */
+    for (ii = 0; ii < that->worker_count; ii++) {
+      embb_mtapi_thread_context_stop(&that->worker_contexts[ii]);
+    }
+    for (ii = 0; ii < that->worker_count; ii++) {
+      embb_mtapi_thread_context_finalize(&that->worker_contexts[ii]);
+    }
 
-  that->worker_count = 0;
-  embb_mtapi_alloc_deallocate(that->worker_contexts);
-  that->worker_contexts = MTAPI_NULL;
+    that->worker_count = 0;
+    embb_mtapi_alloc_deallocate(that->worker_contexts);
+    that->worker_contexts = MTAPI_NULL;
+  }
 }
 
 embb_mtapi_scheduler_t * embb_mtapi_scheduler_new() {
@@ -506,6 +539,7 @@ embb_mtapi_scheduler_t * embb_mtapi_scheduler_new() {
   if (MTAPI_NULL != that) {
     if (MTAPI_FALSE == embb_mtapi_scheduler_initialize(that)) {
       /* on error delete and return MTAPI_NULL */
+      embb_mtapi_scheduler_finalize(that);
       embb_mtapi_scheduler_delete(that);
       return MTAPI_NULL;
     }

@@ -35,6 +35,9 @@ class NetworkTaskTest : public partest::TestCase {
 
  private:
   void TestBasic();
+
+  void TestSimple();
+  void TestCancel();
 };
 
 #endif // MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_TASK_H_

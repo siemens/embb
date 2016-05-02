@@ -73,6 +73,8 @@ extern "C" {
    *
    * Keeps track of freed memory in debug mode.
    *
+   * \pre \c ptr is not NULL.
+   *
    * \threadsafe
    *
    * \see embb_get_bytes_allocated()
@@ -160,6 +162,8 @@ extern "C" {
    * embb_alloc_cache_aligned().
    *
    * Keeps track of freed memory in debug mode.
+   *
+   * \pre \c ptr is not NULL and was allocated by an aligned method.
    *
    * \threadsafe
    *

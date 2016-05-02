@@ -36,12 +36,13 @@ namespace dataflow {
 namespace internal {
 
 class Scheduler;
+class ClockListener;
 
-template <typename Type, int Slices>
+template <typename Type>
 class Out {
  public:
   typedef Signal<Type> SignalType;
-  typedef In<Type, Slices> InType;
+  typedef In<Type> InType;
 
   Out() {
   }
@@ -49,12 +50,6 @@ class Out {
   void Send(SignalType const & value) {
     for (size_t ii = 0; ii < targets_.size(); ii++) {
       targets_[ii]->Receive(value);
-    }
-  }
-
-  void SendInit(InitData * init_data) {
-    for (size_t ii = 0; ii < targets_.size(); ii++) {
-      targets_[ii]->ReceiveInit(init_data);
     }
   }
 
@@ -70,6 +65,18 @@ class Out {
 
   void operator >> (InType & input) {
     Connect(input);
+  }
+
+  bool IsConnected() const {
+    return targets_.size() > 0;
+  }
+
+  bool HasCycle(ClockListener * node) {
+    bool result = false;
+    for (size_t ii = 0; ii < targets_.size() && !result; ii++) {
+      result = result || targets_[ii]->HasCycle(node);
+    }
+    return result;
   }
 
  private:
