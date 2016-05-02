@@ -552,8 +552,9 @@ enum mtapi_node_attributes_enum {
                                             the node */
   MTAPI_NODE_MAX_ACTIONS_PER_JOB,      /**< maximum number of actions in a job
                                             allowed by the node */
-  MTAPI_NODE_MAX_PRIORITIES            /**< maximum number of priorities
+  MTAPI_NODE_MAX_PRIORITIES,           /**< maximum number of priorities
                                             allowed by the node */
+  MTAPI_NODE_REUSE_MAIN_THREAD         /**< reuse main thread as worker */
 };
 /** size of the \a MTAPI_NODE_CORE_AFFINITY attribute */
 #define MTAPI_NODE_CORE_AFFINITY_SIZE sizeof(embb_core_set_t)
@@ -577,6 +578,8 @@ enum mtapi_node_attributes_enum {
 #define MTAPI_NODE_MAX_ACTIONS_PER_JOB_SIZE sizeof(mtapi_uint_t)
 /** size of the \a MTAPI_NODE_MAX_PRIORITIES attribute */
 #define MTAPI_NODE_MAX_PRIORITIES_SIZE sizeof(mtapi_uint_t)
+/** size of the \a MTAPI_NODE_REUSE_MAIN_THREAD attribute */
+#define MTAPI_NODE_REUSE_MAIN_THREAD_SIZE sizeof(mtapi_boolean_t)
 
 /* example attribute value */
 #define MTAPI_NODE_TYPE_SMP 1
@@ -688,6 +691,8 @@ struct mtapi_node_attributes_struct {
   mtapi_uint_t max_actions_per_job;    /**< stores
                                             MTAPI_NODE_MAX_ACTIONS_PER_JOB */
   mtapi_uint_t max_priorities;         /**< stores MTAPI_NODE_MAX_PRIORITIES */
+  mtapi_boolean_t reuse_main_thread;   /**< stores
+                                            MTAPI_NODE_REUSE_MAIN_THREAD */
 };
 
 /**
