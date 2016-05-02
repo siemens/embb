@@ -46,7 +46,6 @@ void Node::Initialize(
     NodeAttributes attributes; // default attributes
     node_instance_ = embb::base::Allocation::New<Node>(
       domain_id, node_id, attributes);
-    Job job = node_instance_->GetJob(EMBB_MTAPI_FUNCTION_JOB_ID);
     node_instance_->function_action_ =
       node_instance_->CreateAction(EMBB_MTAPI_FUNCTION_JOB_ID, ActionFunction);
   }
