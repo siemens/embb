@@ -53,7 +53,7 @@ void NetworkSocketTest::TestBasic() {
 
   err = embb_mtapi_network_socket_initialize(&server_sock);
   PT_EXPECT(err != 0);
-  int port = 4700;
+  uint16_t port = 4700;
   do {
     port++;
     err = embb_mtapi_network_socket_bind_and_listen(
