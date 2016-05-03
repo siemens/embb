@@ -53,8 +53,12 @@ void NetworkSocketTest::TestBasic() {
 
   err = embb_mtapi_network_socket_initialize(&server_sock);
   PT_EXPECT(err != 0);
-  err = embb_mtapi_network_socket_bind_and_listen(
-    &server_sock, "127.0.0.1", 4711, 5);
+  uint16_t port = 4700;
+  do {
+    port++;
+    err = embb_mtapi_network_socket_bind_and_listen(
+      &server_sock, "127.0.0.1", port, 5);
+  } while (err == 0 && port < 4800);
   PT_EXPECT(err != 0);
 
   err = embb_mtapi_network_socket_select(&server_sock, 1, 1);
@@ -62,7 +66,7 @@ void NetworkSocketTest::TestBasic() {
 
   err = embb_mtapi_network_socket_initialize(&client_sock);
   PT_EXPECT(err != 0);
-  err = embb_mtapi_network_socket_connect(&client_sock, "127.0.0.1", 4711);
+  err = embb_mtapi_network_socket_connect(&client_sock, "127.0.0.1", port);
   PT_EXPECT(err != 0);
 
   err = embb_mtapi_network_socket_select(&server_sock, 1, -1);
