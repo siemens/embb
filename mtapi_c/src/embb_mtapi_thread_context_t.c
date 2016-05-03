@@ -54,6 +54,7 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
   that->core_num = core_num;
   that->priorities = node->attributes.max_priorities;
   that->is_initialized = MTAPI_FALSE;
+  that->is_main_thread = (worker_index == 0) ? node->attributes.reuse_main_thread : MTAPI_FALSE;
   embb_atomic_store_int(&that->run, 0);
 
   that->queue = (embb_mtapi_task_queue_t**)embb_mtapi_alloc_allocate(
@@ -121,17 +122,29 @@ mtapi_boolean_t embb_mtapi_thread_context_start(
   embb_core_set_add(&core_set, that->core_num);
 
   /* create thread */
-  err = embb_thread_create(&that->thread, &core_set, worker_func, that);
-  if (EMBB_SUCCESS != err) {
-    embb_mtapi_log_error(
-      "embb_mtapi_ThreadContext_initializeWithNodeAndCoreNumber() could not "
-      "create thread %d on core %d\n", that->worker_index, that->core_num);
-    return MTAPI_FALSE;
-  }
-
-  /* wait for worker to come up */
-  while (0 == embb_atomic_load_int(&that->run)) {
-    embb_thread_yield();
+  if (that->is_main_thread) {
+    /* reuse main thread */
+    that->thread = embb_thread_current();
+    err = embb_tss_create(&that->tss_id);
+    if (EMBB_SUCCESS != err) {
+      /* report error to scheduler */
+      embb_atomic_store_int(&that->run, -1);
+      return MTAPI_FALSE;
+    }
+    embb_tss_set(&(that->tss_id), that);
+    embb_atomic_store_int(&that->run, 1);
+  } else {
+    err = embb_thread_create(&that->thread, &core_set, worker_func, that);
+    if (EMBB_SUCCESS != err) {
+      embb_mtapi_log_error(
+        "embb_mtapi_ThreadContext_initializeWithNodeAndCoreNumber() could not "
+        "create thread %d on core %d\n", that->worker_index, that->core_num);
+      return MTAPI_FALSE;
+    }
+    /* wait for worker to come up */
+    while (0 == embb_atomic_load_int(&that->run)) {
+      embb_thread_yield();
+    }
   }
 
   if (0 < embb_atomic_load_int(&that->run)) {
@@ -146,7 +159,9 @@ void embb_mtapi_thread_context_stop(embb_mtapi_thread_context_t* that) {
   if (0 < embb_atomic_load_int(&that->run)) {
     embb_atomic_store_int(&that->run, 0);
     embb_condition_notify_one(&that->work_available);
-    embb_thread_join(&(that->thread), &result);
+    if (MTAPI_FALSE == that->is_main_thread) {
+      embb_thread_join(&(that->thread), &result);
+    }
   }
 }
 
@@ -158,6 +173,9 @@ void embb_mtapi_thread_context_finalize(embb_mtapi_thread_context_t* that) {
   embb_mtapi_log_trace("embb_mtapi_thread_context_finalize() called\n");
 
   if (that->is_initialized) {
+    if (that->is_main_thread) {
+      embb_tss_delete(&that->tss_id);
+    }
     embb_condition_destroy(&that->work_available);
     embb_mutex_destroy(&that->work_available_mutex);
   }
