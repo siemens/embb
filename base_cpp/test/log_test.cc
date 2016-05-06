@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,7 +28,7 @@
 #include <embb/base/c/internal/unused.h>
 #include <embb/base/log.h>
 
-#include <cstring>
+#include <string>
 
 namespace embb {
 namespace base {
@@ -38,7 +38,7 @@ LogTest::LogTest() {
   CreateUnit("Test all").Add(&LogTest::Test, this);
 }
 
-static char const * logged_message;
+static std::string logged_message;
 
 static void test_log_function(void * context, char const * msg) {
   EMBB_UNUSED(context);
@@ -48,91 +48,90 @@ static void test_log_function(void * context, char const * msg) {
 void LogTest::Test() {
   using embb::base::Log;
   char const * test_msg = "hello";
-  char const * null = 0;
 
   Log::SetLogFunction(0, test_log_function);
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_TRACE);
-  logged_message = null;
+  logged_message = "none";
   Log::Trace("chn", test_msg);
 #ifdef EMBB_DEBUG
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [TRACE] hello"));
+  PT_EXPECT(logged_message == "[chn] - [TRACE] hello");
 #else
-  PT_EXPECT_EQ(null, logged_message);
+  PT_EXPECT(logged_message == "none");
 #endif
-  logged_message = null;
+  logged_message = "none";
   Log::Info("chn", test_msg);
 #ifdef EMBB_DEBUG
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [INFO ] hello"));
+  PT_EXPECT(logged_message == "[chn] - [INFO ] hello");
 #else
-  PT_EXPECT_EQ(null, logged_message);
+  PT_EXPECT(logged_message == "none");
 #endif
-  logged_message = null;
+  logged_message = "none";
   Log::Warning("chn", test_msg);
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));
-  logged_message = null;
+  PT_EXPECT(logged_message == "[chn] - [WARN ] hello");
+  logged_message = "none";
   Log::Error("chn", test_msg);
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
+  PT_EXPECT(logged_message == "[chn] - [ERROR] hello");
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_INFO);
-  logged_message = null;
+  logged_message = "none";
   Log::Trace("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Info("chn", test_msg);
 #ifdef EMBB_DEBUG
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [INFO ] hello"));
+  PT_EXPECT(logged_message == "[chn] - [INFO ] hello");
 #else
-  PT_EXPECT_EQ(null, logged_message);
+  PT_EXPECT(logged_message == "none");
 #endif
-  logged_message = null;
+  logged_message = "none";
   Log::Warning("chn", test_msg);
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));
-  logged_message = null;
+  PT_EXPECT(logged_message == "[chn] - [WARN ] hello");
+  logged_message = "none";
   Log::Error("chn", test_msg);
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
+  PT_EXPECT(logged_message == "[chn] - [ERROR] hello");
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_WARNING);
-  logged_message = null;
+  logged_message = "none";
   Log::Trace("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Info("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Warning("chn", test_msg);
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [WARN ] hello"));
-  logged_message = null;
+  PT_EXPECT(logged_message == "[chn] - [WARN ] hello");
+  logged_message = "none";
   Log::Error("chn", test_msg);
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
+  PT_EXPECT(logged_message == "[chn] - [ERROR] hello");
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_ERROR);
-  logged_message = null;
+  logged_message = "none";
   Log::Trace("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Info("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Warning("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Error("chn", test_msg);
-  PT_EXPECT(0 == strcmp(logged_message, "[chn] - [ERROR] hello"));
+  PT_EXPECT(logged_message == "[chn] - [ERROR] hello");
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_NONE);
-  logged_message = null;
+  logged_message = "none";
   Log::Trace("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Info("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Warning("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
-  logged_message = null;
+  PT_EXPECT(logged_message == "none");
+  logged_message = "none";
   Log::Error("chn", test_msg);
-  PT_EXPECT_EQ(null, logged_message);
+  PT_EXPECT(logged_message == "none");
 }
 
 } // namespace test

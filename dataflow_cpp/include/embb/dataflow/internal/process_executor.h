@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -40,8 +40,8 @@ namespace internal {
 template <class Inputs, class Outputs>
 class ProcessExecutor;
 
-template <int Slices, typename I1, typename O1>
-class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1> > {
+template <typename I1, typename O1>
+class ProcessExecutor< Inputs<I1>, Outputs<O1> > {
  public:
   typedef embb::base::Function<void, I1 const &, O1 &> FunctionType;
 
@@ -49,8 +49,8 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1> & inputs,
-    Outputs<Slices, O1> & outputs) {
+    Inputs<I1> & inputs,
+    Outputs<O1> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       function_(
@@ -62,16 +62,12 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename O1, typename O2>
-class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2> > {
+template <typename I1, typename O1, typename O2>
+class ProcessExecutor< Inputs<I1>, Outputs<O1, O2> > {
  public:
   typedef embb::base::Function<void, I1 const &, O1 &, O2 &> FunctionType;
 
@@ -79,8 +75,8 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1> & inputs,
-    Outputs<Slices, O1, O2> & outputs) {
+    Inputs<I1> & inputs,
+    Outputs<O1, O2> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       O2 o2;
@@ -95,17 +91,12 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename O1, typename O2, typename O3>
-class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3> > {
+template <typename I1, typename O1, typename O2, typename O3>
+class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3> > {
  public:
   typedef embb::base::Function<void, I1 const &, O1 &, O2 &, O3 &>
     FunctionType;
@@ -114,8 +105,8 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1> & inputs,
-    Outputs<Slices, O1, O2, O3> & outputs) {
+    Inputs<I1> & inputs,
+    Outputs<O1, O2, O3> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       O2 o2;
@@ -133,19 +124,13 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-    outputs.template Get<2>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename O1, typename O2, typename O3,
+template <typename I1, typename O1, typename O2, typename O3,
   typename O4>
-class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3, O4> > {
+class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3, O4> > {
  public:
   typedef embb::base::Function<void, I1 const &, O1 &, O2 &, O3 &, O4 &>
     FunctionType;
@@ -154,8 +139,8 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3, O4> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1> & inputs,
-    Outputs<Slices, O1, O2, O3, O4> & outputs) {
+    Inputs<I1> & inputs,
+    Outputs<O1, O2, O3, O4> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       O2 o2;
@@ -176,19 +161,12 @@ class ProcessExecutor< Inputs<Slices, I1>, Outputs<Slices, O1, O2, O3, O4> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3, O4> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-    outputs.template Get<2>().SendInit(init_data);
-    outputs.template Get<3>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename O1>
-class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1> > {
+template <typename I1, typename I2, typename O1>
+class ProcessExecutor< Inputs<I1, I2>, Outputs<O1> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, O1 &>
     FunctionType;
@@ -197,8 +175,8 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2> & inputs,
-    Outputs<Slices, O1> & outputs) {
+    Inputs<I1, I2> & inputs,
+    Outputs<O1> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       function_(
@@ -211,16 +189,12 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename O1, typename O2>
-class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2> > {
+template <typename I1, typename I2, typename O1, typename O2>
+class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, O1 &, O2 &>
     FunctionType;
@@ -229,8 +203,8 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2> & inputs,
-    Outputs<Slices, O1, O2> & outputs) {
+    Inputs<I1, I2> & inputs,
+    Outputs<O1, O2> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       O2 o2;
@@ -246,18 +220,13 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename O1, typename O2,
+template <typename I1, typename I2, typename O1, typename O2,
   typename O3>
-class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2, O3> > {
+class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2, O3> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, O1 &, O2 &, O3 &>
     FunctionType;
@@ -266,8 +235,8 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2, O3> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2> & inputs,
-    Outputs<Slices, O1, O2, O3> & outputs) {
+    Inputs<I1, I2> & inputs,
+    Outputs<O1, O2, O3> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       O2 o2;
@@ -286,18 +255,12 @@ class ProcessExecutor< Inputs<Slices, I1, I2>, Outputs<Slices, O1, O2, O3> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-    outputs.template Get<2>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename I3, typename O1>
-class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1> > {
+template <typename I1, typename I2, typename I3, typename O1>
+class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, I3 const &, O1 &>
     FunctionType;
@@ -306,8 +269,8 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2, I3> & inputs,
-    Outputs<Slices, O1> & outputs) {
+    Inputs<I1, I2, I3> & inputs,
+    Outputs<O1> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       function_(
@@ -321,17 +284,13 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename I3, typename O1,
+template <typename I1, typename I2, typename I3, typename O1,
   typename O2>
-class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1, O2> > {
+class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1, O2> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, I3 const &,
     O1 &, O2 &> FunctionType;
@@ -340,8 +299,8 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1, O2> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2, I3> & inputs,
-    Outputs<Slices, O1, O2> & outputs) {
+    Inputs<I1, I2, I3> & inputs,
+    Outputs<O1, O2> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       O2 o2;
@@ -358,18 +317,13 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3>, Outputs<Slices, O1, O2> > {
     }
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename I1, typename I2, typename I3, typename I4,
+template <typename I1, typename I2, typename I3, typename I4,
   typename O1>
-class ProcessExecutor< Inputs<Slices, I1, I2, I3, I4>, Outputs<Slices, O1> > {
+class ProcessExecutor< Inputs<I1, I2, I3, I4>, Outputs<O1> > {
  public:
   typedef embb::base::Function<void, I1 const &, I2 const &, I3 const &,
     I4 const &, O1 &> FunctionType;
@@ -378,8 +332,8 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3, I4>, Outputs<Slices, O1> > {
 
   void Execute(
     int clock,
-    Inputs<Slices, I1, I2, I3, I4> & inputs,
-    Outputs<Slices, O1> & outputs) {
+    Inputs<I1, I2, I3, I4> & inputs,
+    Outputs<O1> & outputs) {
     if (inputs.AreNoneBlank(clock)) {
       O1 o1;
       function_(
@@ -392,10 +346,6 @@ class ProcessExecutor< Inputs<Slices, I1, I2, I3, I4>, Outputs<Slices, O1> > {
     } else {
       outputs.template Get<0>().Send(Signal<O1>(clock));
     }
-  }
-
-  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
   }
 
  private:

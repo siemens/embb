@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -173,10 +173,6 @@ AtomicTest::TestStressSwap::TestStressSwap(
   size_t number_threads, size_t number_iterations)
   : TestUnit("Swap Stress test for Atomics"), swap1_counter(1)
   , swap2_counter(2) {
-  bitsets[0] = std::bitset<ATOMIC_TESTS_ITERATIONS * 2 + 1>();
-  bitsets[1] = std::bitset<ATOMIC_TESTS_ITERATIONS * 2 + 1>();
-  bitsets[2] = std::bitset<ATOMIC_TESTS_ITERATIONS * 2 + 1>();
-
   PT_ASSERT(number_threads == 1);
   Pre(&TestStressSwap::Init, this);
 

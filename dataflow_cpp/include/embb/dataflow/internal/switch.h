@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,6 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SWITCH_H_
 #define EMBB_DATAFLOW_INTERNAL_SWITCH_H_
 
-#include <embb/dataflow/internal/action.h>
 #include <embb/dataflow/internal/signal.h>
 #include <embb/dataflow/internal/node.h>
 #include <embb/dataflow/internal/inputs.h>
@@ -37,16 +36,17 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-template <int Slices, typename Type>
+template <typename Type>
 class Switch
   : public Node
   , public ClockListener {
  public:
-  typedef Inputs<Slices, bool, Type> InputsType;
-  typedef Outputs<Slices, Type, Type> OutputsType;
+  typedef Inputs<bool, Type> InputsType;
+  typedef Outputs<Type, Type> OutputsType;
 
-  Switch() {
+  explicit Switch(Scheduler * sched) : inputs_() {
     inputs_.SetListener(this);
+    SetScheduler(sched);
   }
 
   virtual bool HasInputs() const {
@@ -78,10 +78,17 @@ class Switch
     }
   }
 
-  virtual void Init(InitData * init_data) {
-    SetScheduler(init_data->sched);
-    GetOutput<0>().SendInit(init_data);
-    GetOutput<1>().SendInit(init_data);
+  virtual bool IsFullyConnected() {
+    return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
+  }
+
+  virtual bool OnHasCycle(ClockListener * node) {
+    ClockListener * this_node = this;
+    if (this_node == node) {
+      return true;
+    } else {
+      return outputs_.HasCycle(node);
+    }
   }
 
   InputsType & GetInputs() {
@@ -110,20 +117,17 @@ class Switch
 
   virtual void OnClock(int clock) {
     //const int idx = clock % Slices;
-    if (!inputs_.AreAtClock(clock))
-      EMBB_THROW(embb::base::ErrorException,
-        "Some inputs are not at expected clock.")
+    assert(inputs_.AreAtClock(clock));
     Run(clock);
-  }
-
-  virtual void OnInit(InitData * init_data) {
-    Init(init_data);
   }
 
  private:
   InputsType inputs_;
   OutputsType outputs_;
-  Action action_[Slices];
+
+  virtual void SetSlices(int slices) {
+    inputs_.SetSlices(slices);
+  }
 };
 
 } // namespace internal

@@ -1,3 +1,3 @@
   Network::Source<std::string> read(
-    embb::base::MakeFunction(SourceFunction)
+    network, embb::base::MakeFunction(SourceFunction)
   );

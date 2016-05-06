@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -52,10 +52,10 @@ std::string with("hello");
 #include "dataflow/dataflow_sink_function-snippet.h"
 
 void RunDataflowLinear() {
+#include "dataflow/dataflow_make-snippet.h"
 #include "dataflow/dataflow_declare_source-snippet.h"
 #include "dataflow/dataflow_declare_replace-snippet.h"
 #include "dataflow/dataflow_declare_sink-snippet.h"
 #include "dataflow/dataflow_connect-snippet.h"
-#include "dataflow/dataflow_add-snippet.h"
 #include "dataflow/dataflow_run-snippet.h"
 }

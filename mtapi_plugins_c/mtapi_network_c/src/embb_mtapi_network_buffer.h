@@ -43,7 +43,7 @@ struct embb_mtapi_network_buffer_struct {
 
 typedef struct embb_mtapi_network_buffer_struct embb_mtapi_network_buffer_t;
 
-void embb_mtapi_network_buffer_initialize(
+int embb_mtapi_network_buffer_initialize(
   embb_mtapi_network_buffer_t * that,
   int capacity
 );

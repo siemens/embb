@@ -250,6 +250,17 @@ extern "C" {
 #endif
 
 
+/* ---- MCA ORGANIZATION IDS ----------------------------------------------- */
+
+#define MCA_ORG_ID_PSI 0 /* PolyCore Software, Inc. */
+#define MCA_ORG_ID_FSL 1 /* Freescale, Inc. */
+#define MCA_ORG_ID_MGC 2 /* Mentor Graphics, Corp. */
+#define MCA_ORG_ID_ADI 3 /* Analog Devices */
+#define MCA_ORG_ID_SIE 4 /* Siemens */
+#define MCA_ORG_ID_EMB 5 /* EMB2 project */
+#define MCA_ORG_ID_TBD 6 /* TBD */
+
+
 /* ---- BASIC DEFINITIONS -------------------------------------------------- */
 
 /** marks input parameters */
@@ -307,8 +318,22 @@ typedef mtapi_uint_t  mtapi_size_t;
  * \ingroup RUNTIME_INIT_SHUTDOWN
  */
 struct mtapi_info_struct {
-  unsigned int hardware_concurrency;   /**< number of CPU cores */
-  unsigned int used_memory;            /**< bytes of memory used by MTAPI */
+  mtapi_uint_t mtapi_version;          /**< The three last (rightmost) hex
+                                            digits are the minor number, and
+                                            those left of the minor number are
+                                            the major number. */
+  mtapi_uint_t organization_id;        /**< Implementation vendor or
+                                            organization ID. */
+  mtapi_uint_t implementation_version; /**< The three last (rightmost) hex
+                                            digits are the minor number, and
+                                            those left of the minor number are
+                                            the major number.*/
+  mtapi_uint_t number_of_domains;      /**< Number of domains allowed by the
+                                            implementation.*/
+  mtapi_uint_t number_of_nodes;        /**< Number of nodes allowed by the
+                                            implementation.*/
+  mtapi_uint_t hardware_concurrency;   /**< Number of CPU cores available. */
+  mtapi_uint_t used_memory;            /**< Bytes of memory used by MTAPI. */
 };
 
 /**
@@ -527,8 +552,9 @@ enum mtapi_node_attributes_enum {
                                             the node */
   MTAPI_NODE_MAX_ACTIONS_PER_JOB,      /**< maximum number of actions in a job
                                             allowed by the node */
-  MTAPI_NODE_MAX_PRIORITIES            /**< maximum number of priorities
+  MTAPI_NODE_MAX_PRIORITIES,           /**< maximum number of priorities
                                             allowed by the node */
+  MTAPI_NODE_REUSE_MAIN_THREAD         /**< reuse main thread as worker */
 };
 /** size of the \a MTAPI_NODE_CORE_AFFINITY attribute */
 #define MTAPI_NODE_CORE_AFFINITY_SIZE sizeof(embb_core_set_t)
@@ -552,6 +578,8 @@ enum mtapi_node_attributes_enum {
 #define MTAPI_NODE_MAX_ACTIONS_PER_JOB_SIZE sizeof(mtapi_uint_t)
 /** size of the \a MTAPI_NODE_MAX_PRIORITIES attribute */
 #define MTAPI_NODE_MAX_PRIORITIES_SIZE sizeof(mtapi_uint_t)
+/** size of the \a MTAPI_NODE_REUSE_MAIN_THREAD attribute */
+#define MTAPI_NODE_REUSE_MAIN_THREAD_SIZE sizeof(mtapi_boolean_t)
 
 /* example attribute value */
 #define MTAPI_NODE_TYPE_SMP 1
@@ -663,6 +691,8 @@ struct mtapi_node_attributes_struct {
   mtapi_uint_t max_actions_per_job;    /**< stores
                                             MTAPI_NODE_MAX_ACTIONS_PER_JOB */
   mtapi_uint_t max_priorities;         /**< stores MTAPI_NODE_MAX_PRIORITIES */
+  mtapi_boolean_t reuse_main_thread;   /**< stores
+                                            MTAPI_NODE_REUSE_MAIN_THREAD */
 };
 
 /**

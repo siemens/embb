@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,9 @@
 int embb_condition_wait_for(embb_condition_t* condition_var,
                             embb_mutex_t* mutex,
                             const embb_duration_t* duration) {
-  assert(condition_var != NULL);
-  assert(mutex != NULL);
+  if (condition_var == NULL || mutex == NULL) {
+    return EMBB_ERROR;
+  }
   embb_time_t time;
   int status = embb_time_in(&time, duration);
   if (status != EMBB_SUCCESS) {
@@ -46,27 +47,34 @@ int embb_condition_wait_for(embb_condition_t* condition_var,
 #ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 int embb_condition_init(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   InitializeConditionVariable(condition_var);
   return EMBB_SUCCESS;
 }
 
 int embb_condition_notify_one(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   WakeConditionVariable(condition_var);
   return EMBB_SUCCESS;
 }
 
 int embb_condition_notify_all(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   WakeAllConditionVariable(condition_var);
   return EMBB_SUCCESS;
 }
 
 int embb_condition_wait(embb_condition_t* condition_var,
                         embb_mutex_t* mutex) {
-  assert(condition_var != NULL);
-  assert(mutex != NULL);
+  if (condition_var == NULL || mutex == NULL) {
+    return EMBB_ERROR;
+  }
   if (SleepConditionVariableCS(condition_var, mutex, INFINITE)) {
     return EMBB_SUCCESS;
   }
@@ -75,9 +83,9 @@ int embb_condition_wait(embb_condition_t* condition_var,
 
 int embb_condition_wait_until(embb_condition_t* condition_var,
                               embb_mutex_t* mutex, const embb_time_t* time) {
-  assert(condition_var != NULL);
-  assert(mutex != NULL);
-  assert(time != NULL);
+  if (condition_var == NULL || mutex == NULL || time == NULL) {
+    return EMBB_ERROR;
+  }
   /* The Windows API needs a time duration, so we need to convert the given time
      by using the time now. */
   embb_time_t now;
@@ -103,7 +111,9 @@ int embb_condition_wait_until(embb_condition_t* condition_var,
 }
 
 int embb_condition_destroy(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   EMBB_UNUSED_IN_RELEASE(condition_var);
   return EMBB_SUCCESS;
 }
@@ -113,35 +123,42 @@ int embb_condition_destroy(embb_condition_t* condition_var) {
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
 int embb_condition_init(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   int result = pthread_cond_init(condition_var, NULL);
   return result == 0 ? EMBB_SUCCESS : EMBB_ERROR;
 }
 
 int embb_condition_notify_one(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   int result = pthread_cond_signal(condition_var);
   return result == 0 ? EMBB_SUCCESS : EMBB_ERROR;
 }
 
 int embb_condition_notify_all(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   int result = pthread_cond_broadcast(condition_var);
   return result == 0 ? EMBB_SUCCESS : EMBB_ERROR;
 }
 
 int embb_condition_wait(embb_condition_t* condition_var, embb_mutex_t* mutex) {
-  assert(condition_var != NULL);
-  assert(mutex != NULL);
+  if (condition_var == NULL || mutex == NULL) {
+    return EMBB_ERROR;
+  }
   int result = pthread_cond_wait(condition_var, mutex);
   return result == 0 ? EMBB_SUCCESS : EMBB_ERROR;
 }
 
 int embb_condition_wait_until(embb_condition_t* condition_var,
                               embb_mutex_t* mutex, const embb_time_t* time) {
-  assert(condition_var != NULL);
-  assert(mutex != NULL);
-  assert(time != NULL);
+  if (condition_var == NULL || mutex == NULL || time == NULL) {
+    return EMBB_ERROR;
+  }
   /* Convert EMBB time to Unix time format */
   struct timespec unix_time;
   unix_time.tv_sec = time->seconds;
@@ -157,7 +174,9 @@ int embb_condition_wait_until(embb_condition_t* condition_var,
 }
 
 int embb_condition_destroy(embb_condition_t* condition_var) {
-  assert(condition_var != NULL);
+  if (condition_var == NULL) {
+    return EMBB_ERROR;
+  }
   int status = pthread_cond_destroy(condition_var);
   if (status != 0) {
     return EMBB_ERROR;

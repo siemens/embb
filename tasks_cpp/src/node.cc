@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,7 +41,7 @@ namespace {
 
 static embb::tasks::Node * node_instance = NULL;
 #if TASKS_CPP_AUTOMATIC_INITIALIZE
-static embb::base::Mutex init_mutex;
+static embb_spinlock_t init_mutex = { { 0 } };
 #endif
 
 }
@@ -76,6 +76,12 @@ Node::Node(
       "mtapi::Node could not initialize mtapi");
   }
   mtapi_node_get_attribute(node_id, MTAPI_NODE_MAX_QUEUES, &queue_count_,
+    sizeof(queue_count_), &status);
+  assert(MTAPI_SUCCESS == status);
+  mtapi_node_get_attribute(node_id, MTAPI_NODE_MAX_GROUPS, &group_count_,
+    sizeof(group_count_), &status);
+  assert(MTAPI_SUCCESS == status);
+  mtapi_node_get_attribute(node_id, MTAPI_NODE_MAX_TASKS, &task_limit_,
     sizeof(queue_count_), &status);
   assert(MTAPI_SUCCESS == status);
   core_count_ = info.hardware_concurrency;
@@ -126,7 +132,7 @@ void Node::Initialize(
     mtapi_nodeattr_set(&attr, MTAPI_NODE_MAX_ACTIONS,
       &tmp, sizeof(tmp), &status);
     assert(MTAPI_SUCCESS == status);
-    tmp = 4;
+    // tmp = 4;
     mtapi_nodeattr_set(&attr, MTAPI_NODE_MAX_JOBS,
       &tmp, sizeof(tmp), &status);
     assert(MTAPI_SUCCESS == status);
@@ -207,13 +213,13 @@ bool Node::IsInitialized() {
 Node & Node::GetInstance() {
 #if TASKS_CPP_AUTOMATIC_INITIALIZE
   if (!IsInitialized()) {
-    init_mutex.Lock();
+    embb_spin_lock(&init_mutex);
     if (!IsInitialized()) {
       Node::Initialize(
         TASKS_CPP_AUTOMATIC_DOMAIN_ID, TASKS_CPP_AUTOMATIC_NODE_ID);
       atexit(Node::Finalize);
     }
-    init_mutex.Unlock();
+    embb_spin_unlock(&init_mutex);
   }
   return *node_instance;
 #else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,13 +36,11 @@ namespace embb {
 namespace dataflow {
 namespace internal {
 
-class Scheduler;
-
 template <class OUTPUTS>
 class SourceExecutor;
 
-template <int Slices, typename O1>
-class SourceExecutor< Outputs<Slices, O1> > {
+template <typename O1>
+class SourceExecutor< Outputs<O1> > {
  public:
   typedef embb::base::Function<bool, O1 &> FunctionType;
 
@@ -50,7 +48,7 @@ class SourceExecutor< Outputs<Slices, O1> > {
 
   bool Execute(
     int clock,
-    Outputs<Slices, O1> & outputs) {
+    Outputs<O1> & outputs) {
     O1 o1;
     bool result = function_(o1);
     if (result) {
@@ -59,16 +57,12 @@ class SourceExecutor< Outputs<Slices, O1> > {
     return result;
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename O1, typename O2>
-class SourceExecutor< Outputs<Slices, O1, O2> > {
+template <typename O1, typename O2>
+class SourceExecutor< Outputs<O1, O2> > {
  public:
   typedef embb::base::Function<bool, O1 &, O2 &> FunctionType;
 
@@ -76,7 +70,7 @@ class SourceExecutor< Outputs<Slices, O1, O2> > {
 
   bool Execute(
     int clock,
-    Outputs<Slices, O1, O2> & outputs) {
+    Outputs<O1, O2> & outputs) {
     O1 o1;
     O2 o2;
     bool result = function_(o1, o2);
@@ -87,17 +81,12 @@ class SourceExecutor< Outputs<Slices, O1, O2> > {
     return result;
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename O1, typename O2, typename O3>
-class SourceExecutor< Outputs<Slices, O1, O2, O3> > {
+template <typename O1, typename O2, typename O3>
+class SourceExecutor< Outputs<O1, O2, O3> > {
  public:
   typedef embb::base::Function<bool, O1 &, O2 &, O3 &> FunctionType;
 
@@ -105,7 +94,7 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3> > {
 
   bool Execute(
     int clock,
-    Outputs<Slices, O1, O2, O3> & outputs) {
+    Outputs<O1, O2, O3> & outputs) {
     O1 o1;
     O2 o2;
     O3 o3;
@@ -118,18 +107,12 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3> > {
     return result;
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-    outputs.template Get<2>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename O1, typename O2, typename O3, typename O4>
-class SourceExecutor< Outputs<Slices, O1, O2, O3, O4> > {
+template <typename O1, typename O2, typename O3, typename O4>
+class SourceExecutor< Outputs<O1, O2, O3, O4> > {
  public:
   typedef embb::base::Function<bool, O1 &, O2 &, O3 &, O4 &> FunctionType;
 
@@ -137,7 +120,7 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3, O4> > {
 
   bool Execute(
     int clock,
-    Outputs<Slices, O1, O2, O3, O4> & outputs) {
+    Outputs<O1, O2, O3, O4> & outputs) {
     O1 o1;
     O2 o2;
     O3 o3;
@@ -152,20 +135,13 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3, O4> > {
     return result;
   }
 
-  void Init(InitData * init_data, Outputs<Slices, O1, O2, O3, O4> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-    outputs.template Get<2>().SendInit(init_data);
-    outputs.template Get<3>().SendInit(init_data);
-  }
-
  private:
   FunctionType function_;
 };
 
-template <int Slices, typename O1, typename O2, typename O3, typename O4,
+template <typename O1, typename O2, typename O3, typename O4,
   typename O5>
-class SourceExecutor< Outputs<Slices, O1, O2, O3, O4, O5> > {
+class SourceExecutor< Outputs<O1, O2, O3, O4, O5> > {
  public:
   typedef embb::base::Function<bool, O1 &, O2 &, O3 &, O4 &, O5 &> FunctionType;
 
@@ -173,7 +149,7 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3, O4, O5> > {
 
   bool Execute(
     int clock,
-    Outputs<Slices, O1, O2, O3, O4, O5> & outputs) {
+    Outputs<O1, O2, O3, O4, O5> & outputs) {
     O1 o1;
     O2 o2;
     O3 o3;
@@ -188,15 +164,6 @@ class SourceExecutor< Outputs<Slices, O1, O2, O3, O4, O5> > {
       outputs.template Get<4>().Send(Signal<O5>(clock, o5));
     }
     return result;
-  }
-
-  void Init(
-    InitData * init_data, Outputs<Slices, O1, O2, O3, O4, O5> & outputs) {
-    outputs.template Get<0>().SendInit(init_data);
-    outputs.template Get<1>().SendInit(init_data);
-    outputs.template Get<2>().SendInit(init_data);
-    outputs.template Get<3>().SendInit(init_data);
-    outputs.template Get<4>().SendInit(init_data);
   }
 
  private:

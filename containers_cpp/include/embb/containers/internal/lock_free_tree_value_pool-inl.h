@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -113,14 +113,17 @@ allocate_rec(int node, Type& element) {
     int pool_index = NodeIndexToPoolIndex(node);
 
     Type expected = pool_[pool_index];
-    if (expected == Undefined)
+    if (expected == Undefined) {
+      element = Type();
       return -1;
+    }
 
     if (pool_[pool_index].CompareAndSwap(expected, Undefined)) {
       element = expected;
       return pool_index;
     }
 
+    element = Type();
     return -1;
   }
 
@@ -133,8 +136,10 @@ allocate_rec(int node, Type& element) {
   do {
     current = tree_[node];
     desired = current - 1;
-    if (desired < 0)
+    if (desired < 0) {
+      element = Type();
       return -1;
+    }
   } while (!tree_[node].CompareAndSwap(current, desired));
 
   int leftResult = allocate_rec(GetLeftChildIndex(node), element);

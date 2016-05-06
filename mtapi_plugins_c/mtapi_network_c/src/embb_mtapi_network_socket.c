@@ -71,13 +71,6 @@ int embb_mtapi_network_socket_bind_and_listen(
   uint16_t port,
   uint16_t max_connections) {
   struct sockaddr_in in_addr;
-  int reuseaddr_on = 1;
-
-  // addr reuse
-  if (SOCKET_ERROR == setsockopt(that->handle, SOL_SOCKET, SO_REUSEADDR,
-    (const char *)&reuseaddr_on, sizeof(reuseaddr_on))) {
-    return 0;
-  }
 
   // bind & listen
   memset(&in_addr, 0, sizeof(in_addr));
@@ -123,7 +116,8 @@ int embb_mtapi_network_socket_connect(
   if (SOCKET_ERROR == connect(that->handle, (struct sockaddr *)&addr,
     sizeof(addr))) {
 #ifdef _WIN32
-    if (WSAEWOULDBLOCK != WSAGetLastError())
+    int err = WSAGetLastError();
+    if (WSAEWOULDBLOCK != err)
 #else
     if (EAGAIN != errno)
 #endif

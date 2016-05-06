@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -88,6 +88,8 @@ int embb_time_in(
 
 /**
  * Compares two time points.
+ *
+ * \pre \c lhs and \c rhs are not NULL and properly initialized.
  *
  * \return -1 if \c lhs < \c rhs \n
  *         0 if \c lhs == \c rhs \n

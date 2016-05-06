@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,54 +41,83 @@ namespace internal {
 
 class Scheduler;
 
-template <typename, int>
+template <typename>
 class Out;
 
-template <typename Type, int Slices>
+template <typename Type>
 class In {
  public:
   typedef Signal<Type> SignalType;
 
-  In() : connected_(false) {}
+  In() : values_(NULL), connected_(false), slices_(0) {}
+
+  ~In() {
+    if (NULL != values_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        values_[ii].~SignalType();
+      }
+      embb::base::Allocation::Free(values_);
+    }
+  }
 
   SignalType const & GetSignal(int clock) const {
-    return values_[clock % Slices];
+    return values_[clock % slices_];
   }
 
   Type GetValue(int clock) const {
     SignalType const & signal = GetSignal(clock);
-    if (signal.IsBlank())
-      EMBB_THROW(embb::base::ErrorException,
-        "Signal is blank, cannot get a value.")
+    assert(!signal.IsBlank());
     return signal.GetValue();
   }
 
   bool IsConnected() const { return connected_; }
   void SetConnected() { connected_ = true; }
 
+  bool HasCycle(ClockListener * node) {
+    return listener_->OnHasCycle(node);
+  }
+
+  void SetSlices(int slices) {
+    if (0 < slices_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        values_[ii].~SignalType();
+      }
+      embb::base::Allocation::Free(values_);
+      values_ = NULL;
+    }
+    slices_ = slices;
+    if (0 < slices_) {
+      values_ = reinterpret_cast<SignalType*>(
+        embb::base::Allocation::Allocate(
+          sizeof(SignalType)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        new (&values_[ii]) SignalType();
+      }
+    }
+  }
+
   void SetListener(ClockListener * listener) { listener_ = listener; }
 
   void Clear(int clock) {
-    const int idx = clock % Slices;
+    const int idx = clock % slices_;
     values_[idx].Clear();
   }
 
-  friend class Out<Type, Slices>;
+  friend class Out<Type>;
 
  private:
-  SignalType values_[Slices];
+  SignalType * values_;
   ClockListener * listener_;
   bool connected_;
+  int slices_;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
   embb::base::Spinlock lock_;
   std::vector<SignalType> history_;
 #endif
 
   void Receive(SignalType const & value) {
-    const int idx = value.GetClock() % Slices;
-    if (values_[idx].GetClock() >= value.GetClock())
-      EMBB_THROW(embb::base::ErrorException,
-        "Received signal does not increase clock.");
+    const int idx = value.GetClock() % slices_;
+    assert(values_[idx].GetClock() < value.GetClock());
     values_[idx] = value;
     listener_->OnClock(value.GetClock());
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
@@ -96,10 +125,6 @@ class In {
     history_.push_back(value);
     lock_.Unlock();
 #endif
-  }
-
-  void ReceiveInit(InitData * init_data) {
-    listener_->OnInit(init_data);
   }
 };
 

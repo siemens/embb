@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -150,7 +150,7 @@ int embb_mutex_unlock(
 /**
  * Destroys a mutex and frees its resources.
  *
- * \pre \c mutex has been initialized
+ * \pre \c mutex is initialized and is not NULL.
  * \post \c mutex is uninitialized
  * \notthreadsafe
  * \see embb_mutex_init()
@@ -233,7 +233,7 @@ int embb_spin_unlock(
 /**
  * Destroys a spinlock and frees its resources.
  *
- * \pre \c spinlock has been initialized
+ * \pre \c spinlock is initialized and is not NULL.
  * \post \c spinlock is uninitialized
  * \notthreadsafe
  * \see embb_spin_init()
