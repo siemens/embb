@@ -1,6 +1,91 @@
 Embedded Multicore Building Blocks (EMB²)
 =========================================
 
+
+Version 0.4.0
+-------------
+
+### Features:
+  - Added C++ wrapper and tests for logging facilities
+
+### Changes and improvements:
+* Base:
+  - Changed assertions on user input into checks with error code return
+  - Improved checks and documentation in time, duration, and log
+  - Added exceptions when errors occur that depend on user input
+  - Added volatile keyword to member of internal atomic struct
+  - Changed spin lock implementaion to yield every 1024 spins
+* MTAPI:
+  - Created defines for MTAPI version
+  - Added missing fields in mtapi_info_t structure, in particular organization ID
+  - Changed reporting of number of domains and nodes to "unlimited"
+  - Changed group deleted and task state attributes to atomic
+  - Enabled reuse of main thread, which is configurable via node attributes
+  - Set result to MTAPI_NULL on error in mtapi_group_wait_any
+  - Network plugin:
+    - Disabled adress reuse for listening socket
+	- Solved problem with port reuse on Linux
+    - Set values to zero on failure for buffer pop operations
+	- Improved protocol for better error handling
+	- Changed signaling of task completion to atomic
+	- Introduced tagging of operations
+	- Improved task cancellation support
+	- Changed sending of result messages to complete ones only
+* Tasks:
+  - Added function to query the maximum number of queues
+  - Added function to query the task limit
+  - Changed initalization in the implementaion of ExecutionPolicy
+  - Made creation of groups and queues thread-safe as documented
+* Dataflow:
+  - Added connection chain test
+  - Added connection checks in outputs
+  - Added check for cycles in graph
+  - Added default token count to network
+  - Changed internal exceptions to assertions
+  - Changed return type of operator >> to allow for connection chains
+  - Changed semantics of source process (emit tokens only if function returns true)
+  - Changed initalization so that the number of slices can now be set at runtime
+  - Added automatic computation of maximum number of slices
+  - Changed done sync to atomics
+  - Removed Network::Make for simpler usage
+  - Added Network:IsValid to check network for errors
+* Containers:
+  - Added missing PT_ASSERT calls in hazard pointer test
+* All:
+  - Resolved several Codesonar warnings
+
+### Bug fixes:
+* Base:
+  - Fixed uninitialized variables in failure cases
+  - Changed implementation of atomic store on Windows to ensure sequential consistency
+  - Fixed memory leak in test for thread-specific storage
+* MTAPI:
+  - Fixed bug causing mtapi_task_wait to hang when a task was cancelled before it was running
+  - Fixed potential null pointer dereferences
+  - Fixed issue with AMD APP SDK in OpenCL plugin
+  - Fixed race condition in OpenCL plugin
+* Dataflow:
+  - Fixed bug with global network instances in MTAPI scheduler
+  - Fixed initalization of input
+  - Fixed memory leaks
+* Containers:
+  - Fixed uninitialized variables in test
+
+### Build system:
+- Moved MTAPI plugins to folder mtapi_plugins_c
+- Removed dependency on installed OpenCL SDK, adapted test to succeed when OpenCL is unavailable
+- Resolved MSVC warnings and build problem
+
+### Documentation:
+- Changed documentation to reflect that atomics are initialized to zero by default
+- Improved documentation for functions without error code return
+- Updated year in license headers and tutorial
+- Updated documentation of spinlock implementations
+- Changed encoding of COPYING.md file to UTF-8
+- Adapted tutorial and examples to reflect changes to dataflow_cpp
+- Revised README.md to reflect new directory structure and removed UTF8 BOM
+
+
 Version 0.3.2
 -------------
 
@@ -63,34 +148,32 @@ Version 0.3.0
 -------------
 
 ### Features:
-- mtapi_c:
-    - Implemented action plugin API
-    - Implemented load balancing for distributed/heterogeneous systems
-    - Implemented OpenCL action plugin
-    - Implemented network action plugin
-- mtapi_cpp:
-    - Added support for distributed/heterogeneous systems
+* MTAPI:
+  - Implemented action plugin API
+  - Implemented load balancing for distributed/heterogeneous systems
+  - Implemented OpenCL action plugin
+  - Implemented network action plugin
+  - Added support for distributed/heterogeneous systems
 
 ### Changes and improvements:
-- mtapi_c:
-    - Added multi-instance task support and test
-    - Improved notification of worker threads
-- mtapi_cpp:
-    - Moved interface for homogeneous systems to tasks_cpp
-- base_cpp:
+* Base:
     - Moved tick types to internal namespace and added duration typedefs
-- dataflow_cpp:
-    - Removed spinlocks
-    - Simplified registration of processes (only sources need to be added)
-    - Increased number of task queues in unit test
-    - Added assertion in unit test
-    - Improved exception handling
-    - Removed stray include
-    - Refactored to use tasks_cpp
-- algorithms_cpp:
-    - Restricted partitioners to random access iterators
-    - Added unit tests for partitioners on large ranges
-    - Refactored to use tasks_cpp
+* MTAPI:
+  - Added multi-instance task support and test
+  - Improved notification of worker threads
+  - Moved interface for homogeneous systems to tasks_cpp
+* Algorithms:
+  - Restricted partitioners to random access iterators
+  - Added unit tests for partitioners on large ranges
+  - Refactored to use tasks_cpp
+* Dataflow:
+  - Removed spinlocks
+  - Simplified registration of processes (only sources need to be added)
+  - Increased number of task queues in unit test
+  - Added assertion in unit test
+  - Improved exception handling
+  - Removed stray include
+  - Refactored to use tasks_cpp
 
 ### Bug fixes:
 - Fixed unit test for dataflow_cpp
