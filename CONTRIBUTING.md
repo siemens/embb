@@ -39,9 +39,9 @@ EMB² consists of several components (modules) which are organized as follows:
 There are two predefined branches in the Git repository:
 
 - ```master```: This branch contains the latest stable version of EMB², i.e., the source code has been reviewed and all tests pass successfully.
-- ```development```: Implementation takes place in this branch. In contrast to feature branches (see below), the source code in this branch has to be compilable. When the new features are stable, the development branch is merged back into the master branch.
+- ```development```: Implementation takes place in this branch. In contrast to feature branches (see below), the source code in this branch has to be compilable. When new features are stable, the development branch is merged back into the master branch.
 
-In addition to these two branches, there may be arbitrarily many feature branches for implementing new functionality of fixing bugs. There are no requirements on the source code in these branches. After finishing the implementation, a feature branch is merged into the development branch (make sure that the source code is still compilable). For merging, use ```git pull```, i.e., a fetch followed by a merge, so that Git is able to track the origin of changes.
+In addition to these two branches, there may be arbitrarily many feature branches for implementing new functionality or fixing bugs. There are no requirements on the source code in these branches. After finishing the implementation, a feature branch is merged into the development branch (make sure that the source code is still compilable afterwards). For merging, use ```git pull```, i.e., a fetch followed by a merge, so that Git is able to track the origin of changes.
 
 ### Contributing
 
@@ -73,11 +73,10 @@ operation, i.e., in the methods for pushing and popping elements.
 
 ### Tool Support
 
-- All source files in the repository must have LF (Unix) line endings. Git can take care of this:
+- All source files in the repository must have LF (Unix) line endings. Git can take care of this (using the following option, newly checked-in files and changes to them will automatically be converted from CRLF to LF if necessary):
 ```
   git config --global core.autocrlf input
 ```
-  If this option is set, newly checked-in files (and changes to them) will automatically be converted from CRLF to LF if necessary.
 - For the C++ parts of EMB², we follow [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html) which can be checked using the [cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) tool. However, we ignore some rules as they are not applicable or yield false results for this project. For example, we respect the include order of the Google style guide, but use <> instead of "" for project includes (see above). To check whether your code adheres to the style guide, use the ```run_cpplint.sh``` script containted in the ```scripts``` folder. You may use [clang-format](http://clang.llvm.org/docs/ClangFormat.html) with option ```-style=Google``` to pretty print your code but be aware that line breaking of Doxygen comments may not work properly.
 - Moreover, we regularly check the code using [Cppcheck](http://cppcheck.sourceforge.net/), a light-weight static analysis tool for C/C++. To run Cppcheck on all files in a certain directory, call it as follows:
 ```
