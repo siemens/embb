@@ -11,14 +11,15 @@ Version 0.4.0
 - Reworked dataflow_cpp interface for easier usage
 
 ### Changes and improvements:
-- Improved network plugin with better error checking and task cancelation support
-- dataflow_cpp network token count is now set at runtime
+- Improved network plugin with better error checking and task cancellation support
+- Revised dataflow_cpp so that network token count can now be set at runtime
 - Added automatic determination of token count to dataflow_cpp
-- All C interface functions check pointers for NULL
-- mtapi_info_t conforms to the standard
+- Added checks for NULL pointers in C interface functions
+- Extended mtapi_info_t to conform to the standard
 - Fixed CodeSonar warnings across the code base
-- Spinlocks yield every 1024 spins now
+- Changed spinlock implementation to yield every 1024 spins now
 - Changed asserts on interface visible parameters to execeptions
+- Enabled reuse of main thread, which is configurable via node attributes
 
 ### Bug fixes:
 - Fixed problem causing low performance on the Jetson TK1 board
@@ -28,12 +29,13 @@ Version 0.4.0
 - Fixed memory leaks in tests
 
 ### Build system:
-- Dependency on an installed OpenCL SDK was removed
+- Removed dependency on an installed OpenCL SDK
 - Moved all MTAPI plugins into folder mtapi_plugins_c
+- Resolved MSVC warnings and build problem
 
 ### Documentation:
 - Updated README to reflect new directory structure
-- Updated DoxyGen documentation of dataflow_cpp for the improved interface
+- Updated Doxygen documentation of dataflow_cpp for the improved interface
 - Updated tutorial and examples to show the usage of dataflow_cpp
 
 
