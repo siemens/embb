@@ -20,7 +20,7 @@ EMB² consists of several components (modules) which are organized as follows:
   CMakeCommon/              -- Custom CMake functions
   doc/                      -- Documentation (tutorial, reference manual, examples)
   scripts/                  -- Scripts for packaging, running tests, ...
-  COMPONENT_A/              -- Component name (e.g., 'base_c' or 'mtapi_cpp'
+  COMPONENT_A/              -- Component name (e.g., 'base_c' or 'mtapi_cpp')
     CMakeLists.txt          -- Buildfile for component, called from main buildfile
     include/                -- Include directory of the component
       embb/                 -- Users shall only include files below this directory
@@ -138,7 +138,7 @@ The following sequence of descriptions and commands shall be obeyed to achieve a
 2. More detailed description [optional]
 3. ```\pre```: Preconditions that must hold when calling the function [optional]
 4. ```\post```: Postconditions that holld after calling the function [optional]
-5. ```\return```: Description of return value description [optional]
+5. ```\return```: Description of return value [optional]
 6. ```\throws```: Thrown exceptions (repeat for each exception) [optional]
 7. ```\memory```: Dynamic memory allocation (see above) [optional]
 8. ```\notthreadsafe```, ```\threadsafe```, ```\lockfree```, ```\waitfree```: Thread safety and progress guarantees (see above)
@@ -191,7 +191,7 @@ class Queue {
 How to port EMB²
 ----------------
 
-EMB² is easily portable to platforms unsupported so far. Almost all platform specific code is located in the base_c and base_cpp directories, and platform specific code is fenced using EMBB_PLATFORM_* defines.
+EMB² is easily portable to platforms unsupported so far. Almost all platform specific code is located in the ```base_c``` and ```base_cpp``` directories, and platform specific code is fenced using ```EMBB_PLATFORM_*``` defines.
 
 To distinguish between compilers, EMB² currently uses the following defines:
 
@@ -212,6 +212,6 @@ Threading APIs are switched by:
 - EMBB_PLATFORM_THREADING_WINTHREADS
 - EMBB_PLATFORM_THREADING_POSIXTHREADS
 
-Please use these defines for new platform specific code. If additional defines are needed, they can be included in the config.h or cmake_config.h.in files.
+Please use these defines for new platform specific code. If additional defines are needed, they can be included in the ```config.h``` or ```cmake_config.h.in``` files.
 
 A list of macros to check the underlying platform, compiler versions, etc. can be found here: http://sourceforge.net/p/predef/wiki/Home/
