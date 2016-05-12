@@ -41,11 +41,11 @@ There are two predefined branches in the Git repository:
 - ```master```: This branch contains the latest stable version of EMB², i.e., the source code has been reviewed and all tests pass successfully.
 - ```development```: Implementation takes place in this branch. In contrast to feature branches (see below), the source code in this branch has to be compilable. When new features are stable, the development branch is merged back into the master branch.
 
-In addition to these two branches, there may be arbitrarily many feature branches for implementing new functionality or fixing bugs. There are no requirements on the source code in these branches. After finishing the implementation, a feature branch is merged into the development branch (make sure that the source code is still compilable afterwards). For merging, use ```git pull```, i.e., a fetch followed by a merge, so that Git is able to track the origin of changes.
+In addition to these two branches, there may be arbitrarily many feature branches for implementing new functionality or fixing bugs. There are no requirements on the source code in these branches. After finishing the implementation, a feature branch is merged into the development branch (make sure that the source code is still compilable afterwards).
 
 ### Contributing
 
-Bug fixes, extensions, etc. can be contributed as pull requests via GutHub or as patches via the development mailing list (mailto:embb-dev@googlegroups.com). If possible, please refer to a current snapshot of the master branch.
+Bug fixes, extensions, etc. can be contributed as pull requests via GitHub or as patches via the development mailing list (mailto:embb-dev@googlegroups.com). If possible, please refer to a current snapshot of the master branch.
 
 
 Coding Guidelines
