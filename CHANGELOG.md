@@ -1,6 +1,44 @@
 Embedded Multicore Building Blocks (EMB²)
 =========================================
 
+
+Version 0.4.0
+-------------
+
+### Features:
+- Added consistency checking functionality to dataflow
+- Added C++ wrapper for base_c logging functions
+- Reworked dataflow_cpp interface for easier usage
+
+### Changes and improvements:
+- Improved network plugin with better error checking and task cancellation support
+- Revised dataflow_cpp so that network token count can now be set at runtime
+- Added automatic determination of token count to dataflow_cpp
+- Added checks for NULL pointers in C interface functions
+- Extended mtapi_info_t to conform to the standard
+- Fixed CodeSonar warnings across the code base
+- Changed spinlock implementation to yield every 1024 spins now
+- Changed asserts on interface visible parameters to execeptions
+- Enabled reuse of main thread, which is configurable via node attributes
+
+### Bug fixes:
+- Fixed problem causing low performance on the Jetson TK1 board
+- Fixed bug in mtapi_c causing a task wait to hang
+- Fixes issue with the AMD APP SDK in the OpenCL plugin
+- Fixed problem with automatic initialization in tasks_cpp
+- Fixed memory leaks in tests
+
+### Build system:
+- Removed dependency on an installed OpenCL SDK
+- Moved all MTAPI plugins into folder mtapi_plugins_c
+- Resolved MSVC warnings and build problem
+
+### Documentation:
+- Updated README to reflect new directory structure
+- Updated Doxygen documentation of dataflow_cpp for the improved interface
+- Updated tutorial and examples to show the usage of dataflow_cpp
+
+
 Version 0.3.2
 -------------
 
@@ -63,34 +101,32 @@ Version 0.3.0
 -------------
 
 ### Features:
-- mtapi_c:
-    - Implemented action plugin API
-    - Implemented load balancing for distributed/heterogeneous systems
-    - Implemented OpenCL action plugin
-    - Implemented network action plugin
-- mtapi_cpp:
-    - Added support for distributed/heterogeneous systems
+* MTAPI:
+  - Implemented action plugin API
+  - Implemented load balancing for distributed/heterogeneous systems
+  - Implemented OpenCL action plugin
+  - Implemented network action plugin
+  - Added support for distributed/heterogeneous systems
 
 ### Changes and improvements:
-- mtapi_c:
-    - Added multi-instance task support and test
-    - Improved notification of worker threads
-- mtapi_cpp:
-    - Moved interface for homogeneous systems to tasks_cpp
-- base_cpp:
+* Base:
     - Moved tick types to internal namespace and added duration typedefs
-- dataflow_cpp:
-    - Removed spinlocks
-    - Simplified registration of processes (only sources need to be added)
-    - Increased number of task queues in unit test
-    - Added assertion in unit test
-    - Improved exception handling
-    - Removed stray include
-    - Refactored to use tasks_cpp
-- algorithms_cpp:
-    - Restricted partitioners to random access iterators
-    - Added unit tests for partitioners on large ranges
-    - Refactored to use tasks_cpp
+* MTAPI:
+  - Added multi-instance task support and test
+  - Improved notification of worker threads
+  - Moved interface for homogeneous systems to tasks_cpp
+* Algorithms:
+  - Restricted partitioners to random access iterators
+  - Added unit tests for partitioners on large ranges
+  - Refactored to use tasks_cpp
+* Dataflow:
+  - Removed spinlocks
+  - Simplified registration of processes (only sources need to be added)
+  - Increased number of task queues in unit test
+  - Added assertion in unit test
+  - Improved exception handling
+  - Removed stray include
+  - Refactored to use tasks_cpp
 
 ### Bug fixes:
 - Fixed unit test for dataflow_cpp

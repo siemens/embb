@@ -1,15 +1,15 @@
 # Copyright (c) 2014-2016, Siemens AG. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice,
 # this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 # this list of conditions and the following disclaimer in the documentation
 # and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,8 +27,8 @@ cmake_minimum_required (VERSION 2.8.9)
 
 # Version number
 set (EMBB_BASE_VERSION_MAJOR 0)
-set (EMBB_BASE_VERSION_MINOR 3)
-set (EMBB_BASE_VERSION_PATCH 2)
+set (EMBB_BASE_VERSION_MINOR 4)
+set (EMBB_BASE_VERSION_PATCH 0)
 
 # Fix compilation for CMake versions >= 3.1
 #

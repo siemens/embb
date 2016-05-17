@@ -44,7 +44,6 @@ namespace base {
  * \{
  * \par Description
  *
- 12345678901234567890123456789012345678901234567890123456789012345678901234567890
  * The mutex concept is used for thread synchronization and provides a lock.
  * At any point in time, only one thread can exclusively hold the lock and
  * the lock is held until the thread explicitly releases it.

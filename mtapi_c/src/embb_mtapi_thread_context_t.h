@@ -68,6 +68,7 @@ struct embb_mtapi_thread_context_struct {
   embb_atomic_int run;
   mtapi_status_t status;
   mtapi_boolean_t is_initialized;
+  mtapi_boolean_t is_main_thread;
 };
 
 #include <embb_mtapi_thread_context_t_fwd.h>
