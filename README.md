@@ -59,7 +59,7 @@ Subscription:
 
 Contact:
   - embb.info@gmail.com or
-  - tobias.schuele@siemens.com
+  - tobias.schuele@siemens.com, sebnem.rusitschka@siemens.com
 
 
 License
