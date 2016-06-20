@@ -171,8 +171,14 @@ class Node {
     return task_limit_;
   }
 
+  /**
+   * Starts a new Task.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
   Task Start(
-    SMPFunction const & func
+    SMPFunction const & func           /**< Function to use for the task. */
     ) {
     Job job = GetJob(EMBB_MTAPI_FUNCTION_JOB_ID);
     void * res = NULL;
@@ -180,9 +186,16 @@ class Node {
       job, embb::base::Allocation::New<SMPFunction>(func), res);
   }
 
+  /**
+   * Starts a new Task with a given affinity and priority.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
   Task Start(
-    SMPFunction const & func,
-    ExecutionPolicy const & policy
+    SMPFunction const & func,          /**< Function to use for the task. */
+    ExecutionPolicy const & policy     /**< Affinity and priority of the
+                                            task. */
   ) {
     Job job = GetJob(EMBB_MTAPI_FUNCTION_JOB_ID);
     void * res = NULL;
