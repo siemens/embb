@@ -99,6 +99,10 @@ class ConditionVariable {
    * \threadsafe
    *
    * \see NotifyOne(), NotifyAll()
+   *
+   * \note When Pthreads is used as the underlying library, this function may issue
+   *       spurious wake ups to a waiting thread. Therefore it is recommended to
+   *       use a loop checking the condition after a wakeup.
    */
   void Wait(
     UniqueLock<Mutex>& lock
@@ -118,6 +122,10 @@ class ConditionVariable {
    * \throws embb::base::ErrorException if an error occurred
    *
    * \threadsafe
+   *
+   * \note When Pthreads is used as the underlying library, this function may issue
+   *       spurious wake ups to a waiting thread. Therefore it is recommended to
+   *       use a loop checking the condition after a wakeup.
    */
   bool WaitUntil(
     UniqueLock<Mutex>& lock,
@@ -141,6 +149,10 @@ class ConditionVariable {
    * \threadsafe
    *
    * \tparam Tick Type of tick of the duration. See Duration.
+   *
+   * \note When Pthreads is used as the underlying library, this function may issue
+   *       spurious wake ups to a waiting thread. Therefore it is recommended to
+   *       use a loop checking the condition after a wakeup.
    */
   template<typename Tick>
   bool WaitFor(
