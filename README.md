@@ -368,6 +368,10 @@ Important Notes
   performance measurements, explicit initialization is strongly recommended
   since the measurements will otherwise include the initialization time of
   MTAPI.
+- When using ThreadSanitizer there is a bug that causes the built-in CMake type
+  size determination to fail which in turn leads to a broken configuration.
+  Therefore, you have to do a normal build first and then rerun CMake with
+  flags and libs configured for ThreadSanitizer.
 
 
 Links
