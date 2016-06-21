@@ -96,14 +96,25 @@ class SchedulerMTAPI : public Scheduler {
     embb::base::Allocation::Free(group_);
     embb::base::Allocation::Free(queue_);
   }
-  virtual void Start(Action & action) {
+  virtual void Start(
+    Action & action,
+    embb::mtapi::ExecutionPolicy const & policy) {
     const int idx = action.GetClock() % slices_;
-    group_[idx].Start(job_, &action, static_cast<void*>(NULL));
+    embb::mtapi::TaskAttributes task_attr;
+    task_attr.SetPolicy(policy);
+    group_[idx].Start(job_, &action, static_cast<void*>(NULL),
+      task_attr);
   }
-  virtual void Enqueue(int process_id, Action & action) {
+  virtual void Enqueue(
+    int process_id,
+    Action & action,
+    embb::mtapi::ExecutionPolicy const & policy) {
     const int idx = action.GetClock() % slices_;
     const int queue_id = process_id % queue_count_;
-    queue_[queue_id].Enqueue(&action, static_cast<void*>(NULL), group_[idx]);
+    embb::mtapi::TaskAttributes task_attr;
+    task_attr.SetPolicy(policy);
+    queue_[queue_id].Enqueue(&action, static_cast<void*>(NULL),
+      task_attr, group_[idx]);
   }
   virtual void WaitForSlice(int slice) {
     group_[slice].WaitAll(MTAPI_INFINITE);
