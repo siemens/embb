@@ -2,13 +2,33 @@ Guidelines for Developing and Contributing Code
 ===============================================
 
 
-Introduction
-------------
+Table of Contents
+-----------------
+
+1. Introduction
+2. Development Environment
+  - Directory Structure
+  - Branches
+  - Contributing
+3. Coding Guidelines
+  - General
+  - Tool Support
+4. Documentation Guidelines
+  - General
+  - Special Commands
+  - Structure
+  - Example
+5. How to port EMB²
+
+
+1. Introduction
+---------------
 
 The EMB² team welcomes all kinds of feedback and contributions. Please don't hesitate to contact us if you have any questions, comments, bug reports, suggestions for improvement, extensions or the like (see [README.md](https://github.com/siemens/embb/blob/master/README.md) for general contact information). In the following, we give an overview of the development environment as well as coding and documentation guidelines, and sketch how to port EMB² to other platforms.
 
-Development Environment
------------------------
+
+2. Development Environment
+--------------------------
 
 ### Directory Structure
 
@@ -48,8 +68,8 @@ In addition to these two branches, there may be arbitrarily many feature branche
 Bug fixes, extensions, etc. can be contributed as pull requests via GitHub or as patches via the development mailing list (mailto:embb-dev@googlegroups.com). If possible, please refer to a current snapshot of the master branch.
 
 
-Coding Guidelines
------------------
+3. Coding Guidelines
+--------------------
 
 ### General
 
@@ -100,12 +120,12 @@ operation, i.e., in the methods for pushing and popping elements.
 ```
 
 
-Documentation Guidelines
-------------------------
-
-The source code is documented using [Doxygen](http::www.doxygen.org/). Please adhere to the following rules:
+4. Documentation Guidelines
+---------------------------
 
 ### General
+
+The source code is documented using [Doxygen](http::www.doxygen.org/). Please adhere to the following rules:
 
 - Document at least all entities visible to the user (API).
 - Member variables need only be documented if their names are not self-explanatory.
@@ -188,8 +208,8 @@ class Queue {
 ```
 
 
-How to port EMB²
-----------------
+5. How to port EMB²
+-------------------
 
 EMB² is easily portable to platforms unsupported so far. Almost all platform specific code is located in the ```base_c``` and ```base_cpp``` directories, and platform specific code is fenced using ```EMBB_PLATFORM_*``` defines.
 
