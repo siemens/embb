@@ -24,18 +24,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb/tasks/execution_policy.h>
-#include <embb/tasks/tasks.h>
+#include <embb/mtapi/execution_policy.h>
+#include <embb/mtapi/node.h>
 #include <embb/base/exceptions.h>
 #include <embb/base/c/internal/bitset.h>
 #include <cassert>
 
 namespace embb {
-namespace tasks {
+namespace mtapi {
 
 ExecutionPolicy::ExecutionPolicy() :
     priority_(DefaultPriority) {
-#if TASKS_CPP_AUTOMATIC_INITIALIZE
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
@@ -48,7 +48,7 @@ ExecutionPolicy::ExecutionPolicy() :
 
 ExecutionPolicy::ExecutionPolicy(bool initial_affinity, mtapi_uint_t priority)
 :priority_(priority) {
-#if TASKS_CPP_AUTOMATIC_INITIALIZE
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
@@ -62,7 +62,7 @@ ExecutionPolicy::ExecutionPolicy(bool initial_affinity, mtapi_uint_t priority)
 
 ExecutionPolicy::ExecutionPolicy(mtapi_uint_t priority)
 :priority_(priority) {
-#if TASKS_CPP_AUTOMATIC_INITIALIZE
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
@@ -75,7 +75,7 @@ ExecutionPolicy::ExecutionPolicy(mtapi_uint_t priority)
 
 ExecutionPolicy::ExecutionPolicy(bool initial_affinity)
 :priority_(DefaultPriority) {
-#if TASKS_CPP_AUTOMATIC_INITIALIZE
+#if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
   mtapi_status_t status;
@@ -110,7 +110,7 @@ unsigned int ExecutionPolicy::GetCoreCount() const {
   return embb_bitset_count(&affinity_);
 }
 
-const mtapi_affinity_t &ExecutionPolicy::GetAffinity() const {
+mtapi_affinity_t ExecutionPolicy::GetAffinity() const {
   return affinity_;
 }
 
@@ -120,5 +120,5 @@ mtapi_uint_t ExecutionPolicy::GetPriority() const {
 
 const mtapi_uint_t ExecutionPolicy::DefaultPriority = 0;
 
-}  // namespace tasks
+}  // namespace mtapi
 }  // namespace embb

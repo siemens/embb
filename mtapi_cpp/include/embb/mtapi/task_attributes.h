@@ -29,6 +29,7 @@
 
 #include <embb/mtapi/c/mtapi.h>
 #include <embb/mtapi/internal/check_status.h>
+#include <embb/mtapi/execution_policy.h>
 
 namespace embb {
 namespace mtapi {
@@ -82,6 +83,31 @@ class TaskAttributes {
     mtapi_taskattr_set(&attributes_, MTAPI_TASK_PRIORITY,
       &priority, sizeof(priority), &status);
     internal::CheckStatus(status);
+    return *this;
+  }
+
+  /**
+   * Sets the affinity of a Task.
+   * The affinity influences on which worker the Task will be executed.
+   *
+   * \returns Reference to this object.
+   * \notthreadsafe
+   */
+  TaskAttributes & SetAffinity(
+    mtapi_affinity_t affinity          /**< The affinity to set. */
+    ) {
+    mtapi_status_t status;
+    mtapi_taskattr_set(&attributes_, MTAPI_TASK_AFFINITY,
+      &affinity, sizeof(affinity), &status);
+    internal::CheckStatus(status);
+    return *this;
+  }
+
+  TaskAttributes & SetPolicy(
+    ExecutionPolicy const & policy
+    ) {
+    SetPriority(policy.GetPriority());
+    SetAffinity(policy.GetAffinity());
     return *this;
   }
 

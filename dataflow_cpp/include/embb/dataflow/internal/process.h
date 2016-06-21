@@ -158,7 +158,7 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     } else {
       const int idx = clock % slices_;
       action_[idx] = Action(this, clock);
-      sched_->Spawn(action_[idx]);
+      sched_->Start(action_[idx]);
     }
   }
 

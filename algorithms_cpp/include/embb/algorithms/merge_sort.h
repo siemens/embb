@@ -28,7 +28,7 @@
 #define EMBB_ALGORITHMS_MERGE_SORT_H_
 
 #include <functional>
-#include <embb/tasks/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/base/memory_allocation.h>
 
 namespace embb {
@@ -149,7 +149,7 @@ void MergeSort(
   RAI last,
   RAITemp temporary_first,
   ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -161,7 +161,7 @@ void MergeSortAllocate(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   ) {
   typedef base::Allocation Alloc;
@@ -200,7 +200,7 @@ void MergeSortAllocate(
   ) {
   MergeSortAllocate(first, last,
                     std::less<typename std::iterator_traits<RAI>::value_type>(),
-                    embb::tasks::ExecutionPolicy(), 0);
+                    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -212,7 +212,7 @@ void MergeSortAllocate(
   RAI last,
   ComparisonFunction comparison
   ) {
-  MergeSortAllocate(first, last, comparison, embb::tasks::ExecutionPolicy(), 0);
+  MergeSortAllocate(first, last, comparison, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -223,7 +223,7 @@ void MergeSortAllocate(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   MergeSortAllocate(first, last, comparison, policy, 0);
 }
@@ -239,7 +239,7 @@ void MergeSort(
   ) {
   MergeSort(first, last, temporary_first,
             std::less<typename std::iterator_traits<RAI>::value_type>(),
-            embb::tasks::ExecutionPolicy(), 0);
+            embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -253,7 +253,7 @@ void MergeSort(
   ComparisonFunction comparison
   ) {
   MergeSort(first, last, temporary_first, comparison,
-    embb::tasks::ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -265,7 +265,7 @@ void MergeSort(
   RAI last,
   RAITemp temporary_first,
   ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   MergeSort(first, last, temporary_first, comparison, policy, 0);
 }

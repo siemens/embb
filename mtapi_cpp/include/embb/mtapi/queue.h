@@ -51,31 +51,19 @@ namespace mtapi {
  */
 class Queue {
  public:
-  /**
-   * Constructs a Queue with the given Job and default attributes.
-   * Requires an initialized Node.
-   */
-  Queue(
-    Job const & job                    /**< The Job to use for the Queue. */
-    ) {
-    Create(MTAPI_QUEUE_ID_NONE, job, MTAPI_DEFAULT_QUEUE_ATTRIBUTES);
+  Queue(Queue const & other) : handle_(other.handle_) {
+    // empty
+  }
+
+  Queue & operator=(Queue const & other) {
+    handle_ = other.handle_;
+    return *this;
   }
 
   /**
-   * Constructs a Queue with the given Job and QueueAttributes.
-   * Requires an initialized Node.
+   * Deletes a Queue object.
    */
-  Queue(
-    Job const & job,                   /**< The Job to use for the Queue. */
-    QueueAttributes const & attr       /**< The attributes to use. */
-    ) {
-    Create(MTAPI_QUEUE_ID_NONE, job, &attr.GetInternal());
-  }
-
-  /**
-   * Destroys a Queue object.
-   */
-  ~Queue() {
+  void Delete() {
     mtapi_queue_delete(handle_, MTAPI_INFINITE, MTAPI_NULL);
   }
 
@@ -272,16 +260,13 @@ class Queue {
   }
 
   friend class embb::base::Allocation;
+  friend class Node;
 
  private:
   // no default constructor
   Queue();
 
-  // not copyable
-  Queue(Queue const & other);
-  void operator=(Queue const & other);
-
-  void Create(
+  Queue(
     mtapi_queue_id_t queue_id,
     Job const & job,
     mtapi_queue_attributes_t const * attributes

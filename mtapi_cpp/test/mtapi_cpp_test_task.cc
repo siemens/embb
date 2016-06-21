@@ -96,9 +96,10 @@ void TaskTest::TestBasic() {
   }
 
   {
-    embb::mtapi::Job job_task(JOB_TEST_TASK, THIS_DOMAIN_ID);
+    embb::mtapi::Job job_task = node.GetJob(JOB_TEST_TASK);
 
-    embb::mtapi::Action action_task(JOB_TEST_TASK, testTaskAction);
+    embb::mtapi::Action action_task =
+      node.CreateAction(JOB_TEST_TASK, testTaskAction);
 
     std::string test;
     embb::mtapi::Task task = node.Start(job_task, "simple", &test);
@@ -106,19 +107,23 @@ void TaskTest::TestBasic() {
     mtapi_status_t status = task.Wait();
     PT_EXPECT_EQ(status, MTAPI_SUCCESS);
     PT_EXPECT(test == "simple");
+
+    action_task.Delete();
   }
 
   {
-    embb::mtapi::Job job_error(JOB_TEST_ERROR, THIS_DOMAIN_ID);
+    embb::mtapi::Job job_error = node.GetJob(JOB_TEST_ERROR);
 
-    embb::mtapi::Action action_error(JOB_TEST_ERROR, testErrorAction,
-      embb::mtapi::ActionAttributes());
+    embb::mtapi::Action action_error =
+      node.CreateAction(JOB_TEST_ERROR, testErrorAction);
 
     std::string test;
     embb::mtapi::Task task = node.Start(job_error, "simple", &test);
     testDoSomethingElse();
     mtapi_status_t status = task.Wait();
     PT_EXPECT_EQ(status, MTAPI_ERR_ACTION_FAILED);
+
+    action_error.Delete();
   }
 
   embb::mtapi::Node::Finalize();

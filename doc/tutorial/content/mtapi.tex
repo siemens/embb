@@ -152,7 +152,11 @@ After everything is done, the action is deleted (\lstinline|mtapi_action_delete(
 \section{C++ Interface}
 \label{sec:mtapi_cpp_interface}
 
-\embb provides C++ wrappers for the MTAPI C interface. The signature of the action function for the C++ interface is the same as in the C interface:
+\embb provides C++ wrappers for the MTAPI C interface. The full interface provides functions for all MTAPI releated tasks and supports heterogeneous systems. For ease of use a simpler version for SMP systems is provided.
+
+\subsection{Full Interface}
+
+The signature of the action function for the C++ interface is the same as in the C interface:
 %
 \\\inputlisting{../examples/mtapi/mtapi_c_action_signature-snippet.h}
 %
@@ -193,7 +197,7 @@ After that, the action function needs to be associated to a job. By instancing a
 %
 \\\inputlisting{../examples/mtapi/mtapi_cpp_register_action-snippet.h}
 %
-Not that the action is registered and the job is initialized, the root task can be started:
+Now that the action is registered and the job is initialized, the root task can be started:
 %
 \\\inputlisting{../examples/mtapi/mtapi_cpp_start_task-snippet.h}
 %
@@ -202,6 +206,19 @@ Again, the started task has to be waited for (using \lstinline|embb::mtapi::Task
 The registered action will be unregistered when it goes out of scope.
 The runtime needs to be shut down by calling:
 \\\inputlisting{../examples/mtapi/mtapi_cpp_finalize-snippet.h}
+
+\subsection{Simplified Interface for SMP actions}
+
+MTAPI CPP provides a simpler version of the MTAPI interface for SMP actions. The signature of the
+action function for the simplified API looks like this:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_simple_action_signature-snippet.h}
+%
+The action function does not need to be registered with a job. Instead a preregistered job is used that expects a \lstinline|embb::base::Function<void, embb::mtapi::TaskContext &>| object. Therefore a task can be scheduled directly using only the function above:
+%
+\\\inputlisting{../examples/mtapi/mtapi_cpp_simple_start_task-snippet.h}
+%
+
 
 \section{Plugins}
 
