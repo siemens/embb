@@ -289,10 +289,12 @@ void mtapi_action_delete(
       embb_mtapi_thread_context_t * context = NULL;
 
       embb_duration_t wait_duration;
+      embb_time_t start_time;
       embb_time_t end_time;
       if (MTAPI_INFINITE < timeout) {
         embb_duration_set_milliseconds(
           &wait_duration, (unsigned long long)timeout);
+        embb_time_now(&start_time);
         embb_time_in(&end_time, &wait_duration);
       }
 
@@ -309,6 +311,12 @@ void mtapi_action_delete(
         if (MTAPI_INFINITE < timeout) {
           embb_time_t current_time;
           embb_time_now(&current_time);
+          if (embb_time_compare(&current_time, &start_time) < 0) {
+            /* time has moved backwards, maybe a wraparound or jitter
+               move end_time backward to avoid endeless loop */
+            start_time = current_time;
+            embb_time_in(&end_time, &wait_duration);
+          }
           if (embb_time_compare(&current_time, &end_time) > 0) {
             /* timeout! */
             local_status = MTAPI_TIMEOUT;
@@ -362,10 +370,12 @@ void mtapi_action_disable(
       embb_mtapi_thread_context_t * context = NULL;
 
       embb_duration_t wait_duration;
+      embb_time_t start_time;
       embb_time_t end_time;
       if (MTAPI_INFINITE < timeout) {
         embb_duration_set_milliseconds(
           &wait_duration, (unsigned long long)timeout);
+        embb_time_now(&start_time);
         embb_time_in(&end_time, &wait_duration);
       }
 
@@ -382,6 +392,12 @@ void mtapi_action_disable(
         if (MTAPI_INFINITE < timeout) {
           embb_time_t current_time;
           embb_time_now(&current_time);
+          if (embb_time_compare(&current_time, &start_time) < 0) {
+            /* time has moved backwards, maybe a wraparound or jitter
+               move end_time backward to avoid endeless loop */
+            start_time = current_time;
+            embb_time_in(&end_time, &wait_duration);
+          }
           if (embb_time_compare(&current_time, &end_time) > 0) {
             /* timeout! */
             local_status = MTAPI_TIMEOUT;
