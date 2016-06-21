@@ -110,9 +110,9 @@ int embb_condition_notify_all(
  * \threadsafe
  * \see embb_condition_notify_one(), embb_condition_notify_all(),
  *      embb_condition_wait_until(), embb_condition_wait_for()
- * \note When pthreads is used as the underlying library, this function may issue
- *       spurious wake ups to a waiting thread. Therefore it is recommended to
- *       use a loop checking the condition after a wakeup.
+ * \note It is strongly recommended checking the condition in a loop in order
+ *       to deal with spurious wakeups and situations where another thread has
+ *       locked the mutex between notification and wakeup.
  */
 int embb_condition_wait(
   embb_condition_t* condition_var,
@@ -134,9 +134,9 @@ int embb_condition_wait(
  * \threadsafe
  * \see embb_condition_notify_one(), embb_condition_notify_all(),
  *      embb_condition_wait(), embb_condition_wait_for()
- * \note When pthreads is used as the underlying library, this function may issue
- *       spurious wake ups to a waiting thread. Therefore it is recommended to
- *       use a loop checking the condition after a wakeup.
+ * \note It is strongly recommended checking the condition in a loop in order
+ *       to deal with spurious wakeups and situations where another thread has
+ *       locked the mutex between notification and wakeup.
  */
 int embb_condition_wait_until(
   embb_condition_t* condition_var,
@@ -160,9 +160,9 @@ int embb_condition_wait_until(
  * \threadsafe
  * \see embb_condition_notify_one(), embb_condition_notify_all(),
  *      embb_condition_wait(), embb_condition_wait_until()
- * \note When pthreads is used as the underlying library, this function may issue
- *       spurious wake ups to a waiting thread. Therefore it is recommended to
- *       use a loop checking the condition after a wakeup.
+ * \note It is strongly recommended checking the condition in a loop in order
+ *       to deal with spurious wakeups and situations where another thread has
+ *       locked the mutex between notification and wakeup.
  */
 int embb_condition_wait_for(
   embb_condition_t* condition_var,

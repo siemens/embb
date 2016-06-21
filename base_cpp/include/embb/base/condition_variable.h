@@ -100,9 +100,9 @@ class ConditionVariable {
    *
    * \see NotifyOne(), NotifyAll()
    *
-   * \note When Pthreads is used as the underlying library, this function may issue
-   *       spurious wake ups to a waiting thread. Therefore it is recommended to
-   *       use a loop checking the condition after a wakeup.
+   * \note It is strongly recommended checking the condition in a loop in order
+   *       to deal with spurious wakeups and situations where another thread has
+   *       locked the mutex between notification and wakeup.
    */
   void Wait(
     UniqueLock<Mutex>& lock
@@ -123,9 +123,9 @@ class ConditionVariable {
    *
    * \threadsafe
    *
-   * \note When Pthreads is used as the underlying library, this function may issue
-   *       spurious wake ups to a waiting thread. Therefore it is recommended to
-   *       use a loop checking the condition after a wakeup.
+   * \note It is strongly recommended checking the condition in a loop in order
+   *       to deal with spurious wakeups and situations where another thread has
+   *       locked the mutex between notification and wakeup.
    */
   bool WaitUntil(
     UniqueLock<Mutex>& lock,
@@ -150,9 +150,9 @@ class ConditionVariable {
    *
    * \tparam Tick Type of tick of the duration. See Duration.
    *
-   * \note When Pthreads is used as the underlying library, this function may issue
-   *       spurious wake ups to a waiting thread. Therefore it is recommended to
-   *       use a loop checking the condition after a wakeup.
+   * \note It is strongly recommended checking the condition in a loop in order
+   *       to deal with spurious wakeups and situations where another thread has
+   *       locked the mutex between notification and wakeup.
    */
   template<typename Tick>
   bool WaitFor(
