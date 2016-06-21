@@ -18,7 +18,7 @@ Table of Contents
   - Special Commands
   - Structure
   - Example
-5. How to port EMB²
+5. Porting
 
 
 1. Introduction
@@ -208,8 +208,8 @@ class Queue {
 ```
 
 
-5. How to port EMB²
--------------------
+5. Porting
+----------
 
 EMB² is easily portable to platforms unsupported so far. Almost all platform specific code is located in the ```base_c``` and ```base_cpp``` directories, and platform specific code is fenced using ```EMBB_PLATFORM_*``` defines.
 
