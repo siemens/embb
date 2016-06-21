@@ -46,3 +46,8 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/embb
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/embb
         DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(TARGETS embb_base_cpp DESTINATION lib)
+if (MSVC)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/embb_base_cpp.pdb
+          DESTINATION lib
+          CONFIGURATIONS Debug)
+endif()
