@@ -54,7 +54,8 @@ class SchedulerMTAPI : public Scheduler {
     }
 
     job_ = node.GetJob(EMBB_DATAFLOW_JOB_ID);
-    action_ = node.CreateAction(EMBB_DATAFLOW_JOB_ID, SchedulerMTAPI::action_func);
+    action_ = node.CreateAction(EMBB_DATAFLOW_JOB_ID,
+      SchedulerMTAPI::action_func);
 
     group_ = reinterpret_cast<embb::mtapi::Group*>(
       embb::base::Allocation::Allocate(

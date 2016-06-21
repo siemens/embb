@@ -452,7 +452,8 @@ class Node {
     mtapi_task_context_t * context) {
     TaskContext task_context(context);
     embb::base::Function<void, TaskContext &> * func =
-      reinterpret_cast<embb::base::Function<void, TaskContext &>*>(const_cast<void*>(args));
+      reinterpret_cast<embb::base::Function<void, TaskContext &>*>(
+        const_cast<void*>(args));
     (*func)(task_context);
     embb::base::Allocation::Delete(func);
   }

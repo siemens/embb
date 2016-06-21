@@ -85,16 +85,16 @@ class Job {
     * Constructs a Job with the given \c job_id and \c domain_id.
     * Requires an initialized Node.
     */
-   Job(
-     mtapi_job_id_t job_id,             /**< Job ID to use. */
-     mtapi_domain_t domain_id           /**< Domain ID to use. */
-     ) {
-     mtapi_status_t status;
-     handle_ = mtapi_job_get(job_id, domain_id, &status);
-     internal::CheckStatus(status);
-   }
+  Job(
+    mtapi_job_id_t job_id,             /**< Job ID to use. */
+    mtapi_domain_t domain_id           /**< Domain ID to use. */
+    ) {
+    mtapi_status_t status;
+    handle_ = mtapi_job_get(job_id, domain_id, &status);
+    internal::CheckStatus(status);
+  }
 
-   mtapi_job_hndl_t handle_;
+  mtapi_job_hndl_t handle_;
 };
 
 } // namespace mtapi
