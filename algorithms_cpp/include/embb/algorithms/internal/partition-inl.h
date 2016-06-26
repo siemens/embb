@@ -93,7 +93,7 @@ ChunkPartitioner<RAI>::ChunkPartitioner(
     size_ = amountChunks;
   } else {
     // if no concrete chunk size was given, use number of cores
-    embb::tasks::Node& node = embb::tasks::Node::GetInstance();
+    embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
     size_ = node.GetWorkerThreadCount();
   }
   elements_count_ = static_cast<size_t>(std::distance(first_, last_));

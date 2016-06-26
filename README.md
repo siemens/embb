@@ -59,7 +59,7 @@ Subscription:
 
 Contact:
   - embb.info@gmail.com or
-  - tobias.schuele@siemens.com
+  - tobias.schuele@siemens.com, sebnem.rusitschka@siemens.com
 
 
 License
@@ -100,7 +100,6 @@ Currently, EMB² contains the following components:
   - base: base_c, base_cpp
   - mtapi: mtapi_c, mtapi_cpp and
     mtapi_plugins_c (mtapi_network_c and mtapi_opencl_c)
-  - tasks: tasks_cpp
   - algorithms: algorithms_cpp
   - dataflow: dataflow_cpp
   - containers: containers_cpp
@@ -114,10 +113,9 @@ implemented in C. Component base_cpp is mainly a C++ wrapper around the base_c
 functions. Component mtapi_c is a task scheduler written in C and mtapi_cpp a
 C++ wrapper for the scheduler (mtapi_network_c and mtapi_opencl_c are scheduler
 plugins for distributed and OpenCL-based heterogeneous systems, respectively).
-To simplify programming of homogeneous systems, tasks_cpp contains abstractions
-to the MTAPI interfaces. Component algorithms_cpp provides high-level constructs
-for typical parallelization tasks in C++, and dataflow_cpp generic skeletons for
-the development of parallel stream-based applications. Finally, containers_cpp
+Component algorithms_cpp provides high-level constructs for typical
+parallelization tasks in C++, and dataflow_cpp generic skeletons for the
+development of parallel stream-based applications. Finally, containers_cpp
 provides data structures for storing objects in a thread-safe way.
 
 
@@ -370,6 +368,10 @@ Important Notes
   performance measurements, explicit initialization is strongly recommended
   since the measurements will otherwise include the initialization time of
   MTAPI.
+- When using ThreadSanitizer there is a bug that causes the built-in CMake type
+  size determination to fail which in turn leads to a broken configuration.
+  Therefore, you have to do a normal build first and then rerun CMake with
+  flags and libs configured for ThreadSanitizer.
 
 
 Links

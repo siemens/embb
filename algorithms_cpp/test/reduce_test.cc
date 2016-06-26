@@ -26,7 +26,7 @@
 
 #include <reduce_test.h>
 #include <embb/algorithms/reduce.h>
-#include <embb/tasks/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <deque>
 #include <vector>
 #include <functional>
@@ -163,7 +163,7 @@ void ReduceTest::TestBlockSizes() {
 
 void ReduceTest::TestPolicy() {
   using embb::algorithms::Reduce;
-  using embb::tasks::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
   size_t count = 4;
   int sum = 0;
@@ -210,9 +210,9 @@ void ReduceTest::TestPolicy() {
 
 void ReduceTest::StressTest() {
   using embb::algorithms::Reduce;
-  using embb::tasks::ExecutionPolicy;
+  using embb::mtapi::ExecutionPolicy;
   using embb::algorithms::Identity;
-  size_t count = embb::tasks::Node::GetInstance().GetCoreCount() * 10;
+  size_t count = embb::mtapi::Node::GetInstance().GetCoreCount() * 10;
   std::vector<int> large_vector(count);
   mtapi_int32_t expected = 0;
   for (size_t i = 0; i < count; i++) {

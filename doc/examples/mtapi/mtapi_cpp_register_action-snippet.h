@@ -1,9 +1,9 @@
   /* create action */
-  embb::mtapi::Action fibonacciAction(
+  embb::mtapi::Action fibonacciAction = node.CreateAction(
     FIBONACCI_JOB,                     /* action ID, defined by the
                                           application */
     (fibonacciActionFunction)          /* action function */
   );
 
   /* get job */
-  fibonacciJob = embb::mtapi::Job(FIBONACCI_JOB, THIS_DOMAIN_ID);
+  fibonacciJob = node.GetJob(FIBONACCI_JOB, THIS_DOMAIN_ID);

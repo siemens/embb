@@ -31,3 +31,8 @@ endif()
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/embb
         DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(TARGETS embb_containers_cpp DESTINATION lib)
+if (MSVC)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/embb_containers_cpp.pdb
+          DESTINATION lib
+          CONFIGURATIONS Debug)
+endif()

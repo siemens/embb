@@ -37,7 +37,7 @@ class Scheduler {
  public:
   Scheduler() {}
   virtual ~Scheduler() {}
-  virtual void Spawn(Action & action) = 0;
+  virtual void Start(Action & action) = 0;
   virtual void Enqueue(int process_id, Action & action) = 0;
   virtual void WaitForSlice(int slice) = 0;
   virtual int GetSlices() = 0;

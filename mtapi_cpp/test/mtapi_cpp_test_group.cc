@@ -61,12 +61,14 @@ GroupTest::GroupTest() {
 
 void GroupTest::TestBasic() {
   embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
 
-  embb::mtapi::Job job(JOB_TEST_GROUP, THIS_DOMAIN_ID);
-  embb::mtapi::Action action(JOB_TEST_GROUP, testGroupAction);
+  embb::mtapi::Job job = node.GetJob(JOB_TEST_GROUP);
+  embb::mtapi::Action action =
+    node.CreateAction(JOB_TEST_GROUP, testGroupAction);
 
   {
-    embb::mtapi::Group group;
+    embb::mtapi::Group group = node.CreateGroup();
 
     result_example_t buffer[TASK_COUNT];
     for (int ii = 0; ii < TASK_COUNT; ii++) {
@@ -86,7 +88,7 @@ void GroupTest::TestBasic() {
   }
 
   {
-    embb::mtapi::Group group;
+    embb::mtapi::Group group = node.CreateGroup();
 
     result_example_t buffer[TASK_COUNT];
     for (int ii = 0; ii < 4; ii++) {
@@ -107,6 +109,7 @@ void GroupTest::TestBasic() {
     PT_EXPECT_EQ(status, MTAPI_GROUP_COMPLETED);
   }
 
+  action.Delete();
   embb::mtapi::Node::Finalize();
 
   PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);

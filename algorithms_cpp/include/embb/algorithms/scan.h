@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_SCAN_H_
 #define EMBB_ALGORITHMS_SCAN_H_
 
-#include <embb/tasks/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
 namespace embb {
@@ -121,7 +121,7 @@ void Scan(
   ReturnType neutral,
   ScanFunction scan,
   TransformationFunction transformation,
-  const embb::tasks::ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -138,7 +138,7 @@ void Scan(
   ScanFunction scan
   ) {
   Scan(first, last, output_iterator, neutral, scan, Identity(),
-    embb::tasks::ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -155,7 +155,7 @@ void Scan(
   TransformationFunction transformation
   ) {
   Scan(first, last, output_iterator, neutral, scan, transformation,
-    embb::tasks::ExecutionPolicy(), 0);
+    embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -170,7 +170,7 @@ void Scan(
   ReturnType neutral,
   ScanFunction scan,
   TransformationFunction transformation,
-  const embb::tasks::ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   Scan(first, last, output_iterator, neutral, scan, transformation, policy, 0);
 }

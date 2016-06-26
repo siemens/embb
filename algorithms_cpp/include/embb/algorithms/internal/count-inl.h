@@ -83,7 +83,7 @@ class FunctionComparisonFunction{
 template<typename RAI, typename ValueType>
 typename std::iterator_traits<RAI>::difference_type
   Count(RAI first, RAI last, const ValueType& value,
-        const embb::tasks::ExecutionPolicy& policy, size_t block_size) {
+        const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
   return Reduce(first, last, Difference(0), std::plus<Difference>(),
                 internal::ValueComparisonFunction<ValueType>(value), policy,
@@ -93,7 +93,7 @@ typename std::iterator_traits<RAI>::difference_type
 template<typename RAI, typename ComparisonFunction>
 typename std::iterator_traits<RAI>::difference_type
   CountIf(RAI first, RAI last, ComparisonFunction comparison,
-          const embb::tasks::ExecutionPolicy& policy, size_t block_size) {
+          const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
   return Reduce(first, last, Difference(0), std::plus<Difference>(),
                 internal::FunctionComparisonFunction<ComparisonFunction>

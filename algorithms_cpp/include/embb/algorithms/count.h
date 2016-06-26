@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_COUNT_H_
 #define EMBB_ALGORITHMS_COUNT_H_
 
-#include <embb/tasks/execution_policy.h>
+#include <embb/mtapi/execution_policy.h>
 #include <iterator>
 
 namespace embb {
@@ -132,7 +132,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
   RAI first,
   RAI last,
   const ValueType& value,
-  const embb::tasks::ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -145,7 +145,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
   RAI last,
   const ValueType& value
   ) {
-  return Count(first, last, value, embb::tasks::ExecutionPolicy(), 0);
+  return Count(first, last, value, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -156,7 +156,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
   RAI first,
   RAI last,
   const ValueType& value,
-  const embb::tasks::ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   return Count(first, last, value, policy, 0);
 }
@@ -169,7 +169,7 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size
   );
 
@@ -182,7 +182,7 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
   RAI last,
   ComparisonFunction comparison
   ) {
-  return CountIf(first, last, comparison, embb::tasks::ExecutionPolicy(), 0);
+  return CountIf(first, last, comparison, embb::mtapi::ExecutionPolicy(), 0);
 }
 
 /**
@@ -193,7 +193,7 @@ typename std::iterator_traits<RAI>::difference_type CountIf(
   RAI first,
   RAI last,
   ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy
+  const embb::mtapi::ExecutionPolicy& policy
   ) {
   return CountIf(first, last, comparison, policy, 0);
 }

@@ -30,7 +30,7 @@
 #include <cassert>
 
 #include <embb/base/exceptions.h>
-#include <embb/tasks/tasks.h>
+#include <embb/mtapi/mtapi.h>
 #include <embb/algorithms/internal/partition.h>
 #include <embb/algorithms/zip_iterator.h>
 
@@ -46,13 +46,13 @@ class ForEachFunctor {
    * Constructs a for-each functor with arguments.
    */
   ForEachFunctor(size_t chunk_first, size_t chunk_last, Function unary,
-                 const embb::tasks::ExecutionPolicy& policy,
+                 const embb::mtapi::ExecutionPolicy& policy,
                  const BlockSizePartitioner<RAI>& partitioner)
   : chunk_first_(chunk_first), chunk_last_(chunk_last),
     unary_(unary), policy_(policy), partitioner_(partitioner) {
   }
 
-  void Action(embb::tasks::TaskContext&) {
+  void Action(embb::mtapi::TaskContext&) {
     if (chunk_first_ == chunk_last_) {
       // Leaf case, recursed to single chunk. Do work on chunk:
       ChunkDescriptor<RAI> chunk = partitioner_[chunk_first_];
@@ -71,14 +71,13 @@ class ForEachFunctor {
       self_t functor_r(chunk_split_index + 1,
                        chunk_last_,
                        unary_, policy_, partitioner_);
-      embb::tasks::Task task_l = embb::tasks::Node::GetInstance().Spawn(
-        embb::tasks::Action(
-          base::MakeFunction(functor_l, &self_t::Action),
-          policy_));
-      embb::tasks::Task task_r = embb::tasks::Node::GetInstance().Spawn(
-        embb::tasks::Action(
-          base::MakeFunction(functor_r, &self_t::Action),
-          policy_));
+      embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
+      embb::mtapi::Task task_l = node.Start(
+        embb::base::MakeFunction(functor_l, &self_t::Action),
+        policy_);
+      embb::mtapi::Task task_r = node.Start(
+        embb::base::MakeFunction(functor_r, &self_t::Action),
+        policy_);
       task_l.Wait(MTAPI_INFINITE);
       task_r.Wait(MTAPI_INFINITE);
     }
@@ -91,7 +90,7 @@ class ForEachFunctor {
   size_t chunk_first_;
   size_t chunk_last_;
   Function unary_;
-  const embb::tasks::ExecutionPolicy& policy_;
+  const embb::mtapi::ExecutionPolicy& policy_;
   const BlockSizePartitioner<RAI>& partitioner_;
 
   /**
@@ -102,7 +101,7 @@ class ForEachFunctor {
 
 template<typename RAI, typename Function>
 void ForEachRecursive(RAI first, RAI last, Function unary,
-  const embb::tasks::ExecutionPolicy& policy, size_t block_size) {
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
   if (distance == 0) {
@@ -114,7 +113,7 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   if (num_cores == 0) {
     EMBB_THROW(embb::base::ErrorException, "No cores in execution policy");
   }
-  embb::tasks::Node& node = embb::tasks::Node::GetInstance();
+  embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
   // Determine actually used block size
   if (block_size == 0) {
     block_size = (static_cast<size_t>(distance) / num_cores);
@@ -129,19 +128,19 @@ void ForEachRecursive(RAI first, RAI last, Function unary,
   }
 
   BlockSizePartitioner<RAI> partitioner(first, last, block_size);
-  ForEachFunctor<RAI, Function> functor(0,
-                                        partitioner.Size() - 1,
-                                        unary, policy, partitioner);
-  embb::tasks::Task task = node.Spawn(embb::tasks::Action(
-                     base::MakeFunction(functor,
-                       &ForEachFunctor<RAI, Function>::Action),
-                     policy));
+  typedef ForEachFunctor<RAI, Function> functor_t;
+  functor_t functor(0,
+                    partitioner.Size() - 1,
+                    unary, policy, partitioner);
+  embb::mtapi::Task task = node.Start(
+    embb::base::MakeFunction(functor, &functor_t::Action),
+    policy);
   task.Wait(MTAPI_INFINITE);
 }
 
 template<typename RAI, typename Function>
 void ForEachIteratorCheck(RAI first, RAI last, Function unary,
-  const embb::tasks::ExecutionPolicy& policy, size_t block_size,
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size,
                           std::random_access_iterator_tag) {
   return ForEachRecursive(first, last, unary, policy, block_size);
 }
@@ -150,7 +149,7 @@ void ForEachIteratorCheck(RAI first, RAI last, Function unary,
 
 template<typename RAI, typename Function>
 void ForEach(RAI first, const RAI last, Function unary,
-  const embb::tasks::ExecutionPolicy& policy, size_t block_size) {
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
   internal::ForEachIteratorCheck(first, last, unary, policy, block_size,
                                  category);

@@ -136,7 +136,7 @@ void ZipIteratorTest::TestZipScan() {
   Scan(embb::algorithms::Zip(vectorA.begin(), vectorB.begin()),
        embb::algorithms::Zip(vectorA.end(), vectorB.end()),
        vectorOut.begin(), 0, std::plus<int>(), DotProductFunctor(),
-       embb::tasks::ExecutionPolicy(), 0);
+       embb::mtapi::ExecutionPolicy(), 0);
 
   long sum = 0;
   for (size_t i = 0; i < kCountSize; i++) {
