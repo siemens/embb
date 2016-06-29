@@ -38,11 +38,12 @@
 
 /* ---- CLASS MEMBERS ------------------------------------------------------ */
 
-mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
+mtapi_boolean_t embb_mtapi_thread_context_initialize(
   embb_mtapi_thread_context_t* that,
   embb_mtapi_node_t* node,
   mtapi_uint_t worker_index,
-  mtapi_uint_t core_num) {
+  mtapi_uint_t core_num,
+  embb_thread_priority_t priority) {
   mtapi_uint_t ii;
   mtapi_boolean_t result = MTAPI_TRUE;
 
@@ -54,6 +55,7 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
   that->core_num = core_num;
   that->priorities = node->attributes.max_priorities;
   that->is_initialized = MTAPI_FALSE;
+  that->thread_priority = priority;
   that->is_main_thread = (worker_index == 0) ?
     node->attributes.reuse_main_thread : MTAPI_FALSE;
   embb_atomic_store_int(&that->run, 0);
@@ -142,6 +144,7 @@ mtapi_boolean_t embb_mtapi_thread_context_start(
         "create thread %d on core %d\n", that->worker_index, that->core_num);
       return MTAPI_FALSE;
     }
+    embb_thread_set_priority(&that->thread, that->thread_priority);
     /* wait for worker to come up */
     while (0 == embb_atomic_load_int(&that->run)) {
       embb_thread_yield();
