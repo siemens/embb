@@ -164,6 +164,43 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
   return 0;
 }
 
+int embb_thread_set_priority(
+  embb_thread_t* thread,
+  embb_thread_priority_t priority
+) {
+  int internal_priority;
+  switch (priority) {
+  case EMBB_THREAD_PRIORITY_IDLE:
+    internal_priority = THREAD_PRIORITY_IDLE;
+    break;
+  case EMBB_THREAD_PRIORITY_LOWEST:
+    internal_priority = THREAD_PRIORITY_LOWEST;
+    break;
+  case EMBB_THREAD_PRIORITY_BELOW_NORMAL:
+    internal_priority = THREAD_PRIORITY_BELOW_NORMAL;
+    break;
+  case EMBB_THREAD_PRIORITY_ABOVE_NORMAL:
+    internal_priority = THREAD_PRIORITY_ABOVE_NORMAL;
+    break;
+  case EMBB_THREAD_PRIORITY_HIGHEST:
+    internal_priority = THREAD_PRIORITY_HIGHEST;
+    break;
+  case EMBB_THREAD_PRIORITY_TIME_CRITICAL:
+    internal_priority = THREAD_PRIORITY_TIME_CRITICAL;
+    break;
+  case EMBB_THREAD_PRIORITY_NORMAL:
+  default:
+    internal_priority = THREAD_PRIORITY_NORMAL;
+    break;
+  }
+  BOOL result = SetThreadPriority(thread->embb_internal_handle, internal_priority);
+  if (result != 0) {
+    return EMBB_SUCCESS;
+  } else {
+    return EMBB_ERROR;
+  }
+}
+
 #endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
@@ -297,6 +334,14 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
     return 0;
   }
   return pthread_equal(lhs->embb_internal_handle, rhs->embb_internal_handle);
+}
+
+int embb_thread_set_priority(
+  embb_thread_t* /*thread*/,
+  embb_thread_priority_t /*priority*/
+) {
+  // not implemented yet
+  return EMBB_ERROR;
 }
 
 #endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */

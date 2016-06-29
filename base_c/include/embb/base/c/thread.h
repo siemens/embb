@@ -56,6 +56,16 @@ extern "C" {
 typedef opaque_type embb_thread_t;
 #endif /* DOXYGEN */
 
+typedef enum {
+  EMBB_THREAD_PRIORITY_IDLE,
+  EMBB_THREAD_PRIORITY_LOWEST,
+  EMBB_THREAD_PRIORITY_BELOW_NORMAL,
+  EMBB_THREAD_PRIORITY_NORMAL,
+  EMBB_THREAD_PRIORITY_ABOVE_NORMAL,
+  EMBB_THREAD_PRIORITY_HIGHEST,
+  EMBB_THREAD_PRIORITY_TIME_CRITICAL
+} embb_thread_priority_t;
+
 /**
  * Thread start function pointer type.
  *
@@ -178,6 +188,11 @@ int embb_thread_equal(
   /**< [IN] First thread (left-hand side of equality sign) */
   const embb_thread_t* rhs
   /**< [IN] Second thread (right-hand side of equality sign) */
+  );
+
+int embb_thread_set_priority(
+  embb_thread_t* thread,
+  embb_thread_priority_t priority
   );
 
 #ifdef __cplusplus
