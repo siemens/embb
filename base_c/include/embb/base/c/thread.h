@@ -133,7 +133,7 @@ void embb_thread_yield();
  * Creates and runs a thread.
  *
  * \pre The given thread is not running and has not yet been successfully
-        joined.
+ *      joined.
  * \post On success, the given thread has started to run.
  * \return EMBB_SUCCESS if the thread could be created. \n
  *         EMBB_NOMEM if there was insufficient amount of memory \n
@@ -150,6 +150,36 @@ int embb_thread_create(
   const embb_core_set_t* core_set,
   /**< [IN] Set of cores on which the thread shall be executed. Can be NULL to
             indicate automatic thread scheduling by the OS. */
+  embb_thread_start_t function,
+  /**< [IN] Function which is executed by the thread when started. Has to be of
+            type embb_thread_start_t. */
+  void* arg
+  /**< [IN/OUT] Argument to thread start function. Can be NULL. */
+  );
+
+/**
+ * Creates and runs a thread.
+ *
+ * \pre The given thread is not running and has not yet been successfully
+ *      joined.
+ * \post On success, the given thread has started to run.
+ * \return EMBB_SUCCESS if the thread could be created. \n
+ *         EMBB_NOMEM if there was insufficient amount of memory \n
+ *         EMBB_ERROR otherwise.
+ * \memory Dynamically allocates a small constant amount of memory to store the
+ *         function and argument pointers. This memory is freed when the thread
+ *         is joined.
+ * \notthreadsafe
+ * \see embb_thread_join()
+ */
+int embb_thread_create_with_priority(
+  embb_thread_t* thread,
+  /**< [OUT] Thread to be run */
+  const embb_core_set_t* core_set,
+  /**< [IN] Set of cores on which the thread shall be executed. Can be NULL to
+            indicate automatic thread scheduling by the OS. */
+  embb_thread_priority_t priority,
+  /**< [IN] Priority to run the thread at. */
   embb_thread_start_t function,
   /**< [IN] Function which is executed by the thread when started. Has to be of
             type embb_thread_start_t. */
@@ -188,11 +218,6 @@ int embb_thread_equal(
   /**< [IN] First thread (left-hand side of equality sign) */
   const embb_thread_t* rhs
   /**< [IN] Second thread (right-hand side of equality sign) */
-  );
-
-int embb_thread_set_priority(
-  embb_thread_t* thread,
-  embb_thread_priority_t priority
   );
 
 #ifdef __cplusplus

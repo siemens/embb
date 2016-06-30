@@ -137,14 +137,14 @@ mtapi_boolean_t embb_mtapi_thread_context_start(
     embb_tss_set(&(that->tss_id), that);
     embb_atomic_store_int(&that->run, 1);
   } else {
-    err = embb_thread_create(&that->thread, &core_set, worker_func, that);
+    err = embb_thread_create_with_priority(
+      &that->thread, &core_set, that->thread_priority, worker_func, that);
     if (EMBB_SUCCESS != err) {
       embb_mtapi_log_error(
         "embb_mtapi_ThreadContext_initializeWithNodeAndCoreNumber() could not "
         "create thread %d on core %d\n", that->worker_index, that->core_num);
       return MTAPI_FALSE;
     }
-    embb_thread_set_priority(&that->thread, that->thread_priority);
     /* wait for worker to come up */
     while (0 == embb_atomic_load_int(&that->run)) {
       embb_thread_yield();
