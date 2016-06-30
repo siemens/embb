@@ -51,7 +51,7 @@ extern "C" {
  *
  * It must be called on all nodes using the MTAPI CUDA plugin.
  *
- * Application software using MTAPI network must call
+ * Application software using MTAPI CUDA must call
  * mtapi_cuda_plugin_initialize() once per node. It is an error to call
  * mtapi_cuda_plugin_initialize() multiple times
  * from a given node, unless mtapi_cuda_plugin_finalize() is called in
@@ -85,11 +85,11 @@ void mtapi_cuda_plugin_initialize(
  * unless mtapi_cuda_plugin_initialize() has been called prior to each
  * mtapi_cuda_plugin_finalize() call.
  *
- * All network tasks that have not completed and that have been started on the
+ * All CUDA tasks that have not completed and that have been started on the
  * node where mtapi_cuda_plugin_finalize() is called will be canceled
- * (see mtapi_task_cancel()). mtapi_opencl_plugin_finalize() blocks until all
+ * (see mtapi_task_cancel()). mtapi_cuda_plugin_finalize() blocks until all
  * tasks that have been started on the same node return. Tasks that execute
- * actions on the node where mtapi_opencl_plugin_finalize() is called, also
+ * actions on the node where mtapi_cuda_plugin_finalize() is called, also
  * block finalization of the MTAPI CUDA system on that node.
  *
  * On success, \c *status is set to \c MTAPI_SUCCESS. On error, \c *status is
@@ -98,7 +98,7 @@ void mtapi_cuda_plugin_initialize(
  * ----------------------------- | --------------------------------------------
  * \c MTAPI_ERR_UNKNOWN          | MTAPI CUDA couldn't be finalized.
  *
- * \see mtapi_opencl_plugin_initialize(), mtapi_task_cancel()
+ * \see mtapi_cuda_plugin_initialize(), mtapi_task_cancel()
  *
  * \notthreadsafe
  * \ingroup C_MTAPI_CUDA
