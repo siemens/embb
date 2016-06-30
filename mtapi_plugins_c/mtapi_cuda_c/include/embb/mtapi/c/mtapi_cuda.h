@@ -109,16 +109,16 @@ void mtapi_cuda_plugin_finalize(
 );
 
 /**
- * This function creates an CUDA action.
+ * This function creates a CUDA action.
  *
  * It is called on the node where the user wants to execute an action on an
  * CUDA device. A CUDA action contains a reference to a local job, the
  * kernel source to compile and execute on the CUDA device, the name of the
  * kernel function, a local work size (see CUDA specification for details)
  * and the size of one element in the result buffer.
- * After an CUDA action is created, it is referenced by the application using
+ * After a CUDA action is created, it is referenced by the application using
  * a node-local handle of type \c mtapi_action_hndl_t, or indirectly through a
- * node-local job handle of type \c mtapi_job_hndl_t. An CUDA action's
+ * node-local job handle of type \c mtapi_job_hndl_t. A CUDA action's
  * life-cycle begins with mtapi_cuda_action_create(), and ends when
  * mtapi_action_delete() or mtapi_finalize() is called.
  *
