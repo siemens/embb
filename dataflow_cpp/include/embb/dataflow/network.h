@@ -846,7 +846,7 @@ class Network : public internal::ClockListener {
           internal::Inputs<I1, I2, I3, I4, I5>,
           internal::Outputs<O1, O2, O3, O4, O5> >(
             network.sched_, function) {
-      SetPolicy(network.policy_);
+      this->SetPolicy(network.policy_);
       network.processes_.push_back(this);
     }
 
@@ -856,7 +856,7 @@ class Network : public internal::ClockListener {
       internal::Inputs<I1, I2, I3, I4, I5>,
       internal::Outputs<O1, O2, O3, O4, O5> >(
         network.sched_, function) {
-      SetPolicy(policy);
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -882,7 +882,7 @@ class Network : public internal::ClockListener {
           internal::Inputs<I1, I2, I3, I4, I5>,
           internal::Outputs<O1, O2, O3, O4, O5> >(
             network.sched_, function) {
-      SetPolicy(network.policy_);
+      this->SetPolicy(network.policy_);
       network.processes_.push_back(this);
     }
 
@@ -892,7 +892,7 @@ class Network : public internal::ClockListener {
       internal::Inputs<I1, I2, I3, I4, I5>,
       internal::Outputs<O1, O2, O3, O4, O5> >(
         network.sched_, function) {
-      SetPolicy(policy);
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -902,13 +902,13 @@ class Network : public internal::ClockListener {
    public:
     explicit Switch(Network & network)
       : internal::Switch<Type>(network.sched_) {
-      SetPolicy(network.policy_);
+      this->SetPolicy(network.policy_);
       network.processes_.push_back(this);
     }
 
     Switch(Network & network, embb::mtapi::ExecutionPolicy const & policy)
       : internal::Switch<Type>(network.sched_) {
-      SetPolicy(policy);
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -918,13 +918,13 @@ class Network : public internal::ClockListener {
    public:
     explicit Select(Network & network)
       : internal::Select<Type>(network.sched_) {
-      SetPolicy(network.policy_);
+      this->SetPolicy(network.policy_);
       network.processes_.push_back(this);
     }
 
     Select(Network & network, embb::mtapi::ExecutionPolicy const & policy)
       : internal::Select<Type>(network.sched_) {
-      SetPolicy(policy);
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -943,7 +943,7 @@ class Network : public internal::ClockListener {
       : internal::Sink<
           internal::Inputs<I1, I2, I3, I4, I5> >(
             network.sched_, &network, function) {
-      SetPolicy(network.policy_);
+      this->SetPolicy(network.policy_);
       network.sinks_.push_back(this);
       network.sink_count_++;
     }
@@ -953,7 +953,7 @@ class Network : public internal::ClockListener {
       : internal::Sink<
       internal::Inputs<I1, I2, I3, I4, I5> >(
         network.sched_, &network, function) {
-      SetPolicy(policy);
+      this->SetPolicy(policy);
       network.sinks_.push_back(this);
       network.sink_count_++;
     }
@@ -973,7 +973,7 @@ class Network : public internal::ClockListener {
     Source(Network & network, FunctionType function)
       : internal::Source<
           internal::Outputs<O1, O2, O3, O4, O5> >(network.sched_, function) {
-      SetPolicy(network.policy_);
+      this->SetPolicy(network.policy_);
       network.sources_.push_back(this);
     }
 
@@ -981,7 +981,7 @@ class Network : public internal::ClockListener {
       embb::mtapi::ExecutionPolicy const & policy)
       : internal::Source<
       internal::Outputs<O1, O2, O3, O4, O5> >(network.sched_, function) {
-      SetPolicy(policy);
+      this->SetPolicy(policy);
       network.sources_.push_back(this);
     }
   };
@@ -991,14 +991,14 @@ class Network : public internal::ClockListener {
    public:
     ConstantSource(Network & network, Type value)
       : internal::ConstantSource<Type>(network.sched_, value) {
-      SetPolicy(network.policy_);
+      this->SetPolicy(network.policy_);
       network.sources_.push_back(this);
     }
 
     ConstantSource(Network & network, Type value,
       embb::mtapi::ExecutionPolicy const & policy)
       : internal::ConstantSource<Type>(network.sched_, value) {
-      SetPolicy(policy);
+      this->SetPolicy(policy);
       network.sources_.push_back(this);
     }
   };
