@@ -51,7 +51,7 @@ extern "C" {
  *
  * It must be called on all nodes using the MTAPI OpenCL plugin.
  *
- * Application software using MTAPI network must call
+ * Application software using MTAPI OpenCL must call
  * mtapi_opencl_plugin_initialize() once per node. It is an error to call
  * mtapi_opencl_plugin_initialize() multiple times
  * from a given node, unless mtapi_opencl_plugin_finalize() is called in
@@ -85,7 +85,7 @@ void mtapi_opencl_plugin_initialize(
  * unless mtapi_opencl_plugin_initialize() has been called prior to each
  * mtapi_opencl_plugin_finalize() call.
  *
- * All network tasks that have not completed and that have been started on the
+ * All OpenCL tasks that have not completed and that have been started on the
  * node where mtapi_opencl_plugin_finalize() is called will be canceled
  * (see mtapi_task_cancel()). mtapi_opencl_plugin_finalize() blocks until all
  * tasks that have been started on the same node return. Tasks that execute
