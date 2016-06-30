@@ -252,10 +252,12 @@ typedef struct embb_internal_thread_arg_t {
  * argument.
  */
 void* embb_internal_thread_start(void* internalArg) {
+#ifdef EMBB_PLATFORM_HAS_GLIB_CPU
   pid_t tid;
   tid = syscall(SYS_gettid);
   setpriority(PRIO_PROCESS, tid,
     ((embb_internal_thread_arg_t*)internalArg)->priority);
+#endif
   ((embb_internal_thread_arg_t*)internalArg)->result =
       ((embb_internal_thread_arg_t*)internalArg)->func(
       ((struct embb_internal_thread_arg_t*)internalArg)->arg);
