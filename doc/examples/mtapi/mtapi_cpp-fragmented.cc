@@ -51,8 +51,8 @@ static
 static
 int fibonacci(int n) {
 #include "mtapi/mtapi_cpp_initialize-snippet.h"
-#include "mtapi/mtapi_cpp_register_action-snippet.h"
 #include "mtapi/mtapi_cpp_get_node-snippet.h"
+#include "mtapi/mtapi_cpp_register_action-snippet.h"
   /* start calculation */
 #include "mtapi/mtapi_cpp_start_task-snippet.h"
   /* wait for task completion */

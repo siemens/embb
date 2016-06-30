@@ -146,7 +146,7 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
             for (int ii = clk; ii < clk_res; ii++) {
               const int idx = ii % slices_;
               action_[idx] = Action(this, ii);
-              sched_->Enqueue(queue_id_, action_[idx]);
+              sched_->Enqueue(queue_id_, action_[idx], policy_);
             }
             queued_clock_.Store(clk_res);
             retry = false;
@@ -158,7 +158,7 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     } else {
       const int idx = clock % slices_;
       action_[idx] = Action(this, clock);
-      sched_->Spawn(action_[idx]);
+      sched_->Start(action_[idx], policy_);
     }
   }
 

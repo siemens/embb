@@ -51,49 +51,19 @@ namespace mtapi {
  */
 class Group {
  public:
-  /**
-   * Constructs a Group object with default attributes.
-   * Requires an initialized Node.
-   */
-  Group() {
-    Create(MTAPI_GROUP_ID_NONE, MTAPI_DEFAULT_GROUP_ATTRIBUTES);
+  Group(Group const & other) : handle_(other.handle_) {
+    // empty
+  }
+
+  Group & operator=(Group const & other) {
+    handle_ = other.handle_;
+    return *this;
   }
 
   /**
-   * Constructs a Group object using the given Attributes.
-   * Requires an initialized Node.
+   * Deletes a Group object.
    */
-  Group(
-    GroupAttributes const & attr       /**< The GroupAttributes to use. */
-    ) {
-    Create(MTAPI_GROUP_ID_NONE, &attr.GetInternal());
-  }
-
-  /**
-   * Constructs a Group object with default attributes and the given ID.
-   * Requires an initialized Node.
-   */
-  Group(
-    mtapi_group_id_t id                /**< A user defined ID of the Group. */
-    ) {
-    Create(id, MTAPI_DEFAULT_GROUP_ATTRIBUTES);
-  }
-
-  /**
-   * Constructs a Group object with given attributes and ID.
-   * Requires an initialized Node.
-   */
-  Group(
-    mtapi_group_id_t id,               /**< A user defined ID of the Group. */
-    GroupAttributes const & attr       /**< The GroupAttributes to use. */
-    ) {
-    Create(id, &attr.GetInternal());
-  }
-
-  /**
-   * Destroys a Group object.
-   */
-  ~Group() {
+  void Delete() {
     // delete the group, ignore status
     mtapi_group_delete(handle_, MTAPI_NULL);
   }
@@ -194,7 +164,6 @@ class Group {
     ) {
     mtapi_status_t status;
     mtapi_group_wait_any(handle_, result, timeout, &status);
-    needs_delete_ = status != MTAPI_GROUP_COMPLETED;
     return status;
   }
 
@@ -245,7 +214,6 @@ class Group {
   ) {
     mtapi_status_t status;
     mtapi_group_wait_all(handle_, timeout, &status);
-    needs_delete_ = status != MTAPI_SUCCESS;
     return status;
   }
 
@@ -271,21 +239,21 @@ class Group {
   }
 
   friend class embb::base::Allocation;
+  friend class Node;
 
  private:
-  // not copyable
-  Group(Group const & other);
-  void operator=(Group const & other);
-
-  void Create(
-    mtapi_group_id_t group_id,
+  /**
+   * Constructs a Group object with given attributes and ID.
+   * Requires an initialized Node.
+   */
+  Group(
+    mtapi_group_id_t id,               /**< A user defined ID of the Group. */
     mtapi_group_attributes_t const * attributes
+                                       /**< The GroupAttributes to use. */
     ) {
-    needs_delete_ = false;
     mtapi_status_t status;
-    handle_ = mtapi_group_create(group_id, attributes, &status);
+    handle_ = mtapi_group_create(id, attributes, &status);
     internal::CheckStatus(status);
-    needs_delete_ = true;
   }
 
   Task Start(
@@ -307,7 +275,6 @@ class Group {
   }
 
   mtapi_group_hndl_t handle_;
-  bool needs_delete_;
 };
 
 } // namespace mtapi

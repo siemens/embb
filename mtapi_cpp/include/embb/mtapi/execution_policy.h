@@ -24,13 +24,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_TASKS_EXECUTION_POLICY_H_
-#define EMBB_TASKS_EXECUTION_POLICY_H_
+#ifndef EMBB_MTAPI_EXECUTION_POLICY_H_
+#define EMBB_MTAPI_EXECUTION_POLICY_H_
 
 #include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/internal/cmake_config.h>
 
 namespace embb {
-namespace tasks {
+namespace mtapi {
 
 /**
  * Describes the execution policy of a parallel algorithm.
@@ -42,7 +43,7 @@ namespace tasks {
  * max_priorities - 1 as given during initialization using Node::Initialize().
  * The default value of max_priorities is 4.
  *
- * \ingroup CPP_TASKS
+ * \ingroup CPP_MTAPI
  */
 class ExecutionPolicy{
  public:
@@ -118,7 +119,7 @@ class ExecutionPolicy{
    *
    * \return the affinity
    */
-  const mtapi_affinity_t &GetAffinity() const;
+  mtapi_affinity_t GetAffinity() const;
 
   /** Returns the priority
    *
@@ -147,7 +148,7 @@ class ExecutionPolicy{
   mtapi_uint_t priority_;
 };
 
-}  // namespace tasks
+}  // namespace mtapi
 }  // namespace embb
 
-#endif  // EMBB_TASKS_EXECUTION_POLICY_H_
+#endif  // EMBB_MTAPI_EXECUTION_POLICY_H_

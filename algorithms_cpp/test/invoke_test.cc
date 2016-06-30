@@ -61,7 +61,7 @@ void InvokeTest::Test() {
   Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
          &Invocable6, &Invocable7, &Invocable8, &Invocable9, &Invocable10);
 
-  embb::tasks::ExecutionPolicy policy;
+  embb::mtapi::ExecutionPolicy policy;
   Invoke(&Invocable1, &Invocable2, policy);
   Invoke(&Invocable1, &Invocable2, &Invocable3, policy);
   Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, policy);

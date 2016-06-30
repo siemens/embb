@@ -6,84 +6,37 @@ Version 0.4.0
 -------------
 
 ### Features:
-  - Added C++ wrapper and tests for logging facilities
+- Added consistency checking functionality to dataflow
+- Added C++ wrapper for base_c logging functions
+- Reworked dataflow_cpp interface for easier usage
 
 ### Changes and improvements:
-* Base:
-  - Changed assertions on user input into checks with error code return
-  - Improved checks and documentation in time, duration, and log
-  - Added exceptions when errors occur that depend on user input
-  - Added volatile keyword to member of internal atomic struct
-  - Changed spin lock implementaion to yield every 1024 spins
-* MTAPI:
-  - Created defines for MTAPI version
-  - Added missing fields in mtapi_info_t structure, in particular organization ID
-  - Changed reporting of number of domains and nodes to "unlimited"
-  - Changed group deleted and task state attributes to atomic
-  - Enabled reuse of main thread, which is configurable via node attributes
-  - Set result to MTAPI_NULL on error in mtapi_group_wait_any
-  - Network plugin:
-    - Disabled adress reuse for listening socket
-	- Solved problem with port reuse on Linux
-    - Set values to zero on failure for buffer pop operations
-	- Improved protocol for better error handling
-	- Changed signaling of task completion to atomic
-	- Introduced tagging of operations
-	- Improved task cancellation support
-	- Changed sending of result messages to complete ones only
-* Tasks:
-  - Added function to query the maximum number of queues
-  - Added function to query the task limit
-  - Changed initalization in the implementaion of ExecutionPolicy
-  - Made creation of groups and queues thread-safe as documented
-* Dataflow:
-  - Added connection chain test
-  - Added connection checks in outputs
-  - Added check for cycles in graph
-  - Added default token count to network
-  - Changed internal exceptions to assertions
-  - Changed return type of operator >> to allow for connection chains
-  - Changed semantics of source process (emit tokens only if function returns true)
-  - Changed initalization so that the number of slices can now be set at runtime
-  - Added automatic computation of maximum number of slices
-  - Changed done sync to atomics
-  - Removed Network::Make for simpler usage
-  - Added Network:IsValid to check network for errors
-* Containers:
-  - Added missing PT_ASSERT calls in hazard pointer test
-* All:
-  - Resolved several Codesonar warnings
+- Improved network plugin with better error checking and task cancellation support
+- Revised dataflow_cpp so that network token count can now be set at runtime
+- Added automatic determination of token count to dataflow_cpp
+- Added checks for NULL pointers in C interface functions
+- Extended mtapi_info_t to conform to the standard
+- Fixed CodeSonar warnings across the code base
+- Changed spinlock implementation to yield every 1024 spins now
+- Changed asserts on interface visible parameters to execeptions
+- Enabled reuse of main thread, which is configurable via node attributes
 
 ### Bug fixes:
-* Base:
-  - Fixed uninitialized variables in failure cases
-  - Changed implementation of atomic store on Windows to ensure sequential consistency
-  - Fixed memory leak in test for thread-specific storage
-* MTAPI:
-  - Fixed bug causing mtapi_task_wait to hang when a task was cancelled before it was running
-  - Fixed potential null pointer dereferences
-  - Fixed issue with AMD APP SDK in OpenCL plugin
-  - Fixed race condition in OpenCL plugin
-* Dataflow:
-  - Fixed bug with global network instances in MTAPI scheduler
-  - Fixed initalization of input
-  - Fixed memory leaks
-* Containers:
-  - Fixed uninitialized variables in test
+- Fixed problem causing low performance on the Jetson TK1 board
+- Fixed bug in mtapi_c causing a task wait to hang
+- Fixes issue with the AMD APP SDK in the OpenCL plugin
+- Fixed problem with automatic initialization in tasks_cpp
+- Fixed memory leaks in tests
 
 ### Build system:
-- Moved MTAPI plugins to folder mtapi_plugins_c
-- Removed dependency on installed OpenCL SDK, adapted test to succeed when OpenCL is unavailable
+- Removed dependency on an installed OpenCL SDK
+- Moved all MTAPI plugins into folder mtapi_plugins_c
 - Resolved MSVC warnings and build problem
 
 ### Documentation:
-- Changed documentation to reflect that atomics are initialized to zero by default
-- Improved documentation for functions without error code return
-- Updated year in license headers and tutorial
-- Updated documentation of spinlock implementations
-- Changed encoding of COPYING.md file to UTF-8
-- Adapted tutorial and examples to reflect changes to dataflow_cpp
-- Revised README.md to reflect new directory structure and removed UTF8 BOM
+- Updated README to reflect new directory structure
+- Updated Doxygen documentation of dataflow_cpp for the improved interface
+- Updated tutorial and examples to show the usage of dataflow_cpp
 
 
 Version 0.3.2

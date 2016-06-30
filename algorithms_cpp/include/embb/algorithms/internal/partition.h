@@ -27,7 +27,7 @@
 #ifndef EMBB_ALGORITHMS_INTERNAL_PARTITION_H_
 #define EMBB_ALGORITHMS_INTERNAL_PARTITION_H_
 
-#include <embb/tasks/tasks.h>
+#include <embb/mtapi/mtapi.h>
 
 namespace embb {
 namespace algorithms {

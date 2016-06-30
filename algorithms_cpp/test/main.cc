@@ -25,7 +25,7 @@
  */
 
 #include <partest/partest.h>
-#include <embb/tasks/tasks.h>
+#include <embb/mtapi/mtapi.h>
 
 #include <iostream>
 #include <sstream>
@@ -66,7 +66,7 @@ int compute1_() {
 }
 
 PT_MAIN("Algorithms") {
-  embb::tasks::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
+  embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
   PT_RUN(PartitionerTest);
   PT_RUN(ForEachTest);
@@ -78,7 +78,7 @@ PT_MAIN("Algorithms") {
   PT_RUN(MergeSortTest);
   PT_RUN(InvokeTest);
 
-  embb::tasks::Node::Finalize();
+  embb::mtapi::Node::Finalize();
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 

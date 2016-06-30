@@ -29,7 +29,7 @@
 
 #include <cstddef>
 
-#include <embb/tasks/task_context.h>
+#include <embb/mtapi/task_context.h>
 
 #include <embb/dataflow/internal/node.h>
 
@@ -46,7 +46,7 @@ class Action {
     node_->Run(clock_);
   }
 
-  void RunMTAPI(embb::tasks::TaskContext & /*context*/) {
+  void RunMTAPI(embb::mtapi::TaskContext & /*context*/) {
     node_->Run(clock_);
   }
 

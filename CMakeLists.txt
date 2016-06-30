@@ -98,9 +98,9 @@ endif()
 message("   (set with command line option -DWARNINGS_ARE_ERRORS=ON/OFF)")
 
 if (USE_AUTOMATIC_INITIALIZATION STREQUAL ON)
-  message("-- MTAPI/Tasks automatic initialization enabled (default)")
+  message("-- MTAPI automatic initialization enabled (default)")
 else()
-  message("-- MTAPI/Tasks automatic initialization disabled")
+  message("-- MTAPI automatic initialization disabled")
 endif()
 message("   (set with command line option -DUSE_AUTOMATIC_INITIALIZATION=ON/OFF)")
 
@@ -137,7 +137,6 @@ set(EXPECTED_EMBB_TEST_EXECUTABLES "embb_algorithms_cpp_test"
                 "embb_mtapi_c_test"
                 "embb_mtapi_cpp_test"
                 "embb_mtapi_network_c_test"
-                "embb_tasks_cpp_test"
                 )
 
 # if opencl is there, we also expect the mtapi opencl test to be generated
@@ -180,7 +179,6 @@ add_subdirectory(mtapi_plugins_c/mtapi_network_c)
 if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   add_subdirectory(mtapi_plugins_c/mtapi_opencl_c)
 endif()
-add_subdirectory(tasks_cpp)
 add_subdirectory(mtapi_cpp)
 add_subdirectory(containers_cpp)
 add_subdirectory(algorithms_cpp)

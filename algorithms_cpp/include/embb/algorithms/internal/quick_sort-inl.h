@@ -33,7 +33,7 @@
 #include <functional>
 
 #include <embb/base/exceptions.h>
-#include <embb/tasks/tasks.h>
+#include <embb/mtapi/mtapi.h>
 #include <embb/algorithms/internal/partition.h>
 
 namespace embb {
@@ -48,7 +48,7 @@ class QuickSortFunctor {
    * Constructs a functor.
    */
   QuickSortFunctor(RAI first, RAI last, ComparisonFunction comparison,
-    const embb::tasks::ExecutionPolicy& policy, size_t block_size)
+    const embb::mtapi::ExecutionPolicy& policy, size_t block_size)
     : first_(first), last_(last), comparison_(comparison), policy_(policy),
       block_size_(block_size) {
   }
@@ -56,7 +56,7 @@ class QuickSortFunctor {
   /**
    * MTAPI action function and starting point of the parallel quick sort.
    */
-  void Action(embb::tasks::TaskContext&) {
+  void Action(embb::mtapi::TaskContext&) {
     Difference distance = last_ - first_;
     if (distance <= 1) {
       return;
@@ -68,15 +68,17 @@ class QuickSortFunctor {
         SerialQuickSort(first_, mid);
         SerialQuickSort(mid, last_);
       } else {
-        embb::tasks::Node& node = embb::tasks::Node::GetInstance();
+        embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
         QuickSortFunctor functor_l(first_, mid, comparison_, policy_,
                                    block_size_);
-        embb::tasks::Task task_l = node.Spawn(embb::tasks::Action(
-          base::MakeFunction(functor_l, &QuickSortFunctor::Action)));
+        embb::mtapi::Task task_l = node.Start(
+          base::MakeFunction(functor_l, &QuickSortFunctor::Action),
+          policy_);
         QuickSortFunctor functor_r(mid, last_, comparison_, policy_,
                                    block_size_);
-        embb::tasks::Task task_r = node.Spawn(embb::tasks::Action(
-          base::MakeFunction(functor_r, &QuickSortFunctor::Action)));
+        embb::mtapi::Task task_r = node.Start(
+          base::MakeFunction(functor_r, &QuickSortFunctor::Action),
+          policy_);
         task_l.Wait(MTAPI_INFINITE);
         task_r.Wait(MTAPI_INFINITE);
       }
@@ -87,7 +89,7 @@ class QuickSortFunctor {
   RAI first_;
   RAI last_;
   ComparisonFunction comparison_;
-  const embb::tasks::ExecutionPolicy& policy_;
+  const embb::mtapi::ExecutionPolicy& policy_;
   size_t block_size_;
 
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
@@ -189,10 +191,10 @@ class QuickSortFunctor {
 template <typename RAI, typename ComparisonFunction>
 void QuickSortIteratorCheck(RAI first, RAI last,
   ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy,
+  const embb::mtapi::ExecutionPolicy& policy,
   size_t block_size,
   std::random_access_iterator_tag) {
-  embb::tasks::Node& node = embb::tasks::Node::GetInstance();
+  embb::mtapi::Node& node = embb::mtapi::Node::GetInstance();
   typedef typename std::iterator_traits<RAI>::difference_type difference_type;
   difference_type distance = std::distance(first, last);
   if (distance == 0) {
@@ -215,8 +217,10 @@ void QuickSortIteratorCheck(RAI first, RAI last,
   }
   QuickSortFunctor<RAI, ComparisonFunction> functor(
       first, last, comparison, policy, block_size);
-  embb::tasks::Task task = node.Spawn(embb::tasks::Action(base::MakeFunction(
-      functor, &QuickSortFunctor<RAI, ComparisonFunction>::Action)));
+  embb::mtapi::Task task = node.Start(
+    embb::base::MakeFunction(functor,
+      &QuickSortFunctor<RAI, ComparisonFunction>::Action),
+    policy);
   task.Wait(MTAPI_INFINITE);
 }
 
@@ -224,7 +228,7 @@ void QuickSortIteratorCheck(RAI first, RAI last,
 
 template <typename RAI, typename ComparisonFunction>
 void QuickSort(RAI first, RAI last, ComparisonFunction comparison,
-  const embb::tasks::ExecutionPolicy& policy, size_t block_size) {
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::iterator_category category;
   internal::QuickSortIteratorCheck(first, last, comparison,
                                    policy, block_size, category());

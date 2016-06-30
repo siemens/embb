@@ -38,10 +38,15 @@ class SchedulerSequential : public Scheduler {
  public:
   SchedulerSequential() {}
   virtual ~SchedulerSequential() {}
-  virtual void Spawn(Action & action) {
+  virtual void Start(
+    Action & action,
+    embb::mtapi::ExecutionPolicy const &) {
     action.RunSequential();
   }
-  virtual void Enqueue(int, Action & action) {
+  virtual void Enqueue(
+    int,
+    Action & action,
+    embb::mtapi::ExecutionPolicy const &) {
     action.RunSequential();
   }
   virtual void WaitForSlice(int /*slice*/) {}
