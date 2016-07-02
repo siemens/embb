@@ -54,6 +54,8 @@ EMB² consists of several components (modules) which are organized as follows:
     ...
 ```
 
+If you add a directory, e.g., for a new plugin, please don't forget to update all relevant CMakeLists.txt files as well as doc/reference/Doxyfile.in and scripts/run_cpplint.sh.
+
 ### Branches
 
 There are two predefined branches in the Git repository:

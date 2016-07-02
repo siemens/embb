@@ -1,133 +1,64 @@
 Embedded Multicore Building Blocks (EMB²)
 =========================================
 
-
 Overview
 --------
 
-The Embedded Multicore Building Blocks (EMB²) are an easy to use yet powerful
-and efficient C/C++ library for the development of parallel applications. EMB²
-has been specifically designed for embedded systems and the typical
-requirements that accompany them, such as real-time capability and constraints
-on memory consumption. As a major advantage, low-level operations are hidden
-in the library which relieves software developers from the burden of thread
-management and synchronization. This not only improves productivity of
-parallel software development, but also results in increased reliability and
-performance of the applications.
+### Introduction
 
-EMB² is independent of the hardware architecture (x86, ARM, ...) and runs on
-various platforms, from small devices to large systems containing numerous
-processor cores. It builds on MTAPI, a standardized programming interface for
-leveraging task parallelism in embedded systems containing symmetric or
-asymmetric multicore processors. A core feature of MTAPI is low-overhead
-scheduling of fine-grained tasks among the available cores during runtime.
-Unlike existing libraries, EMB² supports task priorities and affinities, which
-allows the creation of soft real-time systems. Additionally, the scheduling
-strategy can be optimized for non-functional requirements such as minimal
-latency and fairness.
+The Embedded Multicore Building Blocks (EMB²) are an easy to use yet powerful and efficient C/C++ library for the development of parallel applications. EMB² has been specifically designed for embedded systems and the typical requirements that accompany them, such as real-time capability and constraints on memory consumption. As a major advantage, low-level operations are hidden in the library which relieves software developers from the burden of thread management and synchronization. This not only improves productivity of parallel software development, but also results in increased reliability and performance of the applications.
 
-Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent
-data structures, and skeletons for implementing stream processing applications
-(see figure below). These building blocks are largely implemented in a
-non-blocking fashion, thus preventing frequently encountered pitfalls like
-lock contention, deadlocks, and priority inversion. As another advantage in
-real-time systems, the algorithms and data structures give certain progress
-guarantees. For example, wait-free data structures guarantee system-wide
-progress which means that every operation completes within a finite number of
-steps independently of any other concurrent operations on the same data
-structure.
+EMB² is independent of the hardware architecture (x86, ARM, ...) and runs on various platforms, from small devices to large systems containing numerous processor cores. It builds on MTAPI, a standardized programming interface for leveraging task parallelism in embedded systems containing symmetric or asymmetric (heterogeneous) multicore processors. A core feature of MTAPI is low-overhead scheduling of fine-grained tasks among the available cores during runtime. Unlike existing libraries, EMB² supports task priorities and affinities, which allows the creation of soft real-time systems. Additionally, the scheduling strategy can be optimized for non-functional requirements such as minimal latency and fairness.
+
+Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent data structures, and skeletons for implementing stream processing applications (see figure below). These building blocks are largely implemented in a non-blocking fashion, thus preventing frequently encountered pitfalls like lock contention, deadlocks, and priority inversion. As another advantage in real-time systems, the algorithms and data structures give certain progress guarantees. For example, wait-free data structures guarantee system-wide progress which means that every operation completes within a finite number of steps independently of any other concurrent operations on the same data structure.
 
 <img src="doc/images/embb.png" alt="Building blocks of EMB²" width="500"/>
 
-Community and Contact
----------------------
+### Community and Contact
 
-Project home:
+GitHub:
   - https://github.com/siemens/embb
 
-Git:
+Repository:
   - https://github.com/siemens/embb.git (HTTP)
   - git@github.com:siemens/embb.git (SSH)
 
 Mailing lists:
   - embb-announcements@googlegroups.com (announcements)
+    https://groups.google.com/forum/#!forum/embb-announcements/join
   - embb-dev@googlegroups.com (development)
-
-Subscription:
-  - https://groups.google.com/forum/#!forum/embb-announcements/join
-  - https://groups.google.com/forum/#!forum/embb-dev/join
+    https://groups.google.com/forum/#!forum/embb-dev/join
 
 Contact:
   - embb.info@gmail.com or
   - tobias.schuele@siemens.com, sebnem.rusitschka@siemens.com
 
+### License
 
-License
--------
+See the file [COPYING.md](https://github.com/siemens/embb/blob/master/COPYING.md) in the project's root directory.
 
-See the file "COPYING.md" in the project's root directory.
+### Contributions:
 
-
-Requirements
-------------
-
-This project is based on the standards C99 (for C code) and C++03 (for C++
-code) to be usable on a wide range of target systems. It has been tested on
-the following OS/compiler/architecture combinations:
-
-  - Linux (Ubuntu 12.04) / GCC 4.8.1 / x86, x86_64
-  - Linux (Ubuntu 12.04) / Clang 3.0.0 / x86_64
-  - Linux (Ubuntu 14.04) / GCC 4.8.2 / ARMv7
-  - Windows
-    * MSVC 12.0.21005.1 REL / x86, x86_64
-    * MSVC 11.0.50727.42 VSLRSTAGE / x86, x86_64
-
-Other compilers and operating systems may be supported without any changes to
-the source code. The project includes unit tests that can be used to find out
-whether a system not officially supported is suitable to run EMB². If there is
-a requirement to support a system on which the unit tests do not pass, please
-contact us: embb-dev@googlegroups.com.
-
-
-Directory Structure
--------------------
-
-EMB² consists of various building blocks. For some of them, there exist C and
-C++ versions, others are only implemented in C++. The directory names are
-postfixed with either "_cpp" or "_c" for the C++ and C versions, respectively.
-Currently, EMB² contains the following components:
-
-  - base: base_c, base_cpp
-  - mtapi: mtapi_c, mtapi_cpp and
-    mtapi_plugins_c (mtapi_network_c and mtapi_opencl_c)
-  - algorithms: algorithms_cpp
-  - dataflow: dataflow_cpp
-  - containers: containers_cpp
-
-Each component consists of an include, a src, and a test subfolder that contain
-the header files, source files, and unit tests, respectively.
-
-Component base_c contains abstractions for threading, synchronization, atomic
-operations, and other functionalities. As the name indicates, the code is
-implemented in C. Component base_cpp is mainly a C++ wrapper around the base_c
-functions. Component mtapi_c is a task scheduler written in C and mtapi_cpp a
-C++ wrapper for the scheduler (mtapi_network_c and mtapi_opencl_c are scheduler
-plugins for distributed and OpenCL-based heterogeneous systems, respectively).
-Component algorithms_cpp provides high-level constructs for typical
-parallelization tasks in C++, and dataflow_cpp generic skeletons for the
-development of parallel stream-based applications. Finally, containers_cpp
-provides data structures for storing objects in a thread-safe way.
-
+See the file [CONTRIBUTING.md](https://github.com/siemens/embb/blob/master/CONTRIBUTING.md) in the project's root directory.
 
 Build and Installation
 ----------------------
 
-Note: It is recommended to build from a release file and not from a repository
-snapshot in order to get the documentation and the examples out-of-the box.
-The release files can be found at https://github.com/siemens/embb/releases.
+### General
 
-EMB² is built using CMake (version 2.8.9 or higher). CMake is a build file
-generator which allows to abstract from the concrete build tools. To generate
+It is strongly recommended to build from a release file and not from a repository snapshot in order to get the documentation and the examples out-of-the box. The release files can be found at https://github.com/siemens/embb/releases.
+
+### Platforms
+
+EMB² is regularly built and tested on a variety of OS/compiler/architecture combinations including Linux (x86 and ARM using GCC/Clang) and Windows (x86 using MSVC). Other platforms may be supported without any changes to the source code. The project comes with unit tests that can be used to find out whether a system not officially supported is suitable to run EMB². If the build process or the unit tests fail on your system, please contact us.
+
+### Prerequisites
+
+The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Hence, you can use any C/C++ compiler supporting these standards. Additionally, you need CMake 2.8.9 or higher. CMake is a build file generator which abstracts from the concrete build tools.
+
+
+
+To generate
 and invoke the platform-specific build files, open a shell (on Windows, use
 the Visual Studio developer shell to have the correct environment variables)
 and change to the project's root directory. Create a subdirectory, where you
@@ -326,39 +257,6 @@ Known Bugs and Limitations
   dataflow components are currently limited to homogeneous systems.
 
 
-Development and Contribution
-----------------------------
-
-The EMB² team welcomes all kinds of contributions, preferably as pull requests
-or patches via the development mailing lists (see above). If possible, please
-refer to a current snapshot of the development branch.
-
-EMB² is supposed to be easily portable to platforms unsupported so far. Almost
-all platform specific code is located in the base_c and base_cpp modules. All
-existing platform specific code is fenced by EMBB_PLATFORM_* defines.
-
-To distinguish between compilers, EMB² currently uses the following defines:
-
-  - EMBB_PLATFORM_COMPILER_GNUC
-  - EMBB_PLATFORM_COMPILER_MSVC
-  - EMBB_PLATFORM_COMPILER_UNKNOWN
-
-Different architectures are distinguished using:
-
-  - EMBB_PLATFORM_ARCH_X86
-  - EMBB_PLATFORM_ARCH_X86_32
-  - EMBB_PLATFORM_ARCH_X86_64
-  - EMBB_PLATFORM_ARCH_ARM
-  - EMBB_PLATFORM_ARCH_UNKNOWN
-
-Threading APIs are switched by:
-
-  - EMBB_PLATFORM_THREADING_WINTHREADS
-  - EMBB_PLATFORM_THREADING_POSIXTHREADS
-
-Please use these defines for new platform specific code. If additional defines
-are needed, they can be defined in the config.h or cmake_config.h.in files.
-
 
 Important Notes
 ---------------
@@ -374,18 +272,16 @@ Important Notes
   flags and libs configured for ThreadSanitizer.
 
 
-Links
------
 
-  - Multicore Association:
-    http://www.multicore-association.org
-  - MTAPI:
-    http://www.multicore-association.org/workgroup/mtapi.php
-  - CMake:
-    http://www.cmake.org/
-  - Google C++ Style Guide:
-    http://google-styleguide.googlecode.com/svn/trunk/cppguide.html
-  - cpplint:
-    http://google-styleguide.googlecode.com/svn/trunk/cpplint/
-  - Cppcheck:
-    http://cppcheck.sourceforge.net/
+Components
+----------
+
+EMB² consists of various components. For some of them, there exist C and C++ versions, others are only implemented in C++. The directory names are postfixed with either "_cpp" or "_c" for the C++ and C versions, respectively. Currently, EMB² is composed of the following components:
+
+  - Base library: base_c, base_cpp
+  - MTAPI: mtapi_c, mtapi_cpp, and mtapi_plugins_c (mtapi_network_c, mtapi_opencl_c, mtapi_cuda_c)
+  - Algorithms: algorithms_cpp
+  - Dataflow: dataflow_cpp
+  - Containers: containers_cpp
+
+Directory base_c contains abstractions for threading, synchronization, atomic operations, and other functionalities. As the name indicates, the code is implemented in C. Directory base_cpp contains C++ wrappers around the base_c functions. Similarly, the MTAPI task scheduler is available for programs written in C (mtapi_c) or C++ (mtapi_cpp). Heterogeneous and distributed systems are supported via the plugins contained in mtapi_plugins_c. Directory algorithms_cpp provides high-level constructs for typical parallelization tasks in C++, and dataflow_cpp generic skeletons for the development of parallel stream-based applications. Finally, containers_cpp provides data structures for storing objects in a thread-safe way.
