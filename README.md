@@ -1,10 +1,10 @@
 Embedded Multicore Building Blocks (EMB²)
 =========================================
 
-Overview
---------
+Introduction
+------------
 
-### Introduction
+### Overview
 
 The Embedded Multicore Building Blocks (EMB²) are an easy to use yet powerful and efficient C/C++ library for the development of parallel applications. EMB² has been specifically designed for embedded systems and the typical requirements that accompany them, such as real-time capability and constraints on memory consumption. As a major advantage, low-level operations are hidden in the library which relieves software developers from the burden of thread management and synchronization. This not only improves productivity of parallel software development, but also results in increased reliability and performance of the applications.
 
@@ -24,14 +24,13 @@ Repository:
   - git@github.com:siemens/embb.git (SSH)
 
 Mailing lists:
-  - embb-announcements@googlegroups.com (announcements)
+  - embb-announcements@googlegroups.com (announcements)<br/>
     https://groups.google.com/forum/#!forum/embb-announcements/join
-  - embb-dev@googlegroups.com (development)
+  - embb-dev@googlegroups.com (development)<br/>
     https://groups.google.com/forum/#!forum/embb-dev/join
 
 Contact:
-  - embb.info@gmail.com or
-  - tobias.schuele@siemens.com, sebnem.rusitschka@siemens.com
+  - embb.info@gmail.com
 
 ### License
 
@@ -54,16 +53,44 @@ EMB² is regularly built and tested on a variety of OS/compiler/architecture com
 
 ### Prerequisites
 
-The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Hence, you can use any C/C++ compiler supporting these standards. Additionally, you need CMake 2.8.9 or higher. CMake is a build file generator which abstracts from the concrete build tools.
+The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Besides a C/C++ compiler supporting these standards, you need CMake 2.8.9 or higher. [CMake](https://cmake.org/) is a build file generator which abstracts from the concrete build tools.
 
+### Quick Installation on Linux
 
+To generate and invoke the platform-specific build files, open a shell and change to the project's root directory. Create a subdirectory, where you want to build the library, e.g., "build", and change to that subdirectory. It is assumed that the project's root directory is now the parent directory. Now you can generate the build files using CMake:
 
-To generate
-and invoke the platform-specific build files, open a shell (on Windows, use
-the Visual Studio developer shell to have the correct environment variables)
-and change to the project's root directory. Create a subdirectory, where you
-want to build the library, e.g., "build". Change to that subdirectory. It is
-assumed that the project's root directory is now the parent directory.
+    cmake ..
+
+As the next step, compile EMB² using the generated build files:
+
+    cmake --build .
+
+After compilation has finished, execute the tests:
+
+    binaries/run_tests.sh
+
+Finally, install EMB² (the default path is `/usr/local`):
+
+    sudo cmake --build . --target install
+
+### Quick Installation on Windows
+
+To generate and invoke the platform-specific build files, open the Visual Studio developer shell and change to the project's root directory. Create a subdirectory, where you want to build the library, e.g., "build", and change to that subdirectory. It is assumed that the project's root directory is now the parent directory. Now you can generate the build files using CMake (Make sure that you specify the correct version of Visual Studio. A list of supported CMake generators can be displayed by typing `cmake --help`):
+
+    cmake -G "Visual Studio 14 2015" ..
+
+As the next step, compile EMB² using the generated build files:
+
+    cmake --build . --config Release
+
+After compilation has finished, execute the tests:
+
+    binaries\run_tests.bat
+
+Finally, install EMB² with administrator privileges:
+
+    cmake --build . --target install --config Release
+
 
 ### 1. Generation of native build files
 
