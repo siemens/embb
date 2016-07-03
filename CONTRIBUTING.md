@@ -5,7 +5,7 @@ Table of Contents
 -----------------
 
 1. Introduction
-2. Development Environment
+2. Development
   - Directory Structure
   - Branches
   - Contributing
@@ -22,10 +22,10 @@ Table of Contents
 1. Introduction
 ---------------
 
-The EMB² team welcomes all kinds of feedback and contributions. Please don't hesitate to contact us if you have any questions, comments, bug reports, suggestions for improvement, extensions or the like (see [README.md](https://github.com/siemens/embb/blob/master/README.md) for general contact information). In the following, we give an overview of the development environment as well as coding and documentation guidelines, and sketch how to port EMB² to other platforms.
+The EMB² team welcomes all kinds of feedback and contributions. Please don't hesitate to contact us if you have any questions, comments, bug reports, suggestions for improvement, extensions or the like (see [README.md](https://github.com/siemens/embb/blob/master/README.md) for general contact information). In the following, we give an overview the main development principles and sketch how to port EMB² to other platforms. Moreover, we describe our coding and documentation guidelines that should be adhered to when contributing code.
 
-2. Development Environment
---------------------------
+2. Development
+--------------
 
 ### Directory Structure
 
@@ -51,7 +51,7 @@ EMB² consists of several components (modules) which are organized as follows:
     ...
 ```
 
-If you add a directory, e.g., for a new plugin, please don't forget to update all relevant CMakeLists.txt files as well as doc/reference/Doxyfile.in and scripts/run_cpplint.sh.
+If you add a directory, e.g., for a new plugin, please don't forget to update all relevant `CMakeLists.txt` files as well as `doc/reference/Doxyfile.in` and `scripts/run_cpplint.sh`.
 
 ### Branches
 
@@ -65,6 +65,33 @@ In addition to these two branches, there may be arbitrarily many feature branche
 ### Contributing
 
 Bug fixes, extensions, etc. can be contributed as pull requests via GitHub or as patches via the development mailing list (mailto:embb-dev@googlegroups.com). If possible, please refer to a current snapshot of the master branch.
+
+### Porting
+
+EMB² is easily portable to platforms unsupported so far. Almost all platform specific code is located in the `base_c` and `base_cpp` directories, and platform specific code is fenced using `EMBB_PLATFORM_*` defines.
+
+To distinguish between compilers, EMB² currently uses the following defines:
+
+- EMBB_PLATFORM_COMPILER_GNUC
+- EMBB_PLATFORM_COMPILER_MSVC
+- EMBB_PLATFORM_COMPILER_UNKNOWN
+
+Different architectures are distinguished using:
+
+- EMBB_PLATFORM_ARCH_X86
+- EMBB_PLATFORM_ARCH_X86_32
+- EMBB_PLATFORM_ARCH_X86_64
+- EMBB_PLATFORM_ARCH_ARM
+- EMBB_PLATFORM_ARCH_UNKNOWN
+
+Threading APIs are switched by:
+
+- EMBB_PLATFORM_THREADING_WINTHREADS
+- EMBB_PLATFORM_THREADING_POSIXTHREADS
+
+Please use these defines for new platform specific code. If additional defines are needed, they can be included in the `config.h` or `cmake_config.h.in` files.
+
+A list of macros to check the underlying platform, compiler versions, etc. can be found here: http://sourceforge.net/p/predef/wiki/Home/
 
 3. Coding Guidelines
 --------------------
@@ -92,9 +119,9 @@ operation, i.e., in the methods for pushing and popping elements.
 ### Tool Support
 
 - All source files in the repository must have LF (Unix) line endings. Git can take care of this (using the following option, newly checked-in files and changes to them will automatically be converted from CRLF to LF if necessary):
-
+```
   git config --global core.autocrlf input
-
+```
 - For the C++ parts of EMB², we follow [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html) which can be checked using the [cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) tool. However, we ignore some rules as they are not applicable or yield false results for this project. For example, we respect the include order of the Google style guide, but use <> instead of "" for project includes (see above). To check whether your code adheres to the style guide, use the `run_cpplint.sh` script containted in the `scripts` folder. You may use [clang-format](http://clang.llvm.org/docs/ClangFormat.html) with option `-style=Google` to pretty print your code but be aware that line breaking of Doxygen comments may not work properly.
 - Moreover, we regularly check the code using [Cppcheck](http://cppcheck.sourceforge.net/), a light-weight static analysis tool for C/C++. To run Cppcheck on all files in a certain directory, call it as follows:
 ```
@@ -203,31 +230,3 @@ class Queue {
   );
 };
 ```
-
-5. Porting
-----------
-
-EMB² is easily portable to platforms unsupported so far. Almost all platform specific code is located in the `base_c` and `base_cpp` directories, and platform specific code is fenced using `EMBB_PLATFORM_*` defines.
-
-To distinguish between compilers, EMB² currently uses the following defines:
-
-- EMBB_PLATFORM_COMPILER_GNUC
-- EMBB_PLATFORM_COMPILER_MSVC
-- EMBB_PLATFORM_COMPILER_UNKNOWN
-
-Different architectures are distinguished using:
-
-- EMBB_PLATFORM_ARCH_X86
-- EMBB_PLATFORM_ARCH_X86_32
-- EMBB_PLATFORM_ARCH_X86_64
-- EMBB_PLATFORM_ARCH_ARM
-- EMBB_PLATFORM_ARCH_UNKNOWN
-
-Threading APIs are switched by:
-
-- EMBB_PLATFORM_THREADING_WINTHREADS
-- EMBB_PLATFORM_THREADING_POSIXTHREADS
-
-Please use these defines for new platform specific code. If additional defines are needed, they can be included in the `config.h` or `cmake_config.h.in` files.
-
-A list of macros to check the underlying platform, compiler versions, etc. can be found here: http://sourceforge.net/p/predef/wiki/Home/
