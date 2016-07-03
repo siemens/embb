@@ -1,31 +1,13 @@
 Guidelines for Developing and Contributing Code
 ===============================================
 
-Table of Contents
------------------
-
-1. Introduction
-2. Development
-  - Directory Structure
-  - Branches
-  - Contributing
-  - Porting
-3. Coding Guidelines
-  - General
-  - Tool Support
-4. Documentation Guidelines
-  - General
-  - Special Commands
-  - Structure
-  - Example
-
-1. Introduction
----------------
+Introduction
+------------
 
 The EMB² team welcomes all kinds of feedback and contributions. Please don't hesitate to contact us if you have any questions, comments, bug reports, suggestions for improvement, extensions or the like (see [README.md](https://github.com/siemens/embb/blob/master/README.md) for general contact information). In the following, we give an overview the main development principles and sketch how to port EMB² to other platforms. Moreover, we describe our coding and documentation guidelines that should be adhered to when contributing code.
 
-2. Development
---------------
+Development
+-----------
 
 ### Directory Structure
 
@@ -93,8 +75,8 @@ Please use these defines for new platform specific code. If additional defines a
 
 A list of macros to check the underlying platform, compiler versions, etc. can be found here: http://sourceforge.net/p/predef/wiki/Home/
 
-3. Coding Guidelines
---------------------
+Coding Guidelines
+-----------------
 
 ### General
 
@@ -144,8 +126,8 @@ operation, i.e., in the methods for pushing and popping elements.
 #endif
 ```
 
-4. Documentation Guidelines
----------------------------
+Documentation Guidelines
+------------------------
 
 ### General
 

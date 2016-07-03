@@ -189,7 +189,17 @@ which copies the contents of the "install" folder to the "bin", "lib", and "incl
 Using the Library
 -----------------
 
-To use EMB², the include files have to be made available during compilation of your application and the libraries have to be added during linking.
+### Components
+
+For some of the components, there exist C and C++ versions, wheras others are only implemented in C++. The directory names are postfixed with either "_cpp" or "_c" for the C++ and C versions, respectively. Currently, EMB² is composed of the following components:
+
+  - Base library: base_c, base_cpp
+  - MTAPI: mtapi_c, mtapi_cpp, and mtapi_plugins_c (mtapi_network_c, mtapi_opencl_c, mtapi_cuda_c)
+  - Algorithms: algorithms_cpp
+  - Dataflow: dataflow_cpp
+  - Containers: containers_cpp
+
+Directory base_c contains abstractions for threading, synchronization, atomic operations, and other functionalities. As the name indicates, the code is implemented in C. Directory base_cpp contains C++ wrappers around the base_c functions. Similarly, the MTAPI task scheduler is available for programs written in C (mtapi_c) or C++ (mtapi_cpp). Heterogeneous and distributed systems are supported via the plugins contained in mtapi_plugins_c. Directory algorithms_cpp provides high-level constructs for typical parallelization tasks in C++, and dataflow_cpp generic skeletons for the development of parallel stream-based applications. Finally, containers_cpp provides data structures for storing objects in a thread-safe way.
 
 ### Using C++
 
@@ -216,70 +226,15 @@ The C header files can be included as follows:
     #include<embb/base/c/base.h>
     #include<embb/mtapi/c/mtapi.h>
 
-or simply
+Alternatively, you can include MTAPI by `#include<mtapi.h>`.
 
-    #include<mtapi.h>
+### Documentation
 
-Documentation
--------------
+The release files of EMB² come with a tutorial, example programs, and a reference manual (HTML) describing the APIs. All documentation is contained in the "doc" folder. The root document of the HTML reference is `doc/reference/index.html`. Note that the generated documentation files are not under version control and hence not contained in the repository. As mentioned above, it is therefore recommended to download one of the packaged release files in order to have ready-to-use documentation.
 
-The release files of EMB² come with a tutorial, example programs, and a
-reference manual (HTML) describing the APIs. All documentation is contained in
-the "doc" folder. The root document of the HTML reference is
-"doc/reference/index.html". Note that generated documentation files are not
-under version control and hence not contained in the repository. As mentioned
-above, it is therefore recommended to download one of the packaged release
-files in order to have ready-to-use documentation.
+### Limitations and Important Notes
+------------------------------
 
-
-Code Quality
-------------
-
-For the C++ parts of EMB², we respect most rules of the "Google C++ Style
-Guide" which are checked using the cpplint tool. However, we ignore some
-rules, as they are not applicable or yield false results for this project.
-For example, we respect the include order of the Google Style Guide, but use
-<> instead of "" for project includes, which confuses the cpplint tool.
-Moreover, we do not tolerate compiler warnings and regularly check the source
-code using Cppcheck, a static analysis tool for C++.
-
-
-Known Bugs and Limitations
---------------------------
-
-- For memory management reasons, the number of threads EMB² can deal with
-  is bounded by a predefined but modifiable constant (see functions
-  embb_thread_get_max_count() / embb_thread_set_max_count() and class
-  embb::base::Thread).
-- While MTAPI fully supports heterogeneous systems, the algorithms and
-  dataflow components are currently limited to homogeneous systems.
-
-
-
-Important Notes
----------------
-
-- The MTAPI C++ interface supports automatic initialization, which allows for
-  easy usage of the MTAPI C++, Algorithms, and Dataflow components. For
-  performance measurements, explicit initialization is strongly recommended
-  since the measurements will otherwise include the initialization time of
-  MTAPI.
-- When using ThreadSanitizer there is a bug that causes the built-in CMake type
-  size determination to fail which in turn leads to a broken configuration.
-  Therefore, you have to do a normal build first and then rerun CMake with
-  flags and libs configured for ThreadSanitizer.
-
-
-
-Components
-----------
-
-EMB² consists of various components. For some of them, there exist C and C++ versions, others are only implemented in C++. The directory names are postfixed with either "_cpp" or "_c" for the C++ and C versions, respectively. Currently, EMB² is composed of the following components:
-
-  - Base library: base_c, base_cpp
-  - MTAPI: mtapi_c, mtapi_cpp, and mtapi_plugins_c (mtapi_network_c, mtapi_opencl_c, mtapi_cuda_c)
-  - Algorithms: algorithms_cpp
-  - Dataflow: dataflow_cpp
-  - Containers: containers_cpp
-
-Directory base_c contains abstractions for threading, synchronization, atomic operations, and other functionalities. As the name indicates, the code is implemented in C. Directory base_cpp contains C++ wrappers around the base_c functions. Similarly, the MTAPI task scheduler is available for programs written in C (mtapi_c) or C++ (mtapi_cpp). Heterogeneous and distributed systems are supported via the plugins contained in mtapi_plugins_c. Directory algorithms_cpp provides high-level constructs for typical parallelization tasks in C++, and dataflow_cpp generic skeletons for the development of parallel stream-based applications. Finally, containers_cpp provides data structures for storing objects in a thread-safe way.
+- For memory management reasons, the number of threads EMB² can deal with is bounded by a predefined but modifiable constant (see functions `embb_thread_get_max_count()` / `embb_thread_set_max_count()` and class `embb::base::Thread`).
+- The MTAPI C++ interface supports automatic initialization, which allows for easy usage of the MTAPI C++, Algorithms, and Dataflow components. For performance measurements, explicit initialization is strongly recommended since the measurements will otherwise include the initialization time of MTAPI.
+- When using ThreadSanitizer, a bug causes the built-in CMake type size determination to fail which in turn leads to a broken configuration. Therefore, you have to do a normal build first and then run CMake again with flags and libs configured for ThreadSanitizer.
