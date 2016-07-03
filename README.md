@@ -49,11 +49,11 @@ It is strongly recommended to build from a release file and not from a repositor
 
 ### Platforms
 
-EMB² is regularly built and tested on a variety of OS/compiler/architecture combinations including Linux (x86 and ARM using GCC/Clang) and Windows (x86 using MSVC). Other platforms may be supported without any changes to the source code. The project comes with unit tests that can be used to find out whether a system not officially supported is suitable to run EMB². If the build process or the unit tests fail on your system, please contact us.
+EMB² is regularly built and tested on a variety of OS/compiler/architecture combinations including Linux (x86 and ARM using GCC/Clang) and Windows (x86 using MSVC). Other platforms may be supported without any changes to the source code. The included unit tests can be used to find out whether a system not officially supported is suitable to run EMB². If the build process or the unit tests fail on your system, please contact us.
 
 ### Prerequisites
 
-The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Besides a C/C++ compiler supporting these standards, you need CMake 2.8.9 or higher. [CMake](https://cmake.org/) is a build file generator which abstracts from the concrete build tools.
+The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Besides a C/C++ compiler supporting these standards, [CMake](https://cmake.org/) 2.8.9 or higher is required to build EMB².  is a build file generator which abstracts from the concrete build tools.
 
 ### Quick Installation on Linux
 
@@ -61,7 +61,7 @@ To generate and invoke the platform-specific build files, open a shell and chang
 
     cmake ..
 
-As the next step, compile EMB² using the generated build files:
+As the next step, compile EMB²:
 
     cmake --build .
 
@@ -75,11 +75,11 @@ Finally, install EMB² (the default path is `/usr/local`):
 
 ### Quick Installation on Windows
 
-To generate and invoke the platform-specific build files, open a Visual Studio developer shell and change to the project's root directory. Create a subdirectory, where you want to build the library, e.g., "build", and change to that subdirectory. In the following, it is assumed that the project's root directory is the parent directory. Now you can generate the build files using CMake (a list of supported CMake generators can be displayed by typing `cmake --help`). For example:
+To generate and invoke the platform-specific build files, open a Developer Command Prompt for Visual Studio and change to the project's root directory. Create a subdirectory, where you want to build the library, e.g., "build", and change to that subdirectory. In the following, it is assumed that the project's root directory is the parent directory. Now you can generate the build files using CMake (a list of supported CMake generators can be displayed by typing `cmake --help`). For example:
 
     cmake -G "Visual Studio 14 2015" ..
 
-As the next step, compile EMB² using the generated build files:
+As the next step, compile EMB²:
 
     cmake --build . --config Release
 
@@ -107,7 +107,7 @@ EMB² can be built in Release or Debug mode. The latter contains additional chec
 
      cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-If no build mode is given, the default (Release) is used. The Visual Studio generators create build files for both modes (the selection is done at build time).
+If no build mode is given, the default (Release) is used. The Visual Studio generators create build files for both modes (the selection is done at build time as described below).
 
 You may choose a custom compiler instead the default one by defining `CMAKE_CXX_COMPILER` and/or `CMAKE_C_COMPILER`. For example, to use Clang on Linux, type:
 
@@ -124,7 +124,7 @@ EMB² can be built with C++ exception handling (default) or without exceptions. 
 
 Similarly, automatic initialization of the task scheduler by the MTAPI C++ interface can be disabled with `-DUSE_AUTOMATIC_INITIALIZATION=OFF`. This way, unexpected delays after startup can be avoided, e.g. for timing measurements.
 
-The tutorial of EMB² comes with a number of examples in `doc/examples/`. These can be built with the other source files using the option `-DBUILD_EXAMPLES=ON`. Note, however, that the examples use C++11 features and require a recent compiler.
+The tutorial of EMB² comes with a number of examples in `doc/examples/`. These can be built with the other source files using the option `-DBUILD_EXAMPLES=ON`. Note, however, that the examples use C++11 features and require an appropriate compiler.
 
 By default, the included unit tests are built as part of the installation process. To override the default behavior, add the option `-DBUILD_TESTS=OFF`.
 
@@ -144,7 +144,7 @@ If you are a developer working on a repository snapshot of EMB², you can build 
 
     cmake --build . --target doxygen
 
-Note that this is *not* necessary if you build from a release.
+Note that this is *not* necessary if you build from a release file.
 
 #### 3. Running the Tests
 
@@ -199,11 +199,11 @@ For some of the components, there exist C and C++ versions, wheras others are on
   - Dataflow: dataflow_cpp
   - Containers: containers_cpp
 
-Directory base_c contains abstractions for threading, synchronization, atomic operations, and other functionalities. As the name indicates, the code is implemented in C. Directory base_cpp contains C++ wrappers around the base_c functions. Similarly, the MTAPI task scheduler is available for programs written in C (mtapi_c) or C++ (mtapi_cpp). Heterogeneous and distributed systems are supported via the plugins contained in mtapi_plugins_c. Directory algorithms_cpp provides high-level constructs for typical parallelization tasks in C++, and dataflow_cpp generic skeletons for the development of parallel stream-based applications. Finally, containers_cpp provides data structures for storing objects in a thread-safe way.
+Directory "base_c" contains abstractions for threading, synchronization, atomic operations, and other functionalities. As the name indicates, the code is implemented in C. Directory "base_cpp" contains C++ wrappers around the "base_c" functions. Similarly, the MTAPI task scheduler is available for programs written in C ("mtapi_c") or C++ ("mtapi_cpp"). Heterogeneous and distributed systems are supported via the plugins contained in "mtapi_plugins_c". Directory "algorithms_cpp" provides high-level constructs for typical parallelization tasks in C++, and "dataflow_cpp" generic skeletons for the development of parallel stream-based applications. Finally, "containers_cpp" provides data structures for storing objects in a thread-safe way.
 
 ### Using C++
 
-If you want to use the C++ functionalities of EMB², you have to link the following libraries (names will be different on Windows and on Linux) in the given order:
+If you want to use the C++ functionalities of EMB², you have to link the following libraries (names will be slightly different on Windows and on Linux) in the given order:
 
     embb_dataflow_cpp, embb_algorithms_cpp, embb_containers_cpp, embb_mtapi_cpp, embb_mtapi_c, embb_base_cpp, embb_base_c
 
