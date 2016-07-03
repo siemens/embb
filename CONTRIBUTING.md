@@ -9,6 +9,7 @@ Table of Contents
   - Directory Structure
   - Branches
   - Contributing
+  - Porting
 3. Coding Guidelines
   - General
   - Tool Support
@@ -17,7 +18,6 @@ Table of Contents
   - Special Commands
   - Structure
   - Example
-5. Porting
 
 1. Introduction
 ---------------
