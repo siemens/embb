@@ -140,6 +140,12 @@ For a Windows Release build, type
 
     cmake --build . --config Release
 
+If you are a developer working on a repository snapshot of EMB², you can build the documentation as follows (provided that you have [Doxygen](http://www.doxygen.org/) installed):
+
+    cmake --build . --target doxygen
+
+Note that this is *not* necessary if you build from a release.
+
 #### 3. Running the Tests
 
 To check whether EMB² was compiled correctly, run the tests. The test executables are contained in the subfolder "binaries".
@@ -178,44 +184,41 @@ To install the files, use the command
 
     cmake --build . --target install
 
-which copies the contents of the "install" folder to the "bin", "lib", and
-"include" folders in the installation path. For the default paths, the
-installation has to be run with administrator / root privileges.
-
+which copies the contents of the "install" folder to the "bin", "lib", and "include" folders in the installation path. For the default paths, the installation has to be run with administrator / root privileges.
 
 Using the Library
 -----------------
 
-To use EMB², the include files have to be made available during compilation of
-your application and the libraries have to be added during linking.
+To use EMB², the include files have to be made available during compilation of your application and the libraries have to be added during linking.
 
-### 1. Using C++
+### Using C++
 
-If you want to use the C++ functionalities of EMB², you have to link the
-following libraries (names will be different on Windows and on Linux) in the
-given order:
+If you want to use the C++ functionalities of EMB², you have to link the following libraries (names will be different on Windows and on Linux) in the given order:
 
-    embb_dataflow_cpp, embb_algorithms_cpp, embb_containers_cpp,
-    embb_mtapi_cpp, embb_mtapi_c, embb_base_cpp, embb_base_c
+    embb_dataflow_cpp, embb_algorithms_cpp, embb_containers_cpp, embb_mtapi_cpp, embb_mtapi_c, embb_base_cpp, embb_base_c
 
 The C++ header files can be included as follows:
 
-    #include<embb/mtapi/mtapi.h>
     #include<embb/base/base.h>
+    #include<embb/mtapi/mtapi.h>
     #include<embb/containers/containers.h>
+    #include<embb/dataflow/algorithms.h>
     #include<embb/dataflow/dataflow.h>
 
-### 2. Using C
+### Using C
 
-The following libraries have to be linked in the given order:
+If you only want to use the C versions of MTAPI and the base library, link them in the following order:
 
     embb_mtapi_c, embb_base_c
 
 The C header files can be included as follows:
 
-    #include<embb/mtapi/c/mtapi.h>  or  #include<mtapi.h>
     #include<embb/base/c/base.h>
+    #include<embb/mtapi/c/mtapi.h>
 
+or simply
+
+    #include<mtapi.h>
 
 Documentation
 -------------
