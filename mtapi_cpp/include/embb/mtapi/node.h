@@ -68,6 +68,9 @@ namespace mtapi {
  */
 class Node {
  public:
+  /**
+   * Function type for simple SMP interface.
+   */
   typedef embb::base::Function<void, TaskContext &> SMPFunction;
 
   /**
@@ -285,16 +288,33 @@ class Node {
       MTAPI_DEFAULT_TASK_ATTRIBUTES);
   }
 
-  Job GetJob(mtapi_job_id_t job_id) {
+  /**
+   * Get the job with the given id in the domain of the node.
+   *
+   * \returns The handle for the requested Job.
+   */
+  Job GetJob(
+    mtapi_job_id_t job_id              /**< ID of the job to return */
+    ) {
     return Job(job_id, domain_id_);
   }
 
-  Job GetJob(mtapi_job_id_t job_id, mtapi_domain_t domain_id) {
+  /**
+   * Get the job with the given id in the specified domain.
+   *
+   * \returns The handle for the requested Job.
+   */
+  Job GetJob(
+    mtapi_job_id_t job_id,             /**< ID of the job to return */
+    mtapi_domain_t domain_id           /**< Domain to get the job from */
+    ) {
     return Job(job_id, domain_id);
   }
 
   /**
    * Constructs an Action.
+   *
+   * \returns The handle for the new Action.
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -311,6 +331,8 @@ class Node {
 
   /**
    * Constructs an Action.
+   *
+   * \returns The handle for the new Action.
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -325,6 +347,8 @@ class Node {
 
   /**
    * Constructs an Action.
+   *
+   * \returns The handle for the new Action.
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -337,6 +361,8 @@ class Node {
 
   /**
    * Constructs an Action.
+   *
+   * \returns The handle for the new Action.
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -347,6 +373,8 @@ class Node {
 
   /**
    * Constructs a Group object with default attributes.
+   *
+   * \returns The handle for the new Group.
    */
   Group CreateGroup() {
     return Group(MTAPI_GROUP_ID_NONE, MTAPI_DEFAULT_GROUP_ATTRIBUTES);
@@ -354,6 +382,8 @@ class Node {
 
   /**
    * Constructs a Group object with default attributes and the given ID.
+   *
+   * \returns The handle for the new Group.
    */
   Group CreateGroup(
     mtapi_group_id_t id                /**< A user defined ID of the Group. */
@@ -363,14 +393,19 @@ class Node {
 
   /**
    * Constructs a Group object using the given Attributes.
+   *
+   * \returns The handle for the new Group.
    */
   Group CreateGroup(
-    GroupAttributes const & group_attr) {
+    GroupAttributes const & group_attr /**< Attributes for the Group. */
+    ) {
     return Group(MTAPI_GROUP_ID_NONE, &group_attr.GetInternal());
   }
 
   /**
    * Constructs a Group object with given attributes and ID.
+   *
+   * \returns The handle for the new Group.
    */
   Group CreateGroup(
     mtapi_group_id_t id,               /**< A user defined ID of the Group. */
@@ -381,6 +416,8 @@ class Node {
 
   /**
    * Constructs a Queue with the given Job and default attributes.
+   *
+   * \returns The handle for the new Queue.
    */
   Queue CreateQueue(
     Job & job                          /**< The Job to use for the Queue. */
@@ -390,6 +427,8 @@ class Node {
 
   /**
    * Constructs a Queue with the given Job and QueueAttributes.
+   *
+   * \returns The handle for the new Queue.
    */
   Queue CreateQueue(
     Job const & job,                   /**< The Job to use for the Queue. */

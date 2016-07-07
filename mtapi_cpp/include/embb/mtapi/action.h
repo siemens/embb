@@ -50,11 +50,23 @@ class Action {
     handle_.tag = 0;
   }
 
-  Action(Action const & other) : handle_(other.handle_) {
+  /**
+   * Copies an Action.
+   */
+  Action(
+    Action const & other               /**< Action to copy */
+    ) : handle_(other.handle_) {
     // empty
   }
 
-  Action & operator=(Action const & other) {
+  /**
+   * Copies an Action.
+   *
+   * \returns Reference to this object.
+   */
+  Action & operator=(
+    Action const & other               /**< Action to copy */
+    ) {
     handle_ = other.handle_;
     return *this;
   }

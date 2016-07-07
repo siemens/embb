@@ -51,11 +51,23 @@ namespace mtapi {
  */
 class Group {
  public:
-  Group(Group const & other) : handle_(other.handle_) {
+  /**
+   * Copies a Group.
+   */
+  Group(
+    Group const & other                /**< Group to copy */
+    ) : handle_(other.handle_) {
     // empty
   }
 
-  Group & operator=(Group const & other) {
+  /**
+   * Copies a Group.
+   *
+   * \returns Reference to this object.
+   */
+  Group & operator=(
+    Group const & other                /**< Group to copy */
+    ) {
     handle_ = other.handle_;
     return *this;
   }
