@@ -530,6 +530,9 @@ enum mtapi_notification_enum {
 typedef enum mtapi_notification_enum mtapi_notification_t;
                                        /**< runtime notification */
 
+/**
+ * Enum to select default or specific worker for priority setter
+ */
 enum mtapi_worker_priority_type_enum {
   MTAPI_WORKER_PRIORITY_END = 0,
   MTAPI_WORKER_PRIORITY_DEFAULT = 1,
@@ -599,12 +602,23 @@ enum mtapi_worker_priority_type_enum {
   MTAPI_WORKER_PRIORITY_WORKER_62 = MTAPI_WORKER_PRIORITY_WORKER + 62,
   MTAPI_WORKER_PRIORITY_WORKER_63 = MTAPI_WORKER_PRIORITY_WORKER + 63
 };
+/**
+ * Enum to select default or specific worker for priority setter
+ */
 typedef enum mtapi_worker_priority_type_enum mtapi_worker_priority_type_t;
 
+/**
+ * Describes the default priority of all workers or the priority of a
+ * specific worker.
+ */
 struct mtapi_worker_priority_entry_struct {
-  mtapi_worker_priority_type_t type;
-  embb_thread_priority_t priority;
+  mtapi_worker_priority_type_t type;   /**< default or specific worker */
+  embb_thread_priority_t priority;     /**< priority to set */
 };
+/**
+* Describes the default priority of all workers or the priority of a
+* specific worker.
+*/
 typedef struct mtapi_worker_priority_entry_struct mtapi_worker_priority_entry_t;
 
 /**

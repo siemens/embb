@@ -56,6 +56,9 @@ extern "C" {
 typedef opaque_type embb_thread_t;
 #endif /* DOXYGEN */
 
+/**
+ * Thread priority type.
+ */
 typedef enum {
   EMBB_THREAD_PRIORITY_IDLE,
   EMBB_THREAD_PRIORITY_LOWEST,

@@ -207,12 +207,6 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
   return 0;
 }
 
-int embb_thread_set_priority(
-  embb_thread_t* thread,
-  embb_thread_priority_t priority
-) {
-}
-
 #endif /* EMBB_PLATFORM_THREADING_WINTHREADS */
 
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
