@@ -26,6 +26,7 @@
 
 #include <CL/opencl.h>
 #include <embb/base/c/internal/config.h>
+#include <embb_mtapi_opencl_runtimelinker.h>
 
 //////////////////////////////////////////////////////////////////////////
 // function pointer wrappers to hide runtime linking

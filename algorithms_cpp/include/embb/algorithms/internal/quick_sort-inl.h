@@ -29,7 +29,7 @@
 
 #include <cassert>
 #include <iterator>
-#include <algorithm>
+#include <utility>
 #include <functional>
 
 #include <embb/base/exceptions.h>

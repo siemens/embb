@@ -38,18 +38,17 @@ LogTest::LogTest() {
   CreateUnit("Test all").Add(&LogTest::Test, this);
 }
 
-static std::string logged_message;
-
 static void test_log_function(void * context, char const * msg) {
-  EMBB_UNUSED(context);
-  logged_message = msg;
+  std::string * logged_message = reinterpret_cast<std::string*>(context);
+  *logged_message = msg;
 }
 
 void LogTest::Test() {
   using embb::base::Log;
   char const * test_msg = "hello";
+  std::string logged_message;
 
-  Log::SetLogFunction(0, test_log_function);
+  Log::SetLogFunction(&logged_message, test_log_function);
 
   Log::SetLogLevel(EMBB_LOG_LEVEL_TRACE);
   logged_message = "none";

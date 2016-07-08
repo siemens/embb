@@ -28,7 +28,7 @@
 #define EMBB_BASE_INTERNAL_MUTEX_INL_H_
 
 #include <cassert>
-#include <algorithm>
+#include <utility>
 
 namespace embb {
 namespace base {

@@ -120,7 +120,7 @@ do
         current_rules+=",-runtime/threadsafe_fn" # These tests are allowed to use the thread unsafe rand()
       fi
     done
-    python ${c} --filter=$current_rules --root="$project/include" --output=vs7 $file
+    python ${c} --extensions=c,cc,h --filter=$current_rules --root="$project/include" --output=vs7 $file
     if [[ ! $? -eq 0 ]]; then
       retval=$((retval+1))
     fi
