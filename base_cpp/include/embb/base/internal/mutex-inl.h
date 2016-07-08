@@ -28,7 +28,8 @@
 #define EMBB_BASE_INTERNAL_MUTEX_INL_H_
 
 #include <cassert>
-#include <utility>
+#include <utility>   // swap C++ 11
+#include <algorithm> // swap C++ 98
 
 namespace embb {
 namespace base {
