@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
+ * Copyright (c) 2014, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_MTAPI_C_MTAPI_OPENCL_H_
-#define EMBB_MTAPI_C_MTAPI_OPENCL_H_
+#ifndef EMBB_MTAPI_C_MTAPI_CUDA_H_
+#define EMBB_MTAPI_C_MTAPI_CUDA_H_
 
 
 #include <embb/mtapi/c/mtapi_ext.h>
@@ -37,89 +37,89 @@ extern "C" {
 
 
 /**
- * \defgroup C_MTAPI_OPENCL MTAPI OpenCL Plugin
+ * \defgroup C_MTAPI_CUDA MTAPI CUDA Plugin
  *
  * \ingroup C_MTAPI_EXT
  *
- * Provides functionality to execute tasks on OpenCL devices.
+ * Provides functionality to execute tasks on CUDA devices.
  */
 
 
 /**
- * Initializes the MTAPI OpenCL environment on a previously initialized MTAPI
+ * Initializes the MTAPI CUDA environment on a previously initialized MTAPI
  * node.
  *
- * It must be called on all nodes using the MTAPI OpenCL plugin.
+ * It must be called on all nodes using the MTAPI CUDA plugin.
  *
- * Application software using MTAPI OpenCL must call
- * mtapi_opencl_plugin_initialize() once per node. It is an error to call
- * mtapi_opencl_plugin_initialize() multiple times
- * from a given node, unless mtapi_opencl_plugin_finalize() is called in
+ * Application software using MTAPI CUDA must call
+ * mtapi_cuda_plugin_initialize() once per node. It is an error to call
+ * mtapi_cuda_plugin_initialize() multiple times
+ * from a given node, unless mtapi_cuda_plugin_finalize() is called in
  * between.
  *
  * On success, \c *status is set to \c MTAPI_SUCCESS. On error, \c *status is
  * set to the appropriate error defined below.
  * Error code                  | Description
  * --------------------------- | ----------------------------------------------
- * \c MTAPI_ERR_UNKNOWN        | MTAPI OpenCL couldn't be initialized.
+ * \c MTAPI_ERR_UNKNOWN        | MTAPI CUDA couldn't be initialized.
  *
- * \see mtapi_opencl_plugin_finalize()
+ * \see mtapi_cuda_plugin_finalize()
  *
  * \notthreadsafe
- * \ingroup C_MTAPI_OPENCL
+ * \ingroup C_MTAPI_CUDA
  */
-void mtapi_opencl_plugin_initialize(
+void mtapi_cuda_plugin_initialize(
   MTAPI_OUT mtapi_status_t* status     /**< [out] Pointer to error code,
                                             may be \c MTAPI_NULL */
 );
 
 /**
- * Finalizes the MTAPI OpenCL environment on the local MTAPI node.
+ * Finalizes the MTAPI CUDA environment on the local MTAPI node.
  *
- * It has to be called by each node using MTAPI OpenCL. It is an error to call
- * mtapi_opencl_plugin_finalize() without first calling
- * mtapi_opencl_plugin_initialize(). An MTAPI node can call
- * mtapi_opencl_plugin_finalize() once for each call to
- * mtapi_opencl_plugin_initialize(), but it is an error to call
- * mtapi_opencl_plugin_finalize() multiple times from a given node
- * unless mtapi_opencl_plugin_initialize() has been called prior to each
- * mtapi_opencl_plugin_finalize() call.
+ * It has to be called by each node using MTAPI CUDA. It is an error to call
+ * mtapi_cuda_plugin_finalize() without first calling
+ * mtapi_cuda_plugin_initialize(). An MTAPI node can call
+ * mtapi_cuda_plugin_finalize() once for each call to
+ * mtapi_cuda_plugin_initialize(), but it is an error to call
+ * mtapi_cuda_plugin_finalize() multiple times from a given node
+ * unless mtapi_cuda_plugin_initialize() has been called prior to each
+ * mtapi_cuda_plugin_finalize() call.
  *
- * All OpenCL tasks that have not completed and that have been started on the
- * node where mtapi_opencl_plugin_finalize() is called will be canceled
- * (see mtapi_task_cancel()). mtapi_opencl_plugin_finalize() blocks until all
+ * All CUDA tasks that have not completed and that have been started on the
+ * node where mtapi_cuda_plugin_finalize() is called will be canceled
+ * (see mtapi_task_cancel()). mtapi_cuda_plugin_finalize() blocks until all
  * tasks that have been started on the same node return. Tasks that execute
- * actions on the node where mtapi_opencl_plugin_finalize() is called, also
- * block finalization of the MTAPI OpenCL system on that node.
+ * actions on the node where mtapi_cuda_plugin_finalize() is called, also
+ * block finalization of the MTAPI CUDA system on that node.
  *
  * On success, \c *status is set to \c MTAPI_SUCCESS. On error, \c *status is
  * set to the appropriate error defined below.
  * Error code                    | Description
  * ----------------------------- | --------------------------------------------
- * \c MTAPI_ERR_UNKNOWN          | MTAPI OpenCL couldn't be finalized.
+ * \c MTAPI_ERR_UNKNOWN          | MTAPI CUDA couldn't be finalized.
  *
- * \see mtapi_opencl_plugin_initialize(), mtapi_task_cancel()
+ * \see mtapi_cuda_plugin_initialize(), mtapi_task_cancel()
  *
  * \notthreadsafe
- * \ingroup C_MTAPI_OPENCL
+ * \ingroup C_MTAPI_CUDA
  */
-void mtapi_opencl_plugin_finalize(
+void mtapi_cuda_plugin_finalize(
   MTAPI_OUT mtapi_status_t* status     /**< [out] Pointer to error code,
                                             may be \c MTAPI_NULL */
 );
 
 /**
- * This function creates an OpenCL action.
+ * This function creates a CUDA action.
  *
  * It is called on the node where the user wants to execute an action on an
- * OpenCL device. An OpenCL action contains a reference to a local job, the
- * kernel source to compile and execute on the OpenCL device, the name of the
- * kernel function, a local work size (see OpenCL specification for details)
+ * CUDA device. A CUDA action contains a reference to a local job, the
+ * kernel source to compile and execute on the CUDA device, the name of the
+ * kernel function, a local work size (see CUDA specification for details)
  * and the size of one element in the result buffer.
- * After an OpenCL action is created, it is referenced by the application using
+ * After a CUDA action is created, it is referenced by the application using
  * a node-local handle of type \c mtapi_action_hndl_t, or indirectly through a
- * node-local job handle of type \c mtapi_job_hndl_t. An OpenCL action's
- * life-cycle begins with mtapi_opencl_action_create(), and ends when
+ * node-local job handle of type \c mtapi_job_hndl_t. A CUDA action's
+ * life-cycle begins with mtapi_cuda_action_create(), and ends when
  * mtapi_action_delete() or mtapi_finalize() is called.
  *
  * To create an action, the application must supply the domain-wide job ID of
@@ -163,18 +163,18 @@ void mtapi_opencl_plugin_finalize(
  *   </tr>
  *   <tr>
  *     <td>\c MTAPI_ERR_UNKNOWN</td>
- *     <td>The kernel could not be compiled or no OpenCL device was
+ *     <td>The kernel could not be compiled or no CUDA device was
  *         available.</td>
  *   </tr>
  * </table>
  *
  * \see mtapi_action_delete(), mtapi_finalize()
  *
- * \returns Handle to newly created OpenCL action, invalid handle on error
+ * \returns Handle to newly created CUDA action, invalid handle on error
  * \threadsafe
- * \ingroup C_MTAPI_OPENCL
+ * \ingroup C_MTAPI_CUDA
  */
-mtapi_action_hndl_t mtapi_opencl_action_create(
+mtapi_action_hndl_t mtapi_cuda_action_create(
   MTAPI_IN mtapi_job_id_t job_id,      /**< [in] Job id */
   MTAPI_IN char* kernel_source,        /**< [in] Pointer to kernel source */
   MTAPI_IN char* kernel_name,          /**< [in] Name of the kernel function */
@@ -195,4 +195,4 @@ mtapi_action_hndl_t mtapi_opencl_action_create(
 #endif
 
 
-#endif // EMBB_MTAPI_C_MTAPI_OPENCL_H_
+#endif // EMBB_MTAPI_C_MTAPI_CUDA_H_
