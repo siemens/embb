@@ -36,7 +36,7 @@ PT_ASSERT(MTAPI_SUCCESS == status)
 #define CUDA_JOB 2
 
 // CUDA Kernel Function for element by element vector addition
-#include "embb_mtapi_cuda_test_kernel.h"
+#include <embb_mtapi_cuda_test_kernel.h>
 
 TaskTest::TaskTest() {
   CreateUnit("mtapi cuda task test").Add(&TaskTest::TestBasic, this);

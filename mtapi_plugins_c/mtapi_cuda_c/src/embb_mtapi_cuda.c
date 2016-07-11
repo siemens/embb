@@ -261,9 +261,9 @@ void mtapi_cuda_plugin_initialize(
   mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
   CUresult err;
   embb_mtapi_cuda_plugin_t * plugin = &embb_mtapi_cuda_plugin;
-  
+
   mtapi_status_set(status, MTAPI_ERR_UNKNOWN);
-  
+
   err = cuInit(0);
   if (CUDA_SUCCESS != err) return;
   err =  cuDeviceGet(&plugin->device, 0);
