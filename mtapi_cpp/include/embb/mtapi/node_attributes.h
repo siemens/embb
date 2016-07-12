@@ -87,6 +87,23 @@ class NodeAttributes {
   }
 
   /**
+   * Sets the priority of the specified worker threads.
+   *
+   * \returns Reference to this object.
+   * \notthreadsafe
+   */
+  NodeAttributes & SetWorkerPriority(
+    mtapi_worker_priority_entry_t * worker_priorities
+                                       /**< Array of priorities */
+    ) {
+    mtapi_status_t status;
+    mtapi_nodeattr_set(&attributes_, MTAPI_NODE_WORKER_PRIORITIES,
+      worker_priorities, MTAPI_NODE_WORKER_PRIORITIES_SIZE, &status);
+    internal::CheckStatus(status);
+    return *this;
+  }
+
+  /**
    * Sets the maximum number of concurrently active tasks.
    *
    * \returns Reference to this object.

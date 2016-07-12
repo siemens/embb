@@ -69,6 +69,8 @@ struct embb_mtapi_thread_context_struct {
   mtapi_status_t status;
   mtapi_boolean_t is_initialized;
   mtapi_boolean_t is_main_thread;
+
+  embb_thread_priority_t thread_priority;
 };
 
 #include <embb_mtapi_thread_context_t_fwd.h>
@@ -78,11 +80,12 @@ struct embb_mtapi_thread_context_struct {
  * \memberof embb_mtapi_thread_context_struct
  * \returns MTAPI_TRUE if successful, MTAPI_FALSE on error
  */
-mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
+mtapi_boolean_t embb_mtapi_thread_context_initialize(
   embb_mtapi_thread_context_t* that,
   embb_mtapi_node_t* node,
   mtapi_uint_t worker_index,
-  mtapi_uint_t core_num);
+  mtapi_uint_t core_num,
+  embb_thread_priority_t priority);
 
 /**
  * Destructor.

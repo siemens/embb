@@ -28,7 +28,6 @@
 #define EMBB_BASE_INTERNAL_THREAD_INL_H_
 
 #include <embb/base/exceptions.h>
-#include <embb/base/c/thread.h>
 #include <embb/base/internal/thread_closures.h>
 #include <embb/base/memory_allocation.h>
 #include <iostream>
@@ -55,6 +54,22 @@ Thread::Thread(CoreSet& core_set, Function function) : rep_() {
   int result = embb_thread_create(
     &rep_,
     &core_set.rep_,
+    internal::ThreadClosure<Function>::ThreadStart,
+    static_cast<void*>(closure));
+  CheckThreadCreationErrors(result, closure);
+}
+
+template<typename Function>
+Thread::Thread(
+  CoreSet& core_set,
+  embb_thread_priority_t priority,
+  Function function) : rep_() {
+  typedef internal::ThreadClosure<Function> Closure;
+  Closure* closure = Allocation::New<Closure>(function);
+  int result = embb_thread_create_with_priority(
+    &rep_,
+    &core_set.rep_,
+    priority,
     internal::ThreadClosure<Function>::ThreadStart,
     static_cast<void*>(closure));
   CheckThreadCreationErrors(result, closure);
