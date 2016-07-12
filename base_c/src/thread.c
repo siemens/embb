@@ -159,7 +159,8 @@ int embb_thread_create_with_priority(
     internal_priority = THREAD_PRIORITY_NORMAL;
     break;
   }
-  BOOL result = SetThreadPriority(thread->embb_internal_handle, internal_priority);
+  BOOL result = SetThreadPriority(
+    thread->embb_internal_handle, internal_priority);
   if (result == 0) {
     return EMBB_ERROR;
   }

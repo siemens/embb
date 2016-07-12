@@ -152,7 +152,8 @@ void mtapi_nodeattr_set(
 
       case MTAPI_NODE_WORKER_PRIORITIES:
         local_status = MTAPI_SUCCESS;
-        attributes->worker_priorities = (mtapi_worker_priority_entry_t*)attribute;
+        attributes->worker_priorities =
+          (mtapi_worker_priority_entry_t*)attribute;
         break;
 
       default:
