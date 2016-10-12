@@ -379,6 +379,9 @@ int embb_mtapi_scheduler_worker(void * arg) {
       if (MTAPI_NULL != task->attributes.complete_func) {
         task->attributes.complete_func(task->handle, MTAPI_NULL);
       }
+      if (MTAPI_TRUE == task->attributes.is_detached) {
+        embb_mtapi_task_delete(task, node->task_pool);
+      }
     } else if (counter < 1024) {
       /* spin and yield for a while before going to sleep */
       embb_thread_yield();
