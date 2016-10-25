@@ -46,7 +46,7 @@ In addition to these two branches, there may be arbitrarily many feature branche
 
 ### Contributing
 
-Bug fixes, extensions, etc. can be contributed as pull requests via GitHub or as patches via the development mailing list (mailto:embb-dev@googlegroups.com). If possible, please refer to a current snapshot of the master branch.
+Bug fixes, extensions, etc. can be contributed as pull requests via GitHub (preferred way to involve the community) or as patches via mail (mailto:embb.info@gmail.com). If possible, refer to a current snapshot of the master branch.
 
 ### Porting
 

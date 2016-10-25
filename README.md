@@ -23,11 +23,9 @@ Repository:
   - https://github.com/siemens/embb.git (HTTP)
   - git@github.com:siemens/embb.git (SSH)
 
-Mailing lists:
+Mailing list:
   - embb-announcements@googlegroups.com (announcements)<br/>
     https://groups.google.com/forum/#!forum/embb-announcements/join
-  - embb-dev@googlegroups.com (development)<br/>
-    https://groups.google.com/forum/#!forum/embb-dev/join
 
 Contact:
   - embb.info@gmail.com
