@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
+ * Copyright (c) 2014, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,39 +24,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <embb_mtapi_opencl_test_task.h>
+#include <embb_mtapi_cuda_test_task.h>
 
-#include <embb/mtapi/c/mtapi_opencl.h>
+#include <embb/mtapi/c/mtapi_cuda.h>
 
 #define MTAPI_CHECK_STATUS(status) \
 PT_ASSERT(MTAPI_SUCCESS == status)
 
-#define OPENCL_DOMAIN 1
-#define OPENCL_NODE 2
-#define OPENCL_JOB 2
+#define CUDA_DOMAIN 1
+#define CUDA_NODE 2
+#define CUDA_JOB 2
 
-// OpenCL Kernel Function for element by element vector addition
-const char * kernel =
-"__kernel void test(\n"
-"  __global void* arguments,\n"
-"  int arguments_size,\n"
-"  __global void* result_buffer,\n"
-"  int result_buffer_size,\n"
-"  __global void* node_local_data,\n"
-"  int node_local_data_size) {\n"
-"  int ii = get_global_id(0);\n"
-"  int elements = arguments_size / sizeof(float) / 2;\n"
-"  if (ii >= elements)"
-"    return;"
-"  __global float* a = (__global float*)arguments;\n"
-"  __global float* b = ((__global float*)arguments) + elements;\n"
-"  __global float* c = (__global float*)result_buffer;\n"
-"  __global float* d = (__global float*)node_local_data;\n"
-"  c[ii] = a[ii] + b[ii] + d[0];\n"
-"}\n";
+// CUDA Kernel Function for element by element vector addition
+#include <embb_mtapi_cuda_test_kernel.h>
 
 TaskTest::TaskTest() {
-  CreateUnit("mtapi opencl task test").Add(&TaskTest::TestBasic, this);
+  CreateUnit("mtapi cuda task test").Add(&TaskTest::TestBasic, this);
 }
 
 void TaskTest::TestBasic() {
@@ -74,31 +57,31 @@ void TaskTest::TestBasic() {
     arguments[ii + kElements] = static_cast<float>(ii);
   }
 
-  mtapi_opencl_plugin_initialize(&status);
+  mtapi_cuda_plugin_initialize(&status);
   if (status == MTAPI_ERR_FUNC_NOT_IMPLEMENTED) {
-    // OpenCL unavailable
+    // CUDA unavailable
     return;
   }
   MTAPI_CHECK_STATUS(status);
 
   mtapi_initialize(
-    OPENCL_DOMAIN,
-    OPENCL_NODE,
+    CUDA_DOMAIN,
+    CUDA_NODE,
     MTAPI_NULL,
     MTAPI_NULL,
     &status);
   MTAPI_CHECK_STATUS(status);
 
   float node_local = 1.0f;
-  action = mtapi_opencl_action_create(
-    OPENCL_JOB,
-    kernel, "test", 32, 4,
+  action = mtapi_cuda_action_create(
+    CUDA_JOB,
+    reinterpret_cast<char const *>(imageBytes), "test", 32, 4,
     &node_local, sizeof(float),
     &status);
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
-  job = mtapi_job_get(OPENCL_JOB, OPENCL_DOMAIN, &status);
+  job = mtapi_job_get(CUDA_JOB, CUDA_DOMAIN, &status);
   MTAPI_CHECK_STATUS(status);
 
   task = mtapi_task_start(
@@ -124,6 +107,6 @@ void TaskTest::TestBasic() {
   mtapi_finalize(&status);
   MTAPI_CHECK_STATUS(status);
 
-  mtapi_opencl_plugin_finalize(&status);
+  mtapi_cuda_plugin_finalize(&status);
   MTAPI_CHECK_STATUS(status);
 }

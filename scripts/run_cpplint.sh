@@ -79,7 +79,7 @@ retval=0
 
 ##Excluded files
 RAND_FILES=( embb_mtapi_test_group.cc embb_mtapi_test_queue.cc embb_mtapi_test_task.cc queue_test-inl.h )
-for project in base_c mtapi_c mtapi_plugins_c/mtapi_network_c mtapi_plugins_c/mtapi_opencl_c base_cpp mtapi_cpp algorithms_cpp containers_cpp dataflow_cpp
+for project in base_c mtapi_c mtapi_plugins_c/mtapi_network_c mtapi_plugins_c/mtapi_opencl_c mtapi_plugins_c/mtapi_cuda_c base_cpp mtapi_cpp algorithms_cpp containers_cpp dataflow_cpp
 do
   echo "-> Doing project: $project"
   dir=$d/$project
@@ -120,7 +120,7 @@ do
         current_rules+=",-runtime/threadsafe_fn" # These tests are allowed to use the thread unsafe rand()
       fi
     done
-    python ${c} --filter=$current_rules --root="$project/include" --output=vs7 $file
+    python ${c} --extensions=c,cc,h --filter=$current_rules --root="$project/include" --output=vs7 $file
     if [[ ! $? -eq 0 ]]; then
       retval=$((retval+1))
     fi

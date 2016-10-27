@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
+ * Copyright (c) 2014, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,17 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
-#define MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_CUDA_C_TEST_EMBB_MTAPI_CUDA_TEST_TASK_H_
+#define MTAPI_PLUGINS_C_MTAPI_CUDA_C_TEST_EMBB_MTAPI_CUDA_TEST_TASK_H_
 
 #include <partest/partest.h>
 
-class NetworkSocketTest : public partest::TestCase {
+class TaskTest : public partest::TestCase {
  public:
-  NetworkSocketTest();
+  TaskTest();
 
  private:
   void TestBasic();
 };
 
-#endif // MTAPI_PLUGINS_C_MTAPI_NETWORK_C_TEST_EMBB_MTAPI_NETWORK_TEST_SOCKET_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_CUDA_C_TEST_EMBB_MTAPI_CUDA_TEST_TASK_H_

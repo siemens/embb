@@ -53,6 +53,7 @@ void mtapi_nodeattr_init(
     attributes->max_actions_per_job = MTAPI_NODE_MAX_ACTIONS_PER_JOB_DEFAULT;
     attributes->max_priorities = MTAPI_NODE_MAX_PRIORITIES_DEFAULT;
     attributes->reuse_main_thread = MTAPI_FALSE;
+    attributes->worker_priorities = NULL;
 
     embb_core_set_init(&attributes->core_affinity, 1);
     attributes->num_cores = embb_core_set_count(&attributes->core_affinity);
@@ -147,6 +148,12 @@ void mtapi_nodeattr_set(
       case MTAPI_NODE_REUSE_MAIN_THREAD:
         local_status = embb_mtapi_attr_set_mtapi_boolean_t(
           &attributes->reuse_main_thread, attribute, attribute_size);
+        break;
+
+      case MTAPI_NODE_WORKER_PRIORITIES:
+        local_status = MTAPI_SUCCESS;
+        attributes->worker_priorities =
+          (mtapi_worker_priority_entry_t*)attribute;
         break;
 
       default:

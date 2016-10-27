@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Siemens AG. All rights reserved.
+ * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
 
 #include <CL/opencl.h>
 #include <embb/base/c/internal/config.h>
+#include <embb_mtapi_opencl_runtimelinker.h>
 
 //////////////////////////////////////////////////////////////////////////
 // function pointer wrappers to hide runtime linking

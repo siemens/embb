@@ -40,6 +40,15 @@ void embb_thread_set_max_count(unsigned int max) {
   embb_internal_thread_index_set_max(max);
 }
 
+int embb_thread_create(
+  embb_thread_t* thread,
+  const embb_core_set_t* core_set,
+  embb_thread_start_t func,
+  void *arg) {
+  return embb_thread_create_with_priority(thread, core_set,
+    EMBB_THREAD_PRIORITY_NORMAL, func, arg);
+}
+
 #ifdef EMBB_PLATFORM_THREADING_WINTHREADS
 
 /**
@@ -78,8 +87,12 @@ void embb_thread_yield() {
   SwitchToThread();
 }
 
-int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
-                       embb_thread_start_t func, void *arg) {
+int embb_thread_create_with_priority(
+  embb_thread_t* thread,
+  const embb_core_set_t* core_set,
+  embb_thread_priority_t priority,
+  embb_thread_start_t func,
+  void *arg) {
   if (thread == NULL) {
     return EMBB_ERROR;
   }
@@ -119,6 +132,37 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
         == (DWORD_PTR)NULL) {
       return EMBB_ERROR;
     }
+  }
+
+  int internal_priority;
+  switch (priority) {
+  case EMBB_THREAD_PRIORITY_IDLE:
+    internal_priority = THREAD_PRIORITY_IDLE;
+    break;
+  case EMBB_THREAD_PRIORITY_LOWEST:
+    internal_priority = THREAD_PRIORITY_LOWEST;
+    break;
+  case EMBB_THREAD_PRIORITY_BELOW_NORMAL:
+    internal_priority = THREAD_PRIORITY_BELOW_NORMAL;
+    break;
+  case EMBB_THREAD_PRIORITY_ABOVE_NORMAL:
+    internal_priority = THREAD_PRIORITY_ABOVE_NORMAL;
+    break;
+  case EMBB_THREAD_PRIORITY_HIGHEST:
+    internal_priority = THREAD_PRIORITY_HIGHEST;
+    break;
+  case EMBB_THREAD_PRIORITY_TIME_CRITICAL:
+    internal_priority = THREAD_PRIORITY_TIME_CRITICAL;
+    break;
+  case EMBB_THREAD_PRIORITY_NORMAL:
+  default:
+    internal_priority = THREAD_PRIORITY_NORMAL;
+    break;
+  }
+  BOOL result = SetThreadPriority(
+    thread->embb_internal_handle, internal_priority);
+  if (result == 0) {
+    return EMBB_ERROR;
   }
 
   return EMBB_SUCCESS;
@@ -180,12 +224,18 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
 #include <sys/sysinfo.h> /* Used to get number of processors */
 #endif /* EMBB_PLATFORM_HAS_HEADER_SYSINFO */
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+
 /**
  * Used to wrap client thread start function and argument when calling internal
  * thread start function embb_internal_thread_start.
  */
 typedef struct embb_internal_thread_arg_t {
   embb_thread_start_t func;
+  int priority;
   void* arg;
   int result;
 } embb_internal_thread_arg_t;
@@ -197,6 +247,12 @@ typedef struct embb_internal_thread_arg_t {
  * argument.
  */
 void* embb_internal_thread_start(void* internalArg) {
+#ifdef EMBB_PLATFORM_HAS_GLIB_CPU
+  pid_t tid;
+  tid = syscall(SYS_gettid);
+  setpriority(PRIO_PROCESS, tid,
+    ((embb_internal_thread_arg_t*)internalArg)->priority);
+#endif
   ((embb_internal_thread_arg_t*)internalArg)->result =
       ((embb_internal_thread_arg_t*)internalArg)->func(
       ((struct embb_internal_thread_arg_t*)internalArg)->arg);
@@ -214,8 +270,12 @@ void embb_thread_yield() {
   pthread_yield();
 }
 
-int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
-                       embb_thread_start_t func, void* arg) {
+int embb_thread_create_with_priority(
+  embb_thread_t* thread,
+  const embb_core_set_t* core_set,
+  embb_thread_priority_t priority,
+  embb_thread_start_t func,
+  void* arg) {
   if (thread == NULL) {
     return EMBB_ERROR;
   }
@@ -260,6 +320,31 @@ int embb_thread_create(embb_thread_t* thread, const embb_core_set_t* core_set,
   }
   thread->embb_internal_arg->func = func;
   thread->embb_internal_arg->arg = arg;
+
+  switch (priority) {
+  case EMBB_THREAD_PRIORITY_IDLE:
+    thread->embb_internal_arg->priority = 19;
+    break;
+  case EMBB_THREAD_PRIORITY_LOWEST:
+    thread->embb_internal_arg->priority = 2;
+    break;
+  case EMBB_THREAD_PRIORITY_BELOW_NORMAL:
+    thread->embb_internal_arg->priority = 1;
+    break;
+  case EMBB_THREAD_PRIORITY_ABOVE_NORMAL:
+    thread->embb_internal_arg->priority = -1;
+    break;
+  case EMBB_THREAD_PRIORITY_HIGHEST:
+    thread->embb_internal_arg->priority = -2;
+    break;
+  case EMBB_THREAD_PRIORITY_TIME_CRITICAL:
+    thread->embb_internal_arg->priority = -19;
+    break;
+  case EMBB_THREAD_PRIORITY_NORMAL:
+  default:
+    thread->embb_internal_arg->priority = 0;
+    break;
+  }
 
   status = pthread_create(
       &(thread->embb_internal_handle),     /* pthread handle */
