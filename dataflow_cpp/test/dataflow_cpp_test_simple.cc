@@ -155,6 +155,7 @@ void SimpleTest::TestBasic() {
   embb::base::CoreSet core_set(true);
   embb::mtapi::NodeAttributes node_attr;
   node_attr
+    .SetReuseMainThread(MTAPI_TRUE)
     .SetCoreAffinity(core_set)
     .SetMaxQueues(2);
   embb::mtapi::Node::Initialize(

@@ -105,6 +105,16 @@ class SchedulerMTAPI : public Scheduler {
     group_[idx].Start(job_, &action, static_cast<void*>(NULL),
       task_attr);
   }
+  virtual void Run(
+    Action & action,
+    embb::mtapi::ExecutionPolicy const & policy) {
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::TaskAttributes task_attr;
+    task_attr.SetPolicy(policy);
+    embb::mtapi::Task task = node.Start(job_, &action, static_cast<void*>(NULL),
+      task_attr);
+    task.Wait();
+  }
   virtual void Enqueue(
     int process_id,
     Action & action,

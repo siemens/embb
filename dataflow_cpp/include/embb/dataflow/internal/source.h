@@ -67,7 +67,8 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
 
   virtual bool Start(int clock) {
     if (not_done_) {
-      Run(clock);
+      Action act(this, clock);
+      sched_->Run(act, embb::mtapi::ExecutionPolicy());
     }
     return not_done_;
   }
