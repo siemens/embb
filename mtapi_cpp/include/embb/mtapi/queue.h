@@ -53,6 +53,8 @@ class Queue {
  public:
   /**
    * Copies a Queue.
+   *
+   * \waitfree
    */
   Queue(
     Queue const & other                /**< The Queue to copy */
@@ -64,6 +66,7 @@ class Queue {
    * Copies a Queue.
    *
    * \returns Reference to this object.
+   * \waitfree
    */
   Queue & operator=(
     Queue const & other                /**< The Queue to copy */
@@ -74,6 +77,8 @@ class Queue {
 
   /**
    * Deletes a Queue object.
+   *
+   * \threadsafe
    */
   void Delete() {
     mtapi_queue_delete(handle_, MTAPI_INFINITE, MTAPI_NULL);

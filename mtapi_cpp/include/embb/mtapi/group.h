@@ -53,6 +53,8 @@ class Group {
  public:
   /**
    * Copies a Group.
+   *
+   * \waitfree
    */
   Group(
     Group const & other                /**< Group to copy */
@@ -64,6 +66,7 @@ class Group {
    * Copies a Group.
    *
    * \returns Reference to this object.
+   * \waitfree
    */
   Group & operator=(
     Group const & other                /**< Group to copy */
@@ -74,6 +77,8 @@ class Group {
 
   /**
    * Deletes a Group object.
+   *
+   * \threadsafe
    */
   void Delete() {
     // delete the group, ignore status
@@ -257,6 +262,8 @@ class Group {
   /**
    * Constructs a Group object with given attributes and ID.
    * Requires an initialized Node.
+   *
+   * \threadsafe
    */
   Group(
     mtapi_group_id_t id,               /**< A user defined ID of the Group. */
@@ -268,14 +275,21 @@ class Group {
     internal::CheckStatus(status);
   }
 
+  /**
+   * Starts a new Task in this Group.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
   Task Start(
-    mtapi_task_id_t task_id,
-    mtapi_job_hndl_t job,
-    const void * arguments,
-    mtapi_size_t arguments_size,
-    void * results,
-    mtapi_size_t results_size,
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    mtapi_job_hndl_t job,              /**< The Job to execute. */
+    const void * arguments,            /**< Pointer to the arguments. */
+    mtapi_size_t arguments_size,       /**< Size of the argument buffer. */
+    void * results,                    /**< Pointer to the results. */
+    mtapi_size_t results_size,         /**< Size of the result buffer. */
     mtapi_task_attributes_t const * attributes
+                                       /**< Attributes of the Task */
     ) {
     mtapi_status_t status;
     mtapi_task_hndl_t task_hndl =

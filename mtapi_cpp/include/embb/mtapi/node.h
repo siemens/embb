@@ -292,6 +292,7 @@ class Node {
    * Get the job with the given id in the domain of the node.
    *
    * \returns The handle for the requested Job.
+   * \waitfree
    */
   Job GetJob(
     mtapi_job_id_t job_id              /**< ID of the job to return */
@@ -303,6 +304,7 @@ class Node {
    * Get the job with the given id in the specified domain.
    *
    * \returns The handle for the requested Job.
+   * \waitfree
    */
   Job GetJob(
     mtapi_job_id_t job_id,             /**< ID of the job to return */
@@ -315,6 +317,7 @@ class Node {
    * Constructs an Action.
    *
    * \returns The handle for the new Action.
+   * \lockfree
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -333,6 +336,7 @@ class Node {
    * Constructs an Action.
    *
    * \returns The handle for the new Action.
+   * \lockfree
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -349,6 +353,7 @@ class Node {
    * Constructs an Action.
    *
    * \returns The handle for the new Action.
+   * \lockfree
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -363,6 +368,7 @@ class Node {
    * Constructs an Action.
    *
    * \returns The handle for the new Action.
+   * \lockfree
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
@@ -375,6 +381,7 @@ class Node {
    * Constructs a Group object with default attributes.
    *
    * \returns The handle for the new Group.
+   * \lockfree
    */
   Group CreateGroup() {
     return Group(MTAPI_GROUP_ID_NONE, MTAPI_DEFAULT_GROUP_ATTRIBUTES);
@@ -384,6 +391,7 @@ class Node {
    * Constructs a Group object with default attributes and the given ID.
    *
    * \returns The handle for the new Group.
+   * \lockfree
    */
   Group CreateGroup(
     mtapi_group_id_t id                /**< A user defined ID of the Group. */
@@ -395,6 +403,7 @@ class Node {
    * Constructs a Group object using the given Attributes.
    *
    * \returns The handle for the new Group.
+   * \lockfree
    */
   Group CreateGroup(
     GroupAttributes const & group_attr /**< Attributes for the Group. */
@@ -406,6 +415,7 @@ class Node {
    * Constructs a Group object with given attributes and ID.
    *
    * \returns The handle for the new Group.
+   * \lockfree
    */
   Group CreateGroup(
     mtapi_group_id_t id,               /**< A user defined ID of the Group. */
@@ -418,6 +428,7 @@ class Node {
    * Constructs a Queue with the given Job and default attributes.
    *
    * \returns The handle for the new Queue.
+   * \lockfree
    */
   Queue CreateQueue(
     Job & job                          /**< The Job to use for the Queue. */
@@ -429,6 +440,7 @@ class Node {
    * Constructs a Queue with the given Job and QueueAttributes.
    *
    * \returns The handle for the new Queue.
+   * \lockfree
    */
   Queue CreateQueue(
     Job const & job,                   /**< The Job to use for the Queue. */
