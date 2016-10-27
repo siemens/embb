@@ -28,7 +28,7 @@ function(SetInstallPaths)
   if(WIN32)
     if (DEFINED INSTALL_PREFIX)
       # User given install path given when calling cmake as "-DINSTALL_PREFIX=...".
-      set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX})
+      set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX} CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
     else()
       file(TO_CMAKE_PATH "$ENV{ProgramFiles}" _PROG_FILES) # 32-bit dir on win32, useless to us on win64
       file(TO_CMAKE_PATH "$ENV{ProgramFiles(x86)}" _PROG_FILES_X86) # 32-bit dir: only set on win64
