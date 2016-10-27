@@ -35,6 +35,10 @@ class TaskTest : public partest::TestCase {
 
  private:
   void TestBasic();
+
+  void TrySimple();
+  void TryDetached();
+  void TryMultiInstance();
 };
 
 #endif // MTAPI_C_TEST_EMBB_MTAPI_TEST_TASK_H_
