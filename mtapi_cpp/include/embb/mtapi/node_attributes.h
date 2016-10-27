@@ -232,6 +232,16 @@ class NodeAttributes {
     return *this;
   }
 
+  NodeAttributes & SetReuseMainThread(
+    mtapi_boolean_t reuse
+    ) {
+    mtapi_status_t status;
+    mtapi_nodeattr_set(&attributes_, MTAPI_NODE_REUSE_MAIN_THREAD,
+      &reuse, sizeof(reuse), &status);
+    internal::CheckStatus(status);
+    return *this;
+  }
+
   /**
    * Returns the internal representation of this object.
    * Allows for interoperability with the C interface.
