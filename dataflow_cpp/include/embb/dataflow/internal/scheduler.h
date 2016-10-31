@@ -27,6 +27,8 @@
 #ifndef EMBB_DATAFLOW_INTERNAL_SCHEDULER_H_
 #define EMBB_DATAFLOW_INTERNAL_SCHEDULER_H_
 
+#include <embb/mtapi/execution_policy.h>
+
 namespace embb {
 namespace dataflow {
 namespace internal {
@@ -37,8 +39,13 @@ class Scheduler {
  public:
   Scheduler() {}
   virtual ~Scheduler() {}
-  virtual void Start(Action & action) = 0;
-  virtual void Enqueue(int process_id, Action & action) = 0;
+  virtual void Start(
+    Action & action,
+    embb::mtapi::ExecutionPolicy const & policy) = 0;
+  virtual void Enqueue(
+    int process_id,
+    Action & action,
+    embb::mtapi::ExecutionPolicy const & policy) = 0;
   virtual void WaitForSlice(int slice) = 0;
   virtual int GetSlices() = 0;
 };

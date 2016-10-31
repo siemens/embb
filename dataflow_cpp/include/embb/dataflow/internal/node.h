@@ -29,6 +29,7 @@
 
 #include <cstddef>
 #include <embb/base/exceptions.h>
+#include <embb/mtapi/execution_policy.h>
 #include <embb/dataflow/internal/scheduler.h>
 #include <embb/dataflow/internal/clock_listener.h>
 
@@ -58,10 +59,14 @@ class Node {
       SetSlices(0);
     }
   }
+  void SetPolicy(embb::mtapi::ExecutionPolicy const & policy) {
+    policy_ = policy;
+  }
 
  protected:
   Scheduler * sched_;
   static int next_process_id_;
+  embb::mtapi::ExecutionPolicy policy_;
 
   static int GetNextProcessID() { return next_process_id_++; }
   virtual void SetSlices(int /*slices*/) {}

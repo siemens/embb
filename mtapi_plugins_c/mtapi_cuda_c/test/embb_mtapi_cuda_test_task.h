@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, Siemens AG. All rights reserved.
+ * Copyright (c) 2014, Siemens AG. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,37 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBB_DATAFLOW_INTERNAL_SCHEDULER_SEQUENTIAL_H_
-#define EMBB_DATAFLOW_INTERNAL_SCHEDULER_SEQUENTIAL_H_
+#ifndef MTAPI_PLUGINS_C_MTAPI_CUDA_C_TEST_EMBB_MTAPI_CUDA_TEST_TASK_H_
+#define MTAPI_PLUGINS_C_MTAPI_CUDA_C_TEST_EMBB_MTAPI_CUDA_TEST_TASK_H_
 
-#include <embb/dataflow/internal/action.h>
-#include <embb/dataflow/internal/scheduler.h>
+#include <partest/partest.h>
 
-namespace embb {
-namespace dataflow {
-namespace internal {
-
-class SchedulerSequential : public Scheduler {
+class TaskTest : public partest::TestCase {
  public:
-  SchedulerSequential() {}
-  virtual ~SchedulerSequential() {}
-  virtual void Start(
-    Action & action,
-    embb::mtapi::ExecutionPolicy const &) {
-    action.RunSequential();
-  }
-  virtual void Enqueue(
-    int,
-    Action & action,
-    embb::mtapi::ExecutionPolicy const &) {
-    action.RunSequential();
-  }
-  virtual void WaitForSlice(int /*slice*/) {}
-  virtual int GetSlices() { return 1; }
+  TaskTest();
+
+ private:
+  void TestBasic();
 };
 
-} // namespace internal
-} // namespace dataflow
-} // namespace embb
-
-#endif // EMBB_DATAFLOW_INTERNAL_SCHEDULER_SEQUENTIAL_H_
+#endif // MTAPI_PLUGINS_C_MTAPI_CUDA_C_TEST_EMBB_MTAPI_CUDA_TEST_TASK_H_

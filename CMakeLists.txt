@@ -30,6 +30,8 @@ set (EMBB_BASE_VERSION_MAJOR 0)
 set (EMBB_BASE_VERSION_MINOR 4)
 set (EMBB_BASE_VERSION_PATCH 0)
 
+include(FindCUDA)
+
 # Fix compilation for CMake versions >= 3.1
 #
 # New Policy 0054:
@@ -152,6 +154,9 @@ set(EXPECTED_EMBB_TEST_EXECUTABLES "embb_algorithms_cpp_test"
 if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   list(APPEND EXPECTED_EMBB_TEST_EXECUTABLES "embb_mtapi_opencl_c_test")
 endif()
+if(CUDA_FOUND)
+  list(APPEND EXPECTED_EMBB_TEST_EXECUTABLES "embb_mtapi_cuda_c_test")
+endif()
 
 
 ## Copy test execution script to local binaries folder
@@ -187,6 +192,9 @@ add_subdirectory(mtapi_c)
 add_subdirectory(mtapi_plugins_c/mtapi_network_c)
 if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   add_subdirectory(mtapi_plugins_c/mtapi_opencl_c)
+endif()
+if(CUDA_FOUND)
+  add_subdirectory(mtapi_plugins_c/mtapi_cuda_c)
 endif()
 add_subdirectory(mtapi_cpp)
 add_subdirectory(containers_cpp)

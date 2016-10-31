@@ -38,11 +38,12 @@
 
 /* ---- CLASS MEMBERS ------------------------------------------------------ */
 
-mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
+mtapi_boolean_t embb_mtapi_thread_context_initialize(
   embb_mtapi_thread_context_t* that,
   embb_mtapi_node_t* node,
   mtapi_uint_t worker_index,
-  mtapi_uint_t core_num) {
+  mtapi_uint_t core_num,
+  embb_thread_priority_t priority) {
   mtapi_uint_t ii;
   mtapi_boolean_t result = MTAPI_TRUE;
 
@@ -54,6 +55,7 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize_with_node_worker_and_core(
   that->core_num = core_num;
   that->priorities = node->attributes.max_priorities;
   that->is_initialized = MTAPI_FALSE;
+  that->thread_priority = priority;
   that->is_main_thread = (worker_index == 0) ?
     node->attributes.reuse_main_thread : MTAPI_FALSE;
   embb_atomic_store_int(&that->run, 0);
@@ -135,7 +137,8 @@ mtapi_boolean_t embb_mtapi_thread_context_start(
     embb_tss_set(&(that->tss_id), that);
     embb_atomic_store_int(&that->run, 1);
   } else {
-    err = embb_thread_create(&that->thread, &core_set, worker_func, that);
+    err = embb_thread_create_with_priority(
+      &that->thread, &core_set, that->thread_priority, worker_func, that);
     if (EMBB_SUCCESS != err) {
       embb_mtapi_log_error(
         "embb_mtapi_ThreadContext_initializeWithNodeAndCoreNumber() could not "

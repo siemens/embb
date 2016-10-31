@@ -29,8 +29,9 @@
 
 #include <cassert>
 #include <iterator>
-#include <algorithm>
 #include <functional>
+#include <utility>   // swap C++ 11
+#include <algorithm> // swap C++ 98
 
 #include <embb/base/exceptions.h>
 #include <embb/mtapi/mtapi.h>

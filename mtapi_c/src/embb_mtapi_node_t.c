@@ -131,12 +131,12 @@ void mtapi_initialize(
           node->scheduler = embb_mtapi_scheduler_new();
           if (MTAPI_NULL != node->scheduler) {
             /* fill information structure */
-          node->info.mtapi_version = 0x1000; // mtapi version 1.0
-          node->info.organization_id = MCA_ORG_ID_EMB;
-          node->info.implementation_version =
-            EMBB_BASE_VERSION_MAJOR * 0x1000 + EMBB_BASE_VERSION_MINOR;
-          node->info.number_of_domains = ~0u;
-          node->info.number_of_nodes = ~0u;
+            node->info.mtapi_version = 0x1000; // mtapi version 1.0
+            node->info.organization_id = MCA_ORG_ID_EMB;
+            node->info.implementation_version =
+              EMBB_BASE_VERSION_MAJOR * 0x1000 + EMBB_BASE_VERSION_MINOR;
+            node->info.number_of_domains = ~0u;
+            node->info.number_of_nodes = ~0u;
             node->info.hardware_concurrency = embb_core_count_available();
             node->info.used_memory = embb_mtapi_alloc_get_bytes_allocated();
             if (MTAPI_NULL != mtapi_info) {

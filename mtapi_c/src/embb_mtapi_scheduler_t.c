@@ -503,8 +503,25 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
       }
       core_num++;
     }
-    isinit &= embb_mtapi_thread_context_initialize_with_node_worker_and_core(
-      &that->worker_contexts[ii], node, ii, core_num);
+    embb_thread_priority_t priority = EMBB_THREAD_PRIORITY_NORMAL;
+    if (NULL != node->attributes.worker_priorities) {
+      mtapi_worker_priority_entry_t * entry =
+        node->attributes.worker_priorities;
+      mtapi_worker_priority_type_t type = entry->type;
+      while (type != MTAPI_WORKER_PRIORITY_END) {
+        if (type == MTAPI_WORKER_PRIORITY_DEFAULT) {
+          priority = entry->priority;
+        } else if (type ==
+          (mtapi_worker_priority_type_t)(MTAPI_WORKER_PRIORITY_WORKER + ii)) {
+          priority = entry->priority;
+          break;
+        }
+        entry++;
+        type = entry->type;
+      }
+    }
+    isinit &= embb_mtapi_thread_context_initialize(
+      &that->worker_contexts[ii], node, ii, core_num, priority);
   }
   if (!isinit) {
     return MTAPI_FALSE;

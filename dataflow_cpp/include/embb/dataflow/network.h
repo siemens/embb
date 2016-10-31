@@ -71,6 +71,19 @@ class Network {
   explicit Network(int slices) {}
 
   /**
+   * Constructs an empty network.
+   * \param policy Default execution policy of the processes in the network.
+   */
+  explicit Network(embb::mtapi::ExecutionPolicy const & policy) {}
+
+  /**
+   * Constructs an empty network.
+   * \param slices Number of concurrent tokens allowed in the network.
+   * \param policy Default execution policy of the processes in the network.
+   */
+  Network(int slices, embb::mtapi::ExecutionPolicy const & policy) {}
+
+  /**
    * Input port class.
    */
   template <typename Type>
@@ -208,7 +221,16 @@ class Network {
      * \param network The network this node is going to be part of.
      * \param function The Function to call to process a token.
      */
-    explicit SerialProcess(Network & network, FunctionType function);
+    SerialProcess(Network & network, FunctionType function);
+
+    /**
+     * Constructs a SerialProcess with a user specified processing function.
+     * \param network The network this node is going to be part of.
+     * \param function The Function to call to process a token.
+     * \param policy The execution policy of the process.
+     */
+    SerialProcess(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
 
     /**
      * \returns \c true if the SerialProcess has any inputs, \c false
@@ -254,75 +276,84 @@ class Network {
   };
 
   /**
-  * Generic parallel process template.
-  *
-  * Implements a generic parallel process in the network that may have one to
-  * four input ports and one to four output ports but no more that five total
-  * ports.
-  * Tokens are processed as soon as all inputs for that token are complete.
-  *
-  * \see Source, SerialProcess, Sink, Switch, Select
-  *
-  * \tparam Inputs Inputs of the process.
-  * \tparam Outputs Outputs of the process.
-  */
+   * Generic parallel process template.
+   *
+   * Implements a generic parallel process in the network that may have one to
+   * four input ports and one to four output ports but no more that five total
+   * ports.
+   * Tokens are processed as soon as all inputs for that token are complete.
+   *
+   * \see Source, SerialProcess, Sink, Switch, Select
+   *
+   * \tparam Inputs Inputs of the process.
+   * \tparam Outputs Outputs of the process.
+   */
   template <class Inputs, class Outputs>
   class ParallelProcess {
    public:
     /**
-    * Function type to use when processing tokens.
-    */
+     * Function type to use when processing tokens.
+     */
     typedef embb::base::Function<void, INPUT_TYPE_LIST, OUTPUT_TYPE_LIST>
       FunctionType;
 
     /**
-    * Input port type list.
-    */
+     * Input port type list.
+     */
     typedef Inputs<INPUT_TYPE_LIST> InputsType;
 
     /**
-    * Output port type list.
-    */
+     * Output port type list.
+     */
     typedef Outputs<OUTPUT_TYPE_LIST> OutputsType;
 
     /**
-    * Constructs a ParallelProcess with a user specified processing function.
-    * \param network The network this node is going to be part of.
-    * \param function The Function to call to process a token.
-    */
-    explicit ParallelProcess(Network & network, FunctionType function);
+     * Constructs a ParallelProcess with a user specified processing function.
+     * \param network The network this node is going to be part of.
+     * \param function The Function to call to process a token.
+     */
+    ParallelProcess(Network & network, FunctionType function);
 
     /**
-    * \returns \c true if the ParallelProcess has any inputs, \c false
-    *          otherwise.
-    */
+     * Constructs a ParallelProcess with a user specified processing function.
+     * \param network The network this node is going to be part of.
+     * \param function The Function to call to process a token.
+     * \param policy The execution policy of the process.
+     */
+    ParallelProcess(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
+
+    /**
+     * \returns \c true if the ParallelProcess has any inputs, \c false
+     *          otherwise.
+     */
     virtual bool HasInputs() const;
 
     /**
-    * \returns Reference to a list of all input ports.
-    */
+     * \returns Reference to a list of all input ports.
+     */
     InputsType & GetInputs();
 
     /**
-    * \returns Input port at Index.
-    */
+     * \returns Input port at Index.
+     */
     template <int Index>
     typename InputsType::Types<Index>::Result & GetInput();
 
     /**
-    * \returns \c true if the ParallelProcess has any outputs, \c false
-    *          otherwise.
-    */
+     * \returns \c true if the ParallelProcess has any outputs, \c false
+     *          otherwise.
+     */
     virtual bool HasOutputs() const;
 
     /**
-    * \returns Reference to a list of all output ports.
-    */
+     * \returns Reference to a list of all output ports.
+     */
     OutputsType & GetOutputs();
 
     /**
-    * \returns Output port at Index.
-    */
+     * \returns Output port at Index.
+     */
     template <int Index>
     typename OutputsType::Types<Index>::Result & GetOutput();
 
@@ -371,6 +402,13 @@ class Network {
      * \param network The network this node is going to be part of.
      */
     explicit Select(Network & network);
+
+    /**
+     * Constructs a Switch process.
+     * \param network The network this node is going to be part of.
+     * \param policy The execution policy of the process.
+     */
+    Select(Network & network, embb::mtapi::ExecutionPolicy const & policy);
 
     /**
      * \returns Always \c true.
@@ -451,6 +489,13 @@ class Network {
     explicit Select(Network & network);
 
     /**
+     * Constructs a Select process.
+     * \param network The network this node is going to be part of.
+     * \param policy The execution policy of the process.
+     */
+    Select(Network & network, embb::mtapi::ExecutionPolicy const & policy);
+
+    /**
      * \returns Always \c true.
      */
     virtual bool HasInputs() const;
@@ -528,7 +573,16 @@ class Network {
      * \param network The network this node is going to be part of.
      * \param function The Function to call to process a token.
      */
-    explicit Sink(Network & network, FunctionType function);
+    Sink(Network & network, FunctionType function);
+
+    /**
+     * Constructs a Sink with a user specified processing function.
+     * \param network The network this node is going to be part of.
+     * \param function The Function to call to process a token.
+     * \param policy The execution policy of the process.
+     */
+    Sink(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
 
     /**
      * \returns Always \c true.
@@ -588,7 +642,16 @@ class Network {
      * \param network The network this node is going to be part of.
      * \param function The Function to call to emit a token.
      */
-    explicit Source(Network & network, FunctionType function);
+    Source(Network & network, FunctionType function);
+
+    /**
+     * Constructs a Source with a user specified processing function.
+     * \param network The network this node is going to be part of.
+     * \param function The Function to call to emit a token.
+     * \param policy The execution policy of the process.
+     */
+    Source(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
 
     /**
      * \returns Always \c false.
@@ -641,7 +704,16 @@ class Network {
      * \param network The network this node is going to be part of.
      * \param value The value to emit.
      */
-    explicit ConstantSource(Network & network, Type value);
+    ConstantSource(Network & network, Type value);
+
+    /**
+     * Constructs a ConstantSource with a value to emit on each token.
+     * \param network The network this node is going to be part of.
+     * \param value The value to emit.
+     * \param policy The execution policy of the process.
+     */
+    ConstantSource(Network & network, Type value,
+      embb::mtapi::ExecutionPolicy const & policy);
 
     /**
      * \returns Always \c false.
@@ -698,12 +770,29 @@ class Network {
 class Network : public internal::ClockListener {
  public:
   Network()
-    : sink_counter_(NULL), sink_count_(0), slices_(0), sched_(NULL) {
+    : sink_counter_(NULL), sink_count_(0)
+    , slices_(0), sched_(NULL)
+    , policy_() {
     // empty
   }
 
   explicit Network(int slices)
-    : sink_counter_(NULL), sink_count_(0), slices_(slices), sched_(NULL) {
+    : sink_counter_(NULL), sink_count_(0),
+    slices_(slices), sched_(NULL)
+    , policy_() {
+    PrepareSlices();
+  }
+
+  explicit Network(embb::mtapi::ExecutionPolicy const & policy)
+    : sink_counter_(NULL), sink_count_(0)
+    , slices_(0), sched_(NULL)
+    , policy_(policy) {
+  }
+
+  Network(int slices, embb::mtapi::ExecutionPolicy const & policy)
+    : sink_counter_(NULL), sink_count_(0)
+    , slices_(slices), sched_(NULL)
+    , policy_(policy) {
     PrepareSlices();
   }
 
@@ -751,11 +840,23 @@ class Network : public internal::ClockListener {
       internal::Inputs<I1, I2, I3, I4, I5>,
       internal::Outputs<O1, O2, O3, O4, O5> >::FunctionType
         FunctionType;
-    explicit SerialProcess(Network & network, FunctionType function)
+
+    SerialProcess(Network & network, FunctionType function)
       : internal::Process< true,
           internal::Inputs<I1, I2, I3, I4, I5>,
           internal::Outputs<O1, O2, O3, O4, O5> >(
             network.sched_, function) {
+      this->SetPolicy(network.policy_);
+      network.processes_.push_back(this);
+    }
+
+    SerialProcess(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy)
+      : internal::Process< true,
+      internal::Inputs<I1, I2, I3, I4, I5>,
+      internal::Outputs<O1, O2, O3, O4, O5> >(
+        network.sched_, function) {
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -775,11 +876,23 @@ class Network : public internal::ClockListener {
       internal::Inputs<I1, I2, I3, I4, I5>,
       internal::Outputs<O1, O2, O3, O4, O5> >::FunctionType
         FunctionType;
-    explicit ParallelProcess(Network & network, FunctionType function)
+
+    ParallelProcess(Network & network, FunctionType function)
       : internal::Process< false,
           internal::Inputs<I1, I2, I3, I4, I5>,
           internal::Outputs<O1, O2, O3, O4, O5> >(
             network.sched_, function) {
+      this->SetPolicy(network.policy_);
+      network.processes_.push_back(this);
+    }
+
+    ParallelProcess(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy)
+      : internal::Process< false,
+      internal::Inputs<I1, I2, I3, I4, I5>,
+      internal::Outputs<O1, O2, O3, O4, O5> >(
+        network.sched_, function) {
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -789,6 +902,13 @@ class Network : public internal::ClockListener {
    public:
     explicit Switch(Network & network)
       : internal::Switch<Type>(network.sched_) {
+      this->SetPolicy(network.policy_);
+      network.processes_.push_back(this);
+    }
+
+    Switch(Network & network, embb::mtapi::ExecutionPolicy const & policy)
+      : internal::Switch<Type>(network.sched_) {
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -798,6 +918,13 @@ class Network : public internal::ClockListener {
    public:
     explicit Select(Network & network)
       : internal::Select<Type>(network.sched_) {
+      this->SetPolicy(network.policy_);
+      network.processes_.push_back(this);
+    }
+
+    Select(Network & network, embb::mtapi::ExecutionPolicy const & policy)
+      : internal::Select<Type>(network.sched_) {
+      this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
   };
@@ -812,10 +939,21 @@ class Network : public internal::ClockListener {
     typedef typename internal::Sink<
       internal::Inputs<I1, I2, I3, I4, I5> >::FunctionType FunctionType;
 
-    explicit Sink(Network & network, FunctionType function)
+    Sink(Network & network, FunctionType function)
       : internal::Sink<
           internal::Inputs<I1, I2, I3, I4, I5> >(
             network.sched_, &network, function) {
+      this->SetPolicy(network.policy_);
+      network.sinks_.push_back(this);
+      network.sink_count_++;
+    }
+
+    Sink(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy)
+      : internal::Sink<
+      internal::Inputs<I1, I2, I3, I4, I5> >(
+        network.sched_, &network, function) {
+      this->SetPolicy(policy);
       network.sinks_.push_back(this);
       network.sink_count_++;
     }
@@ -832,9 +970,18 @@ class Network : public internal::ClockListener {
       internal::Outputs<O1, O2, O3, O4, O5> >::FunctionType
         FunctionType;
 
-    explicit Source(Network & network, FunctionType function)
+    Source(Network & network, FunctionType function)
       : internal::Source<
           internal::Outputs<O1, O2, O3, O4, O5> >(network.sched_, function) {
+      this->SetPolicy(network.policy_);
+      network.sources_.push_back(this);
+    }
+
+    Source(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy)
+      : internal::Source<
+      internal::Outputs<O1, O2, O3, O4, O5> >(network.sched_, function) {
+      this->SetPolicy(policy);
       network.sources_.push_back(this);
     }
   };
@@ -842,8 +989,16 @@ class Network : public internal::ClockListener {
   template<typename Type>
   class ConstantSource : public internal::ConstantSource<Type> {
    public:
-    explicit ConstantSource(Network & network, Type value)
+    ConstantSource(Network & network, Type value)
       : internal::ConstantSource<Type>(network.sched_, value) {
+      this->SetPolicy(network.policy_);
+      network.sources_.push_back(this);
+    }
+
+    ConstantSource(Network & network, Type value,
+      embb::mtapi::ExecutionPolicy const & policy)
+      : internal::ConstantSource<Type>(network.sched_, value) {
+      this->SetPolicy(policy);
       network.sources_.push_back(this);
     }
   };
@@ -928,6 +1083,7 @@ class Network : public internal::ClockListener {
   int sink_count_;
   int slices_;
   internal::Scheduler * sched_;
+  embb::mtapi::ExecutionPolicy policy_;
 
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
   std::vector<int> spawn_history_[Slices];

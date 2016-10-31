@@ -31,6 +31,7 @@
 #include <embb/base/internal/thread_closures.h>
 #include <embb/base/mutex.h>
 #include <embb/base/core_set.h>
+#include <embb/base/c/thread.h>
 #include <ostream>
 
 namespace embb {
@@ -177,9 +178,33 @@ class Thread {
    * \tparam Function Function object type
    */
   template<typename Function>
-  explicit Thread(
+  Thread(
     CoreSet& core_set,
     /**< [IN] Set of cores on which the thread shall be executed. */
+    Function function
+    /**< [IN] Copyable function object, callable without arguments */
+    );
+
+  /**
+   * Creates and runs a thread with zero-argument start function.
+   *
+   * \note If the function is passed as a temporary object when creating a
+   * thread, this might be interpreted as a function declaration ("most vexing
+   * parse"). C++11 resolves this by using curly braces for initialization.
+   *
+   * \throws NoMemoryException if not enough memory is available
+   * \throws ErrorException in case of another error
+   * \memory A small constant amount of memory to store the function. This
+   *         memory is freed the thread is joined.
+   * \notthreadsafe
+   * \tparam Function Function object type
+   */
+  template<typename Function>
+  Thread(
+    CoreSet& core_set,
+    /**< [IN] Set of cores on which the thread shall be executed. */
+    embb_thread_priority_t priority,
+    /**< [IN] Priority of the new thread. */
     Function function
     /**< [IN] Copyable function object, callable without arguments */
     );
