@@ -43,7 +43,7 @@
   EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_atomic_init_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
   EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable) { \
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex); \
-  variable->marker = 0x12345678; \
+  EMBB_ATOMIC_INIT_MARKER(variable); \
   }
 
 #undef EMBB_ATOMIC_METHOD_TO_GENERATE

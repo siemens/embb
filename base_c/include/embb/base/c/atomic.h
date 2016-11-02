@@ -321,6 +321,7 @@ void embb_mutex_destroy(
 #define EMBB_ATOMIC_MUTEX_UNLOCK(mutex) embb_mutex_unlock(&(mutex))
 #define EMBB_ATOMIC_MUTEX_DESTROY(mutex) embb_mutex_destroy(&(mutex))
 #define EMBB_ATOMIC_INIT_CHECK(variable) assert(variable->marker == 0x12345678)
+#define EMBB_ATOMIC_INIT_MARKER(variable) variable->marker = 0x12345678
 
 #else
 
@@ -328,7 +329,8 @@ void embb_mutex_destroy(
 #define EMBB_ATOMIC_MUTEX_LOCK(...)
 #define EMBB_ATOMIC_MUTEX_UNLOCK(...)
 #define EMBB_ATOMIC_MUTEX_DESTROY(...)
-#define EMBB_ATOMIC_INIT_CHECK(...)
+#define EMBB_ATOMIC_INIT_CHECK(variable) (void)(variable)
+#define EMBB_ATOMIC_INIT_MARKER(variable) (void)(variable)
 
 #endif
 
