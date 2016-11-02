@@ -51,11 +51,23 @@ namespace mtapi {
  */
 class Queue {
  public:
-  Queue(Queue const & other) : handle_(other.handle_) {
+  /**
+   * Copy constructs a Queue.
+   */
+  Queue(
+    Queue const & other                /**< The Queue to copy. */
+    ) : handle_(other.handle_) {
     // empty
   }
 
-  Queue & operator=(Queue const & other) {
+  /**
+   * Copies a Queue.
+   *
+   * \returns Reference to this object.
+   */
+  Queue & operator=(
+    Queue const & other                /**< The Queue to copy. */
+    ) {
     handle_ = other.handle_;
     return *this;
   }
