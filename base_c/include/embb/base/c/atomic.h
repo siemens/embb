@@ -293,7 +293,9 @@ extern "C" {
 #endif
 
 #include <embb/base/c/internal/cmake_config.h>
+
 #ifdef EMBB_THREADING_ANALYSIS_MODE
+
 #include <embb/base/c/internal/platform.h>
 #include <assert.h>
 
@@ -322,8 +324,11 @@ void embb_mutex_destroy(
 
 #else
 
-#define EMBB_ATOMIC_MUTEX_LOCK(mutex)
-#define EMBB_ATOMIC_MUTEX_UNLOCK(mutex)
+#define EMBB_ATOMIC_MUTEX_INIT(...)
+#define EMBB_ATOMIC_MUTEX_LOCK(...)
+#define EMBB_ATOMIC_MUTEX_UNLOCK(...)
+#define EMBB_ATOMIC_MUTEX_DESTROY(...)
+#define EMBB_ATOMIC_INIT_CHECK(...)
 
 #endif
 

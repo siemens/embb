@@ -93,10 +93,10 @@ inline void AtomicInteger<BaseType>::operator&=(BaseType val) {
   NativeType native_operand;
   memcpy(&native_operand, &val, sizeof(val));
 
-  EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
+  EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
   and_assign_implementation<NativeType>::
     and_assign(&this->AtomicValue, native_operand);
-  EMBB_ATOMIC_MUTEX_UNLOCK(internal_mutex);
+  EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 }
 
 template<typename BaseType>
@@ -104,10 +104,10 @@ inline void AtomicInteger<BaseType>::operator|=(BaseType val) {
   NativeType native_operand;
   memcpy(&native_operand, &val, sizeof(val));
 
-  EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
+  EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
   or_assign_implementation<NativeType>::
     or_assign(&this->AtomicValue, native_operand);
-  EMBB_ATOMIC_MUTEX_UNLOCK(internal_mutex);
+  EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 }
 
 template<typename BaseType>
@@ -115,10 +115,10 @@ inline void AtomicInteger<BaseType>::operator^=(BaseType val) {
   NativeType native_operand;
   memcpy(&native_operand, &val, sizeof(val));
 
-  EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
+  EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
   xor_assign_implementation<NativeType>::
     xor_assign(&this->AtomicValue, native_operand);
-  EMBB_ATOMIC_MUTEX_UNLOCK(internal_mutex);
+  EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 }
 
 }  // namespace atomic
