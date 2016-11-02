@@ -36,11 +36,20 @@ namespace embb {
 namespace base {
 namespace test {
 
+embb_atomic_int flag;
+
 ThreadIndexTest::ThreadIndexTest()
     : number_threads_(partest::TestSuite::GetDefaultNumThreads()) {
+  embb_atomic_init_int(&flag);
+  embb_atomic_store_int(&flag, 1);
+
   CreateUnit("Test 0 indices").Add(&ThreadIndexTest::Test0, this);
   CreateUnit("Test 1 index").Add(&ThreadIndexTest::Test1, this);
   CreateUnit("Test N indices").Add(&ThreadIndexTest::TestN, this, 1);
+}
+
+ThreadIndexTest::~ThreadIndexTest() {
+  embb_atomic_destroy_int(&flag);
 }
 
 void ThreadIndexTest::Test0() {
@@ -78,8 +87,6 @@ void ThreadIndexTest::Test1() {
   embb_internal_thread_index_set_max(old_max);
 }
 
-embb_atomic_int flag = { 1 };
-
 void ThreadIndexTest::TestN() {
   embb_internal_thread_index_reset();
   unsigned int old_max = embb_thread_get_max_count();
@@ -106,6 +113,8 @@ void ThreadIndexTest::TestN() {
   embb_thread_join(&thread, NULL);
   delete[] threads;
   embb_internal_thread_index_set_max(old_max);
+
+  embb_atomic_destroy_int(&flag);
 }
 
 int ThreadStart(void* arg) {

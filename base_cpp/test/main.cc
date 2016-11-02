@@ -51,8 +51,6 @@ using embb::base::test::ThreadTest;
 using embb::base::test::LogTest;
 
 PT_MAIN("Base C++") {
-  embb_atomic_initialize();
-
   unsigned int max_threads =
       static_cast<unsigned int>(2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
@@ -69,6 +67,4 @@ PT_MAIN("Base C++") {
   PT_RUN(LogTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
-
-  embb_atomic_finalize();
 }

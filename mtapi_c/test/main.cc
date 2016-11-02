@@ -43,8 +43,6 @@
 #include <embb/base/c/atomic.h>
 
 PT_MAIN("MTAPI C") {
-  embb_atomic_initialize();
-
   embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);
   embb_thread_set_max_count(1024);
 
@@ -57,6 +55,4 @@ PT_MAIN("MTAPI C") {
   PT_RUN(IdPoolTest);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
-
-  embb_atomic_finalize();
 }

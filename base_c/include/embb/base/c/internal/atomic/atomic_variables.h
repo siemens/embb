@@ -41,6 +41,8 @@
   typedef struct \
 { \
   volatile EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
+  embb_mutex_t internal_mutex; \
+  uint32_t marker; \
 } EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
 
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(char, char)
@@ -57,17 +59,5 @@ EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(uintptr_t, uintptr_t)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(size_t, size_t)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(ptrdiff_t, ptrdiff_t)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(uintmax_t, uintmax_t)
-
-#ifdef EMBB_THREADING_ANALYSIS_MODE
-#include <embb/base/c/mutex.h>
-
-extern embb_mutex_t embb_atomic_mutex;
-
-void embb_atomic_initialize();
-void embb_atomic_finalize();
-#else
-#define embb_atomic_initialize()
-#define embb_atomic_finalize()
-#endif
 
 #endif //EMBB_BASE_C_INTERNAL_ATOMIC_ATOMIC_VARIABLES_H_

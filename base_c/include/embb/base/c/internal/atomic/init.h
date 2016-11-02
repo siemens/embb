@@ -24,20 +24,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <partest/partest.h>
+#ifndef EMBB_BASE_C_INTERNAL_ATOMIC_INIT_H_
+#define EMBB_BASE_C_INTERNAL_ATOMIC_INIT_H_
 
-#include <embb/base/c/thread.h>
-#include <embb/base/c/atomic.h>
+#ifndef DOXYGEN
 
-#include <mtapi_cpp_test_task.h>
-#include <mtapi_cpp_test_group.h>
-#include <mtapi_cpp_test_queue.h>
+#include <embb/base/c/internal/config.h>
+#include <embb/base/c/internal/atomic/atomic_sizes.h>
+#include <embb/base/c/internal/macro_helper.h>
+#include <embb/base/c/internal/atomic/atomic_variables.h>
+#include <string.h>
 
+/*
+* See file and_assign.h for a detailed (and operation independent) description
+* of the following macro.
+*/
+#define EMBB_ATOMIC_INTERNAL_DEFINE_INIT_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
+  EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_atomic_init_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
+  EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable) { \
+  EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex); \
+  variable->marker = 0x12345678; \
+  }
 
-PT_MAIN("MTAPI C++") {
-  embb_thread_set_max_count(1024);
+#undef EMBB_ATOMIC_METHOD_TO_GENERATE
+#define EMBB_ATOMIC_METHOD_TO_GENERATE INIT_METHOD
+#include <embb/base/c/internal/atomic/generate_atomic_implementation_template.h>
+#undef EMBB_ATOMIC_METHOD_TO_GENERATE
 
-  PT_RUN(TaskTest);
-  PT_RUN(GroupTest);
-  PT_RUN(QueueTest);
-}
+#endif //DOXYGEN
+
+#endif //EMBB_BASE_C_INTERNAL_ATOMIC_INIT_H_
+

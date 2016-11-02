@@ -57,12 +57,10 @@
 #define EMBB_DEFINE_FETCH_AND_ADD(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX) \
   EMBB_PLATFORM_INLINE EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) EMBB_CAT2(embb_internal__atomic_fetch_and_add_, EMBB_PARAMETER_SIZE_BYTE) \
   (EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value) { \
-  EMBB_ATOMIC_MUTEX_LOCK; \
   __asm__ __volatile__ ("lock xadd" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "+m" (*pointer_to_value), "+q" (new_value) \
   : \
   : "memory", "cc" ); \
-  EMBB_ATOMIC_MUTEX_UNLOCK; \
   return new_value; \
   }
 #else
@@ -109,9 +107,6 @@ EMBB_DEFINE_FETCH_AND_ADD(8, "q")
   : "memory", "cc" ); \
   return result; \
   }
-/*    return __sync_fetch_and_add( \
-      pointer_to_value, new_value); \
-  }*/
 #else
 #error "No atomic fetch and store implementation found"
 #endif
@@ -133,9 +128,12 @@ EMBB_DEFINE_FETCH_AND_ADD(4, "")
   EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE value) { \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) value_pun; \
   memcpy(&value_pun, &value, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE)); \
+  EMBB_ATOMIC_INIT_CHECK(variable); \
+  EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex); \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) return_val = EMBB_CAT2(embb_internal__atomic_fetch_and_add_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)(\
   (EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *)\
   (&(variable->internal_variable)), value_pun); \
+  EMBB_ATOMIC_MUTEX_UNLOCK(variable->internal_mutex); \
   EMBB_ATOMIC_PARAMETER_TYPE_NATIVE return_val_pun; \
   memcpy(&return_val_pun, &return_val, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE)); \
   return return_val_pun; \

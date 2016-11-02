@@ -36,9 +36,14 @@ namespace test {
 class ThreadIndexTest : public partest::TestCase {
  public:
   /**
-   * Adds test methods.
+   * Adds test methods and allocates temporary data.
    */
   ThreadIndexTest();
+
+  /**
+   * Destroys temporary data.
+   */
+  ~ThreadIndexTest();
 
  private:
   /**

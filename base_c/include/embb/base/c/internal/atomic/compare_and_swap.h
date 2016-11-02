@@ -58,7 +58,6 @@
   EMBB_PLATFORM_INLINE int EMBB_CAT2(embb_internal__atomic_compare_and_swap_, \
   EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* expected, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) desired) { \
-  EMBB_ATOMIC_MUTEX_LOCK; \
   char result; \
   __asm__ __volatile__ ("lock cmpxchg" EMBB_ATOMIC_X86_SIZE_SUFFIX\
   " %3, %0 \n\t" \
@@ -66,7 +65,6 @@
   : "+m" (*pointer_to_value), "+a" (*expected), "=q" (result) \
   : "q" (desired) \
   : "memory", "cc" ); \
-  EMBB_ATOMIC_MUTEX_UNLOCK; \
   return result; \
   }
 #else
@@ -140,8 +138,12 @@ EMBB_DEFINE_COMPARE_AND_SWAP(4, "")
   EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE* expected, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE desired) {\
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) desired_pun;\
   memcpy(&desired_pun, &desired, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE));\
-  return EMBB_CAT2(embb_internal__atomic_compare_and_swap_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)((EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) \
+  EMBB_ATOMIC_INIT_CHECK(variable); \
+  EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex); \
+  int result = EMBB_CAT2(embb_internal__atomic_compare_and_swap_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)((EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) \
   (&(variable->internal_variable)), (EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) expected, desired_pun); \
+  EMBB_ATOMIC_MUTEX_UNLOCK(variable->internal_mutex); \
+  return result;\
   }
 
 #undef EMBB_ATOMIC_METHOD_TO_GENERATE

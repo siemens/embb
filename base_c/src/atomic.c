@@ -46,17 +46,3 @@ void __embb_atomic_internal_compile_time_checks() {
   BUILD_BUG_ON(sizeof(ptrdiff_t) != EMBB_PTRDIFF_T_TYPE_SIZE);
   BUILD_BUG_ON(sizeof(uintmax_t) != EMBB_UINTMAX_T_TYPE_SIZE);
 }
-
-#ifdef EMBB_THREADING_ANALYSIS_MODE
-
-embb_mutex_t embb_atomic_mutex;
-
-void embb_atomic_initialize() {
-  embb_mutex_init(&embb_atomic_mutex, EMBB_MUTEX_PLAIN);
-}
-
-void embb_atomic_finalize() {
-  embb_mutex_destroy(&embb_atomic_mutex);
-}
-
-#endif

@@ -84,13 +84,16 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
         embb::base::Allocation::Allocate(
           sizeof(embb::base::Atomic<int>)*slices_));
       for (int ii = 0; ii < slices_; ii++) {
-        count_[ii] = 1;
+        new(count_+ii) embb::base::Atomic<int>(1);
       }
     }
     this->template Get<0>().SetSlices(slices_);
   }
   ~Inputs() {
     if (NULL != count_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii].~Atomic<int>();
+      }
       embb::base::Allocation::Free(count_);
     }
   }
@@ -150,7 +153,7 @@ class Inputs<T1, T2, embb::base::internal::Nil,
         embb::base::Allocation::Allocate(
           sizeof(embb::base::Atomic<int>)*slices_));
       for (int ii = 0; ii < slices_; ii++) {
-        count_[ii] = 2;
+        new(count_ + ii) embb::base::Atomic<int>(2);
       }
     }
     this->template Get<0>().SetSlices(slices_);
@@ -158,6 +161,9 @@ class Inputs<T1, T2, embb::base::internal::Nil,
   }
   ~Inputs() {
     if (NULL != count_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii].~Atomic<int>();
+      }
       embb::base::Allocation::Free(count_);
     }
   }
@@ -222,7 +228,7 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
         embb::base::Allocation::Allocate(
           sizeof(embb::base::Atomic<int>)*slices_));
       for (int ii = 0; ii < slices_; ii++) {
-        count_[ii] = 3;
+        new(count_ + ii) embb::base::Atomic<int>(3);
       }
     }
     this->template Get<0>().SetSlices(slices_);
@@ -231,6 +237,9 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
   }
   ~Inputs() {
     if (NULL != count_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii].~Atomic<int>();
+      }
       embb::base::Allocation::Free(count_);
     }
   }
@@ -299,7 +308,7 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
         embb::base::Allocation::Allocate(
           sizeof(embb::base::Atomic<int>)*slices_));
       for (int ii = 0; ii < slices_; ii++) {
-        count_[ii] = 4;
+        new(count_ + ii) embb::base::Atomic<int>(4);
       }
     }
     this->template Get<0>().SetSlices(slices_);
@@ -309,6 +318,9 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
   }
   ~Inputs() {
     if (NULL != count_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii].~Atomic<int>();
+      }
       embb::base::Allocation::Free(count_);
     }
   }
@@ -383,7 +395,7 @@ class Inputs
         embb::base::Allocation::Allocate(
           sizeof(embb::base::Atomic<int>)*slices_));
       for (int ii = 0; ii < slices_; ii++) {
-        count_[ii] = 5;
+        new(count_ + ii) embb::base::Atomic<int>(5);
       }
     }
     this->template Get<0>().SetSlices(slices_);
@@ -394,6 +406,9 @@ class Inputs
   }
   ~Inputs() {
     if (NULL != count_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        count_[ii].~Atomic<int>();
+      }
       embb::base::Allocation::Free(count_);
     }
   }

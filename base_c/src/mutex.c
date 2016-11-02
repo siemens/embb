@@ -149,6 +149,7 @@ int embb_spin_init(embb_spinlock_t* spinlock) {
   }
   // For now, store the initial value. In the future will use atomic init
   // function (as soon as available).
+  embb_atomic_init_int(&spinlock->atomic_spin_variable_);
   embb_atomic_store_int(&spinlock->atomic_spin_variable_, 0);
   return EMBB_SUCCESS;
 }
@@ -207,7 +208,5 @@ int embb_spin_unlock(embb_spinlock_t* spinlock) {
 
 void embb_spin_destroy(embb_spinlock_t* spinlock) {
   assert(NULL != spinlock);
-  // for now, doing nothing here... in future, will call the respective
-  // destroy function for atomics...
-  EMBB_UNUSED(spinlock);
+  embb_atomic_destroy_int(&spinlock->atomic_spin_variable_);
 }

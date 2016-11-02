@@ -66,8 +66,6 @@ mtapi_boolean_t embb_mtapi_##TYPE##_pool_initialize( \
       that->storage[ii].handle.id = EMBB_MTAPI_IDPOOL_INVALID_ID; \
       that->storage[ii].handle.tag = 0; \
     } \
-    /* use entry 0 as invalid */ \
-    embb_mtapi_##TYPE##_initialize(that->storage); \
     return MTAPI_TRUE; \
   } else { \
     that->id_pool.ids_available = 0; \
@@ -96,7 +94,6 @@ void embb_mtapi_##TYPE##_pool_deallocate( \
   embb_mtapi_##TYPE##_pool_t * that, \
   embb_mtapi_##TYPE##_t * object) { \
   mtapi_uint_t pool_id = object->handle.id; \
-  embb_mtapi_##TYPE##_finalize(object); \
   object->handle.id = EMBB_MTAPI_IDPOOL_INVALID_ID; \
   object->handle.tag++; \
   embb_mtapi_id_pool_deallocate(&that->id_pool, pool_id); \

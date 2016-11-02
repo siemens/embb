@@ -56,7 +56,9 @@ void embb_mtapi_queue_initialize(embb_mtapi_queue_t* that) {
 
   mtapi_queueattr_init(&that->attributes, MTAPI_NULL);
   that->queue_id = MTAPI_QUEUE_ID_NONE;
+  embb_atomic_init_char(&that->enabled);
   embb_atomic_store_char(&that->enabled, MTAPI_FALSE);
+  embb_atomic_init_int(&that->num_tasks);
   embb_atomic_store_int(&that->num_tasks, 0);
   that->job_handle.id = 0;
   that->job_handle.tag = 0;
@@ -71,7 +73,9 @@ void embb_mtapi_queue_initialize_with_attributes_and_job(
 
   that->attributes = *attributes;
   that->queue_id = MTAPI_QUEUE_ID_NONE;
+  embb_atomic_init_char(&that->enabled);
   embb_atomic_store_char(&that->enabled, MTAPI_TRUE);
+  embb_atomic_init_int(&that->num_tasks);
   embb_atomic_store_int(&that->num_tasks, 0);
   that->job_handle = job;
 }
@@ -81,6 +85,8 @@ void embb_mtapi_queue_finalize(embb_mtapi_queue_t* that) {
 
   that->job_handle.id = 0;
   that->job_handle.tag = 0;
+  embb_atomic_destroy_int(&that->num_tasks);
+  embb_atomic_destroy_char(&that->enabled);
   embb_mtapi_queue_initialize(that);
 }
 

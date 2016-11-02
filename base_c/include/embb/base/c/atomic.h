@@ -295,6 +295,12 @@ extern "C" {
 #include <embb/base/c/internal/cmake_config.h>
 #ifdef EMBB_THREADING_ANALYSIS_MODE
 #include <embb/base/c/internal/platform.h>
+#include <assert.h>
+
+int embb_mutex_init(
+  embb_mutex_t* mutex,
+  int type
+  );
 
 int embb_mutex_lock(
   embb_mutex_t* mutex
@@ -304,13 +310,20 @@ int embb_mutex_unlock(
   embb_mutex_t* mutex
   );
 
-#define EMBB_ATOMIC_MUTEX_LOCK embb_mutex_lock(&embb_atomic_mutex)
-#define EMBB_ATOMIC_MUTEX_UNLOCK embb_mutex_unlock(&embb_atomic_mutex)
+void embb_mutex_destroy(
+  embb_mutex_t* mutex
+  );
+
+#define EMBB_ATOMIC_MUTEX_INIT(mutex) embb_mutex_init(&(mutex), 0)
+#define EMBB_ATOMIC_MUTEX_LOCK(mutex) embb_mutex_lock(&(mutex))
+#define EMBB_ATOMIC_MUTEX_UNLOCK(mutex) embb_mutex_unlock(&(mutex))
+#define EMBB_ATOMIC_MUTEX_DESTROY(mutex) embb_mutex_destroy(&(mutex))
+#define EMBB_ATOMIC_INIT_CHECK(variable) assert(variable->marker == 0x12345678)
 
 #else
 
-#define EMBB_ATOMIC_MUTEX_LOCK
-#define EMBB_ATOMIC_MUTEX_UNLOCK
+#define EMBB_ATOMIC_MUTEX_LOCK(mutex)
+#define EMBB_ATOMIC_MUTEX_UNLOCK(mutex)
 
 #endif
 
@@ -318,6 +331,8 @@ int embb_mutex_unlock(
 #include <embb/base/c/internal/atomic/atomic_sizes.h>
 #include <embb/base/c/internal/atomic/atomic_variables.h>
 #include <embb/base/c/internal/macro_helper.h>
+#include <embb/base/c/internal/atomic/init.h>
+#include <embb/base/c/internal/atomic/destroy.h>
 #include <embb/base/c/internal/atomic/load.h>
 #include <embb/base/c/internal/atomic/and_assign.h>
 #include <embb/base/c/internal/atomic/store.h>

@@ -733,8 +733,12 @@ void TestContext() {
 }
 
 void ErrorTest::TestBasic() {
+  embb_atomic_init_int(&wait);
+
   TestNodeNotInit();
   TestParameter();
   TestLimits();
   TestContext();
+
+  embb_atomic_destroy_int(&wait);
 }

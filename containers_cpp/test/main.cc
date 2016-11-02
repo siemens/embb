@@ -72,8 +72,6 @@ using embb::containers::test::ObjectPoolTest;
 using embb::containers::test::HazardPointerTest2;
 
 PT_MAIN("Data Structures C++") {
-  embb_atomic_initialize();
-
   unsigned int max_threads = static_cast<unsigned int>(
     2 * partest::TestSuite::GetDefaultNumThreads());
   embb_thread_set_max_count(max_threads);
@@ -90,6 +88,4 @@ PT_MAIN("Data Structures C++") {
   PT_RUN(ObjectPoolTest< WaitFreeArrayValuePool<bool COMMA false> >);
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
-
-  embb_atomic_finalize();
 }

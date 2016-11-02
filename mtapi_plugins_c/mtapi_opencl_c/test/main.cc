@@ -32,10 +32,6 @@
 #include <embb/base/c/atomic.h>
 
 PT_MAIN("MTAPI OPENCL") {
-  embb_atomic_initialize();
-
   PT_RUN(LinkerTest);
   PT_RUN(TaskTest);
-
-  embb_atomic_finalize();
 }

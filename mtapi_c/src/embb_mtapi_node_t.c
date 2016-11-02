@@ -105,6 +105,7 @@ void mtapi_initialize(
       }
 
       if (MTAPI_SUCCESS == local_status) {
+        embb_atomic_init_int(&node->is_scheduler_running);
         embb_atomic_store_int(&node->is_scheduler_running, MTAPI_FALSE);
 
         /* initialize storage */
@@ -198,6 +199,8 @@ void mtapi_finalize(MTAPI_OUT mtapi_status_t* status) {
     if (MTAPI_NULL != node->job_list) {
       embb_mtapi_job_finalize_list(node);
     }
+
+    embb_atomic_destroy_int(&node->is_scheduler_running);
 
     /* free system instance */
     embb_mtapi_alloc_deallocate(node);

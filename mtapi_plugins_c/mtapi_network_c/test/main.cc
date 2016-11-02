@@ -33,11 +33,7 @@
 #include <embb/base/c/atomic.h>
 
 PT_MAIN("MTAPI NETWORK") {
-  embb_atomic_initialize();
-
   PT_RUN(NetworkBufferTest);
   PT_RUN(NetworkSocketTest);
   PT_RUN(NetworkTaskTest);
-
-  embb_atomic_finalize();
 }

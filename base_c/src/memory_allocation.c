@@ -33,7 +33,7 @@
 
 #ifdef EMBB_DEBUG
 
-static embb_atomic_long embb_bytes_allocated = { 0 };
+static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_bytes_allocated = 0;
 
 enum {
   // Make the marking unlikely to be something else
@@ -49,7 +49,7 @@ void* embb_alloc(size_t bytes) {
   if (allocated == NULL)
     return NULL;
 
-  embb_atomic_fetch_and_add_long(
+  embb_internal__atomic_fetch_and_add_4(
     &embb_bytes_allocated, (long)bytes_to_allocate);
 
   size_t* x_as_size_type = (size_t*)allocated;
@@ -72,7 +72,7 @@ void embb_free(void * ptr) {
 
   (*alloc_type) = (size_t)INVALID_ALLOCATION;
 
-  embb_atomic_fetch_and_add_long(
+  embb_internal__atomic_fetch_and_add_4(
     &embb_bytes_allocated, (long)(0 - (size_t)(*bytes_allocated)));
 
   free((size_t*)ptr - 2);
@@ -127,7 +127,7 @@ void* embb_alloc_aligned(size_t alignment, size_t size) {
   x_as_size_type[-2] = (size_t)allocated;
   x_as_size_type[-3] = bytes_to_allocate;
 
-  embb_atomic_fetch_and_add_long(
+  embb_internal__atomic_fetch_and_add_4(
       &embb_bytes_allocated, (long)bytes_to_allocate);
 
   return x;
@@ -144,14 +144,14 @@ void embb_free_aligned(void* ptr) {
 
   ptr_conv[-1] = (size_t)INVALID_ALLOCATION;
 
-  embb_atomic_fetch_and_add_long(
+  embb_internal__atomic_fetch_and_add_4(
     &embb_bytes_allocated, (long)((long)0 - ptr_conv[-3]));
 
   free((void*)ptr_conv[-2]);
 }
 
 size_t embb_get_bytes_allocated() {
-  return (size_t)(embb_atomic_load_long(&embb_bytes_allocated));
+  return (size_t)(embb_internal__atomic_load_4(&embb_bytes_allocated));
 }
 
 #else // EMBB_DEBUG

@@ -62,6 +62,7 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
         new_action->node_local_data_size = node_local_data_size;
         new_action->enabled = MTAPI_TRUE;
         new_action->is_plugin_action = MTAPI_TRUE;
+        embb_atomic_init_int(&new_action->num_tasks);
         embb_atomic_store_int(&new_action->num_tasks, 0);
 
         new_action->plugin_task_start_function = task_start_function;
@@ -87,6 +88,7 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
           action_handle = new_action->handle;
           embb_mtapi_job_add_action(job, new_action);
         } else {
+          embb_mtapi_action_finalize(new_action);
           embb_mtapi_action_pool_deallocate(node->action_pool, new_action);
         }
       } else {

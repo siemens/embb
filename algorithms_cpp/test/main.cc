@@ -68,8 +68,6 @@ int compute1_() {
 }
 
 PT_MAIN("Algorithms") {
-  embb_atomic_initialize();
-
   embb::mtapi::Node::Initialize(THIS_DOMAIN_ID, THIS_NODE_ID);
 
   PT_RUN(PartitionerTest);
@@ -85,6 +83,4 @@ PT_MAIN("Algorithms") {
   embb::mtapi::Node::Finalize();
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
-
-  embb_atomic_finalize();
 }

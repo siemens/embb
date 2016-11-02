@@ -34,10 +34,6 @@
 #include <embb/base/c/atomic.h>
 
 PT_MAIN("Dataflow C++") {
-  embb_atomic_initialize();
-
   PT_RUN(SimpleTest);
   PT_RUN(TupleTest);
-
-  embb_atomic_finalize();
 }
