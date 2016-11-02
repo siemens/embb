@@ -44,23 +44,42 @@ class Action {
   /**
    * Constructs an Action.
    * The Action object will be invalid.
+   *
+   * \waitfree
    */
   Action() {
     handle_.id = 0;
     handle_.tag = 0;
   }
 
-  Action(Action const & other) : handle_(other.handle_) {
+  /**
+   * Copies an Action.
+   *
+   * \waitfree
+   */
+  Action(
+    Action const & other               /**< Action to copy */
+    ) : handle_(other.handle_) {
     // empty
   }
 
-  Action & operator=(Action const & other) {
+  /**
+   * Copies an Action.
+   *
+   * \returns Reference to this object.
+   * \waitfree
+   */
+  Action & operator=(
+    Action const & other               /**< Action to copy */
+    ) {
     handle_ = other.handle_;
     return *this;
   }
 
   /**
    * Deletes an Action.
+   *
+   * \threadsafe
    */
   void Delete() {
     mtapi_action_delete(handle_, MTAPI_INFINITE, MTAPI_NULL);
@@ -82,6 +101,8 @@ class Action {
  private:
   /**
    * Constructs an Action.
+   *
+   * \threadsafe
    */
   Action(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */

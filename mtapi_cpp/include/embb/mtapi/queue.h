@@ -51,17 +51,34 @@ namespace mtapi {
  */
 class Queue {
  public:
-  Queue(Queue const & other) : handle_(other.handle_) {
+  /**
+   * Copies a Queue.
+   *
+   * \waitfree
+   */
+  Queue(
+    Queue const & other                /**< The Queue to copy */
+    ) : handle_(other.handle_) {
     // empty
   }
 
-  Queue & operator=(Queue const & other) {
+  /**
+   * Copies a Queue.
+   *
+   * \returns Reference to this object.
+   * \waitfree
+   */
+  Queue & operator=(
+    Queue const & other                /**< The Queue to copy */
+    ) {
     handle_ = other.handle_;
     return *this;
   }
 
   /**
    * Deletes a Queue object.
+   *
+   * \threadsafe
    */
   void Delete() {
     mtapi_queue_delete(handle_, MTAPI_INFINITE, MTAPI_NULL);
