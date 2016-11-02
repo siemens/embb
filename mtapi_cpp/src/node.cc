@@ -32,7 +32,7 @@ namespace mtapi {
 
 embb::mtapi::Node * embb::mtapi::Node::node_instance_ = NULL;
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
-static embb_spinlock_t init_mutex = { { 0 } };
+static EMBB_BASE_BASIC_TYPE_SIZE_4 init_mutex = 0;
 #endif
 
 void Node::Initialize(
@@ -68,13 +68,18 @@ void Node::Initialize(
 Node & Node::GetInstance() {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
   if (!IsInitialized()) {
-    embb_spin_lock(&init_mutex);
+    EMBB_BASE_BASIC_TYPE_SIZE_4 compare = 0;
+    while (0 == embb_internal__atomic_compare_and_swap_4(
+      &init_mutex, &compare, 1)) {
+      compare = 0;
+      embb_thread_yield();
+    }
     if (!IsInitialized()) {
       Node::Initialize(
         MTAPI_CPP_AUTOMATIC_DOMAIN_ID, MTAPI_CPP_AUTOMATIC_NODE_ID);
       atexit(Node::Finalize);
     }
-    embb_spin_unlock(&init_mutex);
+    embb_internal__atomic_store_4(&init_mutex, 0);
   }
   return *node_instance_;
 #else
