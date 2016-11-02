@@ -105,13 +105,13 @@ class TaskAttributes {
 
   /**
    * Sets the ExecutionPolicy of a Task.
-   * The policy influences the priority and affinity of a Task.
+   * The ExecutionPolicy determines the affinity and priority of a Task.
    *
    * \returns Reference to this object.
    * \notthreadsafe
    */
   TaskAttributes & SetPolicy(
-    ExecutionPolicy const & policy     /**< The policy to set. */
+    ExecutionPolicy const & policy     /**< The ExecutionPolicy to set. */
     ) {
     SetPriority(policy.GetPriority());
     SetAffinity(policy.GetAffinity());

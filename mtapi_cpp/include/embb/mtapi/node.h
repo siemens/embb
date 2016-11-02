@@ -289,26 +289,27 @@ class Node {
   }
 
   /**
-   * Get the job with the given id in the domain of the node.
+   * Retrieves a handle to the Job identified by \c job_id within the domain
+   * of the local Node.
    *
-   * \returns The handle for the requested Job.
+   * \returns The handle to the requested Job.
    * \waitfree
    */
   Job GetJob(
-    mtapi_job_id_t job_id              /**< ID of the job to return */
+    mtapi_job_id_t job_id              /**< [in] The id of the job */
     ) {
     return Job(job_id, domain_id_);
   }
 
   /**
-   * Get the job with the given id in the specified domain.
+   * Retrieves a handle to the Job identified by \c job_id and \c domain_id.
    *
-   * \returns The handle for the requested Job.
+   * \returns The handle to the requested Job.
    * \waitfree
    */
   Job GetJob(
-    mtapi_job_id_t job_id,             /**< ID of the job to return */
-    mtapi_domain_t domain_id           /**< Domain to get the job from */
+    mtapi_job_id_t job_id,             /**< [in] The id of the job */
+    mtapi_domain_t domain_id           /**< [in] The domain id to use */
     ) {
     return Job(job_id, domain_id);
   }
@@ -316,7 +317,7 @@ class Node {
   /**
    * Constructs an Action.
    *
-   * \returns The handle for the new Action.
+   * \returns The handle to the new Action.
    * \lockfree
    */
   Action CreateAction(
@@ -326,7 +327,7 @@ class Node {
                                        Tasks using this Action */
     mtapi_size_t node_local_data_size, /**< Size of node local data */
     ActionAttributes const & attributes
-    /**< Attributes of the Action */
+                                       /**< Attributes of the Action */
     ) {
     return Action(job_id, func, node_local_data, node_local_data_size,
       &attributes.GetInternal());
@@ -335,7 +336,7 @@ class Node {
   /**
    * Constructs an Action.
    *
-   * \returns The handle for the new Action.
+   * \returns The handle to the new Action.
    * \lockfree
    */
   Action CreateAction(
@@ -352,14 +353,14 @@ class Node {
   /**
    * Constructs an Action.
    *
-   * \returns The handle for the new Action.
+   * \returns The handle to the new Action.
    * \lockfree
    */
   Action CreateAction(
     mtapi_job_id_t job_id,             /**< Job ID the Action belongs to */
     mtapi_action_function_t func,      /**< The action function */
     ActionAttributes const & attributes
-    /**< Attributes of the Action */
+                                       /**< Attributes of the Action */
     ) {
     return Action(job_id, func, MTAPI_NULL, 0, &attributes.GetInternal());
   }
@@ -367,7 +368,7 @@ class Node {
   /**
    * Constructs an Action.
    *
-   * \returns The handle for the new Action.
+   * \returns The handle to the new Action.
    * \lockfree
    */
   Action CreateAction(
@@ -380,7 +381,7 @@ class Node {
   /**
    * Constructs a Group object with default attributes.
    *
-   * \returns The handle for the new Group.
+   * \returns The handle to the new Group.
    * \lockfree
    */
   Group CreateGroup() {
@@ -390,7 +391,7 @@ class Node {
   /**
    * Constructs a Group object with default attributes and the given ID.
    *
-   * \returns The handle for the new Group.
+   * \returns The handle to the new Group.
    * \lockfree
    */
   Group CreateGroup(
@@ -402,11 +403,11 @@ class Node {
   /**
    * Constructs a Group object using the given Attributes.
    *
-   * \returns The handle for the new Group.
+   * \returns The handle to the new Group.
    * \lockfree
    */
   Group CreateGroup(
-    GroupAttributes const & group_attr /**< Attributes for the Group. */
+    GroupAttributes const & group_attr /**< The GroupAttributes to use. */
     ) {
     return Group(MTAPI_GROUP_ID_NONE, &group_attr.GetInternal());
   }
@@ -414,7 +415,7 @@ class Node {
   /**
    * Constructs a Group object with given attributes and ID.
    *
-   * \returns The handle for the new Group.
+   * \returns The handle to the new Group.
    * \lockfree
    */
   Group CreateGroup(
@@ -427,7 +428,7 @@ class Node {
   /**
    * Constructs a Queue with the given Job and default attributes.
    *
-   * \returns The handle for the new Queue.
+   * \returns The handle to the new Queue.
    * \lockfree
    */
   Queue CreateQueue(
@@ -439,7 +440,7 @@ class Node {
   /**
    * Constructs a Queue with the given Job and QueueAttributes.
    *
-   * \returns The handle for the new Queue.
+   * \returns The handle to the new Queue.
    * \lockfree
    */
   Queue CreateQueue(
