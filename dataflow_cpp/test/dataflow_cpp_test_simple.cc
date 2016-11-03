@@ -150,12 +150,12 @@ SimpleTest::SimpleTest() {
 #define MTAPI_DOMAIN_ID 1
 #define MTAPI_NODE_ID 1
 
-void SimpleTest::TestBasic() {
+void SimpleTest::TrySimple(bool reuse_main_thread) {
   // All available cores
   embb::base::CoreSet core_set(true);
   embb::mtapi::NodeAttributes node_attr;
   node_attr
-    .SetReuseMainThread(MTAPI_TRUE)
+    .SetReuseMainThread(reuse_main_thread ? MTAPI_TRUE : MTAPI_FALSE)
     .SetCoreAffinity(core_set)
     .SetMaxQueues(2);
   embb::mtapi::Node::Initialize(
@@ -163,7 +163,7 @@ void SimpleTest::TestBasic() {
     MTAPI_NODE_ID,
     node_attr);
 
-  for (int ii = 0; ii < 10000; ii++) {
+  for (int ii = 0; ii < 1000; ii++) {
     ArraySink<TEST_COUNT> asink;
     MyNetwork network(NUM_SLICES);
     MyConstantSource constant(network, 4);
@@ -226,3 +226,7 @@ void SimpleTest::TestBasic() {
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }
 
+void SimpleTest::TestBasic() {
+  TrySimple(false);
+  TrySimple(true);
+}
