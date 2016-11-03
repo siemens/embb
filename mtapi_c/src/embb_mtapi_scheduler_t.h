@@ -138,6 +138,15 @@ embb_mtapi_thread_context_t * embb_mtapi_scheduler_get_current_thread_context(
   embb_mtapi_scheduler_t * that);
 
 /**
+ * Executes the given task if the thread context is valid.
+ * \memberof embb_mtapi_scheduler_struct
+ */
+mtapi_boolean_t embb_mtapi_scheduler_execute_task(
+  embb_mtapi_task_t * task,
+  embb_mtapi_node_t * node,
+  embb_mtapi_thread_context_t * thread_context);
+
+/**
  * Fetches and executes a single task if the thread context is valid,
  * yields otherwise.
  * \memberof embb_mtapi_scheduler_struct

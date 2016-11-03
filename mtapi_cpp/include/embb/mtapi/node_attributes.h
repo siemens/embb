@@ -43,6 +43,8 @@ class NodeAttributes {
  public:
   /**
    * Constructs a NodeAttributes object.
+   *
+   * \waitfree
    */
   NodeAttributes() {
     mtapi_status_t status;
@@ -52,6 +54,8 @@ class NodeAttributes {
 
   /**
    * Copies a NodeAttributes object.
+   *
+   * \waitfree
    */
   NodeAttributes(
     NodeAttributes const & other       /**< The NodeAttributes to copy. */
@@ -62,6 +66,8 @@ class NodeAttributes {
 
   /**
    * Copies a NodeAttributes object.
+   *
+   * \waitfree
    */
   void operator=(
     NodeAttributes const & other       /**< The NodeAttributes to copy. */
@@ -228,6 +234,22 @@ class NodeAttributes {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_MAX_PRIORITIES,
       &value, sizeof(value), &status);
+    internal::CheckStatus(status);
+    return *this;
+  }
+
+  /**
+   * Enables or disables the reuse of the main thread as a worker.
+   *
+   * \returns Reference to this object.
+   * \notthreadsafe
+   */
+  NodeAttributes & SetReuseMainThread(
+    mtapi_boolean_t reuse
+    ) {
+    mtapi_status_t status;
+    mtapi_nodeattr_set(&attributes_, MTAPI_NODE_REUSE_MAIN_THREAD,
+      &reuse, sizeof(reuse), &status);
     internal::CheckStatus(status);
     return *this;
   }

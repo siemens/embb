@@ -46,6 +46,9 @@ class Scheduler {
     int process_id,
     Action & action,
     embb::mtapi::ExecutionPolicy const & policy) = 0;
+  virtual void Run(
+    Action & action,
+    embb::mtapi::ExecutionPolicy const & policy) = 0;
   virtual void WaitForSlice(int slice) = 0;
   virtual int GetSlices() = 0;
 };
