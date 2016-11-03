@@ -37,7 +37,8 @@ template <typename Type>
 class Signal {
  public:
   Signal() : blank_(true), value_(), clock_(-1) {}
-  Signal(int clock, Type value) : blank_(false), value_(value), clock_(clock) {}
+  Signal(int clock, Type const & value)
+    : blank_(false), value_(value), clock_(clock) {}
   explicit Signal(int clock) : blank_(true), value_(), clock_(clock) {}
   Signal(Signal const & other)
     : blank_(other.blank_), value_(other.value_), clock_(other.clock_) {}
