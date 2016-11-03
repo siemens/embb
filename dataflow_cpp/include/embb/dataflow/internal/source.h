@@ -32,6 +32,7 @@
 #include <embb/dataflow/internal/node.h>
 #include <embb/dataflow/internal/outputs.h>
 #include <embb/dataflow/internal/source_executor.h>
+#include <embb/dataflow/internal/action.h>
 
 namespace embb {
 namespace dataflow {
