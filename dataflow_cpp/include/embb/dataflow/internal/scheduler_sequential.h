@@ -43,6 +43,11 @@ class SchedulerSequential : public Scheduler {
     embb::mtapi::ExecutionPolicy const &) {
     action.RunSequential();
   }
+  virtual void Run(
+    Action & action,
+    embb::mtapi::ExecutionPolicy const &) {
+    action.RunSequential();
+  }
   virtual void Enqueue(
     int,
     Action & action,
