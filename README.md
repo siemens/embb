@@ -51,7 +51,7 @@ EMB² is regularly built and tested on a variety of OS/compiler/architecture com
 
 ### Prerequisites
 
-The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Besides a C/C++ compiler supporting these standards, [CMake](https://cmake.org/) 2.8.9 or higher is required to build EMB².  is a build file generator which abstracts from the concrete build tools.
+The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Besides a C/C++ compiler supporting these standards, [CMake](https://cmake.org/) 2.8.9 or higher is required to build EMB² (CMake is a build file generator which abstracts from the concrete build tools).
 
 ### Quick Installation on Linux
 
