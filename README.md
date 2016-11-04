@@ -14,7 +14,7 @@ Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent
 
 <img src="doc/images/embb.png" alt="Building blocks of EMB²" width="500"/>
 
-### Community and Contact
+### Important Links
 
 GitHub:
   - https://github.com/siemens/embb
@@ -24,8 +24,12 @@ Repository:
   - git@github.com:siemens/embb.git (SSH)
 
 Mailing list:
-  - embb-announcements@googlegroups.com (announcements)<br/>
-    https://groups.google.com/forum/#!forum/embb-announcements/join
+  - embb-announcements@googlegroups.com (low volume, release announcements, news, etc.)<br/>
+    Join: https://groups.google.com/forum/#!forum/embb-announcements/join
+	
+Community:
+  - https://github.com/siemens/embb/issues<br>
+    For help, create an issue labeled with 'question'.
 
 Contact:
   - embb.info@gmail.com
