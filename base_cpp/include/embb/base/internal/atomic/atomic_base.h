@@ -59,7 +59,7 @@ class AtomicBase {
   mutable NativeType AtomicValue;
 
 #ifdef EMBB_THREADING_ANALYSIS_MODE
-  embb_mutex_t internal_mutex;
+  mutable embb_mutex_t internal_mutex;
 #endif
 
  public:
@@ -84,13 +84,13 @@ class AtomicBase {
 
   // The members below are documented in atomic.h
   BaseType operator=(BaseType val);
-  operator BaseType();
+  operator BaseType() const;
   bool IsLockFree() const;
   bool IsArithmetic() const;
   bool IsInteger() const;
   bool IsPointer() const;
   void Store(BaseType val);
-  BaseType Load();
+  BaseType Load() const;
   BaseType Swap(BaseType val);
   bool CompareAndSwap(BaseType& expected, BaseType desired);
 };
@@ -118,7 +118,7 @@ inline BaseType AtomicBase<BaseType>::operator=(BaseType val) {
 }
 
 template<typename BaseType>
-inline AtomicBase<BaseType>::operator BaseType() {
+inline AtomicBase<BaseType>::operator BaseType() const {
   return Load();
 }
 
@@ -155,7 +155,7 @@ inline void AtomicBase<BaseType>::Store(BaseType val) {
 }
 
 template<typename BaseType>
-inline BaseType AtomicBase<BaseType>::Load() {
+inline BaseType AtomicBase<BaseType>::Load() const {
   BaseType return_value;
 
   EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
