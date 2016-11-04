@@ -34,6 +34,7 @@
 
 #define JOB_TEST_TASK 42
 #define JOB_TEST_MULTIINSTANCE_TASK 43
+#define JOB_TEST_DETACHED_TASK 44
 #define TASK_TEST_ID 23
 
 static void testTaskAction(
@@ -54,6 +55,16 @@ static void testTaskAction(
   embb_mtapi_log_info("testTaskAction %d called from worker %d...\n",
     *reinterpret_cast<const int*>(args), core_num);
   EMBB_UNUSED(args);
+}
+
+static void testDetachedTaskAction(
+  const void* /*args*/,
+  mtapi_size_t /*arg_size*/,
+  void* /*result_buffer*/,
+  mtapi_size_t /*result_buffer_size*/,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t* /*task_context*/) {
 }
 
 void testMultiInstanceTaskAction(
@@ -98,45 +109,15 @@ TaskTest::TaskTest() {
   CreateUnit("mtapi task test").Add(&TaskTest::TestBasic, this);
 }
 
-void TaskTest::TestBasic() {
-  mtapi_node_attributes_t node_attr;
-  mtapi_action_attributes_t action_attr;
-  mtapi_affinity_t affinity;
-  mtapi_info_t info;
+void TaskTest::TrySimple() {
   mtapi_status_t status;
+  mtapi_affinity_t affinity;
   mtapi_action_hndl_t action;
+  mtapi_action_attributes_t action_attr;
   mtapi_job_hndl_t job;
-  mtapi_task_hndl_t task[100];
   mtapi_uint_t ii;
-
-  embb_mtapi_log_info("running testTask...\n");
-
-  status = MTAPI_ERR_UNKNOWN;
-  mtapi_nodeattr_init(&node_attr, &status);
-  MTAPI_CHECK_STATUS(status);
-
-  status = MTAPI_ERR_UNKNOWN;
-  mtapi_nodeattr_set(
-    &node_attr,
-    MTAPI_NODE_TYPE,
-    MTAPI_ATTRIBUTE_VALUE(MTAPI_NODE_TYPE_SMP),
-    MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
-    &status);
-  MTAPI_CHECK_STATUS(status);
-
-  status = MTAPI_ERR_UNKNOWN;
-  mtapi_initialize(
-    THIS_DOMAIN_ID,
-    THIS_NODE_ID,
-    &node_attr,
-    &info,
-    &status);
-  MTAPI_CHECK_STATUS(status);
-
-  embb_mtapi_log_trace("mtapi successfully initialized...\n");
-  embb_mtapi_log_trace(
-    "hardware concurrency   : %d\n", info.hardware_concurrency);
-  embb_mtapi_log_trace("used memory            : %d\n", info.used_memory);
+  static const mtapi_uint_t kTaskCount = 100u;
+  mtapi_task_hndl_t task[kTaskCount];
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_affinity_init(&affinity, MTAPI_TRUE, &status);
@@ -169,7 +150,7 @@ void TaskTest::TestBasic() {
   job = mtapi_job_get(JOB_TEST_TASK, THIS_DOMAIN_ID, &status);
   MTAPI_CHECK_STATUS(status);
 
-  for (ii = 0; ii < 100u; ii++) {
+  for (ii = 0; ii < kTaskCount; ii++) {
     status = MTAPI_ERR_UNKNOWN;
     mtapi_uint_t arg = ii;
     task[ii] = mtapi_task_start(
@@ -187,7 +168,7 @@ void TaskTest::TestBasic() {
 
   testDoSomethingElse();
 
-  for (ii = 0; ii < 100u; ii++) {
+  for (ii = 0; ii < kTaskCount; ii++) {
     status = MTAPI_ERR_UNKNOWN;
     mtapi_task_wait(task[ii], 100000, &status);
     MTAPI_CHECK_STATUS(status);
@@ -196,6 +177,80 @@ void TaskTest::TestBasic() {
   status = MTAPI_ERR_UNKNOWN;
   mtapi_action_delete(action, 10, &status);
   MTAPI_CHECK_STATUS(status);
+}
+
+void TaskTest::TryDetached() {
+  mtapi_status_t status;
+  mtapi_affinity_t affinity;
+  mtapi_action_hndl_t action;
+  mtapi_action_attributes_t action_attr;
+  mtapi_job_hndl_t job;
+  mtapi_uint_t ii;
+  static const mtapi_uint_t kTaskCount = MTAPI_NODE_MAX_TASKS_DEFAULT + 100u;
+  mtapi_task_attributes_t taskattr;
+  mtapi_boolean_t detached = MTAPI_TRUE;
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_affinity_init(&affinity, MTAPI_TRUE, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_actionattr_init(&action_attr, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_actionattr_set(
+    &action_attr,
+    MTAPI_ACTION_AFFINITY,
+    &affinity,
+    MTAPI_ACTION_AFFINITY_SIZE,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  action = mtapi_action_create(
+    JOB_TEST_DETACHED_TASK,
+    testDetachedTaskAction,
+    MTAPI_NULL,
+    0,
+    &action_attr,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  job = mtapi_job_get(JOB_TEST_DETACHED_TASK, THIS_DOMAIN_ID, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  mtapi_taskattr_init(&taskattr, &status);
+  MTAPI_CHECK_STATUS(status);
+  mtapi_taskattr_set(&taskattr, MTAPI_TASK_DETACHED, &detached, sizeof(detached), &status);
+  MTAPI_CHECK_STATUS(status);
+
+  for (ii = 0; ii < kTaskCount; ii++) {
+    status = MTAPI_ERR_UNKNOWN;
+    mtapi_uint_t arg = ii;
+    mtapi_task_start(
+      TASK_TEST_ID,
+      job,
+      reinterpret_cast<const void*>(&arg),
+      0,
+      MTAPI_NULL,
+      0,
+      &taskattr,
+      MTAPI_GROUP_NONE,
+      &status);
+    MTAPI_CHECK_STATUS(status);
+  }
+
+  testDoSomethingElse();
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_action_delete(action, 1000, &status);
+  MTAPI_CHECK_STATUS(status);
+}
+
+void TaskTest::TryMultiInstance() {
+  mtapi_status_t status;
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_action_hndl_t multiinstance_action = mtapi_action_create(
@@ -203,7 +258,7 @@ void TaskTest::TestBasic() {
     testMultiInstanceTaskAction,
     MTAPI_NULL,
     0,
-    &action_attr,
+    MTAPI_DEFAULT_ACTION_ATTRIBUTES,
     &status);
   MTAPI_CHECK_STATUS(status);
 
@@ -227,6 +282,7 @@ void TaskTest::TestBasic() {
   MTAPI_CHECK_STATUS(status);
 
   mtapi_uint_t result[kTaskInstances];
+  mtapi_uint_t ii;
   for (ii = 0; ii < kTaskInstances; ii++) {
     result[ii] = kTaskInstances + 1;
   }
@@ -234,11 +290,11 @@ void TaskTest::TestBasic() {
   status = MTAPI_ERR_UNKNOWN;
   mtapi_task_hndl_t multiinstance_task =
     mtapi_task_start(MTAPI_TASK_ID_NONE, multiinstance_job,
-    MTAPI_NULL, 0,
-    &result[0], sizeof(mtapi_uint_t) * kTaskInstances,
-    &task_attr,
-    MTAPI_GROUP_NONE,
-    &status);
+      MTAPI_NULL, 0,
+      &result[0], sizeof(mtapi_uint_t) * kTaskInstances,
+      &task_attr,
+      MTAPI_GROUP_NONE,
+      &status);
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
@@ -252,6 +308,45 @@ void TaskTest::TestBasic() {
   status = MTAPI_ERR_UNKNOWN;
   mtapi_action_delete(multiinstance_action, 10, &status);
   MTAPI_CHECK_STATUS(status);
+}
+
+void TaskTest::TestBasic() {
+  mtapi_node_attributes_t node_attr;
+  mtapi_info_t info;
+  mtapi_status_t status;
+
+  embb_mtapi_log_info("running testTask...\n");
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_nodeattr_init(&node_attr, &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_nodeattr_set(
+    &node_attr,
+    MTAPI_NODE_TYPE,
+    MTAPI_ATTRIBUTE_VALUE(MTAPI_NODE_TYPE_SMP),
+    MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_initialize(
+    THIS_DOMAIN_ID,
+    THIS_NODE_ID,
+    &node_attr,
+    &info,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  embb_mtapi_log_trace("mtapi successfully initialized...\n");
+  embb_mtapi_log_trace(
+    "hardware concurrency   : %d\n", info.hardware_concurrency);
+  embb_mtapi_log_trace("used memory            : %d\n", info.used_memory);
+
+  TrySimple();
+  TryDetached();
+  TryMultiInstance();
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_finalize(&status);

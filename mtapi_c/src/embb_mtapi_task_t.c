@@ -139,14 +139,6 @@ mtapi_boolean_t embb_mtapi_task_execute(
   }
 
   if (todo == 1) {
-    /* is task associated with a group? */
-    if (embb_mtapi_group_pool_is_handle_valid(
-      context->thread_context->node->group_pool, that->group)) {
-      embb_mtapi_group_t* local_group =
-        embb_mtapi_group_pool_get_storage_for_handle(
-        context->thread_context->node->group_pool, that->group);
-      embb_mtapi_task_queue_push(&local_group->queue, that);
-    }
     return MTAPI_TRUE;
   } else {
     return MTAPI_FALSE;
