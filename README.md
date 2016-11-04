@@ -179,6 +179,11 @@ Similarly, automatic initialization of the task scheduler by the MTAPI C++
 interface can be disabled with -DUSE_AUTOMATIC_INITIALIZATION=OFF. This way,
 unexpected delays after startup can be avoided, e.g. for timing measurements.
 
+Furthermore, EMB² can be built to work with threading analysis tools such as
+Helgrind or ThreadSanitizer.
+To enable support for them use -DTHREADING_ANALYSIS_MODE=ON. This uses mutexes
+around atomics to avoid false positives and degrades performance significantly.
+
 The tutorial of EMB² comes with example source files in doc/examples/. These
 can be built with the other source files using CMake option -DBUILD_EXAMPLES=ON
 in the generation step. Note, however, that the examples use C++11 features and

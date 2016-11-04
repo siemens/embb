@@ -133,7 +133,7 @@ EMBB_DEFINE_AND_ASSIGN(4, "")
 /*
  * Now, using the basic functions above, we generate the respective functions
  * for all basic data types, like "unsigned short". For that purpose, the
- * following generator macro is used. This macro is calleuild-work-Desktop-Defaultd by the macros in the
+ * following generator macro is used. This macro is called by the macros in the
  * generator header, defining the implementation for the basic data types.
  *
  * For unsigned short and for and_assign.h, the following method would be
