@@ -28,8 +28,7 @@ Mailing list:
     Join: https://groups.google.com/forum/#!forum/embb-announcements/join
 	
 Community:
-  - https://github.com/siemens/embb/issues<br>
-    For help, create an issue labeled with 'question'.
+  - https://github.com/siemens/embb/issues (for help, create an issue labeled with 'question').
 
 Contact:
   - embb.info@gmail.com
