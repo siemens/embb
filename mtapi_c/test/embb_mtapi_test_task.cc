@@ -223,7 +223,8 @@ void TaskTest::TryDetached() {
 
   mtapi_taskattr_init(&taskattr, &status);
   MTAPI_CHECK_STATUS(status);
-  mtapi_taskattr_set(&taskattr, MTAPI_TASK_DETACHED, &detached, sizeof(detached), &status);
+  mtapi_taskattr_set(&taskattr, MTAPI_TASK_DETACHED,
+    &detached, sizeof(detached), &status);
   MTAPI_CHECK_STATUS(status);
 
   for (ii = 0; ii < kTaskCount; ii++) {
