@@ -473,8 +473,7 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != node);
 
-  embb_atomic_init_int(&that->affine_task_counter);
-  embb_atomic_store_int(&that->affine_task_counter, 0);
+  embb_atomic_init_int(&that->affine_task_counter, 0);
 
   /* Paranoia sanitizing of scheduler mode */
   if (mode >= NUM_SCHEDULER_MODES) {

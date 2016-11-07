@@ -40,8 +40,7 @@ embb_atomic_int flag;
 
 ThreadIndexTest::ThreadIndexTest()
     : number_threads_(partest::TestSuite::GetDefaultNumThreads()) {
-  embb_atomic_init_int(&flag);
-  embb_atomic_store_int(&flag, 1);
+  embb_atomic_init_int(&flag, 1);
 
   CreateUnit("Test 0 indices").Add(&ThreadIndexTest::Test0, this);
   CreateUnit("Test 1 index").Add(&ThreadIndexTest::Test1, this);

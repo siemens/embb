@@ -33,8 +33,7 @@ int embb_counter_init(embb_counter_t* counter) {
   if (counter == NULL) {
     return EMBB_ERROR;
   }
-  embb_atomic_init_unsigned_int(&(counter->value));
-  embb_atomic_store_unsigned_int(&(counter->value), 0);
+  embb_atomic_init_unsigned_int(&(counter->value), 0);
   return EMBB_SUCCESS;
 }
 

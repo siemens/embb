@@ -105,8 +105,7 @@ void mtapi_initialize(
       }
 
       if (MTAPI_SUCCESS == local_status) {
-        embb_atomic_init_int(&node->is_scheduler_running);
-        embb_atomic_store_int(&node->is_scheduler_running, MTAPI_FALSE);
+        embb_atomic_init_int(&node->is_scheduler_running, MTAPI_FALSE);
 
         /* initialize storage */
         embb_mtapi_job_initialize_list(node);

@@ -59,8 +59,7 @@ void embb_mtapi_action_initialize(embb_mtapi_action_t* that) {
   that->node_local_data = NULL;
   that->node_local_data_size = 0;
   that->plugin_data = MTAPI_NULL;
-  embb_atomic_init_int(&that->num_tasks);
-  embb_atomic_store_int(&that->num_tasks, 0);
+  embb_atomic_init_int(&that->num_tasks, 0);
 }
 
 void embb_mtapi_action_finalize(embb_mtapi_action_t* that) {
@@ -153,8 +152,7 @@ mtapi_action_hndl_t mtapi_action_create(
         new_action->node_local_data_size = node_local_data_size;
         new_action->enabled = MTAPI_TRUE;
         new_action->is_plugin_action = MTAPI_FALSE;
-        embb_atomic_init_int(&new_action->num_tasks);
-        embb_atomic_store_int(&new_action->num_tasks, 0);
+        embb_atomic_init_int(&new_action->num_tasks, 0);
 
         new_action->action_function = action_function;
 

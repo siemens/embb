@@ -658,8 +658,7 @@ void mtapi_network_plugin_initialize(
   err = embb_mtapi_network_initialize();
   if (0 == err) return;
 
-  embb_atomic_init_int(&plugin->run);
-  embb_atomic_store_int(&plugin->run, 0);
+  embb_atomic_init_int(&plugin->run, 0);
 
   err = embb_mtapi_network_buffer_initialize(
     &plugin->recv_buffer, (int)buffer_size);

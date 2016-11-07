@@ -33,6 +33,7 @@
 #include <embb/base/c/internal/atomic/atomic_sizes.h>
 #include <embb/base/c/internal/macro_helper.h>
 #include <embb/base/c/internal/atomic/atomic_variables.h>
+#include <embb/base/c/internal/atomic/store.h>
 #include <string.h>
 
 /*
@@ -41,9 +42,11 @@
 */
 #define EMBB_ATOMIC_INTERNAL_DEFINE_INIT_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
   EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_atomic_init_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
-  EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable) { \
+  EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, \
+  EMBB_ATOMIC_PARAMETER_TYPE_NATIVE value) { \
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex); \
   EMBB_ATOMIC_INIT_MARKER(variable); \
+  EMBB_CAT2(embb_atomic_store_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(variable, value); \
   }
 
 #undef EMBB_ATOMIC_METHOD_TO_GENERATE

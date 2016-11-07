@@ -59,11 +59,8 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize(
   that->is_main_thread = (worker_index == 0) ?
     node->attributes.reuse_main_thread : MTAPI_FALSE;
 
-  embb_atomic_init_int(&that->run);
-  embb_atomic_init_int(&that->is_sleeping);
-
-  embb_atomic_store_int(&that->run, 0);
-  embb_atomic_store_int(&that->is_sleeping, 0);
+  embb_atomic_init_int(&that->run, 0);
+  embb_atomic_init_int(&that->is_sleeping, 0);
 
   that->queue = (embb_mtapi_task_queue_t**)embb_mtapi_alloc_allocate(
     sizeof(embb_mtapi_task_queue_t)*that->priorities);
