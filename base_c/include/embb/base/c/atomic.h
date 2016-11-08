@@ -297,7 +297,6 @@ extern "C" {
 #ifdef EMBB_THREADING_ANALYSIS_MODE
 
 #include <embb/base/c/internal/platform.h>
-#include <assert.h>
 
 int embb_mutex_init(
   embb_mutex_t* mutex,
@@ -331,6 +330,8 @@ void embb_mutex_destroy(
 #endif
 
 #ifdef EMBB_DEBUG
+
+#include <assert.h>
 
 #define EMBB_ATOMIC_INIT_CHECK(variable) assert(variable->marker == 0x12345678)
 #define EMBB_ATOMIC_INIT_MARKER(variable) variable->marker = 0x12345678

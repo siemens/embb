@@ -811,13 +811,13 @@ static void network_task_start(
         int actual = 0;
         // expected counts bytes we intended to put into the buffer
         int expected =
-          4 +                             // operation
-          4 +                             // domain_id
-          4 +                             // job_id
-          4 +                             // priority
-          4 + 4 +                         // task handle
-          4 +                             // result_size
-          4 + local_task->arguments_size; // arguments buffer
+          4 +                                  // operation
+          4 +                                  // domain_id
+          4 +                                  // job_id
+          4 +                                  // priority
+          4 + 4 +                              // task handle
+          4 +                                  // result_size
+          4 + (int)local_task->arguments_size; // arguments buffer
 
         // packet size
         actual += embb_mtapi_network_buffer_push_back_int32(
