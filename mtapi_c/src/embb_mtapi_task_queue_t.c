@@ -146,7 +146,7 @@ mtapi_boolean_t embb_mtapi_task_queue_process(
   if (embb_spin_lock(&that->lock) == EMBB_SUCCESS) {
     idx = that->get_task_position;
     for (ii = 0; ii < that->tasks_available; ii++) {
-      result = process(that->task_buffer[ii], user_data);
+      result = process(that->task_buffer[idx], user_data);
       if (MTAPI_FALSE == result) {
         break;
       }

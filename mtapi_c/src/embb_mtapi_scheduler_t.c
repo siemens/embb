@@ -230,8 +230,8 @@ void embb_mtapi_scheduler_finalize_task(
   if (MTAPI_NULL != task->attributes.complete_func) {
     task->attributes.complete_func(task->handle, MTAPI_NULL);
   }
-  /* delete task if detached */
-  if (MTAPI_TRUE == task->attributes.is_detached) {
+  /* delete task if detached and not in a group */
+  if (MTAPI_NULL == group && MTAPI_TRUE == task->attributes.is_detached) {
     embb_mtapi_task_delete(task, node->task_pool);
   }
 }
