@@ -258,6 +258,7 @@ void SpinLockTest::TestSpinLockTooManySpins() {
   lock.Unlock();
   success = lock.TryLock(100);
   PT_ASSERT(success);
+  lock.Unlock();
 }
 } // namespace test
 } // namespace base
