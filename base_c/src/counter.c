@@ -33,7 +33,7 @@ int embb_counter_init(embb_counter_t* counter) {
   if (counter == NULL) {
     return EMBB_ERROR;
   }
-  embb_atomic_store_unsigned_int(&(counter->value), 0);
+  embb_atomic_init_unsigned_int(&(counter->value), 0);
   return EMBB_SUCCESS;
 }
 
@@ -55,7 +55,7 @@ unsigned int embb_counter_decrement(embb_counter_t* counter) {
 
 void embb_counter_destroy(embb_counter_t* counter) {
   assert(counter != NULL);
-  EMBB_UNUSED_IN_RELEASE(counter);
+  embb_atomic_destroy_unsigned_int(&(counter->value));
 }
 
 

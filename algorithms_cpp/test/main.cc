@@ -46,6 +46,8 @@
 #include <functional>
 
 #include <embb/base/c/memory_allocation.h>
+#include <embb/base/c/atomic.h>
+
 
 #define THIS_DOMAIN_ID 1
 #define THIS_NODE_ID 1
@@ -81,7 +83,4 @@ PT_MAIN("Algorithms") {
   embb::mtapi::Node::Finalize();
 
   PT_EXPECT(embb_get_bytes_allocated() == 0);
-
-  //  std::cout << "please press return to continue..." << std::endl;
-  //  std::cin.get();
 }

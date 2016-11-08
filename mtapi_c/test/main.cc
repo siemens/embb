@@ -40,6 +40,7 @@
 #include <embb_mtapi_test_id_pool.h>
 
 #include <embb/base/c/memory_allocation.h>
+#include <embb/base/c/atomic.h>
 
 PT_MAIN("MTAPI C") {
   embb_log_set_log_level(EMBB_LOG_LEVEL_NONE);

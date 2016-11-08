@@ -654,14 +654,16 @@ void mtapi_network_plugin_initialize(
   plugin->socket_count = 0;
   plugin->buffer_size = 0;
   plugin->sockets = NULL;
-  embb_atomic_store_int(&plugin->run, 0);
 
   err = embb_mtapi_network_initialize();
   if (0 == err) return;
 
+  embb_atomic_init_int(&plugin->run, 0);
+
   err = embb_mtapi_network_buffer_initialize(
     &plugin->recv_buffer, (int)buffer_size);
   if (0 == err) {
+    embb_atomic_destroy_int(&plugin->run);
     embb_mtapi_network_finalize();
     return;
   }
@@ -670,6 +672,7 @@ void mtapi_network_plugin_initialize(
     &plugin->send_buffer, (int)buffer_size);
   if (0 == err) {
     embb_mtapi_network_buffer_finalize(&plugin->recv_buffer);
+    embb_atomic_destroy_int(&plugin->run);
     embb_mtapi_network_finalize();
     return;
   }
@@ -684,6 +687,7 @@ void mtapi_network_plugin_initialize(
     embb_mtapi_network_buffer_finalize(&plugin->send_buffer);
     embb_mtapi_network_buffer_finalize(&plugin->recv_buffer);
     plugin->buffer_size = 0;
+    embb_atomic_destroy_int(&plugin->run);
     embb_mtapi_network_finalize();
     return;
   }
@@ -695,6 +699,7 @@ void mtapi_network_plugin_initialize(
     embb_mtapi_network_buffer_finalize(&plugin->send_buffer);
     embb_mtapi_network_buffer_finalize(&plugin->recv_buffer);
     plugin->buffer_size = 0;
+    embb_atomic_destroy_int(&plugin->run);
     embb_mtapi_network_finalize();
     return;
   }
@@ -707,6 +712,7 @@ void mtapi_network_plugin_initialize(
     embb_mtapi_network_buffer_finalize(&plugin->send_buffer);
     embb_mtapi_network_buffer_finalize(&plugin->recv_buffer);
     plugin->buffer_size = 0;
+    embb_atomic_destroy_int(&plugin->run);
     embb_mtapi_network_finalize();
     return;
   }
@@ -723,6 +729,7 @@ void mtapi_network_plugin_initialize(
     embb_mtapi_network_buffer_finalize(&plugin->send_buffer);
     embb_mtapi_network_buffer_finalize(&plugin->recv_buffer);
     plugin->buffer_size = 0;
+    embb_atomic_destroy_int(&plugin->run);
     embb_mtapi_network_finalize();
     return;
   }
@@ -741,6 +748,7 @@ void mtapi_network_plugin_initialize(
     embb_mtapi_network_buffer_finalize(&plugin->send_buffer);
     embb_mtapi_network_buffer_finalize(&plugin->recv_buffer);
     plugin->buffer_size = 0;
+    embb_atomic_destroy_int(&plugin->run);
     embb_mtapi_network_finalize();
     return;
   }
@@ -764,6 +772,9 @@ void mtapi_network_plugin_finalize(
 
   embb_mtapi_network_socket_finalize(&plugin->sockets[0]);
   embb_free(plugin->sockets);
+
+  embb_atomic_destroy_int(&plugin->run);
+
   embb_mtapi_network_finalize();
 
   mtapi_status_set(status, local_status);

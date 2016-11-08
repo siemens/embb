@@ -53,7 +53,14 @@
  */
 #cmakedefine EMBB_PLATFORM_HAS_GLIB_CPU
 
+/**
+ * Enables mutex-based implementation of all synchronization constructs.
+ */
+#cmakedefine EMBB_THREADING_ANALYSIS_MODE
 
+/**
+ * Version defines.
+ */
 #define EMBB_BASE_VERSION_MAJOR ${EMBB_BASE_VERSION_MAJOR}
 #define EMBB_BASE_VERSION_MINOR ${EMBB_BASE_VERSION_MINOR}
 #define EMBB_BASE_VERSION_PATCH ${EMBB_BASE_VERSION_PATCH}

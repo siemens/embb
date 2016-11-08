@@ -31,6 +31,8 @@
 #include <dataflow_cpp_test_simple.h>
 #include <dataflow_cpp_test_tuple.h>
 
+#include <embb/base/c/atomic.h>
+
 PT_MAIN("Dataflow C++") {
   PT_RUN(SimpleTest);
   PT_RUN(TupleTest);

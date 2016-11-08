@@ -30,6 +30,8 @@
 #include <embb_mtapi_network_test_socket.h>
 #include <embb_mtapi_network_test_task.h>
 
+#include <embb/base/c/atomic.h>
+
 PT_MAIN("MTAPI NETWORK") {
   PT_RUN(NetworkBufferTest);
   PT_RUN(NetworkSocketTest);

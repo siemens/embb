@@ -117,8 +117,10 @@ FetchAndAdd(DifferenceType val) {
   NativeType native_desired;
   memcpy(&native_desired, &desired, sizeof(desired));
 
+  EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
   NativeType storage_value = fetch_and_add_implementation<NativeType>::
     fetch_and_add(&this->AtomicValue, native_desired);
+  EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 
   memcpy(&return_value, &storage_value, sizeof(return_value));
   return return_value;

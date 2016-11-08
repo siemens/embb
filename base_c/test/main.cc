@@ -39,6 +39,7 @@
 #include <embb/base/c/log.h>
 #include <iostream>
 
+#include <embb/base/c/atomic.h>
 #include <embb/base/c/memory_allocation.h>
 
 using embb::base::test::AllocTest;

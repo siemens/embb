@@ -491,7 +491,7 @@ mtapi_boolean_t embb_mtapi_scheduler_initialize_with_mode(
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != node);
 
-  embb_atomic_store_int(&that->affine_task_counter, 0);
+  embb_atomic_init_int(&that->affine_task_counter, 0);
 
   /* Paranoia sanitizing of scheduler mode */
   if (mode >= NUM_SCHEDULER_MODES) {
@@ -573,6 +573,8 @@ void embb_mtapi_scheduler_finalize(embb_mtapi_scheduler_t * that) {
     embb_mtapi_alloc_deallocate(that->worker_contexts);
     that->worker_contexts = MTAPI_NULL;
   }
+
+  embb_atomic_destroy_int(&that->affine_task_counter);
 }
 
 embb_mtapi_scheduler_t * embb_mtapi_scheduler_new() {

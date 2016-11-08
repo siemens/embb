@@ -58,7 +58,9 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize(
   that->thread_priority = priority;
   that->is_main_thread = (worker_index == 0) ?
     node->attributes.reuse_main_thread : MTAPI_FALSE;
-  embb_atomic_store_int(&that->run, 0);
+
+  embb_atomic_init_int(&that->run, 0);
+  embb_atomic_init_int(&that->is_sleeping, 0);
 
   that->queue = (embb_mtapi_task_queue_t**)embb_mtapi_alloc_allocate(
     sizeof(embb_mtapi_task_queue_t)*that->priorities);
@@ -101,7 +103,6 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize(
 
   embb_mutex_init(&that->work_available_mutex, EMBB_MUTEX_PLAIN);
   embb_condition_init(&that->work_available);
-  embb_atomic_store_int(&that->is_sleeping, 0);
 
   that->is_initialized = MTAPI_TRUE;
 
@@ -207,6 +208,9 @@ void embb_mtapi_thread_context_finalize(embb_mtapi_thread_context_t* that) {
     embb_mtapi_alloc_deallocate(that->private_queue);
     that->private_queue = MTAPI_NULL;
   }
+
+  embb_atomic_destroy_int(&that->is_sleeping);
+  embb_atomic_destroy_int(&that->run);
 
   that->priorities = 0;
   that->is_initialized = MTAPI_FALSE;

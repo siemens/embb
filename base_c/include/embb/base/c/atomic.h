@@ -85,9 +85,41 @@
 
 #ifdef DOXYGEN
 /**
+ * Initializes an atomic variable.
+ *
+ * \pre The atomic variable has not been initialized.
+ * \post The atomic variable has the value \c initial_value and can be used in
+ *       atomic operations.
+ *
+ * \ingroup C_BASE_ATOMIC
+ * \notthreadsafe
+ */
+void embb_atomic_init_TYPE(
+  emb_atomic_TYPE* variable,
+  /**< [IN,OUT] Pointer to atomic variable to be initialized. */
+  TYPE initial_value
+  /**< [IN] Initial value to be assigned to atomic variable. */
+  );
+
+/**
+ * Destroys an atomic variable and frees its resources.
+ *
+ * \pre The atomic variable has been initialized.
+ * \post The atomic variable is uninitialized.
+ *
+ * \ingroup C_BASE_ATOMIC
+ * \notthreadsafe
+ */
+void embb_atomic_destroy_TYPE(
+  emb_atomic_TYPE* variable
+  /**< [IN,OUT] Pointer to atomic variable to be destroyed. */
+  );
+
+/**
  * Computes the logical "and" of the value stored in \p variable and \c value.
  *
- * The result is stored in \p variable.
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+ * \post The result is stored in \p variable.
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
  * information and the meaning of \b TYPE.
@@ -95,12 +127,12 @@
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE void embb_atomic_and_assign_TYPE(
+void embb_atomic_and_assign_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable which serves as left-hand side for
                 the "and" operation and is used to store the result. */
   TYPE value
-  /** [IN] Right-hand side of "and" operation, passed by value */
+  /**< [IN] Right-hand side of "and" operation, passed by value */
   );
 
 /**
@@ -111,6 +143,8 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_TYPE(
  * to the value of \p expected. Otherwise, stores the value of \p variable in
  * \p expected.
  *
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+ *
  * \return != 0 if the values of \p variable and \p expected were equivalent \n
  *          0 otherwise
  *
@@ -120,7 +154,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_TYPE(
+int embb_atomic_compare_and_swap_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable */
   TYPE* expected,
@@ -132,6 +166,8 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_TYPE(
 /**
  * Adds \p value to \p variable and returns its old value.
  *
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+ *
  * \return The value before the operation
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
@@ -140,7 +176,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE TYPE embb_atomic_fetch_and_add_TYPE(
+TYPE embb_atomic_fetch_and_add_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable*/
   TYPE value
@@ -150,6 +186,8 @@ EMBB_PLATFORM_INLINE TYPE embb_atomic_fetch_and_add_TYPE(
 /**
  * Loads the value of \p variable and returns it.
  *
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+ *
  * \return The value of the atomic variable.
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
@@ -158,7 +196,7 @@ EMBB_PLATFORM_INLINE TYPE embb_atomic_fetch_and_add_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE TYPE embb_atomic_load_TYPE(
+TYPE embb_atomic_load_TYPE(
   const embb_atomic_TYPE* variable
   /**< [IN] Pointer to atomic variable */
   );
@@ -169,12 +207,13 @@ EMBB_PLATFORM_INLINE TYPE embb_atomic_load_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier();
+void embb_atomic_memory_barrier();
 
 /**
  * Computes the logical "or" of the value stored in \p variable and \c value.
  *
- * The result is stored in \p variable.
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+ * \post The result is stored in \p variable.
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
  * information and the meaning of \b TYPE.
@@ -182,7 +221,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier();
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE void embb_atomic_or_assign_TYPE(
+void embb_atomic_or_assign_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable which serves as left-hand side for
                 the "or" operation and is used to store the result. */
@@ -193,13 +232,15 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_TYPE(
 /**
  * Stores \p value in \p variable.
  *
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+ *
  * \see \ref general_desc_atomic_base "Detailed description" for general
  * information and the meaning of \b TYPE.
  *
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE void embb_atomic_store_TYPE(
+void embb_atomic_store_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable */
   int value
@@ -209,6 +250,8 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_TYPE(
 /**
  * Swaps the current value of \p variable with \p value.
  *
+ * \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+ *
  * \return The old value of \p variable
  *
  * \see \ref general_desc_atomic_base "Detailed description" for general
@@ -217,7 +260,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_TYPE(
  * \ingroup C_BASE_ATOMIC
  * \waitfree
  */
-EMBB_PLATFORM_INLINE TYPE embb_atomic_swap_TYPE(
+TYPE embb_atomic_swap_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable whose value is swapped */
   TYPE value
@@ -227,7 +270,8 @@ EMBB_PLATFORM_INLINE TYPE embb_atomic_swap_TYPE(
 /**
 * Computes the logical "xor" of the value stored in \p variable and \c value.
 *
-* The result is stored in \p variable.
+* \pre The atomic variable has been initialized with \c embb_atomic_init_TYPE
+* \post The result is stored in \p variable.
 *
 * \see \ref general_desc_atomic_base "Detailed description" for general
 * information and the meaning of \b TYPE.
@@ -235,7 +279,7 @@ EMBB_PLATFORM_INLINE TYPE embb_atomic_swap_TYPE(
 * \ingroup C_BASE_ATOMIC
 * \waitfree
 */
-EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_TYPE(
+void embb_atomic_xor_assign_TYPE(
   embb_atomic_TYPE* variable,
   /**< [IN,OUT] Pointer to atomic variable which serves as left-hand side for
                 the "xor" operation and is used to store the result. */
@@ -248,10 +292,62 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_TYPE(
 extern "C" {
 #endif
 
+#include <embb/base/c/internal/cmake_config.h>
+
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+
+#include <embb/base/c/internal/platform.h>
+#include <assert.h>
+
+int embb_mutex_init(
+  embb_mutex_t* mutex,
+  int type
+  );
+
+int embb_mutex_lock(
+  embb_mutex_t* mutex
+  );
+
+int embb_mutex_unlock(
+  embb_mutex_t* mutex
+  );
+
+void embb_mutex_destroy(
+  embb_mutex_t* mutex
+  );
+
+#define EMBB_ATOMIC_MUTEX_INIT(mutex) embb_mutex_init(&(mutex), 0)
+#define EMBB_ATOMIC_MUTEX_LOCK(mutex) embb_mutex_lock(&(mutex))
+#define EMBB_ATOMIC_MUTEX_UNLOCK(mutex) embb_mutex_unlock(&(mutex))
+#define EMBB_ATOMIC_MUTEX_DESTROY(mutex) embb_mutex_destroy(&(mutex))
+
+#else
+
+#define EMBB_ATOMIC_MUTEX_INIT(...)
+#define EMBB_ATOMIC_MUTEX_LOCK(...)
+#define EMBB_ATOMIC_MUTEX_UNLOCK(...)
+#define EMBB_ATOMIC_MUTEX_DESTROY(...)
+
+#endif
+
+#ifdef EMBB_DEBUG
+
+#define EMBB_ATOMIC_INIT_CHECK(variable) assert(variable->marker == 0x12345678)
+#define EMBB_ATOMIC_INIT_MARKER(variable) variable->marker = 0x12345678
+
+#else
+
+#define EMBB_ATOMIC_INIT_CHECK(variable) (void)(variable)
+#define EMBB_ATOMIC_INIT_MARKER(variable) (void)(variable)
+
+#endif
+
 #include <embb/base/c/internal/platform.h>
 #include <embb/base/c/internal/atomic/atomic_sizes.h>
 #include <embb/base/c/internal/atomic/atomic_variables.h>
 #include <embb/base/c/internal/macro_helper.h>
+#include <embb/base/c/internal/atomic/init.h>
+#include <embb/base/c/internal/atomic/destroy.h>
 #include <embb/base/c/internal/atomic/load.h>
 #include <embb/base/c/internal/atomic/and_assign.h>
 #include <embb/base/c/internal/atomic/store.h>

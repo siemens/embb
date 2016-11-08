@@ -29,10 +29,53 @@
 
 #include <stddef.h>
 #include <embb/base/c/internal/macro_helper.h>
+#include <embb/base/c/internal/cmake_config.h>
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #include <intrin.h>
 #endif
+
+#ifdef EMBB_DEBUG
+
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+
+#define EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE( \
+  EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, \
+  EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX) \
+  typedef struct \
+{ \
+  volatile EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
+  embb_mutex_t internal_mutex; \
+  uint32_t marker; \
+} EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
+
+#else
+
+#define EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE( \
+  EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, \
+  EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX) \
+  typedef struct \
+{ \
+  volatile EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
+  uint32_t marker; \
+} EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
+
+#endif
+
+#else
+
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+
+#define EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE( \
+  EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, \
+  EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX) \
+  typedef struct \
+{ \
+  volatile EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
+  embb_mutex_t internal_mutex; \
+} EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
+
+#else
 
 #define EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE( \
   EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, \
@@ -41,6 +84,10 @@
 { \
   volatile EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
 } EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
+
+#endif
+
+#endif
 
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(char, char)
 EMBB_ATOMIC_INTERNAL_DEFINE_VARIABLE(short, short)

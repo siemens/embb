@@ -84,8 +84,8 @@ void plugin_initialize(
 
   plugin_task.id = 0;
   plugin_task.tag = 0;
-  embb_atomic_store_int(&plugin_running, 1);
-  embb_atomic_store_int(&plugin_task_available, 0);
+  embb_atomic_init_int(&plugin_running, 1);
+  embb_atomic_init_int(&plugin_task_available, 0);
 
   err = embb_thread_create(&plugin_thread, NULL, plugin_thread_function, NULL);
   if (EMBB_SUCCESS == err) {
@@ -107,6 +107,9 @@ void plugin_finalize(
   if (EMBB_SUCCESS == err) {
     local_status = MTAPI_SUCCESS;
   }
+
+  embb_atomic_destroy_int(&plugin_task_available);
+  embb_atomic_destroy_int(&plugin_running);
 
   mtapi_status_set(status, local_status);
 }

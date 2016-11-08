@@ -802,6 +802,9 @@ class Network : public internal::ClockListener {
       sched_ = NULL;
     }
     if (NULL != sink_counter_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        sink_counter_[ii].~Atomic<int>();
+      }
       embb::base::Allocation::Free(sink_counter_);
       sink_counter_ = NULL;
     }
@@ -1111,7 +1114,7 @@ class Network : public internal::ClockListener {
       embb::base::Allocation::Allocate(
         sizeof(embb::base::Atomic<int>)*slices_));
     for (int ii = 0; ii < slices_; ii++) {
-      sink_counter_[ii] = 0;
+      new(sink_counter_+ii) embb::base::Atomic<int>(0);
     }
   }
 };

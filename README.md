@@ -125,6 +125,9 @@ EMB² can be built with C++ exception handling (default) or without exceptions. 
 
 Similarly, automatic initialization of the task scheduler by the MTAPI C++ interface can be disabled with `-DUSE_AUTOMATIC_INITIALIZATION=OFF`. This way, unexpected delays after startup can be avoided, e.g. for timing measurements.
 
+Furthermore, EMB² can be built to work with threading analysis tools such as Helgrind or ThreadSanitizer with -DTHREADING_ANALYSIS_MODE=ON. This uses mutexes around atomics to avoid false positives but degrades performance significantly.
+
+
 The tutorial of EMB² comes with a number of examples in `doc/examples/`. These can be built with the other source files using the option `-DBUILD_EXAMPLES=ON`. Note, however, that the examples use C++11 features and require an appropriate compiler.
 
 By default, the included unit tests are built as part of the installation process. To override the default behavior, add the option `-DBUILD_TESTS=OFF`.

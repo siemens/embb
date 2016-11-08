@@ -40,18 +40,18 @@
  * This function has local scope.
  */
 static int embb_max_number_thread_indices_max = 0;
-static embb_atomic_int embb_max_number_thread_indices_flag = { 0 };
+static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_max_number_thread_indices_flag = 0;
 
 unsigned int* embb_max_number_thread_indices() {
-  int compare_to = 0;
-  if (embb_atomic_load_int(&embb_max_number_thread_indices_flag) != 2) {
-    if (embb_atomic_compare_and_swap_int(
+  EMBB_BASE_BASIC_TYPE_SIZE_4 compare_to = 0;
+  if (embb_internal__atomic_load_4(&embb_max_number_thread_indices_flag) != 2) {
+    if (embb_internal__atomic_compare_and_swap_4(
         &embb_max_number_thread_indices_flag, &compare_to, 1)) {
       embb_max_number_thread_indices_max =
         (int)(embb_core_count_available() * 2);
-      embb_atomic_store_int(&embb_max_number_thread_indices_flag, 2);
+      embb_internal__atomic_store_4(&embb_max_number_thread_indices_flag, 2);
     }
-    while (embb_atomic_load_int(&embb_max_number_thread_indices_flag) != 2) {}
+    while (embb_internal__atomic_load_4(&embb_max_number_thread_indices_flag) != 2) {}
   }
   return (unsigned int*) &embb_max_number_thread_indices_max;
 }
@@ -61,17 +61,17 @@ unsigned int* embb_max_number_thread_indices() {
  *
  * This function has local scope.
  */
-static embb_atomic_int embb_thread_index_counter_flag = { 0 };
+static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_thread_index_counter_flag = 0;
 static embb_counter_t embb_thread_index_counter_index;
 embb_counter_t* embb_thread_index_counter() {
-  int compare_to = 0;
-  if (embb_atomic_load_int(&embb_thread_index_counter_flag) != 2) {
-    if (embb_atomic_compare_and_swap_int(
+  EMBB_BASE_BASIC_TYPE_SIZE_4 compare_to = 0;
+  if (embb_internal__atomic_load_4(&embb_thread_index_counter_flag) != 2) {
+    if (embb_internal__atomic_compare_and_swap_4(
         &embb_thread_index_counter_flag, &compare_to, 1)) {
       embb_counter_init(&embb_thread_index_counter_index);
-      embb_atomic_store_int(&embb_thread_index_counter_flag, 2);
+      embb_internal__atomic_store_4(&embb_thread_index_counter_flag, 2);
     }
-    while (embb_atomic_load_int(&embb_thread_index_counter_flag) != 2) {}
+    while (embb_internal__atomic_load_4(&embb_thread_index_counter_flag) != 2) {}
   }
   return &embb_thread_index_counter_index;
 }

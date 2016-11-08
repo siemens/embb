@@ -30,12 +30,12 @@
 
 #include <embb_mtapi_alloc.h>
 
-static embb_atomic_unsigned_int embb_mtapi_alloc_bytes_allocated = { 0 };
+static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_mtapi_alloc_bytes_allocated = 0;
 
 void * embb_mtapi_alloc_allocate(unsigned int bytes) {
   void * ptr = embb_alloc(bytes);
   if (ptr != NULL) {
-    embb_atomic_fetch_and_add_unsigned_int(
+    embb_internal__atomic_fetch_and_add_4(
       &embb_mtapi_alloc_bytes_allocated, sizeof(unsigned int)+bytes);
   }
   return ptr;
@@ -48,9 +48,9 @@ void embb_mtapi_alloc_deallocate(void * ptr) {
 }
 
 void embb_mtapi_alloc_reset_bytes_allocated() {
-  embb_atomic_store_unsigned_int(&embb_mtapi_alloc_bytes_allocated, 0);
+  embb_internal__atomic_store_4(&embb_mtapi_alloc_bytes_allocated, 0);
 }
 
 unsigned int embb_mtapi_alloc_get_bytes_allocated() {
-  return embb_atomic_load_unsigned_int(&embb_mtapi_alloc_bytes_allocated);
+  return embb_internal__atomic_load_4(&embb_mtapi_alloc_bytes_allocated);
 }
