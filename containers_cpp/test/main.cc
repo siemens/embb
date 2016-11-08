@@ -39,7 +39,6 @@
 #include <embb/containers/object_pool.h>
 #include <embb/containers/lock_free_stack.h>
 #include <embb/containers/lock_free_mpmc_queue.h>
-#include <embb/base/c/memory_allocation.h>
 #include <embb/base/c/atomic.h>
 
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
