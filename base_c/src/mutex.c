@@ -205,5 +205,6 @@ int embb_spin_unlock(embb_spinlock_t* spinlock) {
 
 void embb_spin_destroy(embb_spinlock_t* spinlock) {
   assert(NULL != spinlock);
+  embb_spin_lock(spinlock);
   embb_atomic_destroy_int(&spinlock->atomic_spin_variable_);
 }

@@ -46,7 +46,7 @@
 { \
   volatile EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
   embb_mutex_t internal_mutex; \
-  uint32_t marker; \
+  volatile uint32_t marker; \
 } EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
 
 #else
@@ -57,7 +57,7 @@
   typedef struct \
 { \
   volatile EMBB_ATOMIC_PARAMETER_TYPE_NATIVE internal_variable; \
-  uint32_t marker; \
+  volatile uint32_t marker; \
 } EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX);
 
 #endif
