@@ -292,7 +292,7 @@ void embb_atomic_xor_assign_TYPE(
 extern "C" {
 #endif
 
-#include <embb/base/c/internal/cmake_config.h>
+#include <embb/base/c/internal/config.h>
 
 #ifdef EMBB_THREADING_ANALYSIS_MODE
 
@@ -335,11 +335,13 @@ void embb_mutex_destroy(
 
 #define EMBB_ATOMIC_INIT_CHECK(variable) assert(variable->marker == 0x12345678)
 #define EMBB_ATOMIC_INIT_MARKER(variable) variable->marker = 0x12345678
+#define EMBB_ATOMIC_DESTROY_MARKER(variable) variable->marker = 0
 
 #else
 
 #define EMBB_ATOMIC_INIT_CHECK(variable) (void)(variable)
 #define EMBB_ATOMIC_INIT_MARKER(variable) (void)(variable)
+#define EMBB_ATOMIC_DESTROY_MARKER(variable) (void)(variable)
 
 #endif
 

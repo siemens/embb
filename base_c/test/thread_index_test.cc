@@ -112,8 +112,6 @@ void ThreadIndexTest::TestN() {
   embb_thread_join(&thread, NULL);
   delete[] threads;
   embb_internal_thread_index_set_max(old_max);
-
-  embb_atomic_destroy_int(&flag);
 }
 
 int ThreadStart(void* arg) {

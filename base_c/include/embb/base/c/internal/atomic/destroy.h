@@ -44,6 +44,7 @@
   EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable) { \
   EMBB_ATOMIC_INIT_CHECK(variable); \
   EMBB_ATOMIC_MUTEX_DESTROY(variable->internal_mutex); \
+  EMBB_ATOMIC_DESTROY_MARKER(variable); \
   }
 
 #undef EMBB_ATOMIC_METHOD_TO_GENERATE
