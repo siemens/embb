@@ -1,0 +1,28 @@
+---
+layout: page
+permalink: faq.html
+title: Embedded Multicore Building Blocks
+subTitle: Boost your applications' performance
+---
+<div class="lead">
+  <div class="container">
+    <div class="panel-group" id="accordion">
+      {% for category in site.faq %}
+        <br/>
+        <h2 class="section-heading">{{ category.title }}</h2>
+        {% for item in category.faq %}
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#{{ category.title }}{{ forloop.index }}" style="color: #000000">{{ item.question }}</a>
+            </div>
+            <div id="{{ category.title }}{{ forloop.index }}" class="panel-collapse collapse">
+              <div class="panel-body">
+                {{ item.answer }}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</div>

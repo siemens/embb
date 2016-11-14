@@ -1,0 +1,191 @@
+---
+layout: page
+permalink: get_started.html
+title: Embedded Multicore Building Blocks
+subTitle: Boost your applications' performance
+---
+<div class="lead">
+
+  <div class="container" style="padding-top: 55px">
+    To get started with EMB², you may follow the instructions given below. We will guide you through the installation process and show how to create a simple <a href="#Application">application</a> on both <a href="#Linux">Linux</a> and <a href="#Windows">Windows</a>. Additionally, you may also try out the examples contained in the subdirectory <code>doc/examples</code> after EMB² has been installed.
+  </div>
+
+  <section id="Linux" style="padding-top: 55px">
+    <div class="container">
+      <hr class="section-heading-spacer">
+      <div class="clearfix"></div>
+      <h2 class="section-heading">Linux</h2>
+      <h3 class="section-heading">Installation</h3>
+      <ol>
+        <li class="instruction-li">Make sure that you have <a href="https://cmake.org/">CMake</a> installed. On a Debian or Ubuntu system, for example, type:
+          <pre class="shell">sudo apt-get install cmake</pre>
+        </li>
+        <li class="instruction-li">Download the <a href="https://github.com/siemens/embb/releases/latest">latest release</a> of EMB² (.tar.gz file) from GitHub and save it in a directory of your choice.</li>
+        <li class="instruction-li">Open a shell, change to that directory, and untar the file (replace X.Y.Z with the actual version number):
+          <pre class="shell">tar xfz embb-X.Y.Z.tar.gz</pre>
+        </li>
+        <li class="instruction-li">Create a subdirectory <code>build</code> and change to it:<br/>
+          <pre class="shell">cd embb-X.Y.Z<br/>mkdir build<br/>cd build</pre>
+        </li>
+        <li class="instruction-li">Generate the build files using CMake:
+          <pre class="shell">cmake ..</pre>
+        </li>
+        <li class="instruction-li">Now, you can compile EMB² using the generated build files:
+          <pre class="shell">cmake --build .</pre>
+        </li>
+        <li class="instruction-li">After compilation has finished, execute the tests:
+          <pre class="shell">binaries/run_tests.sh</pre>
+          None of the tests should fail.
+        </li>
+        <li class="instruction-li">Finally, you can install EMB² (the default path is <code>/usr/local</code>):
+          <pre class="shell">sudo cmake --build . --target install</pre>
+        </li>
+      </ol>
+      <h3 class="section-heading" style="margin-top: 35px">Creating and Running an Application</h3>
+      <ol class="instruction-ol">
+        <li class="instruction-li">Change to a directory where you want to keep the application and open a text editor.</li>
+        <li class="instruction-li">Copy the source code of the <a href="#Application">application</a> (see below), paste it into the editor, and save it in the file <code>sum_of_squares.cpp</code>. Note: For simplicity, we are using C++11 although EMB² can also be used with C++03. Please make sure that you have a recent compiler installed.</li>
+        <li class="instruction-li">Compile the application as follows:
+          <pre class="shell">g++ -O3 -Wall --std=c++11 sum_of_squares.cpp -o sum_of_squares -lembb_dataflow_cpp -lembb_algorithms_cpp -lembb_containers_cpp -lembb_mtapi_cpp -lembb_mtapi_c -lembb_base_cpp -lembb_base_c -lpthread</pre>
+          Note: For the sake of generality, we link all libraries provided by EMB², not only the required ones.
+        </li>
+        <li class="instruction-li">Run the generated executable:
+          <pre class="shell">./sum_of_squares</pre>
+          You should get something like this:
+          <pre class="shell">Result:  1.00744e+23<br/>Runtime: 85 ms</pre>
+          Note: The result may vary due to rounding errors, and the runtime of course depends on the processor speed as well as the number of cores. You may increase or decrease <code>vector_size</code> to get acceptable but not too short runtimes (if the vector is too large, you will get a <code>bad_alloc</code> exception).
+        </li>
+        <li class="instruction-li">To compare the parallel version with a sequential implementation, replace the call to <code>Reduce</code> (lines 25-30) with a simple loop:
+{% highlight cpp %}
+double result = 0.0;
+for (double x : vec)
+  result += pow(x, 2.0);
+{% endhighlight %}
+        </li>
+        <li class="instruction-li">Compile and execute the program as in steps 3 and 4, respectively.</li>
+        <li class="instruction-li">Get a coffee and stop programming sequentially (or using threads)!</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="Windows" style="padding-top: 55px">
+    <div class="container">
+      <hr class="section-heading-spacer">
+      <div class="clearfix"></div>
+      <h2 class="section-heading">Windows</h2>
+      <h3 class="section-heading">Installation</h3>
+      <ol>
+        <li class="instruction-li"><a href="https://cmake.org/download">Download</a> and run the Windows installer of <a href="https://cmake.org/">CMake</a>. Make sure that CMake is added to the system path:
+        <img src="img/cmake.png" class="img-responsive" style="margin-top: 10px" alt="CMake installation options"></li>
+        <li class="instruction-li">Download the <a href="https://github.com/siemens/embb/releases/latest">latest release</a> of EMB² (.zip file) from GitHub and save it in a directory of your choice.</li>
+        <li class="instruction-li">Open a developer command prompt for Visual Studio (use a version supporting C++11 to be able to compile the sample application) with <em>administrator privileges</em> (right-click on the icon and select "Run as administrator"). Change to the directory where you saved the .zip file and unzip it (replace X.Y.Z with the actual version number):
+          <pre class="shell">unzip embb-X.Y.Z.zip</pre>
+        </li>
+        <li class="instruction-li">Create a subdirectory <code>build</code> and change to it:<br/>
+          <pre class="shell">cd embb-X.Y.Z<br/>mkdir build<br/>cd build</pre>
+        </li>
+        <li class="instruction-li">Generate the build files using CMake, for example:
+          <pre class="shell">cmake -G "Visual Studio 14 2015" ..</pre>
+          Note: Make sure that you specify the correct version of Visual Studio. A list of supported CMake generators can be displayed by typing:
+          <pre class="shell">cmake --help</pre>
+          In the following, we will assume a 32 bit configuration (64 bit are handled similiarly).
+        </li>
+        <li class="instruction-li">Now, you can compile EMB² using the generated build files:
+          <pre class="shell">cmake --build . --config Release</pre>
+          Note: As opposed to a Linux build, the type [Release|Debug] has to be specified explicitly.
+        </li>
+        <li class="instruction-li">After compilation has finished, execute the tests:
+          <pre class="shell">binaries\run_tests.bat</pre>
+          None of the tests should fail.
+        </li>
+        <li class="instruction-li">Finally, you can install EMB² (the default path is <code>C:\Program Files\embb-X.Y.Z\</code> or <code>C:\Program Files (x86)\embb-X.Y.Z</code> depending on the architecture):
+          <pre class="shell">cmake --build . --target install --config Release</pre>
+          Note: In case of errors, you probably did not run the developer command prompt as administrator.
+        </li>
+      </ol>
+      <h3 class="section-heading" style="margin-top: 35px">Creating and Running an Application</h3>
+      <ol class="instruction-ol">
+        <li class="instruction-li">Open Visual Studio and click on <em>File</em> &rarr; <em>New</em> &rarr; <em>Project...</em></li>
+        <li class="instruction-li">Select <em>Win32 Console Application</em>, enter a (solution) name, e.g., <code>sum_of_squares</code>, and click <em>OK</em>:
+        <img src="img/vs_new_project.png" class="img-responsive" style="margin-top: 10px" alt="Visual Studio project creation"></li>
+        <li class="instruction-li">Click <em>Next ></em>, deselect <em>Precompiled header</em>, and click <em>Finish</em>:
+        <img src="img/vs_application_settings.png" class="img-responsive" style="margin-top: 10px" alt="Visual Studio application settings"></li>
+        <li class="instruction-li">Copy the source code of the <a href="#Application">application</a> (see below) and paste it into <code>sum_of_squares.cpp</code>.</li>
+        <li class="instruction-li">Press <em>Alt+F7</em> to open the project properties.</li>
+        <li class="instruction-li">In the <em>Configuration</em> field, select <em>All Configurations</em>.</li>
+        <li class="instruction-li">Select <em>C/C++</em> &rarr; <em>General</em> and add <code>C:\Program Files (x86)\EMBB-X.Y.Z\include</code> to the <em>Additional Include Directories</em> field:
+        <img src="img/vs_include_directories.png" class="img-responsive" style="margin-top: 10px" alt="Visual Studio include directories"></li>
+        <li class="instruction-li">Select <em>Linker</em> &rarr; <em>General</em> and add <code>C:\Program Files (x86)\EMBB-X.Y.Z\lib</code> to the <em>Additional Library Directories</em> field:
+        <img src="img/vs_library_directories.png" class="img-responsive" style="margin-top: 10px" alt="Visual Studio library directories"></li>
+        <li class="instruction-li">Select <em>Linker</em> &rarr; <em>Input</em> and add <code>embb_dataflow_cpp.lib; embb_algorithms_cpp.lib; embb_containers_cpp.lib; embb_mtapi_cpp.lib; embb_mtapi_c.lib; embb_base_cpp.lib; embb_base_c.lib;</code> to the <em>Additional Dependencies</em> field:
+        <img src="img/vs_additional_dependencies.png" class="img-responsive" style="margin-top: 10px; margin-bottom: 10px" alt="Visual Studio additional dependencies">
+        Note: For the sake of generality, we link all libraries provided by EMB², not only the required ones.</li>
+        <li class="instruction-li">Select <em>Release</em> configuration in the toolbar:
+        <img src="img/vs_release_configuration.png" class="img-responsive" style="margin-top: 10px" alt="Visual Studio release configuration"></li>
+        <li class="instruction-li">Press <em>F7</em> to build the solution and <em>CTRL+F5</em> to run it. You should get something like this:
+          <pre class="shell">Result:  1.00744e+23<br/>Runtime: 936 ms</pre>
+          Note: The result may vary due to rounding errors, and the runtime of course depends on the processor speed as well as the number of cores. You may increase or decrease <code>vector_size</code> to get acceptable but not too short runtimes (if the vector is too large, you will get a <code>bad_alloc</code> exception).
+        </li>
+        <li class="instruction-li">To compare the parallel version with a sequential implementation, replace the call to <code>Reduce</code> (lines 25-30) with a simple loop:
+{% highlight cpp %}
+double result = 0.0;
+for (double x : vec)
+  result += pow(x, 2.0);
+{% endhighlight %}
+        </li>
+        <li class="instruction-li">Compile and execute the program as in step 11.</li>
+        <li class="instruction-li">Get a coffee and stop programming sequentially (or using threads)!</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="Application" style="padding-top: 55px">
+    <div class="container">
+      <hr class="section-heading-spacer">
+      <div class="clearfix"></div>
+      <h2 class="section-heading">Sample Application</h2>
+      The following program serves as an example of how to use the parallel patterns provided by EMB². The program squares each element of a vector and computes the sum of the resultung values&mdash;a typical scenario for exploiting data parallelism. As a first step, it initializes the task scheduler and the input vector. Then, it calls the <code>Reduce</code> function which is part of the <code>algorithms</code> namespace. Similar to <code>std::accumulate</code>, this function takes as arguments the input range, the neutral element w.r.t to the performed operation (initial value), and the operation itself (reduction function). Moreover, it takes a transformation function which is applied to each element before the actual reduction takes place. Internally, <code>Reduce</code> splits the input range into blocks which are processed in parallel by the task scheduler. Hence, there is no need to care about thread management and synchronization.
+      <div style="margin-top: 30px; margin-bottom: 20px">
+{% highlight cpp linenos %}
+#include <cmath>
+#include <vector>
+#include <iostream>
+#include <chrono>
+#include <functional>
+
+#include <embb/algorithms/algorithms.h>
+
+// Domain and Node ID for MTAPI
+const mtapi_domain_t domain_id(1);
+const mtapi_node_t node_id(1);
+
+// Size of vector (adjust depending on processor speed)
+const size_t vector_size(1 << 26);
+
+int main() {
+  // Initialize task scheduler
+  embb::mtapi::Node::Initialize(domain_id, node_id);
+  // Create and initialize vector
+  std::vector<double> vec(vector_size);
+  for (size_t i = 0; i < vec.size(); i++)
+    vec[i] = static_cast<double>(i);
+  // Compute sum of squares
+  auto start = std::chrono::steady_clock::now();
+  double result = embb::algorithms::Reduce(
+    vec.begin(), vec.end(),  // input range
+    0.0,  // neutral element (w.r.t. addition)
+    std::plus<double>(),  // reduction fn. (addition)
+    [] (double x) {return pow(x, 2.0);}  // transformation fn. (square)
+  );
+  auto stop = std::chrono::steady_clock::now();
+  // Print result and runtime
+  auto runtime = std::chrono::duration_cast<std::chrono::milliseconds>
+    (stop - start).count();
+  std::cout << "Result:  " << result << std::endl;
+  std::cout << "Runtime: " << runtime << " ms" << std::endl;
+}{% endhighlight %}
+      </div>
+    </div>
+  </section>
+
+</div>

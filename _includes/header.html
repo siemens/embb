@@ -1,0 +1,79 @@
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <!-- <div class="navbar-header page-scroll"> -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- <a class="navbar-brand page-scroll" href="index.html"><img src="img/embb_logo.svg" height="40" alt="{{ site.title }}"></a> -->
+      <a class="navbar-brand" href="index.html"><img src="img/embb_logo.svg" height="40" alt="{{ site.title }}"></a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a href="index.html">Home</a>
+        </li>
+        <li>
+          <a href="get_started.html">Get Started</a>
+        </li>
+        <li>
+          <a href="learn_more.html">Learn More</a>
+        </li>
+        <li>
+          <a href="keep_in_touch.html">Keep in Touch</a>
+        </li>
+        <li>
+          <a href="faq.html">FAQ</a>
+        </li>
+      </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+
+<section id="home">
+  <!-- Header -->
+  <div class="intro-header">
+
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="intro-message">
+            <h1>{{ page.title }}</h1>
+            <h3>{{ page.subTitle }}</h3>
+            <hr class="intro-divider">
+            <!-- Original
+            <ul class="list-inline intro-social-buttons">
+              {% for social in site.social %}
+              <li>
+                <a href="{{ social.url }}" class="btn btn-default btn-lg"><i class="fa fa-{{ social.title }} fa-fw"></i> <span class="network-name">{{ social.title }}</span></a>
+              </li>
+              {% endfor %}
+            </ul>
+            -->
+            <ul class="list-inline intro-social-buttons">
+              <li>
+                <a href="https://github.com/siemens/embb" class="btn btn-default btn-lg"><i class="fa fa-github fa-fw"></i> <span class="network-name">GitHub</span></a>
+              </li>
+              <li>
+                <a href="https://github.com/siemens/embb/releases/latest" class="btn btn-default btn-lg"><i class="fa fa-download fa-fw"></i> <span class="network-name">Download</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- /.container -->
+
+  </div>
+  <!-- /.intro-header -->
+</section>

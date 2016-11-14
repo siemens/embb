@@ -1,0 +1,74 @@
+---
+layout: page
+title: Embedded Multicore Building Blocks
+subTitle: Boost your applications' performance
+---
+<section id="overview" class="container content-section text-center">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2">
+      <br/><br/>
+      <h2>&ldquo;In 2022, multicore will be everywhere&rdquo;<span style="font-weight:normal">&sup1;</span></h2>
+      <br/>
+      <p class="lead">
+        The era of increasing processor clock frequencies is over&mdash;hardware vendors are instead increasing the number of processor cores integrated on a single chip. Such multicore processors provide high performance, which enables novel applications, at low costs and reduced energy consumption. The latter is essential for battery-powered devices and systems with limited capabilities to dissipate heat.
+      </p>
+      <p class="lead">
+        Efficiently leveraging the performance of multicore processors requires to parallelize the applications. Using conventional techniques provided by the operating system, however, this is an intricate and error-prone task. The Embedded Multicore Building Blocks (EMB²) are a domain-independent open source C/C++ library that solves this problem by simplifying parallel programming. This way, EMB² helps to increase product quality and development productivity.
+      </p>
+      <p>
+        &sup1; <a href="https://www.computer.org/cms/ComputingNow/2022Report.pdf">IEEE CS 2022 Report</a>
+      </p>
+      <br/>
+    </div>
+  </div>
+</section>
+
+{% for item in site.intro %}
+{% capture thecycle %}{% cycle 'odd', 'even' %}{% endcapture %}
+{% if thecycle == 'odd' %}
+<div class="content-section-a">
+
+  <div class="container">
+
+    <div class="row">
+      <div class="col-lg-5 col-sm-6">
+        <hr class="section-heading-spacer">
+        <div class="clearfix"></div>
+        <h2 class="section-heading">{{ item.title }}</h2>
+        <div class="lead">{{ item.content }}</div>
+      </div>
+      <div class="col-lg-5 col-lg-offset-2 col-sm-6">
+        <img class="img-responsive" src="img/{{ item.img }}" alt="">
+      </div>
+    </div>
+
+  </div>
+  <!-- /.container -->
+
+</div>
+<!-- /.content-section-a -->
+{% else %}
+
+<div class="content-section-b">
+
+  <div class="container">
+
+    <div class="row">
+      <div class="col-lg-5 col-lg-offset-1 col-sm-push-6  col-sm-6">
+        <hr class="section-heading-spacer">
+        <div class="clearfix"></div>
+        <h2 class="section-heading">{{ item.title }}</h2>
+        <div class="lead">{{ item.content }}</div>
+      </div>
+      <div class="col-lg-5 col-sm-pull-6  col-sm-6">
+        <img class="img-responsive" src="img/{{ item.img }}" alt="">
+      </div>
+    </div>
+
+  </div>
+  <!-- /.container -->
+
+</div>
+<!-- /.content-section-b -->
+{% endif %}
+{% endfor %}

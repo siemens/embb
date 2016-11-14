@@ -1,0 +1,131 @@
+/*! Settings for EMB² site (overriding bootstrap.css and landing-page.css) */
+
+/*! bootstrap.css */
+
+.navbar {
+  min-height: 60px; /* Original: 50px */
+}
+
+.navbar-brand {
+  height: 60px; /* Original: 50px */
+  padding: 10px 15px; /* Original: 15px 15px */
+}
+
+.navbar-nav > li > a {
+  line-height: 30px; /* Original: 20px */
+  font-size: 18px; /* Original: none */
+}
+
+code {
+  word-wrap: break-word;
+}
+
+pre {
+  font-size: 16.5px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.shell {
+  background-color: black;
+  color: white;
+}
+
+.instruction-li {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/*! landing-page.css */
+
+.intro-header {
+  padding-top: 60px; /* Original: 50px */
+  padding-bottom: 60px; /* Original: 50px */
+  background: url(../img/embb_intro.png) no-repeat center center;
+}
+
+.intro-message > h1 {
+  font-size: 4em; /* Original: 5em */
+}
+
+.intro-divider {
+  width: 100%; /* Original: 400px */
+  max-width: 465px; /* none */
+}
+
+.intro-message > h3 {
+  font-size: 2em; /* Original: none */
+}
+
+.banner {
+  background: url(../img/embb_banner.png) no-repeat center center;
+}
+
+.section-heading-spacer {
+  margin-top: 0px; /* Original: 20px */
+}
+
+/*! Custom settings */
+
+.btn-circle {
+  width: 80px;
+  height: 80px;
+  font-size: 40px;
+  border-radius: 40px;
+  padding: 10px;
+  color: #ffffff;
+  background-color: #959582;
+  border-color: #959582;
+}
+
+.btn-circle:hover,
+.btn-circle:focus,
+.btn-circle:active,
+.btn-circle.active {
+  color: #ffffff;
+  background-color: #898974;
+  border-color: #7b7b69;
+}
+.btn-circle.disabled:hover,
+.btn-circle.disabled:focus,
+.btn-circle.disabled:active,
+.btn-circle.disabled.active,
+.btn-circle[disabled]:hover,
+.btn-circle[disabled]:focus,
+.btn-circle[disabled]:active,
+.btn-circle[disabled].active,
+fieldset[disabled] .btn-circle:hover,
+fieldset[disabled] .btn-circle:focus,
+fieldset[disabled] .btn-circle:active,
+fieldset[disabled] .btn-circle.active {
+  background-color: #959582;
+  border-color: #959582;
+}
+
+.btn-text {
+  margin-top:10px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 200px;
+}
+
+.section-heading-rule-center {
+    float: center;
+    width: 75%;
+    border-top: 3px solid #e7e7e7;
+    margin-bottom: 30px;
+}
+
+.panel-heading [data-toggle="collapse"]:after {
+  content: "\f0d8"; /* fa-caret-up */
+    font-family: 'FontAwesome';
+    float: right;
+    font-size: 22px;
+    line-height: 22px;
+    color: #841725;
+}
+
+.panel-heading [data-toggle="collapse"].collapsed:after {
+  content: "\f0d7"; /* fa-caret-down */
+  color: #959582;
+}
