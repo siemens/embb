@@ -6,7 +6,7 @@ url: https://embb.io
 title: Embedded Multicore Building Blocks
 email: embb.info@gmail.com
 author: Tobias Schuele
-description: 'Library for Parallel Programming of Embedded Multicore Systems'
+description: 'EMB² is an open source C/C++ library for parallel programming of embedded systems'
 copyright: '&copy; Siemens AG, 2016'
 credits: 'Credits: This site is based on &lsquo;Landing Page&rsquo;, a free to use, open source Bootstrap theme created by <a href="http://startbootstrap.com/">Start Bootstrap</a>, and hosted by <a href="https://github.com/">GitHub</a>.'
 
