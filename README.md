@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/siemens/embb.svg?branch=master)](https://travis-ci.org/siemens/embb)
+
 Embedded Multicore Building Blocks (EMB²)
 =========================================
 
