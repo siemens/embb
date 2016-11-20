@@ -85,7 +85,6 @@ void embb_mtapi_task_initialize(embb_mtapi_task_t* that) {
   that->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->error_code = MTAPI_SUCCESS;
   embb_atomic_init_unsigned_int(&that->current_instance, 0);
-  embb_spin_init(&that->state_lock);
   embb_atomic_init_unsigned_int(&that->instances_todo, 0);
 }
 
@@ -100,7 +99,6 @@ void embb_mtapi_task_finalize(embb_mtapi_task_t* that) {
   that->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->error_code = MTAPI_SUCCESS;
   embb_atomic_destroy_unsigned_int(&that->current_instance);
-  embb_spin_destroy(&that->state_lock);
   embb_atomic_destroy_unsigned_int(&that->instances_todo);
 }
 
@@ -159,10 +157,7 @@ void embb_mtapi_task_set_state(
   mtapi_task_state_t state) {
   assert(MTAPI_NULL != that);
 
-  embb_spin_lock(&that->state_lock);
   embb_atomic_store_int(&that->state, state);
-  embb_atomic_memory_barrier();
-  embb_spin_unlock(&that->state_lock);
 }
 
 static mtapi_task_hndl_t embb_mtapi_task_start(

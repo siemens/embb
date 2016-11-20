@@ -114,8 +114,6 @@ void SpinLockTest::TestSpinLockTooManySpins() {
   return_code = embb_spin_try_lock(&spinlock_, 100);
   PT_ASSERT(return_code == EMBB_SUCCESS);
 
-  embb_spin_unlock(&spinlock_);
-
   embb_spin_destroy(&spinlock_);
 }
 
