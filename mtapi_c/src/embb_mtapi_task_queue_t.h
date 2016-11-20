@@ -100,9 +100,10 @@ mtapi_boolean_t embb_mtapi_task_queue_push_front(
 
 /**
  * Process all elements of the task queue using the given functor.
+ * If the process function returns false, the task is removed from the queue.
  * \memberof embb_mtapi_task_queue_struct
  */
-mtapi_boolean_t embb_mtapi_task_queue_process(
+void embb_mtapi_task_queue_process(
   embb_mtapi_task_queue_t * that,
   embb_mtapi_task_visitor_function_t process,
   void * user_data);

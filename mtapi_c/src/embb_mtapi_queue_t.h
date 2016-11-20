@@ -32,6 +32,7 @@
 
 #include <embb_mtapi_pool_template.h>
 #include <embb/base/c/mutex.h>
+#include <embb_mtapi_task_queue_t.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,8 +40,6 @@ extern "C" {
 
 
 /* ---- FORWARD DECLARATIONS ----------------------------------------------- */
-
-#include <embb_mtapi_task_queue_t_fwd.h>
 
 
 /* ---- CLASS DECLARATION -------------------------------------------------- */
@@ -61,6 +60,7 @@ struct embb_mtapi_queue_struct {
 
   embb_atomic_int num_tasks;
   mtapi_affinity_t ordered_affinity;
+  embb_mtapi_task_queue_t retained_tasks;
 };
 
 #include <embb_mtapi_queue_t_fwd.h>

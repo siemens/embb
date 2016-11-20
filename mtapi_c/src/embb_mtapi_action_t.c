@@ -84,7 +84,6 @@ static mtapi_boolean_t embb_mtapi_action_delete_visitor(
   embb_mtapi_task_t * task,
   void * user_data) {
   embb_mtapi_action_t * action = (embb_mtapi_action_t*)user_data;
-  mtapi_boolean_t result = MTAPI_FALSE;
 
   assert(MTAPI_NULL != action);
   assert(MTAPI_NULL != task);
@@ -95,17 +94,16 @@ static mtapi_boolean_t embb_mtapi_action_delete_visitor(
     /* task is scheduled and needs to be cancelled */
     embb_mtapi_task_set_state(task, MTAPI_TASK_CANCELLED);
     task->error_code = MTAPI_ERR_ACTION_DELETED;
-    result = MTAPI_TRUE;
   }
 
-  return result;
+  /* do not remove task from queue */
+  return MTAPI_TRUE;
 }
 
 static mtapi_boolean_t embb_mtapi_action_disable_visitor(
   embb_mtapi_task_t * task,
   void * user_data) {
   embb_mtapi_action_t * action = (embb_mtapi_action_t*)user_data;
-  mtapi_boolean_t result = MTAPI_FALSE;
 
   assert(MTAPI_NULL != action);
   assert(MTAPI_NULL != task);
@@ -116,10 +114,10 @@ static mtapi_boolean_t embb_mtapi_action_disable_visitor(
     /* task is scheduled and needs to be cancelled */
     embb_mtapi_task_set_state(task, MTAPI_TASK_CANCELLED);
     task->error_code = MTAPI_ERR_ACTION_DISABLED;
-    result = MTAPI_TRUE;
   }
 
-  return result;
+  /* do not remove task from queue */
+  return MTAPI_TRUE;
 }
 
 

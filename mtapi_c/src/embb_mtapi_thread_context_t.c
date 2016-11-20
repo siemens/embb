@@ -227,16 +227,10 @@ mtapi_boolean_t embb_mtapi_thread_context_process_tasks(
   assert(MTAPI_NULL != process);
 
   for (ii = 0; ii < that->priorities; ii++) {
-    result = embb_mtapi_task_queue_process(
+    embb_mtapi_task_queue_process(
       that->private_queue[ii], process, user_data);
-    if (MTAPI_FALSE == result) {
-      break;
-    }
-    result = embb_mtapi_task_queue_process(
+    embb_mtapi_task_queue_process(
       that->queue[ii], process, user_data);
-    if (MTAPI_FALSE == result) {
-      break;
-    }
   }
 
   return result;

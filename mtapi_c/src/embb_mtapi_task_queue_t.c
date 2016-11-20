@@ -117,25 +117,42 @@ mtapi_boolean_t embb_mtapi_task_queue_push_front(
   return result;
 }
 
-mtapi_boolean_t embb_mtapi_task_queue_process(
+void embb_mtapi_task_queue_process(
   embb_mtapi_task_queue_t * that,
   embb_mtapi_task_visitor_function_t process,
   void * user_data) {
-  mtapi_boolean_t result = MTAPI_TRUE;
+  mtapi_boolean_t result;
   embb_mtapi_task_t * task;
+  embb_mtapi_task_t * prev = MTAPI_NULL;
+  embb_mtapi_task_t * next;
 
   assert(MTAPI_NULL != that);
   assert(MTAPI_NULL != process);
 
   if (embb_spin_lock(&that->lock) == EMBB_SUCCESS) {
     for (task = that->front; task != MTAPI_NULL; task = task->next) {
+      /* store next task, might get destroyed if process requests
+         removal of current task from queue */
+      next = task->next;
+      /* process the task */
       result = process(task, user_data);
+      /* remove task from queue? */
       if (MTAPI_FALSE == result) {
-        break;
+        if (task == that->front) {
+          that->front = next;
+        }
+        if (task == that->back) {
+          that->back = prev;
+        }
+        if (prev != MTAPI_NULL) {
+          prev->next = next;
+        }
+        /* do not update previous task, as the current one is gone */
+      } else {
+        /* store task as previous task */
+        prev = task;
       }
     }
     embb_spin_unlock(&that->lock);
   }
-
-  return result;
 }

@@ -284,14 +284,6 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     result = MTAPI_TRUE;
     break;
 
-  case MTAPI_TASK_RETAINED:
-    /* put task into queue again for later execution */
-    embb_mtapi_scheduler_schedule_task(node->scheduler, task);
-    /* yield, as there may be only retained tasks in the queue */
-    embb_thread_yield();
-    /* task is not done, so do not notify queue */
-    break;
-
   case MTAPI_TASK_CANCELLED:
     /* set return value to cancelled */
     task->error_code = MTAPI_ERR_ACTION_CANCELLED;
@@ -304,6 +296,7 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     }
     break;
 
+  case MTAPI_TASK_RETAINED:
   case MTAPI_TASK_COMPLETED:
   case MTAPI_TASK_DELETED:
   case MTAPI_TASK_WAITING:
@@ -312,7 +305,8 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
   case MTAPI_TASK_ERROR:
   case MTAPI_TASK_INTENTIONALLY_UNUSED:
   default:
-    /* do nothing, although this is an error */
+    /* this should never happen */
+    assert(0);
     break;
   }
 
@@ -447,8 +441,7 @@ mtapi_boolean_t embb_mtapi_scheduler_wait_for_task(
     (mtapi_task_state_t)embb_atomic_load_int(&task->state);
   while (
     (MTAPI_TASK_SCHEDULED == task_state) ||
-    (MTAPI_TASK_RUNNING == task_state) ||
-    (MTAPI_TASK_RETAINED == task_state) ) {
+    (MTAPI_TASK_RUNNING == task_state) ) {
     if (MTAPI_INFINITE < timeout) {
       embb_time_t current_time;
       embb_time_now(&current_time);

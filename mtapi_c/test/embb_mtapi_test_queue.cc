@@ -74,8 +74,11 @@ static void testQueueWaitAction(
     const_cast<void*>(args));
   int ii;
 
+  /* we're running from an ordered queue, so the common atomic should be 0
+     and we're trying to set it to 1 */
   int expected = 0;
   if (0 == embb_atomic_compare_and_swap_int(test, &expected, 1)) {
+    /* it is not, return an error */
     mtapi_context_status_set(task_context, MTAPI_ERR_ACTION_FAILED, &status);
     MTAPI_CHECK_STATUS(status);
     return;
@@ -84,6 +87,7 @@ static void testQueueWaitAction(
   job = mtapi_job_get(JOB_TEST_TASK, THIS_DOMAIN_ID, &status);
   MTAPI_CHECK_STATUS(status);
 
+  /* spawn some tasks to wait for */
   for (ii = 0; ii < kTasks; ii++) {
     task[ii] = mtapi_task_start(
       MTAPI_TASK_ID_NONE, job,
@@ -94,16 +98,13 @@ static void testQueueWaitAction(
     MTAPI_CHECK_STATUS(status);
   }
 
-  mtapi_uint_t core_num = mtapi_context_corenum_get(task_context, MTAPI_NULL);
-  srand(core_num);
-  for (ii = 1000; ii < rand() % 1000000; ii++) {
-  }
-
+  /* wait for the spawned tasks */
   for (ii = 0; ii < kTasks; ii++) {
     mtapi_task_wait(task[ii], MTAPI_INFINITE, &status);
     MTAPI_CHECK_STATUS(status);
   }
 
+  /* indicate that we're done */
   embb_atomic_store_int(test, 0);
 }
 

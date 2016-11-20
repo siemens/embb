@@ -60,6 +60,7 @@ void embb_mtapi_queue_initialize(embb_mtapi_queue_t* that) {
   embb_atomic_init_int(&that->num_tasks, 0);
   that->job_handle.id = 0;
   that->job_handle.tag = 0;
+  embb_mtapi_task_queue_initialize(&that->retained_tasks);
 }
 
 void embb_mtapi_queue_initialize_with_attributes_and_job(
@@ -74,11 +75,13 @@ void embb_mtapi_queue_initialize_with_attributes_and_job(
   embb_atomic_init_char(&that->enabled, MTAPI_TRUE);
   embb_atomic_init_int(&that->num_tasks, 0);
   that->job_handle = job;
+  embb_mtapi_task_queue_initialize(&that->retained_tasks);
 }
 
 void embb_mtapi_queue_finalize(embb_mtapi_queue_t* that) {
   assert(MTAPI_NULL != that);
 
+  embb_mtapi_task_queue_finalize(&that->retained_tasks);
   that->job_handle.id = 0;
   that->job_handle.tag = 0;
   embb_atomic_destroy_int(&that->num_tasks);
@@ -100,7 +103,6 @@ static mtapi_boolean_t embb_mtapi_queue_delete_visitor(
   embb_mtapi_task_t * task,
   void * user_data) {
   embb_mtapi_queue_t * queue = (embb_mtapi_queue_t*)user_data;
-  mtapi_boolean_t result = MTAPI_FALSE;
 
   assert(MTAPI_NULL != queue);
   assert(MTAPI_NULL != task);
@@ -110,17 +112,18 @@ static mtapi_boolean_t embb_mtapi_queue_delete_visitor(
     /* task is scheduled and needs to be cancelled */
     embb_mtapi_task_set_state(task, MTAPI_TASK_CANCELLED);
     task->error_code = MTAPI_ERR_QUEUE_DELETED;
-    result = MTAPI_TRUE;
   }
 
-  return result;
+  /* do not remove task from queue */
+  return MTAPI_TRUE;
 }
 
 static mtapi_boolean_t embb_mtapi_queue_disable_visitor(
   embb_mtapi_task_t * task,
   void * user_data) {
   embb_mtapi_queue_t * queue = (embb_mtapi_queue_t*)user_data;
-  mtapi_boolean_t result = MTAPI_FALSE;
+  /* do not remove task from queue by default */
+  mtapi_boolean_t result = MTAPI_TRUE;
 
   assert(MTAPI_NULL != queue);
   assert(MTAPI_NULL != task);
@@ -130,31 +133,14 @@ static mtapi_boolean_t embb_mtapi_queue_disable_visitor(
     if (queue->attributes.retain) {
       /* task is scheduled and needs to be retained */
       embb_mtapi_task_set_state(task, MTAPI_TASK_RETAINED);
+      embb_mtapi_task_queue_push_back(&queue->retained_tasks, task);
+      /* remove task from queue */
+      result = MTAPI_FALSE;
     } else {
       /* task is scheduled and needs to be cancelled */
       embb_mtapi_task_set_state(task, MTAPI_TASK_CANCELLED);
       task->error_code = MTAPI_ERR_QUEUE_DISABLED;
     }
-    result = MTAPI_TRUE;
-  }
-
-  return result;
-}
-
-static mtapi_boolean_t embb_mtapi_queue_enable_visitor(
-  embb_mtapi_task_t * task,
-  void * user_data) {
-  embb_mtapi_queue_t * queue = (embb_mtapi_queue_t*)user_data;
-  mtapi_boolean_t result = MTAPI_FALSE;
-
-  assert(MTAPI_NULL != queue);
-  assert(MTAPI_NULL != task);
-
-  if (task->queue.id == queue->handle.id &&
-      task->queue.tag == queue->handle.tag) {
-    /* task is retained and should be scheduled */
-    embb_mtapi_task_set_state(task, MTAPI_TASK_SCHEDULED);
-    result = MTAPI_TRUE;
   }
 
   return result;
@@ -375,6 +361,17 @@ void mtapi_queue_delete(
       context = embb_mtapi_scheduler_get_current_thread_context(
         node->scheduler);
 
+      if (local_queue->attributes.retain) {
+        /* reschedule retained tasks */
+        embb_mtapi_task_t * task =
+          embb_mtapi_task_queue_pop_front(&local_queue->retained_tasks);
+        while (MTAPI_NULL != task) {
+          embb_mtapi_task_set_state(task, MTAPI_TASK_SCHEDULED);
+          embb_mtapi_scheduler_schedule_task(node->scheduler, task);
+          task = embb_mtapi_task_queue_pop_front(&local_queue->retained_tasks);
+        }
+      }
+
       /* cancel all tasks */
       embb_mtapi_scheduler_process_tasks(
         node->scheduler, embb_mtapi_queue_delete_visitor, local_queue);
@@ -509,8 +506,13 @@ void mtapi_queue_enable(
       local_status = MTAPI_SUCCESS;
       if (local_queue->attributes.retain) {
         /* reschedule retained tasks */
-        embb_mtapi_scheduler_process_tasks(
-          node->scheduler, embb_mtapi_queue_enable_visitor, local_queue);
+        embb_mtapi_task_t * task =
+          embb_mtapi_task_queue_pop_front(&local_queue->retained_tasks);
+        while (MTAPI_NULL != task) {
+          embb_mtapi_task_set_state(task, MTAPI_TASK_SCHEDULED);
+          embb_mtapi_scheduler_schedule_task(node->scheduler, task);
+          task = embb_mtapi_task_queue_pop_front(&local_queue->retained_tasks);
+        }
       }
     } else {
       local_status = MTAPI_ERR_QUEUE_INVALID;
