@@ -65,12 +65,13 @@ struct embb_mtapi_task_struct {
   mtapi_queue_hndl_t queue;
 
   mtapi_action_hndl_t action;
-  embb_spinlock_t state_lock;
   embb_atomic_int state;
   embb_atomic_unsigned_int current_instance;
   embb_atomic_unsigned_int instances_todo;
 
   mtapi_status_t error_code;
+
+  struct embb_mtapi_task_struct * next;
 };
 
 #include <embb_mtapi_task_t_fwd.h>

@@ -332,8 +332,17 @@ void embb_mutex_destroy(
 #ifdef EMBB_DEBUG
 
 #include <assert.h>
+#include <stdint.h>
 
-#define EMBB_ATOMIC_INIT_CHECK(variable) assert(variable->marker == 0x12345678)
+static int test_atomic_marker(uint32_t marker) {
+  if (marker == 0x12345678) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+#define EMBB_ATOMIC_INIT_CHECK(variable) assert(test_atomic_marker(variable->marker))
 #define EMBB_ATOMIC_INIT_MARKER(variable) variable->marker = 0x12345678
 #define EMBB_ATOMIC_DESTROY_MARKER(variable) variable->marker = 0
 

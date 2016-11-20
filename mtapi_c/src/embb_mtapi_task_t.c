@@ -84,6 +84,7 @@ void embb_mtapi_task_initialize(embb_mtapi_task_t* that) {
   that->group.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->error_code = MTAPI_SUCCESS;
+  that->next = MTAPI_NULL;
   embb_atomic_init_unsigned_int(&that->current_instance, 0);
   embb_atomic_init_unsigned_int(&that->instances_todo, 0);
 }
@@ -98,6 +99,7 @@ void embb_mtapi_task_finalize(embb_mtapi_task_t* that) {
   that->group.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->queue.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
   that->error_code = MTAPI_SUCCESS;
+  that->next = MTAPI_NULL;
   embb_atomic_destroy_unsigned_int(&that->current_instance);
   embb_atomic_destroy_unsigned_int(&that->instances_todo);
 }
@@ -273,13 +275,8 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
               MTAPI_TRUE : MTAPI_FALSE;
           } else {
             /* schedule local task */
-            was_scheduled = MTAPI_TRUE;
-
-            for (mtapi_uint_t kk = 0; kk < task->attributes.num_instances;
-              kk++) {
-              was_scheduled = (mtapi_boolean_t)(was_scheduled &
-                embb_mtapi_scheduler_schedule_task(scheduler, task, kk));
-            }
+            was_scheduled =
+              embb_mtapi_scheduler_schedule_task(scheduler, task);
           }
 
           if (was_scheduled) {

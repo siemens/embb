@@ -72,8 +72,7 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize(
     that->queue[ii] = (embb_mtapi_task_queue_t*)
       embb_mtapi_alloc_allocate(sizeof(embb_mtapi_task_queue_t));
     if (that->queue[ii] != NULL) {
-      embb_mtapi_task_queue_initialize_with_capacity(
-        that->queue[ii], node->attributes.queue_limit);
+      embb_mtapi_task_queue_initialize(that->queue[ii]);
     } else {
       result = MTAPI_FALSE;
     }
@@ -91,8 +90,7 @@ mtapi_boolean_t embb_mtapi_thread_context_initialize(
     that->private_queue[ii] = (embb_mtapi_task_queue_t*)
       embb_mtapi_alloc_allocate(sizeof(embb_mtapi_task_queue_t));
     if (that->private_queue[ii] != NULL) {
-      embb_mtapi_task_queue_initialize_with_capacity(
-        that->private_queue[ii], node->attributes.queue_limit);
+      embb_mtapi_task_queue_initialize(that->private_queue[ii]);
     } else {
       result = MTAPI_FALSE;
     }

@@ -448,7 +448,8 @@ static mtapi_status_t embb_mtapi_network_handle_return_result(
               embb_mtapi_group_t* local_group =
                 embb_mtapi_group_pool_get_storage_for_handle(
                   node->group_pool, local_task->group);
-              embb_mtapi_task_queue_push(&local_group->queue, local_task);
+              embb_mtapi_task_queue_push_back(
+                &local_group->queue, local_task);
             }
 
             local_status = MTAPI_SUCCESS;
@@ -516,7 +517,8 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
             embb_mtapi_group_t* local_group =
               embb_mtapi_group_pool_get_storage_for_handle(
                 node->group_pool, local_task->group);
-            embb_mtapi_task_queue_push(&local_group->queue, local_task);
+            embb_mtapi_task_queue_push_back(
+              &local_group->queue, local_task);
           }
 
           local_status = MTAPI_SUCCESS;
