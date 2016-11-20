@@ -295,7 +295,7 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     /* set return value to cancelled */
     task->error_code = MTAPI_ERR_ACTION_CANCELLED;
     if (embb_atomic_fetch_and_add_unsigned_int(
-      &task->instances_todo, (unsigned int)-1) == 0) {
+      &task->instances_todo, (unsigned int)-1) == 1) {
       embb_mtapi_scheduler_finalize_task(task, node, local_queue, local_group);
     }
     if (MTAPI_NULL != local_action) {
