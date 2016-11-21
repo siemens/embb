@@ -77,6 +77,7 @@ endif()
 # Check headers and create configure file with preprocessor defines
 include(CheckIncludeFiles) # Includes module to perform checks
 include(CheckSymbolExists) # Includes module to perform symbol checks 
+check_include_files("pthread_np.h" EMBB_PLATFORM_HAS_HEADER_PTHREAD_NP)
 check_include_files("sys/sysinfo.h" EMBB_PLATFORM_HAS_HEADER_SYSINFO)
 check_include_files("sys/param.h;sys/cpuset.h" EMBB_PLATFORM_HAS_HEADER_CPUSET)
 check_symbol_exists("_SC_NPROCESSORS_ONLN" "unistd.h" EMBB_PLATFORM_HAS_SC_NPROCESSORS_ONLN)

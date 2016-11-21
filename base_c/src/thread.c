@@ -212,8 +212,11 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
 
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
-#ifdef EMBB_PLATFORM_HAS_HEADER_CPUSET
+#ifdef EMBB_PLATFORM_HAS_HEADER_PTHREAD_NP
 #include <pthread_np.h>
+#endif
+
+#ifdef EMBB_PLATFORM_HAS_HEADER_CPUSET
 #include <sys/param.h>
 #include <sys/cpuset.h>
 #endif

@@ -49,6 +49,11 @@
 #cmakedefine EMBB_PLATFORM_HAS_HEADER_CPUSET
 
 /**
+ * Is used to set thread affinities on certain systems.
+ */
+#cmakedefine EMBB_PLATFORM_HAS_HEADER_PTHREAD_NP
+
+/**
  * Is used for Linux thread affinities.
  */
 #cmakedefine EMBB_PLATFORM_HAS_GLIB_CPU
