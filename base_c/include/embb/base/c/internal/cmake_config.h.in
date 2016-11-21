@@ -41,7 +41,7 @@
 /**
  * Is used to get the number of cores on certain systems.
  */
-#cmakedefine EMBB_PLATFORM_HAS_HEADER_SYSCTL
+#cmakedefine EMBB_PLATFORM_HAS_SC_NPROCESSORS_ONLN
 
 /**
  * Is used to set thread affinities on certain systems.

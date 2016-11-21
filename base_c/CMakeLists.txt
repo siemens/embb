@@ -78,8 +78,8 @@ endif()
 include(CheckIncludeFiles) # Includes module to perform checks
 include(CheckSymbolExists) # Includes module to perform symbol checks 
 check_include_files("sys/sysinfo.h" EMBB_PLATFORM_HAS_HEADER_SYSINFO)
-check_include_files("sys/types.h;sys/sysctl.h" EMBB_PLATFORM_HAS_HEADER_SYSCTL)
 check_include_files("sys/param.h;sys/cpuset.h" EMBB_PLATFORM_HAS_HEADER_CPUSET)
+check_symbol_exists("_SC_NPROCESSORS_ONLN" "unistd.h" EMBB_PLATFORM_HAS_SC_NPROCESSORS_ONLN)
 link_libraries(${link_libraries}  ${gnu_libs})
 set(CMAKE_EXTRA_INCLUDE_FILES sched.h)
   check_type_size(cpu_set_t EMBB_PLATFORM_HAS_GLIB_CPU)
