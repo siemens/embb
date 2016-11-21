@@ -212,9 +212,7 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
 
 #ifdef EMBB_PLATFORM_THREADING_POSIXTHREADS
 
-#ifdef EMBB_PLATFORM_HAS_GLIB_CPU
-#include <sched.h>
-#elif defined EMBB_PLATFORM_HAS_HEADER_CPUSET
+#ifdef EMBB_PLATFORM_HAS_HEADER_CPUSET
 #include <pthread_np.h>
 #include <sys/param.h>
 #include <sys/cpuset.h>
@@ -224,6 +222,7 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
 #include <sys/sysinfo.h> /* Used to get number of processors */
 #endif /* EMBB_PLATFORM_HAS_HEADER_SYSINFO */
 
+#include <sched.h>
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/time.h>
@@ -267,7 +266,7 @@ embb_thread_t embb_thread_current() {
 }
 
 void embb_thread_yield() {
-  pthread_yield();
+  sched_yield();
 }
 
 int embb_thread_create_with_priority(
