@@ -225,9 +225,12 @@ int embb_thread_equal(const embb_thread_t* lhs, const embb_thread_t* rhs) {
 #include <sys/sysinfo.h> /* Used to get number of processors */
 #endif /* EMBB_PLATFORM_HAS_HEADER_SYSINFO */
 
+#ifdef EMBB_PLATFORM_HAS_HEADER_SYSCALL
+#include <sys/syscall.h>
+#endif
+
 #include <sched.h>
 #include <unistd.h>
-#include <sys/syscall.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -249,7 +252,7 @@ typedef struct embb_internal_thread_arg_t {
  * argument.
  */
 void* embb_internal_thread_start(void* internalArg) {
-#ifdef EMBB_PLATFORM_HAS_GLIB_CPU
+#ifdef EMBB_PLATFORM_HAS_HEADER_SYSCALL
   pid_t tid;
   tid = syscall(SYS_gettid);
   setpriority(PRIO_PROCESS, tid,
