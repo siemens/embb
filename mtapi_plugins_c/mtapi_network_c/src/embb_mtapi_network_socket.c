@@ -35,6 +35,7 @@
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 #include <sys/time.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
