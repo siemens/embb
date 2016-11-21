@@ -252,6 +252,17 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     local_queue =
       embb_mtapi_queue_pool_get_storage_for_handle(
         node->queue_pool, task->queue);
+
+    /* ordered queue and task running on it? */
+    if (local_queue->attributes.ordered) {
+      /* try to get ordered queue execution slot */
+      if (!embb_mtapi_queue_ordered_task_start(local_queue)) {
+        /* some task is already execution, keep task back in the queue */
+        embb_mtapi_task_queue_push_back(&local_queue->ordered_tasks, task);
+        /* return and let other tasks execute first */
+        return MTAPI_FALSE;
+      }
+    }
   }
 
   /* is task associated with a group? */
@@ -281,6 +292,21 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     } else {
       embb_mtapi_scheduler_schedule_task(node->scheduler, task);
     }
+    if (MTAPI_NULL != local_queue) {
+      if (local_queue->attributes.ordered) {
+        /* tell queue that execution of ordered task is done */
+        embb_mtapi_queue_ordered_task_finish(local_queue);
+        /* fetch task that has been kept back */
+        embb_mtapi_task_t * ordered_task =
+          embb_mtapi_task_queue_pop_front(&local_queue->ordered_tasks);
+        if (MTAPI_NULL != ordered_task) {
+          /* add ordered task to front of private queue */
+          embb_mtapi_task_queue_push_front(
+            thread_context->private_queue[local_queue->attributes.priority],
+            ordered_task);
+        }
+      }
+    }
     result = MTAPI_TRUE;
     break;
 
@@ -290,6 +316,12 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     if (embb_atomic_fetch_and_add_unsigned_int(
       &task->instances_todo, (unsigned int)-1) == 1) {
       embb_mtapi_scheduler_finalize_task(task, node, local_queue, local_group);
+    }
+    if (MTAPI_NULL != local_queue) {
+      if (local_queue->attributes.ordered) {
+        /* tell queue that execution of ordered task is done */
+        embb_mtapi_queue_ordered_task_finish(local_queue);
+      }
     }
     if (MTAPI_NULL != local_action) {
       embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);

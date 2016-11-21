@@ -61,6 +61,8 @@ struct embb_mtapi_queue_struct {
   embb_atomic_int num_tasks;
   mtapi_affinity_t ordered_affinity;
   embb_mtapi_task_queue_t retained_tasks;
+  embb_mtapi_task_queue_t ordered_tasks;
+  embb_atomic_int ordered_task_executing;
 };
 
 #include <embb_mtapi_queue_t_fwd.h>
@@ -97,6 +99,19 @@ void embb_mtapi_queue_task_started(embb_mtapi_queue_t* that);
  * \memberof embb_mtapi_queue_struct
  */
 void embb_mtapi_queue_task_finished(embb_mtapi_queue_t* that);
+
+/**
+ * Start ordered task on queue, returns 0 if a task is already running.
+ * \memberof embb_mtapi_queue_struct
+ */
+int embb_mtapi_queue_ordered_task_start(embb_mtapi_queue_t* that);
+
+/**
+ * Finish ordered task on queue.
+ * \memberof embb_mtapi_queue_struct
+ */
+void embb_mtapi_queue_ordered_task_finish(embb_mtapi_queue_t* that);
+
 
 /* ---- POOL DECLARATION --------------------------------------------------- */
 

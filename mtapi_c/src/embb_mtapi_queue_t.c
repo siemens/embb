@@ -34,9 +34,11 @@
 #include <embb_mtapi_log.h>
 #include <mtapi_status_t.h>
 #include <embb_mtapi_queue_t.h>
+#include <embb_mtapi_group_t.h>
 #include <embb_mtapi_node_t.h>
 #include <embb_mtapi_task_t.h>
 #include <embb_mtapi_job_t.h>
+#include <embb_mtapi_action_t.h>
 #include <embb_mtapi_pool_template-inl.h>
 #include <embb_mtapi_task_queue_t.h>
 #include <embb_mtapi_scheduler_t.h>
@@ -56,11 +58,13 @@ void embb_mtapi_queue_initialize(embb_mtapi_queue_t* that) {
 
   mtapi_queueattr_init(&that->attributes, MTAPI_NULL);
   that->queue_id = MTAPI_QUEUE_ID_NONE;
+  embb_atomic_init_int(&that->ordered_task_executing, 0);
   embb_atomic_init_char(&that->enabled, MTAPI_FALSE);
   embb_atomic_init_int(&that->num_tasks, 0);
   that->job_handle.id = 0;
   that->job_handle.tag = 0;
   embb_mtapi_task_queue_initialize(&that->retained_tasks);
+  embb_mtapi_task_queue_initialize(&that->ordered_tasks);
 }
 
 void embb_mtapi_queue_initialize_with_attributes_and_job(
@@ -72,21 +76,25 @@ void embb_mtapi_queue_initialize_with_attributes_and_job(
 
   that->attributes = *attributes;
   that->queue_id = MTAPI_QUEUE_ID_NONE;
+  embb_atomic_init_int(&that->ordered_task_executing, 0);
   embb_atomic_init_char(&that->enabled, MTAPI_TRUE);
   embb_atomic_init_int(&that->num_tasks, 0);
   that->job_handle = job;
   embb_mtapi_task_queue_initialize(&that->retained_tasks);
+  embb_mtapi_task_queue_initialize(&that->ordered_tasks);
 }
 
 void embb_mtapi_queue_finalize(embb_mtapi_queue_t* that) {
   assert(MTAPI_NULL != that);
 
+  embb_mtapi_task_queue_finalize(&that->ordered_tasks);
   embb_mtapi_task_queue_finalize(&that->retained_tasks);
   that->job_handle.id = 0;
   that->job_handle.tag = 0;
   embb_atomic_destroy_int(&that->num_tasks);
   embb_atomic_destroy_char(&that->enabled);
-  embb_mtapi_queue_initialize(that);
+  embb_atomic_destroy_int(&that->ordered_task_executing);
+  that->queue_id = MTAPI_QUEUE_ID_NONE;
 }
 
 void embb_mtapi_queue_task_started(embb_mtapi_queue_t* that) {
@@ -97,6 +105,18 @@ void embb_mtapi_queue_task_started(embb_mtapi_queue_t* that) {
 void embb_mtapi_queue_task_finished(embb_mtapi_queue_t* that) {
   assert(MTAPI_NULL != that);
   embb_atomic_fetch_and_add_int(&that->num_tasks, -1);
+}
+
+int embb_mtapi_queue_ordered_task_start(
+  embb_mtapi_queue_t* that) {
+  int expected = 0;
+  return embb_atomic_compare_and_swap_int(
+    &that->ordered_task_executing, &expected, 1);
+}
+
+void embb_mtapi_queue_ordered_task_finish(
+  embb_mtapi_queue_t* that) {
+  embb_atomic_store_int(&that->ordered_task_executing, 0);
 }
 
 static mtapi_boolean_t embb_mtapi_queue_delete_visitor(
@@ -434,6 +454,40 @@ void mtapi_queue_disable(
       /* cancel or retain all tasks scheduled via queue */
       embb_mtapi_scheduler_process_tasks(
         node->scheduler, embb_mtapi_queue_disable_visitor, local_queue);
+
+      /* cancel all tasks held back the ordered queue if it is not retaining */
+      if (local_queue->attributes.ordered && !local_queue->attributes.retain) {
+        embb_mtapi_group_t * local_group = MTAPI_NULL;
+        embb_mtapi_action_t * local_action = MTAPI_NULL;
+        embb_mtapi_task_t * task =
+          embb_mtapi_task_queue_pop_front(&local_queue->ordered_tasks);
+        while (MTAPI_NULL != task) {
+          /* is task associated with a group? */
+          if (embb_mtapi_group_pool_is_handle_valid(
+            node->group_pool, task->group)) {
+            local_group = embb_mtapi_group_pool_get_storage_for_handle(
+                node->group_pool, task->group);
+          }
+          /* get action for task */
+          if (embb_mtapi_action_pool_is_handle_valid(
+            node->action_pool, task->action)) {
+            local_action =
+              embb_mtapi_action_pool_get_storage_for_handle(
+                node->action_pool, task->action);
+          }
+          /* set state to cancelled */
+          embb_mtapi_task_set_state(task, MTAPI_TASK_CANCELLED);
+          task->error_code = MTAPI_ERR_ACTION_CANCELLED;
+          embb_mtapi_scheduler_finalize_task(
+            task, node, local_queue, local_group);
+          /* remove task from action */
+          if (MTAPI_NULL != local_action) {
+            embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
+          }
+          /* get next task */
+          task = embb_mtapi_task_queue_pop_front(&local_queue->ordered_tasks);
+        }
+      }
 
       /* if queue is not retaining, wait for all tasks to finish */
       if (MTAPI_FALSE == local_queue->attributes.retain) {
