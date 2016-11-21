@@ -27,7 +27,7 @@
 #include <alloc_test.h>
 #include <embb/base/c/memory_allocation.h>
 #include <cassert>
-#include <memory.h>
+#include <string.h>
 
 namespace embb {
 namespace base {
