@@ -46,8 +46,6 @@ void Node::Initialize(
     NodeAttributes attributes; // default attributes
     node_instance_ = embb::base::Allocation::New<Node>(
       domain_id, node_id, attributes);
-    node_instance_->function_action_ =
-      node_instance_->CreateAction(EMBB_MTAPI_FUNCTION_JOB_ID, ActionFunction);
   }
 }
 
@@ -94,8 +92,6 @@ Node & Node::GetInstance() {
 
 void Node::Finalize() {
   if (IsInitialized()) {
-    node_instance_->function_action_.Delete();
-    mtapi_finalize(MTAPI_NULL);
     embb::base::Allocation::Delete(node_instance_);
     node_instance_ = NULL;
   } else {

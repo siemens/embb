@@ -74,6 +74,16 @@ class Node {
   typedef embb::base::Function<void, TaskContext &> SMPFunction;
 
   /**
+   * Destroys the runtime singleton.
+   *
+   * \notthreadsafe
+   */
+  ~Node() {
+    function_action_.Delete();
+    mtapi_finalize(MTAPI_NULL);
+  }
+
+  /**
    * Initializes the runtime singleton using default values:
    *   - all available cores will be used
    *   - maximum number of tasks is 1024
@@ -474,6 +484,9 @@ class Node {
       &attr.GetInternal().core_affinity);
 
     domain_id_ = domain_id;
+
+    function_action_ =
+      CreateAction(EMBB_MTAPI_FUNCTION_JOB_ID, ActionFunction);
   }
 
   Task Start(
