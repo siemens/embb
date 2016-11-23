@@ -218,8 +218,7 @@ mtapi_boolean_t embb_mtapi_scheduler_process_tasks(
  */
 mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
   embb_mtapi_scheduler_t * that,
-  embb_mtapi_task_t * task,
-  mtapi_uint_t instance);
+  embb_mtapi_task_t * task);
 
 
 #ifdef __cplusplus

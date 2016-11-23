@@ -186,7 +186,8 @@ void TaskTest::TryDetached() {
   mtapi_action_attributes_t action_attr;
   mtapi_job_hndl_t job;
   mtapi_uint_t ii;
-  static const mtapi_uint_t kTaskCount = MTAPI_NODE_MAX_TASKS_DEFAULT + 100u;
+  /* use up all tasks, to see if autodeletion works */
+  static const mtapi_uint_t kTaskCount = MTAPI_NODE_MAX_TASKS_DEFAULT;
   mtapi_task_attributes_t taskattr;
   mtapi_boolean_t detached = MTAPI_TRUE;
 
@@ -345,8 +346,8 @@ void TaskTest::TestBasic() {
     "hardware concurrency   : %d\n", info.hardware_concurrency);
   embb_mtapi_log_trace("used memory            : %d\n", info.used_memory);
 
-  TrySimple();
   TryDetached();
+  TrySimple();
   TryMultiInstance();
 
   status = MTAPI_ERR_UNKNOWN;

@@ -35,6 +35,9 @@ class QueueTest : public partest::TestCase {
 
  private:
   void TestBasic();
+
+  void TrySimple();
+  void TryWithWait();
 };
 
 #endif // MTAPI_C_TEST_EMBB_MTAPI_TEST_QUEUE_H_

@@ -52,10 +52,8 @@ extern "C" {
  * \ingroup INTERNAL
  */
 struct embb_mtapi_task_queue_struct {
-  embb_mtapi_task_t ** task_buffer;
-  mtapi_uint_t tasks_available;
-  mtapi_uint_t get_task_position;
-  mtapi_uint_t put_task_position;
+  embb_mtapi_task_t * front;
+  embb_mtapi_task_t * back;
   mtapi_queue_attributes_t attributes;
   embb_spinlock_t lock;
 };
@@ -69,40 +67,43 @@ struct embb_mtapi_task_queue_struct {
 void embb_mtapi_task_queue_initialize(embb_mtapi_task_queue_t* that);
 
 /**
- * Constructor with configurable capacity.
- * \memberof embb_mtapi_task_queue_struct
- */
-void embb_mtapi_task_queue_initialize_with_capacity(
-  embb_mtapi_task_queue_t* that,
-  mtapi_uint_t capacity);
-
-/**
  * Destructor.
  * \memberof embb_mtapi_task_queue_struct
  */
 void embb_mtapi_task_queue_finalize(embb_mtapi_task_queue_t* that);
 
 /**
- * Pop a task from the queue. Returns MTAPI_NULL if the queue is empty.
+ * Pop a task from the front of the queue. Returns MTAPI_NULL if the queue is
+ * empty.
  * \memberof embb_mtapi_task_queue_struct
  */
-embb_mtapi_task_t * embb_mtapi_task_queue_pop(embb_mtapi_task_queue_t* that);
+embb_mtapi_task_t * embb_mtapi_task_queue_pop_front(
+  embb_mtapi_task_queue_t* that);
 
 /**
- * Push a task into the queue. Returns MTAPI_TRUE if successfull and
+ * Push a task to the back of the queue. Returns MTAPI_TRUE if successfull and
  * MTAPI_FALSE if the queue is full or cannot be locked in time.
  * \memberof embb_mtapi_task_queue_struct
  */
-mtapi_boolean_t embb_mtapi_task_queue_push(
+mtapi_boolean_t embb_mtapi_task_queue_push_back(
   embb_mtapi_task_queue_t* that,
   embb_mtapi_task_t * task);
 
+/**
+ * Push a task to the front of the queue. Returns MTAPI_TRUE if successfull and
+ * MTAPI_FALSE if the queue is full or cannot be locked in time.
+ * \memberof embb_mtapi_task_queue_struct
+ */
+mtapi_boolean_t embb_mtapi_task_queue_push_front(
+  embb_mtapi_task_queue_t* that,
+  embb_mtapi_task_t * task);
 
 /**
  * Process all elements of the task queue using the given functor.
+ * If the process function returns false, the task is removed from the queue.
  * \memberof embb_mtapi_task_queue_struct
  */
-mtapi_boolean_t embb_mtapi_task_queue_process(
+void embb_mtapi_task_queue_process(
   embb_mtapi_task_queue_t * that,
   embb_mtapi_task_visitor_function_t process,
   void * user_data);

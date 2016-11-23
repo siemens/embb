@@ -69,8 +69,7 @@ void embb_mtapi_group_initialize_with_node(
   that->group_id = MTAPI_GROUP_ID_NONE;
   embb_atomic_init_int(&that->deleted, MTAPI_FALSE);
   embb_atomic_init_int(&that->num_tasks, 0);
-  embb_mtapi_task_queue_initialize_with_capacity(
-    &that->queue, node->attributes.queue_limit);
+  embb_mtapi_task_queue_initialize(&that->queue);
 }
 
 void embb_mtapi_group_finalize(embb_mtapi_group_t * that) {
@@ -250,7 +249,7 @@ void mtapi_group_wait_all(
         }
 
         /* fetch and delete all available tasks */
-        local_task = embb_mtapi_task_queue_pop(&local_group->queue);
+        local_task = embb_mtapi_task_queue_pop_front(&local_group->queue);
         while (MTAPI_NULL != local_task) {
           if (MTAPI_SUCCESS != local_task->error_code) {
             local_status = local_task->error_code;
@@ -258,7 +257,7 @@ void mtapi_group_wait_all(
           embb_mtapi_task_delete(local_task, node->task_pool);
           embb_atomic_fetch_and_add_int(&local_group->num_tasks, -1);
 
-          local_task = embb_mtapi_task_queue_pop(&local_group->queue);
+          local_task = embb_mtapi_task_queue_pop_front(&local_group->queue);
         }
 
         /* do other work if applicable */
@@ -325,7 +324,7 @@ void mtapi_group_wait_any(
 
         /* wait for any task to arrive */
         local_status = MTAPI_SUCCESS;
-        local_task = embb_mtapi_task_queue_pop(&local_group->queue);
+        local_task = embb_mtapi_task_queue_pop_front(&local_group->queue);
         while (MTAPI_NULL == local_task) {
           if (MTAPI_INFINITE < timeout) {
             embb_time_t current_time;
@@ -350,7 +349,7 @@ void mtapi_group_wait_any(
             context);
 
           /* try to pop a task from the group queue */
-          local_task = embb_mtapi_task_queue_pop(&local_group->queue);
+          local_task = embb_mtapi_task_queue_pop_front(&local_group->queue);
         }
         /* was there a timeout, or is there a result? */
         if (MTAPI_NULL != local_task) {
