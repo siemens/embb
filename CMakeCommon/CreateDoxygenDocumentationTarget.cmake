@@ -57,13 +57,19 @@ ENDIF ()
 ")
 
       add_custom_target(doxygen)
-      add_custom_command(
-        TARGET doxygen
-        COMMAND ${CMAKE_COMMAND}
-          -DEXE=${DOXYGEN_EXECUTABLE}
-          -DIN=${PROJECT_BINARY_DIR}/Doxyfile
-          -DWARNINGS_ARE_ERRORS=${WARNINGS_ARE_ERRORS}
-          -P ${CMAKE_BINARY_DIR}/doxygen_makefile.cmake)
+      if (NOT DOXYGEN_FOUND)
+        add_custom_command(
+          TARGET doxygen
+          COMMAND echo "Doxygen is needed to build the documentation. Please install it correctly")
+      else()
+        add_custom_command(
+          TARGET doxygen
+          COMMAND ${CMAKE_COMMAND}
+            -DEXE=${DOXYGEN_EXECUTABLE}
+            -DIN=${PROJECT_BINARY_DIR}/Doxyfile
+            -DWARNINGS_ARE_ERRORS=${WARNINGS_ARE_ERRORS}
+            -P ${CMAKE_BINARY_DIR}/doxygen_makefile.cmake)
+      endif()
     endif()
   endif()
 endfunction()
