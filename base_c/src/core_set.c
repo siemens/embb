@@ -93,20 +93,15 @@ void embb_core_set_init(embb_core_set_t* core_set, int initializer) {
 
 #ifdef EMBB_PLATFORM_HAS_HEADER_SYSINFO
 #include <sys/sysinfo.h>
-#elif defined EMBB_PLATFORM_HAS_HEADER_SYSCTL
-#include <sys/types.h>
-#include <sys/sysctl.h>
+#elif defined EMBB_PLATFORM_HAS_SC_NPROCESSORS_ONLN
+#include <unistd.h>
 #endif
 
 unsigned int embb_core_count_available() {
 #ifdef EMBB_PLATFORM_HAS_HEADER_SYSINFO
   return get_nprocs();
-#elif defined EMBB_PLATFORM_HAS_HEADER_SYSCTL
-  const size_t kBufferSize = sizeof(unsigned int);
-  char buf[kBufferSize];
-  size_t len = kBufferSize;
-  sysctlbyname("hw.ncpu", buf, &len, NULL, 0);
-  return *(unsigned int*)&buf;
+#elif defined EMBB_PLATFORM_HAS_SC_NPROCESSORS_ONLN
+  return (int)sysconf(_SC_NPROCESSORS_ONLN);
 #else
 #error "No implementation for embb_core_count_available()!"
 #endif

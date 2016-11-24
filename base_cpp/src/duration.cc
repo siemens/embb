@@ -141,7 +141,7 @@ unsigned long long internal::Microseconds::Max() {
 #if EMBB_DURATION_MAX_SECONDS < ULLONG_MAX / 1000000
   return ULLONG_MAX;
 #else
-  return EMBB_DURATION_MAX_SECONDS * 1000000;
+  return EMBB_DURATION_MAX_SECONDS * 1000000ULL;
 #endif
 }
 
@@ -172,7 +172,7 @@ unsigned long long internal::Nanoseconds::Max() {
 #if EMBB_DURATION_MAX_SECONDS < ULLONG_MAX / 1000000000
   return ULLONG_MAX;
 #else
-  return EMBB_DURATION_MAX_SECONDS * 1000000000;
+  return EMBB_DURATION_MAX_SECONDS * 1000000000ULL;
 #endif
 }
 
