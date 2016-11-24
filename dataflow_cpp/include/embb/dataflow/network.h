@@ -67,12 +67,17 @@ class Network {
   /**
    * Constructs an empty network.
    * \param slices Number of concurrent tokens allowed in the network.
+   * \note The number of slices might be reduced internally if the task
+   * limit of the underlying MTAPI node would be exceeded.
    */
   explicit Network(int slices) {}
 
   /**
    * Constructs an empty network.
    * \param policy Default execution policy of the processes in the network.
+   * \note The number of concurrent tokens will automatically be derived from
+   * the structure of the network on the first call to operator(), and the
+   * corresponding resources will be allocated then.
    */
   explicit Network(embb::mtapi::ExecutionPolicy const & policy) {}
 
@@ -80,6 +85,8 @@ class Network {
    * Constructs an empty network.
    * \param slices Number of concurrent tokens allowed in the network.
    * \param policy Default execution policy of the processes in the network.
+   * \note The number of slices might be reduced internally if the task
+   * limit of the underlying MTAPI node would be exceeded.
    */
   Network(int slices, embb::mtapi::ExecutionPolicy const & policy) {}
 
