@@ -288,15 +288,14 @@ void embb_atomic_xor_assign_TYPE(
   );
 #endif
 
+#include <embb/base/c/internal/config.h>
+#include <embb/base/c/internal/platform.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <embb/base/c/internal/config.h>
-
 #ifdef EMBB_THREADING_ANALYSIS_MODE
-
-#include <embb/base/c/internal/platform.h>
 
 int embb_mutex_init(
   embb_mutex_t* mutex,
@@ -354,7 +353,20 @@ static int embb_atomic_test_marker(uint32_t marker) {
 
 #endif
 
-#include <embb/base/c/internal/platform.h>
+#ifdef __cplusplus
+}
+#endif
+
+#if defined EMBB_PLATFORM_ARCH_C11 || defined EMBB_PLATFORM_ARCH_CXX11
+
+#include <embb/base/c/internal/atomic/c11.h>
+
+#else
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <embb/base/c/internal/atomic/atomic_sizes.h>
 #include <embb/base/c/internal/atomic/atomic_variables.h>
 #include <embb/base/c/internal/macro_helper.h>
@@ -372,6 +384,8 @@ static int embb_atomic_test_marker(uint32_t marker) {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif //EMBB_BASE_C_ATOMIC_H_
