@@ -31,6 +31,7 @@
 
 #if defined EMBB_PLATFORM_ARCH_CXX11
 #include <atomic>
+#include <cstddef>
 #include <cstdint>
 #elif defined EMBB_PLATFORM_ARCH_C11
 #include <stdatomic.h>
@@ -39,6 +40,8 @@
 #else
 #error "Not available for selected C or C++ standard"
 #endif
+
+#define EMBB_64_BIT_ATOMIC_AVAILABLE
 
 EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier(void)
 {
