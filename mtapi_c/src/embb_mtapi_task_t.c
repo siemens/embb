@@ -106,7 +106,8 @@ void embb_mtapi_task_finalize(embb_mtapi_task_t* that) {
 
 mtapi_boolean_t embb_mtapi_task_execute(
   embb_mtapi_task_t* that,
-  embb_mtapi_task_context_t * context) {
+  embb_mtapi_task_context_t * context,
+  mtapi_task_state_t * new_task_state) {
   unsigned int todo = that->attributes.num_instances;
 
   assert(MTAPI_NULL != that);
@@ -121,6 +122,7 @@ mtapi_boolean_t embb_mtapi_task_execute(
     embb_mtapi_action_t* local_action =
       embb_mtapi_action_pool_get_storage_for_handle(
       context->thread_context->node->action_pool, that->action);
+
     /* only continue if there was no error so far */
     if (context->task->error_code == MTAPI_SUCCESS) {
       local_action->action_function(
@@ -136,15 +138,16 @@ mtapi_boolean_t embb_mtapi_task_execute(
     todo = embb_atomic_fetch_and_add_unsigned_int(
       &that->instances_todo, (unsigned int)-1);
 
+    embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
     if (todo == 1) {
       /* task has completed successfully */
-      embb_mtapi_task_set_state(that, MTAPI_TASK_COMPLETED);
+      *new_task_state = MTAPI_TASK_COMPLETED;
     }
-    embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
   } else {
     /* action was deleted, task did not complete */
     that->error_code = MTAPI_ERR_ACTION_DELETED;
-    embb_mtapi_task_set_state(that, MTAPI_TASK_ERROR);
+    *new_task_state = MTAPI_TASK_ERROR;
+    todo = 1;
   }
 
   if (todo == 1) {

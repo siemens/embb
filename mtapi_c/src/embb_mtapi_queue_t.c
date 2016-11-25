@@ -476,10 +476,9 @@ void mtapi_queue_disable(
                 node->action_pool, task->action);
           }
           /* set state to cancelled */
-          embb_mtapi_task_set_state(task, MTAPI_TASK_CANCELLED);
           task->error_code = MTAPI_ERR_ACTION_CANCELLED;
           embb_mtapi_scheduler_finalize_task(
-            task, node, local_queue, local_group);
+            task, node, local_queue, local_group, MTAPI_TASK_CANCELLED);
           /* remove task from action */
           if (MTAPI_NULL != local_action) {
             embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);

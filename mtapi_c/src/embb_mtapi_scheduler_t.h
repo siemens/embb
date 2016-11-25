@@ -146,7 +146,8 @@ void embb_mtapi_scheduler_finalize_task(
   embb_mtapi_task_t * task,
   embb_mtapi_node_t * node,
   embb_mtapi_queue_t * queue,
-  embb_mtapi_group_t * group);
+  embb_mtapi_group_t * group,
+  mtapi_task_state_t next_task_state);
 
 /**
  * Executes the given task if the thread context is valid.

@@ -110,7 +110,8 @@ void embb_mtapi_task_finalize(embb_mtapi_task_t* that);
  */
 mtapi_boolean_t embb_mtapi_task_execute(
   embb_mtapi_task_t* that,
-  embb_mtapi_task_context_t * context);
+  embb_mtapi_task_context_t * context,
+  mtapi_task_state_t * new_task_state);
 
 /**
  * Set the current task state.
