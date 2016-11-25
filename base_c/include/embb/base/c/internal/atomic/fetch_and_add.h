@@ -29,11 +29,6 @@
 
 #ifndef DOXYGEN
 
-#include <embb/base/c/internal/config.h>
-#include <embb/base/c/internal/atomic/atomic_sizes.h>
-#include <embb/base/c/internal/macro_helper.h>
-#include <embb/base/c/internal/atomic/atomic_variables.h>
-
 /*
 * See file and_assign.h for a detailed (and operation independent) description
 * of the following macro.
@@ -118,31 +113,6 @@ EMBB_DEFINE_FETCH_AND_ADD(4, "")
 #else
 #error "Unknown architecture"
 #endif
-
-/*
-* See file and_assign.h for a detailed (and operation independent) description
-* of the following macro.
-*/
-#define EMBB_ATOMIC_INTERNAL_DEFINE_FETCH_AND_ADD_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
-  EMBB_PLATFORM_INLINE EMBB_ATOMIC_PARAMETER_TYPE_NATIVE EMBB_CAT2(embb_atomic_fetch_and_add_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
-  EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE value) { \
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) value_pun; \
-  memcpy(&value_pun, &value, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE)); \
-  EMBB_ATOMIC_INIT_CHECK(variable); \
-  EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex); \
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) return_val = EMBB_CAT2(embb_internal__atomic_fetch_and_add_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)(\
-  (EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *)\
-  (&(variable->internal_variable)), value_pun); \
-  EMBB_ATOMIC_MUTEX_UNLOCK(variable->internal_mutex); \
-  EMBB_ATOMIC_PARAMETER_TYPE_NATIVE return_val_pun; \
-  memcpy(&return_val_pun, &return_val, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE)); \
-  return return_val_pun; \
-  }
-
-#undef EMBB_ATOMIC_METHOD_TO_GENERATE
-#define EMBB_ATOMIC_METHOD_TO_GENERATE FETCH_AND_ADD_METHOD
-#include <embb/base/c/internal/atomic/generate_atomic_implementation_template.h>
-#undef EMBB_ATOMIC_METHOD_TO_GENERATE
 
 #endif //DOXYGEN
 

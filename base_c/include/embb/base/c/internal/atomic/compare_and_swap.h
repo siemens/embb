@@ -29,12 +29,6 @@
 
 #ifndef DOXYGEN
 
-#include <embb/base/c/internal/config.h>
-#include <embb/base/c/internal/atomic/atomic_sizes.h>
-#include <embb/base/c/internal/macro_helper.h>
-#include <embb/base/c/internal/atomic/atomic_variables.h>
-#include <string.h>
-
 /*
 * See file and_assign.h for a detailed (and operation independent) description
 * of the following macro.
@@ -128,28 +122,6 @@ EMBB_DEFINE_COMPARE_AND_SWAP(4, "")
 #else
 #error "Unknown architecture"
 #endif
-
-/*
-* See file and_assign.h for a detailed (and operation independent) description
-* of the following macro.
-*/
-#define EMBB_ATOMIC_INTERNAL_DEFINE_COMPARE_AND_SWAP_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
-  EMBB_PLATFORM_INLINE int EMBB_CAT2(embb_atomic_compare_and_swap_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(\
-  EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE* expected, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE desired) {\
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) desired_pun;\
-  memcpy(&desired_pun, &desired, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE));\
-  EMBB_ATOMIC_INIT_CHECK(variable); \
-  EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex); \
-  int result = EMBB_CAT2(embb_internal__atomic_compare_and_swap_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)((EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) \
-  (&(variable->internal_variable)), (EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) expected, desired_pun); \
-  EMBB_ATOMIC_MUTEX_UNLOCK(variable->internal_mutex); \
-  return result;\
-  }
-
-#undef EMBB_ATOMIC_METHOD_TO_GENERATE
-#define EMBB_ATOMIC_METHOD_TO_GENERATE COMPARE_AND_SWAP_METHOD
-#include <embb/base/c/internal/atomic/generate_atomic_implementation_template.h>
-#undef EMBB_ATOMIC_METHOD_TO_GENERATE
 
 #endif //DOXYGEN
 

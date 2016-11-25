@@ -27,18 +27,7 @@
 #ifndef EMBB_BASE_C_INTERNAL_ATOMIC_SIZES_H_
 #define EMBB_BASE_C_INTERNAL_ATOMIC_SIZES_H_
 
-#include <embb/base/c/internal/cmake_config.h>
-#include <stdint.h>
-
-typedef uint8_t EMBB_BASE_BASIC_TYPE_SIZE_1;
-typedef uint16_t EMBB_BASE_BASIC_TYPE_SIZE_2;
-typedef uint32_t EMBB_BASE_BASIC_TYPE_SIZE_4;
-typedef uint64_t EMBB_BASE_BASIC_TYPE_SIZE_8;
-
-typedef EMBB_BASE_BASIC_TYPE_SIZE_1 EMBB_BASE_BASIC_TYPE_ATOMIC_1;
-typedef EMBB_BASE_BASIC_TYPE_SIZE_2 EMBB_BASE_BASIC_TYPE_ATOMIC_2;
-typedef EMBB_BASE_BASIC_TYPE_SIZE_4 EMBB_BASE_BASIC_TYPE_ATOMIC_4;
-typedef EMBB_BASE_BASIC_TYPE_SIZE_8 EMBB_BASE_BASIC_TYPE_ATOMIC_8;
+#include <embb/base/c/internal/config.h>
 
 /**
  * CMake is used to set the correct size for types used in the atomic
@@ -61,7 +50,7 @@ typedef EMBB_BASE_BASIC_TYPE_SIZE_8 EMBB_BASE_BASIC_TYPE_ATOMIC_8;
 #define EMBB_UINTMAX_T_TYPE_SIZE ${EMBB_UINTMAX_T_TYPE_SIZE}
 
 
-#ifdef EMBB_PLATFORM_ARCH_X86_64
+#if defined EMBB_PLATFORM_ARCH_CXX11 || defined EMBB_PLATFORM_ARCH_C11 || defined EMBB_PLATFORM_ARCH_X86_64
 #  define EMBB_64_BIT_ATOMIC_AVAILABLE_VAL 1
 #  define EMBB_64_BIT_ATOMIC_AVAILABLE
 #else
