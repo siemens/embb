@@ -44,6 +44,7 @@
 #include <mtapi_status_t.h>
 
 #include <assert.h>
+#include <string.h>
 
 int embb_mtapi_network_initialize() {
 #ifdef _WIN32
