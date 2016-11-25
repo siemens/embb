@@ -27,6 +27,8 @@
 #ifndef EMBB_BASE_C_COUNTER_H_
 #define EMBB_BASE_C_COUNTER_H_
 
+#include <embb/base/c/atomic.h>
+
 /**
  * \defgroup C_BASE_COUNTER Counter
  * Thread-safe counter
@@ -37,8 +39,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <embb/base/c/atomic.h>
 
 /**
  * Opaque type representing a thread-safe counter.
