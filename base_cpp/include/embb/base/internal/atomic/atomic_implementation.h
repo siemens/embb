@@ -32,6 +32,7 @@
 #else
 
 #include <embb/base/c/atomic.h>
+#include <embb/base/c/internal/macro_helper.h>
 
 /**
  * The macros below are used to generate calls to the base_c implementation. We
