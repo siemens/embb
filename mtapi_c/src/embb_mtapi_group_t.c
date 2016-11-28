@@ -60,18 +60,6 @@ void embb_mtapi_group_initialize(embb_mtapi_group_t * that) {
   embb_mtapi_task_queue_initialize(&that->queue);
 }
 
-void embb_mtapi_group_initialize_with_node(
-  embb_mtapi_group_t * that,
-  embb_mtapi_node_t * node) {
-  assert(MTAPI_NULL != that);
-  assert(MTAPI_NULL != node);
-
-  that->group_id = MTAPI_GROUP_ID_NONE;
-  embb_atomic_init_int(&that->deleted, MTAPI_FALSE);
-  embb_atomic_init_int(&that->num_tasks, 0);
-  embb_mtapi_task_queue_initialize(&that->queue);
-}
-
 void embb_mtapi_group_finalize(embb_mtapi_group_t * that) {
   assert(MTAPI_NULL != that);
 
@@ -99,7 +87,7 @@ mtapi_group_hndl_t mtapi_group_create(
   if (embb_mtapi_node_is_initialized()) {
     group = embb_mtapi_group_pool_allocate(node->group_pool);
     if (MTAPI_NULL != group) {
-      embb_mtapi_group_initialize_with_node(group, node);
+      embb_mtapi_group_initialize(group);
       group->group_id = group_id;
       if (MTAPI_NULL != attributes) {
         group->attributes = *attributes;

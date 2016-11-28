@@ -70,14 +70,6 @@ struct embb_mtapi_group_struct {
 void embb_mtapi_group_initialize(embb_mtapi_group_t * that);
 
 /**
- * Constructor using parameters from embb_mtapi_node_struct.
- * \memberof embb_mtapi_group_struct
- */
-void embb_mtapi_group_initialize_with_node(
-  embb_mtapi_group_t * that,
-  embb_mtapi_node_t * node);
-
-/**
  * Destructor.
  * \memberof embb_mtapi_group_struct
  */
