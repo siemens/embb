@@ -110,6 +110,14 @@ for t in internalTypes:
 	print("typedef " + t.stdName() + " EMBB_BASE_BASIC_TYPE_SIZE_" + t.designator() + ";")
 print("")
 
+print("#if defined EMBB_PLATFORM_ARCH_CXX11\n")
+for t in internalTypes:
+	print("typedef std::atomic_" + t.stdName() + " EMBB_BASE_BASIC_TYPE_ATOMIC_" + t.designator() + ";")
+print("\n#elif defined EMBB_PLATFORM_ARCH_C11\n")
+for t in internalTypes:
+	print("typedef atomic_" + t.stdName() + " EMBB_BASE_BASIC_TYPE_ATOMIC_" + t.designator() + ";")
+print("\n#endif\n")
+
 # Internal ops
 
 class InternalOp:
@@ -118,28 +126,28 @@ class InternalOp:
 		self.mStdOpFormat = stdOpFormat
 
 	def embbOp(self, d):
-		return self.mEMBBOpFormat.replace("%D", d).replace("%A", "EMBB_BASE_BASIC_TYPE_SIZE_" + d)
+		return self.mEMBBOpFormat.replace("%D", d).replace("%A", "EMBB_BASE_BASIC_TYPE_ATOMIC_" + d).replace("%B", "EMBB_BASE_BASIC_TYPE_SIZE_" + d)
 
-	def stdOp(self, t, n):
-		return self.mStdOpFormat.replace("%c", "(%Natomic_" + t + "*)").replace("%N", n)
+	def stdOp(self, n):
+		return self.mStdOpFormat.replace("%N", n)
 
 internalOps = [
-	InternalOp("void embb_internal__atomic_and_assign_%D(\n  %A* variable,\n  %A value\n  )",
-	    "(void)%Natomic_fetch_and(%cvariable, value)"),
-	InternalOp("int embb_internal__atomic_compare_and_swap_%D(\n  %A* variable,\n  %A* expected,\n  %A desired\n  )",
-	    "return %Natomic_compare_exchange_strong(%cvariable, expected, desired)"),
-	InternalOp("%A embb_internal__atomic_fetch_and_add_%D(\n  %A* variable,\n  %A value\n  )",
-	    "return %Natomic_fetch_add(%cvariable, value)"),
-	InternalOp("%A embb_internal__atomic_load_%D(\n  const %A* variable\n  )",
-	    "return %Natomic_load(%cvariable)"),
-	InternalOp("void embb_internal__atomic_or_assign_%D(\n  %A* variable,\n  %A value\n  )",
-	    "(void)%Natomic_fetch_or(%cvariable, value)"),
-	InternalOp("void embb_internal__atomic_store_%D(\n  %A* variable,\n  %A value\n  )",
-	    "%Natomic_store(%cvariable, value)"),
-	InternalOp("%A embb_internal__atomic_swap_%D(\n  %A* variable,\n  %A value\n  )",
-	    "return %Natomic_exchange(%cvariable, value)"),
-	InternalOp("void embb_internal__atomic_xor_assign_%D(\n  %A* variable,\n  %A value\n  )",
-	    "(void)%Natomic_fetch_xor(%cvariable, value)"),
+	InternalOp("void embb_internal__atomic_and_assign_%D(\n  %A* variable,\n  %B value\n  )",
+	    "(void)%Natomic_fetch_and(variable, value)"),
+	InternalOp("int embb_internal__atomic_compare_and_swap_%D(\n  %A* variable,\n  %B* expected,\n  %B desired\n  )",
+	    "return %Natomic_compare_exchange_strong(variable, expected, desired)"),
+	InternalOp("%B embb_internal__atomic_fetch_and_add_%D(\n  %A* variable,\n  %B value\n  )",
+	    "return %Natomic_fetch_add(variable, value)"),
+	InternalOp("%B embb_internal__atomic_load_%D(\n  const %A* variable\n  )",
+	    "return %Natomic_load(variable)"),
+	InternalOp("void embb_internal__atomic_or_assign_%D(\n  %A* variable,\n  %B value\n  )",
+	    "(void)%Natomic_fetch_or(variable, value)"),
+	InternalOp("void embb_internal__atomic_store_%D(\n  %A* variable,\n  %B value\n  )",
+	    "%Natomic_store(variable, value)"),
+	InternalOp("%B embb_internal__atomic_swap_%D(\n  %A* variable,\n  %B value\n  )",
+	    "return %Natomic_exchange(variable, value)"),
+	InternalOp("void embb_internal__atomic_xor_assign_%D(\n  %A* variable,\n  %B value\n  )",
+	    "(void)%Natomic_fetch_xor(variable, value)"),
 ]
 
 for o in internalOps:
@@ -147,9 +155,9 @@ for o in internalOps:
 		s = "EMBB_PLATFORM_INLINE " + o.embbOp(t.designator()) + "\n"
 		s += "{\n"
 		s += "#if defined EMBB_PLATFORM_ARCH_CXX11\n"
-		s += "  " + o.stdOp(t.stdName(), "std::") + ";\n"
+		s += "  " + o.stdOp("std::") + ";\n"
 		s += "#elif defined EMBB_PLATFORM_ARCH_C11\n"
-		s += "  " + o.stdOp(t.stdName(), "") + ";\n"
+		s += "  " + o.stdOp("") + ";\n"
 		s += "#endif\n"
 		s += "}\n"
 		print(s)

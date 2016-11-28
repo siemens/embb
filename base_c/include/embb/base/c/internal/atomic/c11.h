@@ -57,387 +57,403 @@ typedef uint_least16_t EMBB_BASE_BASIC_TYPE_SIZE_2;
 typedef uint_least32_t EMBB_BASE_BASIC_TYPE_SIZE_4;
 typedef uint_least64_t EMBB_BASE_BASIC_TYPE_SIZE_8;
 
+#if defined EMBB_PLATFORM_ARCH_CXX11
+
+typedef std::atomic_uint_least8_t EMBB_BASE_BASIC_TYPE_ATOMIC_1;
+typedef std::atomic_uint_least16_t EMBB_BASE_BASIC_TYPE_ATOMIC_2;
+typedef std::atomic_uint_least32_t EMBB_BASE_BASIC_TYPE_ATOMIC_4;
+typedef std::atomic_uint_least64_t EMBB_BASE_BASIC_TYPE_ATOMIC_8;
+
+#elif defined EMBB_PLATFORM_ARCH_C11
+
+typedef atomic_uint_least8_t EMBB_BASE_BASIC_TYPE_ATOMIC_1;
+typedef atomic_uint_least16_t EMBB_BASE_BASIC_TYPE_ATOMIC_2;
+typedef atomic_uint_least32_t EMBB_BASE_BASIC_TYPE_ATOMIC_4;
+typedef atomic_uint_least64_t EMBB_BASE_BASIC_TYPE_ATOMIC_8;
+
+#endif
+
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_1(
-  EMBB_BASE_BASIC_TYPE_SIZE_1* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and((std::atomic_uint_least8_t*)variable, value);
+  (void)std::atomic_fetch_and(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_and((atomic_uint_least8_t*)variable, value);
+  (void)atomic_fetch_and(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_2(
-  EMBB_BASE_BASIC_TYPE_SIZE_2* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and((std::atomic_uint_least16_t*)variable, value);
+  (void)std::atomic_fetch_and(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_and((atomic_uint_least16_t*)variable, value);
+  (void)atomic_fetch_and(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_4(
-  EMBB_BASE_BASIC_TYPE_SIZE_4* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and((std::atomic_uint_least32_t*)variable, value);
+  (void)std::atomic_fetch_and(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_and((atomic_uint_least32_t*)variable, value);
+  (void)atomic_fetch_and(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_8(
-  EMBB_BASE_BASIC_TYPE_SIZE_8* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and((std::atomic_uint_least64_t*)variable, value);
+  (void)std::atomic_fetch_and(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_and((atomic_uint_least64_t*)variable, value);
+  (void)atomic_fetch_and(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_1(
-  EMBB_BASE_BASIC_TYPE_SIZE_1* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_1 desired
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong((std::atomic_uint_least8_t*)variable, expected, desired);
+  return std::atomic_compare_exchange_strong(variable, expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_compare_exchange_strong((atomic_uint_least8_t*)variable, expected, desired);
+  return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
 }
 
 EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_2(
-  EMBB_BASE_BASIC_TYPE_SIZE_2* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_2 desired
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong((std::atomic_uint_least16_t*)variable, expected, desired);
+  return std::atomic_compare_exchange_strong(variable, expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_compare_exchange_strong((atomic_uint_least16_t*)variable, expected, desired);
+  return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
 }
 
 EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_4(
-  EMBB_BASE_BASIC_TYPE_SIZE_4* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_4 desired
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong((std::atomic_uint_least32_t*)variable, expected, desired);
+  return std::atomic_compare_exchange_strong(variable, expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_compare_exchange_strong((atomic_uint_least32_t*)variable, expected, desired);
+  return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
 }
 
 EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_8(
-  EMBB_BASE_BASIC_TYPE_SIZE_8* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_8 desired
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong((std::atomic_uint_least64_t*)variable, expected, desired);
+  return std::atomic_compare_exchange_strong(variable, expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_compare_exchange_strong((atomic_uint_least64_t*)variable, expected, desired);
+  return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_fetch_and_add_1(
-  EMBB_BASE_BASIC_TYPE_SIZE_1* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add((std::atomic_uint_least8_t*)variable, value);
+  return std::atomic_fetch_add(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_fetch_add((atomic_uint_least8_t*)variable, value);
+  return atomic_fetch_add(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_fetch_and_add_2(
-  EMBB_BASE_BASIC_TYPE_SIZE_2* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add((std::atomic_uint_least16_t*)variable, value);
+  return std::atomic_fetch_add(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_fetch_add((atomic_uint_least16_t*)variable, value);
+  return atomic_fetch_add(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_fetch_and_add_4(
-  EMBB_BASE_BASIC_TYPE_SIZE_4* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add((std::atomic_uint_least32_t*)variable, value);
+  return std::atomic_fetch_add(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_fetch_add((atomic_uint_least32_t*)variable, value);
+  return atomic_fetch_add(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_fetch_and_add_8(
-  EMBB_BASE_BASIC_TYPE_SIZE_8* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add((std::atomic_uint_least64_t*)variable, value);
+  return std::atomic_fetch_add(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_fetch_add((atomic_uint_least64_t*)variable, value);
+  return atomic_fetch_add(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_load_1(
-  const EMBB_BASE_BASIC_TYPE_SIZE_1* variable
+  const EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load((std::atomic_uint_least8_t*)variable);
+  return std::atomic_load(variable);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_load((atomic_uint_least8_t*)variable);
+  return atomic_load(variable);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_load_2(
-  const EMBB_BASE_BASIC_TYPE_SIZE_2* variable
+  const EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load((std::atomic_uint_least16_t*)variable);
+  return std::atomic_load(variable);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_load((atomic_uint_least16_t*)variable);
+  return atomic_load(variable);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_load_4(
-  const EMBB_BASE_BASIC_TYPE_SIZE_4* variable
+  const EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load((std::atomic_uint_least32_t*)variable);
+  return std::atomic_load(variable);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_load((atomic_uint_least32_t*)variable);
+  return atomic_load(variable);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_load_8(
-  const EMBB_BASE_BASIC_TYPE_SIZE_8* variable
+  const EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load((std::atomic_uint_least64_t*)variable);
+  return std::atomic_load(variable);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_load((atomic_uint_least64_t*)variable);
+  return atomic_load(variable);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_1(
-  EMBB_BASE_BASIC_TYPE_SIZE_1* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or((std::atomic_uint_least8_t*)variable, value);
+  (void)std::atomic_fetch_or(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_or((atomic_uint_least8_t*)variable, value);
+  (void)atomic_fetch_or(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_2(
-  EMBB_BASE_BASIC_TYPE_SIZE_2* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or((std::atomic_uint_least16_t*)variable, value);
+  (void)std::atomic_fetch_or(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_or((atomic_uint_least16_t*)variable, value);
+  (void)atomic_fetch_or(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_4(
-  EMBB_BASE_BASIC_TYPE_SIZE_4* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or((std::atomic_uint_least32_t*)variable, value);
+  (void)std::atomic_fetch_or(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_or((atomic_uint_least32_t*)variable, value);
+  (void)atomic_fetch_or(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_8(
-  EMBB_BASE_BASIC_TYPE_SIZE_8* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or((std::atomic_uint_least64_t*)variable, value);
+  (void)std::atomic_fetch_or(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_or((atomic_uint_least64_t*)variable, value);
+  (void)atomic_fetch_or(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_1(
-  EMBB_BASE_BASIC_TYPE_SIZE_1* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store((std::atomic_uint_least8_t*)variable, value);
+  std::atomic_store(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  atomic_store((atomic_uint_least8_t*)variable, value);
+  atomic_store(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_2(
-  EMBB_BASE_BASIC_TYPE_SIZE_2* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store((std::atomic_uint_least16_t*)variable, value);
+  std::atomic_store(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  atomic_store((atomic_uint_least16_t*)variable, value);
+  atomic_store(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_4(
-  EMBB_BASE_BASIC_TYPE_SIZE_4* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store((std::atomic_uint_least32_t*)variable, value);
+  std::atomic_store(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  atomic_store((atomic_uint_least32_t*)variable, value);
+  atomic_store(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_8(
-  EMBB_BASE_BASIC_TYPE_SIZE_8* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store((std::atomic_uint_least64_t*)variable, value);
+  std::atomic_store(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  atomic_store((atomic_uint_least64_t*)variable, value);
+  atomic_store(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_swap_1(
-  EMBB_BASE_BASIC_TYPE_SIZE_1* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange((std::atomic_uint_least8_t*)variable, value);
+  return std::atomic_exchange(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_exchange((atomic_uint_least8_t*)variable, value);
+  return atomic_exchange(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_swap_2(
-  EMBB_BASE_BASIC_TYPE_SIZE_2* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange((std::atomic_uint_least16_t*)variable, value);
+  return std::atomic_exchange(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_exchange((atomic_uint_least16_t*)variable, value);
+  return atomic_exchange(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_swap_4(
-  EMBB_BASE_BASIC_TYPE_SIZE_4* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange((std::atomic_uint_least32_t*)variable, value);
+  return std::atomic_exchange(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_exchange((atomic_uint_least32_t*)variable, value);
+  return atomic_exchange(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_swap_8(
-  EMBB_BASE_BASIC_TYPE_SIZE_8* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange((std::atomic_uint_least64_t*)variable, value);
+  return std::atomic_exchange(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  return atomic_exchange((atomic_uint_least64_t*)variable, value);
+  return atomic_exchange(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_1(
-  EMBB_BASE_BASIC_TYPE_SIZE_1* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor((std::atomic_uint_least8_t*)variable, value);
+  (void)std::atomic_fetch_xor(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_xor((atomic_uint_least8_t*)variable, value);
+  (void)atomic_fetch_xor(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_2(
-  EMBB_BASE_BASIC_TYPE_SIZE_2* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor((std::atomic_uint_least16_t*)variable, value);
+  (void)std::atomic_fetch_xor(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_xor((atomic_uint_least16_t*)variable, value);
+  (void)atomic_fetch_xor(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_4(
-  EMBB_BASE_BASIC_TYPE_SIZE_4* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor((std::atomic_uint_least32_t*)variable, value);
+  (void)std::atomic_fetch_xor(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_xor((atomic_uint_least32_t*)variable, value);
+  (void)atomic_fetch_xor(variable, value);
 #endif
 }
 
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_8(
-  EMBB_BASE_BASIC_TYPE_SIZE_8* variable,
+  EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor((std::atomic_uint_least64_t*)variable, value);
+  (void)std::atomic_fetch_xor(variable, value);
 #elif defined EMBB_PLATFORM_ARCH_C11
-  (void)atomic_fetch_xor((atomic_uint_least64_t*)variable, value);
+  (void)atomic_fetch_xor(variable, value);
 #endif
 }
 
