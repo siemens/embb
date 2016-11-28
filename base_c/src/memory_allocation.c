@@ -33,7 +33,7 @@
 
 #ifdef EMBB_DEBUG
 
-static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_bytes_allocated = 0;
+static EMBB_BASE_BASIC_TYPE_ATOMIC_4 embb_bytes_allocated = 0;
 
 enum {
   // Make the marking unlikely to be something else

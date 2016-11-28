@@ -54,6 +54,8 @@ namespace atomic {
 template<typename BaseType, typename DifferenceType, size_t Stride>
 class AtomicArithmetic : public AtomicBase<BaseType> {
  protected:
+  typedef typename AtomicBase<BaseType>::AtomicType AtomicType;
+
   typedef typename AtomicBase<BaseType>::NativeType NativeType;
 
  public:
@@ -118,7 +120,7 @@ FetchAndAdd(DifferenceType val) {
   memcpy(&native_desired, &desired, sizeof(desired));
 
   EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
-  NativeType storage_value = fetch_and_add_implementation<NativeType>::
+  NativeType storage_value = fetch_and_add_implementation<AtomicType, NativeType>::
     fetch_and_add(&this->AtomicValue, native_desired);
   EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 

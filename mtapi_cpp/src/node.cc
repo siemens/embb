@@ -32,7 +32,7 @@ namespace mtapi {
 
 embb::mtapi::Node * embb::mtapi::Node::node_instance_ = NULL;
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
-static EMBB_BASE_BASIC_TYPE_SIZE_4 init_mutex = 0;
+static EMBB_BASE_BASIC_TYPE_ATOMIC_4 init_mutex(0);
 #endif
 
 void Node::Initialize(

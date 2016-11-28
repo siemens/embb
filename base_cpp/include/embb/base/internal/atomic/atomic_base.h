@@ -54,9 +54,13 @@ class AtomicBase {
  protected:
   typedef typename embb::base::internal::atomic::
     AtomicTraits<sizeof(BaseType)>::
+    AtomicType AtomicType;
+
+  typedef typename embb::base::internal::atomic::
+    AtomicTraits<sizeof(BaseType)>::
     NativeType NativeType;
 
-  mutable NativeType AtomicValue;
+  mutable AtomicType AtomicValue;
 
 #ifdef EMBB_THREADING_ANALYSIS_MODE
   mutable embb_mutex_t internal_mutex;
@@ -149,7 +153,7 @@ inline void AtomicBase<BaseType>::Store(BaseType val) {
   memcpy(&storage_value, &val, sizeof(storage_value));
 
   EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
-  store_implementation< NativeType >
+  store_implementation< AtomicType, NativeType >
     ::Store(&AtomicValue, storage_value);
   EMBB_ATOMIC_MUTEX_UNLOCK(internal_mutex);
 }
@@ -160,7 +164,7 @@ inline BaseType AtomicBase<BaseType>::Load() const {
 
   EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
   NativeType storage_value =
-    load_implementation< NativeType >::Load(&AtomicValue);
+    load_implementation< AtomicType, NativeType >::Load(&AtomicValue);
   EMBB_ATOMIC_MUTEX_UNLOCK(internal_mutex);
 
   memcpy(&return_value, &storage_value, sizeof(return_value));
@@ -176,7 +180,7 @@ inline BaseType AtomicBase<BaseType>::Swap(BaseType val) {
   memcpy(&storage_value, &val, sizeof(storage_value));
 
   EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
-  NativeType storage_value2 = swap_implementation< NativeType >
+  NativeType storage_value2 = swap_implementation< AtomicType, NativeType >
     ::Swap(&AtomicValue, storage_value);
   EMBB_ATOMIC_MUTEX_UNLOCK(internal_mutex);
 
@@ -196,7 +200,7 @@ CompareAndSwap(BaseType& expected, BaseType desired) {
 
   EMBB_ATOMIC_MUTEX_LOCK(internal_mutex);
   bool return_val =
-    (compare_and_swap_implementation<NativeType>::
+    (compare_and_swap_implementation<AtomicType, NativeType>::
     compare_and_swap(&AtomicValue, &native_expected, native_desired)) !=0
     ? true : false;
   EMBB_ATOMIC_MUTEX_UNLOCK(internal_mutex);

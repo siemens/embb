@@ -48,20 +48,28 @@ template<size_t S> struct AtomicTraits;
  */
 
 // Specialization for bytes
-template<> struct AtomicTraits<1>
-  { typedef EMBB_BASE_BASIC_TYPE_SIZE_1 NativeType; };
+template<> struct AtomicTraits<1> {
+  typedef EMBB_BASE_BASIC_TYPE_SIZE_1 NativeType;
+  typedef EMBB_BASE_BASIC_TYPE_ATOMIC_1 AtomicType;
+};
 
 // Specialization for half-words
-template<> struct AtomicTraits<2>
-  { typedef EMBB_BASE_BASIC_TYPE_SIZE_2 NativeType; };
+template<> struct AtomicTraits<2> {
+  typedef EMBB_BASE_BASIC_TYPE_SIZE_2 NativeType;
+  typedef EMBB_BASE_BASIC_TYPE_ATOMIC_2 AtomicType;
+};
 
 // Specialization for words
-template<> struct AtomicTraits<4>
-  { typedef EMBB_BASE_BASIC_TYPE_SIZE_4 NativeType; };
+template<> struct AtomicTraits<4> {
+  typedef EMBB_BASE_BASIC_TYPE_SIZE_4 NativeType;
+  typedef EMBB_BASE_BASIC_TYPE_ATOMIC_4 AtomicType;
+};
 
 // Specialization for double-words
-template<> struct AtomicTraits<8>
-  { typedef EMBB_BASE_BASIC_TYPE_SIZE_8 NativeType; };
+template<> struct AtomicTraits<8> {
+  typedef EMBB_BASE_BASIC_TYPE_SIZE_8 NativeType;
+  typedef EMBB_BASE_BASIC_TYPE_ATOMIC_8 AtomicType;
+};
 
 }  // namespace atomic
 }  // namespace internal

@@ -30,7 +30,7 @@
 
 #include <embb_mtapi_alloc.h>
 
-static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_mtapi_alloc_bytes_allocated = 0;
+static EMBB_BASE_BASIC_TYPE_ATOMIC_4 embb_mtapi_alloc_bytes_allocated = 0;
 
 void * embb_mtapi_alloc_allocate(unsigned int bytes) {
   void * ptr = embb_alloc(bytes);

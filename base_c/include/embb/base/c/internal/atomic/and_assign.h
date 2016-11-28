@@ -47,7 +47,7 @@
  * analogous for other atomic methods):
  *
  *     static inline void embb_internal__atomic_and_assign_[BYTE_SIZE]
- *     (EMBB_BASE_BASIC_TYPE_SIZE_[BYTE_SIZE] volatile* pointer_to_value,
+ *     (EMBB_BASE_BASIC_TYPE_ATOMIC_[BYTE_SIZE] volatile* pointer_to_value,
  *     EMBB_BASE_BASIC_TYPE_SIZE_[BYTE_SIZE] value)
  *
  * BYTE_SIZE is the number of bytes passed to the macro.
@@ -58,7 +58,7 @@
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #define EMBB_DEFINE_AND_ASSIGN(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX) \
   extern void __fastcall EMBB_CAT2(embb_internal__atomic_and_assign_, EMBB_PARAMETER_SIZE_BYTE)_asm( \
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value); \
+  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value); \
   EMBB_PLATFORM_INLINE void __fastcall EMBB_CAT2(embb_internal__atomic_and_assign_, EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value) { \
   _ReadWriteBarrier(); \
@@ -68,7 +68,7 @@
 #elif defined(EMBB_PLATFORM_COMPILER_GNUC)
 #define EMBB_DEFINE_AND_ASSIGN(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX)\
   EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_internal__atomic_and_assign_, \
-  EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value) { \
+  EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) value) { \
   __asm__ __volatile__("lock and" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "+m" (*pointer_to_value), "+q" (value) \
   : \
@@ -97,7 +97,7 @@ EMBB_DEFINE_AND_ASSIGN(8, "q")
   EMBB_PLATFORM_INLINE \
   void EMBB_CAT2(embb_internal__atomic_and_assign_, \
   EMBB_PARAMETER_SIZE_BYTE)(\
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
+  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_PARAMETER_SIZE_BYTE) \
   volatile* pointer_to_value, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) \
   value) { \
@@ -154,7 +154,7 @@ EMBB_DEFINE_AND_ASSIGN(4, "")
   memcpy(&value_pun, &value, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE));\
   EMBB_ATOMIC_INIT_CHECK(variable); \
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex); \
-  EMBB_CAT2(embb_internal__atomic_and_assign_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)((EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) \
+  EMBB_CAT2(embb_internal__atomic_and_assign_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)((EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *) \
   (&(variable->internal_variable)), value_pun); \
   EMBB_ATOMIC_MUTEX_UNLOCK(variable->internal_mutex); \
   }

@@ -50,6 +50,9 @@ template<typename BaseType>
 class AtomicInteger : public AtomicArithmetic<BaseType, BaseType, 1u> {
  private:
   typedef typename AtomicArithmetic<BaseType, BaseType, 1u>::
+    AtomicType AtomicType;
+
+  typedef typename AtomicArithmetic<BaseType, BaseType, 1u>::
     NativeType NativeType;
 
  public:
@@ -94,7 +97,7 @@ inline void AtomicInteger<BaseType>::operator&=(BaseType val) {
   memcpy(&native_operand, &val, sizeof(val));
 
   EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
-  and_assign_implementation<NativeType>::
+  and_assign_implementation<AtomicType, NativeType>::
     and_assign(&this->AtomicValue, native_operand);
   EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 }
@@ -105,7 +108,7 @@ inline void AtomicInteger<BaseType>::operator|=(BaseType val) {
   memcpy(&native_operand, &val, sizeof(val));
 
   EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
-  or_assign_implementation<NativeType>::
+  or_assign_implementation<AtomicType, NativeType>::
     or_assign(&this->AtomicValue, native_operand);
   EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 }
@@ -116,7 +119,7 @@ inline void AtomicInteger<BaseType>::operator^=(BaseType val) {
   memcpy(&native_operand, &val, sizeof(val));
 
   EMBB_ATOMIC_MUTEX_LOCK(this->internal_mutex);
-  xor_assign_implementation<NativeType>::
+  xor_assign_implementation<AtomicType, NativeType>::
     xor_assign(&this->AtomicValue, native_operand);
   EMBB_ATOMIC_MUTEX_UNLOCK(this->internal_mutex);
 }
