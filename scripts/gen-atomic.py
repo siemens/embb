@@ -128,26 +128,26 @@ class InternalOp:
 	def embbOp(self, d):
 		return self.mEMBBOpFormat.replace("%D", d).replace("%A", "EMBB_BASE_BASIC_TYPE_ATOMIC_" + d).replace("%B", "EMBB_BASE_BASIC_TYPE_SIZE_" + d)
 
-	def stdOp(self, n):
-		return self.mStdOpFormat.replace("%N", n)
+	def stdOp(self, p, v, c, d):
+		return self.mStdOpFormat.replace("%P", p).replace("%V", v).replace("%C", c).replace("%D", d)
 
 internalOps = [
 	InternalOp("void embb_internal__atomic_and_assign_%D(\n  %A* variable,\n  %B value\n  )",
-	    "(void)%Natomic_fetch_and(variable, value)"),
+	    "(void)%Pfetch_and(%V%Cvalue)"),
 	InternalOp("int embb_internal__atomic_compare_and_swap_%D(\n  %A* variable,\n  %B* expected,\n  %B desired\n  )",
-	    "return %Natomic_compare_exchange_strong(variable, expected, desired)"),
+	    "return %Pcompare_exchange_strong(%V%C%Dexpected, desired)"),
 	InternalOp("%B embb_internal__atomic_fetch_and_add_%D(\n  %A* variable,\n  %B value\n  )",
-	    "return %Natomic_fetch_add(variable, value)"),
+	    "return %Pfetch_add(%V%Cvalue)"),
 	InternalOp("%B embb_internal__atomic_load_%D(\n  const %A* variable\n  )",
-	    "return %Natomic_load(variable)"),
+	    "return %Pload(%V)"),
 	InternalOp("void embb_internal__atomic_or_assign_%D(\n  %A* variable,\n  %B value\n  )",
-	    "(void)%Natomic_fetch_or(variable, value)"),
+	    "(void)%Pfetch_or(%V%Cvalue)"),
 	InternalOp("void embb_internal__atomic_store_%D(\n  %A* variable,\n  %B value\n  )",
-	    "%Natomic_store(variable, value)"),
+	    "%Pstore(%V%Cvalue)"),
 	InternalOp("%B embb_internal__atomic_swap_%D(\n  %A* variable,\n  %B value\n  )",
-	    "return %Natomic_exchange(variable, value)"),
+	    "return %Pexchange(%V%Cvalue)"),
 	InternalOp("void embb_internal__atomic_xor_assign_%D(\n  %A* variable,\n  %B value\n  )",
-	    "(void)%Natomic_fetch_xor(variable, value)"),
+	    "(void)%Pfetch_xor(%V%Cvalue)"),
 ]
 
 for o in internalOps:
@@ -155,9 +155,9 @@ for o in internalOps:
 		s = "EMBB_PLATFORM_INLINE " + o.embbOp(t.designator()) + "\n"
 		s += "{\n"
 		s += "#if defined EMBB_PLATFORM_ARCH_CXX11\n"
-		s += "  " + o.stdOp("std::") + ";\n"
+		s += "  " + o.stdOp("variable->", "", "", "*") + ";\n"
 		s += "#elif defined EMBB_PLATFORM_ARCH_C11\n"
-		s += "  " + o.stdOp("") + ";\n"
+		s += "  " + o.stdOp("atomic_", "variable", ", ", "") + ";\n"
 		s += "#endif\n"
 		s += "}\n"
 		print(s)
@@ -192,37 +192,48 @@ print("\n#endif\n")
 # Ops
 
 class Op:
-	def __init__(self, embbOpFormat, stdOpFormat):
+	def __init__(self, embbOpFormat, stdCOpFormat, stdCXXOpFormat = None ):
 		self.mEMBBOpFormat = embbOpFormat
-		self.mStdOpFormat = stdOpFormat
+		self.mStdCOpFormat = stdCOpFormat
+
+                if stdCXXOpFormat == None:
+                    self.mStdCXXOpFormat = stdCOpFormat
+                else:
+                    self.mStdCXXOpFormat = stdCXXOpFormat
 
 	def embbOp(self, t, d):
 		return self.mEMBBOpFormat.replace("%T", t).replace("%D", d).replace("%A", "embb_atomic_" + d)
 
-	def stdOp(self, n):
-		return self.mStdOpFormat.replace("%N", n)
+	def stdOp(self, s, p, v, c, d):
+		return s.replace("%P", p).replace("%V", v).replace("%C", c).replace("%D", d)
+
+	def stdCOp(self, p, v, c, d):
+		return self.stdOp(self.mStdCOpFormat, p, v, c, d)
+
+	def stdCXXOp(self, p, v, c, d):
+		return self.stdOp(self.mStdCXXOpFormat, p, v, c, d)
 
 ops = [
 	Op("void embb_atomic_and_assign_%D(\n  %A* variable,\n  %T value\n  )",
-	    "(void)%Natomic_fetch_and(variable, value)"),
+	    "(void)%Pfetch_and(%V%Cvalue)"),
 	Op("int embb_atomic_compare_and_swap_%D(\n  %A* variable,\n  %T* expected,\n  %T desired\n  )",
-	    "return %Natomic_compare_exchange_strong(variable, expected, desired)"),
+	    "return %Pcompare_exchange_strong(%V%C%Dexpected, desired)"),
 	Op("void embb_atomic_destroy_%D(\n  %A* variable\n  )",
 	    "(void)variable"),
 	Op("%T embb_atomic_fetch_and_add_%D(\n  %A* variable,\n  %T value\n  )",
-	    "return %Natomic_fetch_add(variable, value)"),
+	    "return %Pfetch_add(%V%Cvalue)"),
 	Op("void embb_atomic_init_%D(\n  %A* variable,\n  %T value\n  )",
-	    "%Natomic_init(variable, value)"),
+	    "%Pinit(%V%Cvalue)", "%Pstore(%V%Cvalue)"),
 	Op("%T embb_atomic_load_%D(\n  const %A* variable\n  )",
-	    "return %Natomic_load(variable)"),
+	    "return %Pload(%V)"),
 	Op("void embb_atomic_or_assign_%D(\n  %A* variable,\n  %T value\n  )",
-	    "(void)%Natomic_fetch_or(variable, value)"),
+	    "(void)%Pfetch_or(%V%Cvalue)"),
 	Op("void embb_atomic_store_%D(\n  %A* variable,\n  %T value\n  )",
-	    "%Natomic_store(variable, value)"),
+	    "%Pstore(%V%Cvalue)"),
 	Op("%T embb_atomic_swap_%D(\n  %A* variable,\n  %T value\n  )",
-	    "return %Natomic_exchange(variable, value)"),
+	    "return %Pexchange(%V%Cvalue)"),
 	Op("void embb_atomic_xor_assign_%D(\n  %A* variable,\n  %T value\n  )",
-	    "(void)%Natomic_fetch_xor(variable, value)"),
+	    "(void)%Pfetch_xor(%V%Cvalue)"),
 ]
 
 for o in ops:
@@ -230,9 +241,9 @@ for o in ops:
 		s = "EMBB_PLATFORM_INLINE " + o.embbOp(t.name(), t.designator()) + "\n"
 		s += "{\n"
 		s += "#if defined EMBB_PLATFORM_ARCH_CXX11\n"
-		s += "  " + o.stdOp("std::") + ";\n"
+		s += "  " + o.stdCXXOp("variable->", "", "", "*") + ";\n"
 		s += "#elif defined EMBB_PLATFORM_ARCH_C11\n"
-		s += "  " + o.stdOp("") + ";\n"
+		s += "  " + o.stdCOp("atomic_", "variable", ", ", "") + ";\n"
 		s += "#endif\n"
 		s += "}\n"
 		print(s)

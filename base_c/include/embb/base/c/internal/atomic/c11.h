@@ -79,7 +79,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_1(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -91,7 +91,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_2(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -103,7 +103,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_4(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -115,7 +115,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_8(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -128,7 +128,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_1(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -141,7 +141,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_2(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -154,7 +154,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_4(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -167,7 +167,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_8(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -179,7 +179,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_fetch_and
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -191,7 +191,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_fetch_and
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -203,7 +203,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_fetch_and
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -215,7 +215,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_fetch_and
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -226,7 +226,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_load_1(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -237,7 +237,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_load_2(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -248,7 +248,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_load_4(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -259,7 +259,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_load_8(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -271,7 +271,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_1(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -283,7 +283,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_2(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -295,7 +295,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_4(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -307,7 +307,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_8(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -319,7 +319,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_1(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -331,7 +331,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_2(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -343,7 +343,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_4(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -355,7 +355,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_8(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -367,7 +367,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_swap_1(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -379,7 +379,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_swap_2(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -391,7 +391,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_swap_4(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -403,7 +403,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_swap_8(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -415,7 +415,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_1(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -427,7 +427,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_2(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -439,7 +439,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_4(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -451,7 +451,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_8(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -499,7 +499,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -511,7 +511,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -523,7 +523,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -535,7 +535,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -547,7 +547,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -559,7 +559,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -571,7 +571,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -583,7 +583,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -595,7 +595,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -607,7 +607,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -619,7 +619,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -631,7 +631,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -643,7 +643,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -655,7 +655,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_and(variable, value);
+  (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_and(variable, value);
 #endif
@@ -668,7 +668,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -681,7 +681,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -694,7 +694,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -707,7 +707,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -720,7 +720,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -733,7 +733,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -746,7 +746,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -759,7 +759,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -772,7 +772,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -785,7 +785,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -798,7 +798,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -811,7 +811,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -824,7 +824,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -837,7 +837,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_compare_exchange_strong(variable, expected, desired);
+  return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_compare_exchange_strong(variable, expected, desired);
 #endif
@@ -1003,7 +1003,7 @@ EMBB_PLATFORM_INLINE char embb_atomic_fetch_and_add_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1015,7 +1015,7 @@ EMBB_PLATFORM_INLINE short embb_atomic_fetch_and_add_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1027,7 +1027,7 @@ EMBB_PLATFORM_INLINE unsigned short embb_atomic_fetch_and_add_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1039,7 +1039,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_fetch_and_add_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1051,7 +1051,7 @@ EMBB_PLATFORM_INLINE unsigned int embb_atomic_fetch_and_add_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1063,7 +1063,7 @@ EMBB_PLATFORM_INLINE long embb_atomic_fetch_and_add_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1075,7 +1075,7 @@ EMBB_PLATFORM_INLINE unsigned long embb_atomic_fetch_and_add_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1087,7 +1087,7 @@ EMBB_PLATFORM_INLINE long long embb_atomic_fetch_and_add_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1099,7 +1099,7 @@ EMBB_PLATFORM_INLINE unsigned long long embb_atomic_fetch_and_add_unsigned_long_
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1111,7 +1111,7 @@ EMBB_PLATFORM_INLINE intptr_t embb_atomic_fetch_and_add_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1123,7 +1123,7 @@ EMBB_PLATFORM_INLINE uintptr_t embb_atomic_fetch_and_add_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1135,7 +1135,7 @@ EMBB_PLATFORM_INLINE size_t embb_atomic_fetch_and_add_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1147,7 +1147,7 @@ EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_fetch_and_add_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1159,7 +1159,7 @@ EMBB_PLATFORM_INLINE uintmax_t embb_atomic_fetch_and_add_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_fetch_add(variable, value);
+  return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_fetch_add(variable, value);
 #endif
@@ -1171,7 +1171,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1183,7 +1183,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1195,7 +1195,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1207,7 +1207,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1219,7 +1219,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1231,7 +1231,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1243,7 +1243,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1255,7 +1255,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1267,7 +1267,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1279,7 +1279,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1291,7 +1291,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1303,7 +1303,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1315,7 +1315,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1327,7 +1327,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_init(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_init(variable, value);
 #endif
@@ -1338,7 +1338,7 @@ EMBB_PLATFORM_INLINE char embb_atomic_load_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1349,7 +1349,7 @@ EMBB_PLATFORM_INLINE short embb_atomic_load_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1360,7 +1360,7 @@ EMBB_PLATFORM_INLINE unsigned short embb_atomic_load_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1371,7 +1371,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_load_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1382,7 +1382,7 @@ EMBB_PLATFORM_INLINE unsigned int embb_atomic_load_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1393,7 +1393,7 @@ EMBB_PLATFORM_INLINE long embb_atomic_load_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1404,7 +1404,7 @@ EMBB_PLATFORM_INLINE unsigned long embb_atomic_load_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1415,7 +1415,7 @@ EMBB_PLATFORM_INLINE long long embb_atomic_load_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1426,7 +1426,7 @@ EMBB_PLATFORM_INLINE unsigned long long embb_atomic_load_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1437,7 +1437,7 @@ EMBB_PLATFORM_INLINE intptr_t embb_atomic_load_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1448,7 +1448,7 @@ EMBB_PLATFORM_INLINE uintptr_t embb_atomic_load_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1459,7 +1459,7 @@ EMBB_PLATFORM_INLINE size_t embb_atomic_load_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1470,7 +1470,7 @@ EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_load_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1481,7 +1481,7 @@ EMBB_PLATFORM_INLINE uintmax_t embb_atomic_load_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_load(variable);
+  return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_load(variable);
 #endif
@@ -1493,7 +1493,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1505,7 +1505,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1517,7 +1517,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1529,7 +1529,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1541,7 +1541,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1553,7 +1553,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1565,7 +1565,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1577,7 +1577,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1589,7 +1589,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1601,7 +1601,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1613,7 +1613,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1625,7 +1625,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1637,7 +1637,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1649,7 +1649,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_or(variable, value);
+  (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_or(variable, value);
 #endif
@@ -1661,7 +1661,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1673,7 +1673,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1685,7 +1685,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1697,7 +1697,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1709,7 +1709,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1721,7 +1721,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1733,7 +1733,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1745,7 +1745,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1757,7 +1757,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1769,7 +1769,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1781,7 +1781,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1793,7 +1793,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1805,7 +1805,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1817,7 +1817,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  std::atomic_store(variable, value);
+  variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   atomic_store(variable, value);
 #endif
@@ -1829,7 +1829,7 @@ EMBB_PLATFORM_INLINE char embb_atomic_swap_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1841,7 +1841,7 @@ EMBB_PLATFORM_INLINE short embb_atomic_swap_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1853,7 +1853,7 @@ EMBB_PLATFORM_INLINE unsigned short embb_atomic_swap_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1865,7 +1865,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_swap_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1877,7 +1877,7 @@ EMBB_PLATFORM_INLINE unsigned int embb_atomic_swap_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1889,7 +1889,7 @@ EMBB_PLATFORM_INLINE long embb_atomic_swap_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1901,7 +1901,7 @@ EMBB_PLATFORM_INLINE unsigned long embb_atomic_swap_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1913,7 +1913,7 @@ EMBB_PLATFORM_INLINE long long embb_atomic_swap_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1925,7 +1925,7 @@ EMBB_PLATFORM_INLINE unsigned long long embb_atomic_swap_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1937,7 +1937,7 @@ EMBB_PLATFORM_INLINE intptr_t embb_atomic_swap_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1949,7 +1949,7 @@ EMBB_PLATFORM_INLINE uintptr_t embb_atomic_swap_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1961,7 +1961,7 @@ EMBB_PLATFORM_INLINE size_t embb_atomic_swap_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1973,7 +1973,7 @@ EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_swap_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1985,7 +1985,7 @@ EMBB_PLATFORM_INLINE uintmax_t embb_atomic_swap_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  return std::atomic_exchange(variable, value);
+  return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   return atomic_exchange(variable, value);
 #endif
@@ -1997,7 +1997,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_char(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2009,7 +2009,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2021,7 +2021,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_short(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2033,7 +2033,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2045,7 +2045,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_int(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2057,7 +2057,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2069,7 +2069,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2081,7 +2081,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2093,7 +2093,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_long_long(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2105,7 +2105,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_intptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2117,7 +2117,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_uintptr_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2129,7 +2129,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_size_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2141,7 +2141,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_ptrdiff_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
@@ -2153,7 +2153,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_uintmax_t(
   )
 {
 #if defined EMBB_PLATFORM_ARCH_CXX11
-  (void)std::atomic_fetch_xor(variable, value);
+  (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
   (void)atomic_fetch_xor(variable, value);
 #endif
