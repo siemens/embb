@@ -25,6 +25,7 @@
  */
 
 #include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <embb_mtapi_attr.h>
@@ -39,7 +40,7 @@ mtapi_status_t embb_mtapi_attr_set_##TYPE(TYPE* target, \
     memcpy(target, attribute, sizeof(TYPE)); \
     return MTAPI_SUCCESS; \
   } else if (MTAPI_ATTRIBUTE_POINTER_AS_VALUE == attribute_size) { \
-    memcpy(target, &attribute, sizeof(TYPE)); \
+    *target = (TYPE)(uintptr_t)attribute; \
     return MTAPI_SUCCESS; \
   } else { \
     return MTAPI_ERR_ATTR_SIZE; \
