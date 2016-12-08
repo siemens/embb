@@ -63,7 +63,14 @@ typedef opaque_type embb_spinlock_t;
  * Spinlock type, treat as opaque.
  */
 typedef struct {
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  /* Use a simple mutex in analysis mode to reflect the semantics of a lock and
+  to avoid potential problems with dynamic race detectors or concurrency testing
+  tools. */
+  embb_mutex_t mutex_;
+#else
   embb_atomic_int atomic_spin_variable_;
+#endif /* EMBB_THREADING_ANALYSIS_MODE */
 } embb_spinlock_t;
 #endif /* DOXYGEN */
 

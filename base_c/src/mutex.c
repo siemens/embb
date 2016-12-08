@@ -56,7 +56,9 @@ int embb_mutex_try_lock(embb_mutex_t* mutex) {
   }
   BOOL success;
   success = TryEnterCriticalSection(mutex);
-  if (success == FALSE) return EMBB_ERROR;
+  if (success == FALSE) {
+    return EMBB_BUSY;
+  }
   return EMBB_SUCCESS;
 }
 
@@ -143,6 +145,47 @@ void embb_mutex_destroy(embb_mutex_t* mutex) {
 
 #endif /* EMBB_PLATFORM_THREADING_POSIXTHREADS */
 
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+
+int embb_spin_init(embb_spinlock_t* spinlock) {
+  if (NULL == spinlock) {
+    return EMBB_ERROR;
+  }
+  return embb_mutex_init(&spinlock->mutex_, EMBB_MUTEX_PLAIN);
+}
+
+int embb_spin_lock(embb_spinlock_t* spinlock) {
+  if (NULL == spinlock) {
+    return EMBB_ERROR;
+  }
+  return embb_mutex_lock(&spinlock->mutex_);
+}
+
+int embb_spin_try_lock(embb_spinlock_t* spinlock,
+  unsigned int max_number_spins) {
+  if (NULL == spinlock) {
+    return EMBB_ERROR;
+  }
+  if (max_number_spins == 0) {
+    return EMBB_BUSY;
+  }
+  return embb_mutex_try_lock(&spinlock->mutex_);
+}
+
+int embb_spin_unlock(embb_spinlock_t* spinlock) {
+  if (NULL == spinlock) {
+    return EMBB_ERROR;
+  }
+  return embb_mutex_unlock(&spinlock->mutex_);
+}
+
+void embb_spin_destroy(embb_spinlock_t* spinlock) {
+  assert(NULL != spinlock);
+  embb_mutex_destroy(&spinlock->mutex_);
+}
+
+#else
+
 int embb_spin_init(embb_spinlock_t* spinlock) {
   if (NULL == spinlock) {
     return EMBB_ERROR;
@@ -158,7 +201,6 @@ int embb_spin_lock(embb_spinlock_t* spinlock) {
   int expected = 0;
   int spins = 1;
 
-  // try to swap the
   while (0 == embb_atomic_compare_and_swap_int(
     &spinlock->atomic_spin_variable_, &expected, 1)) {
     if (0 == (spins & 1023)) {
@@ -207,3 +249,5 @@ void embb_spin_destroy(embb_spinlock_t* spinlock) {
   assert(NULL != spinlock);
   embb_atomic_destroy_int(&spinlock->atomic_spin_variable_);
 }
+
+#endif /* EMBB_THREADING_ANALYSIS_MODE */

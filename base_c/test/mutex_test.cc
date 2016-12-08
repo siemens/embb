@@ -36,7 +36,6 @@ MutexTest::MutexTest() : counter_(0),
     number_threads_(partest::TestSuite::GetDefaultNumThreads()),
     number_iterations_(partest::TestSuite::GetDefaultNumIterations()) {
   embb_mutex_init(&mutex_, EMBB_MUTEX_PLAIN);
-  //embb_thread_set_max_count(number_threads_);
   CreateUnit("Protected counter")
       .Pre(&MutexTest::PreMutexInc, this)
       .Add(&MutexTest::TestMutexInc, this, number_threads_, number_iterations_)
@@ -94,12 +93,16 @@ number_threads_(partest::TestSuite::GetDefaultNumThreads()),
   number_iterations_)
   .Post(&SpinLockTest::PostSpinLockInc, this);
 
+  /* Disable tests that assume non-recursive behavior */
+#if !(defined(EMBB_THREADING_ANALYSIS_MODE) && \
+  defined(EMBB_PLATFORM_THREADING_WINTHREADS))
   CreateUnit("Test spinning (too many spins), single thread")
     .Add(&SpinLockTest::TestSpinLockTooManySpins, this,
     // one thread
     1,
     // one iteration
     1);
+#endif
 }
 
 void SpinLockTest::TestSpinLockTooManySpins() {

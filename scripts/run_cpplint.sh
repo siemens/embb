@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Copyright (c) 2014-2016, Siemens AG. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice,
 # this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 # this list of conditions and the following disclaimer in the documentation
 # and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -24,10 +24,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 usage() {
-echo "Run Google C++ Style Guide checking on project.";
+echo "Check Google C++ Style Guide on project.";
 echo "Specify EMBB root directory with -d and the";
-echo "cpplint executable with -c. If not specified";
-echo "it is assumed the cpplint binary is contained";
+echo "cpplint executable with -c. If not specified,";
+echo "it is assumed that the cpplint binary is contained";
 echo "in the current working directory.";
 echo "";
 echo "Usage: $0 [-d directory] [-c cpplint_executable] " 1>&2; exit 1;
@@ -79,7 +79,7 @@ retval=0
 
 ##Excluded files
 RAND_FILES=( embb_mtapi_test_group.cc embb_mtapi_test_queue.cc embb_mtapi_test_task.cc queue_test-inl.h )
-for project in base_c mtapi_c mtapi_plugins_c/mtapi_network_c mtapi_plugins_c/mtapi_opencl_c mtapi_plugins_c/mtapi_cuda_c base_cpp mtapi_cpp algorithms_cpp containers_cpp dataflow_cpp
+for project in base_c base_cpp mtapi_c mtapi_plugins_c/mtapi_network_c mtapi_plugins_c/mtapi_opencl_c mtapi_plugins_c/mtapi_cuda_c mtapi_cpp algorithms_cpp containers_cpp dataflow_cpp
 do
   echo "-> Doing project: $project"
   dir=$d/$project
