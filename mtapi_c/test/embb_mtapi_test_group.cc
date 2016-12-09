@@ -71,7 +71,7 @@ static void testDoSomethingElse() {
 }
 
 GroupTest::GroupTest() {
-  CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this, 1, 1000);
+  CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this, 1, 100);
 }
 
 void GroupTest::TestBasic() {

@@ -355,7 +355,7 @@ void TaskTest::TestBasic() {
     "hardware concurrency   : %d\n", info.hardware_concurrency);
   embb_mtapi_log_trace("used memory            : %d\n", info.used_memory);
 
-  for (int ii = 0; ii < 100000; ii++) {
+  for (int ii = 0; ii < 1000; ii++) {
     TryDetached();
     TrySimple();
     TryMultiInstance();
