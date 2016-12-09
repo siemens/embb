@@ -457,17 +457,10 @@ void mtapi_queue_disable(
 
       /* cancel all tasks held back the ordered queue if it is not retaining */
       if (local_queue->attributes.ordered && !local_queue->attributes.retain) {
-        embb_mtapi_group_t * local_group = MTAPI_NULL;
         embb_mtapi_action_t * local_action = MTAPI_NULL;
         embb_mtapi_task_t * task =
           embb_mtapi_task_queue_pop_front(&local_queue->ordered_tasks);
         while (MTAPI_NULL != task) {
-          /* is task associated with a group? */
-          if (embb_mtapi_group_pool_is_handle_valid(
-            node->group_pool, task->group)) {
-            local_group = embb_mtapi_group_pool_get_storage_for_handle(
-                node->group_pool, task->group);
-          }
           /* get action for task */
           if (embb_mtapi_action_pool_is_handle_valid(
             node->action_pool, task->action)) {

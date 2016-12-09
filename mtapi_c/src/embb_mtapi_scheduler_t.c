@@ -271,8 +271,6 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
   embb_mtapi_task_context_t task_context;
   mtapi_boolean_t result = MTAPI_FALSE;
   embb_mtapi_queue_t * local_queue = MTAPI_NULL;
-  embb_mtapi_group_t * local_group = MTAPI_NULL;
-  embb_mtapi_action_t * local_action = MTAPI_NULL;
   mtapi_task_state_t next_task_state = MTAPI_TASK_INTENTIONALLY_UNUSED;
 
   /* is task associated with a queue? */
@@ -292,21 +290,6 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
         return MTAPI_FALSE;
       }
     }
-  }
-
-  /* is task associated with a group? */
-  if (embb_mtapi_group_pool_is_handle_valid(
-    node->group_pool, task->group)) {
-    local_group =
-      embb_mtapi_group_pool_get_storage_for_handle(
-        node->group_pool, task->group);
-  }
-
-  if (embb_mtapi_action_pool_is_handle_valid(
-    node->action_pool, task->action)) {
-    local_action =
-      embb_mtapi_action_pool_get_storage_for_handle(
-        node->action_pool, task->action);
   }
 
   switch (embb_atomic_load_int(&task->state)) {
