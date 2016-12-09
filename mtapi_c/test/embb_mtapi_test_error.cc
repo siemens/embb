@@ -553,7 +553,7 @@ static void TestLimits() {
 
   /* and we're done */
   mtapi_finalize(&status);
-  PT_EXPECT_EQ(status, MTAPI_SUCCESS);
+  MTAPI_CHECK_STATUS(status);
 
   PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
 }
@@ -647,7 +647,7 @@ static void TestParameter() {
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_finalize(&status);
-  PT_EXPECT_EQ(status, MTAPI_SUCCESS);
+  MTAPI_CHECK_STATUS(status);
 
   PT_EXPECT_EQ(embb_get_bytes_allocated(), 0u);
 }
@@ -725,7 +725,7 @@ void TestContext() {
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_finalize(&status);
-  PT_EXPECT_EQ(status, MTAPI_SUCCESS);
+  MTAPI_CHECK_STATUS(status);
 
   embb_tss_delete(&thread_ctx_storage.tss_id);
 

@@ -138,7 +138,6 @@ mtapi_boolean_t embb_mtapi_task_execute(
     todo = embb_atomic_fetch_and_add_unsigned_int(
       &that->instances_todo, (unsigned int)-1);
 
-    embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
     if (todo == 1) {
       /* task has completed successfully */
       *new_task_state = MTAPI_TASK_COMPLETED;
@@ -266,6 +265,11 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
           embb_mtapi_action_t * local_action =
             embb_mtapi_action_pool_get_storage_for_handle(
               node->action_pool, task->action);
+          int num_instances = (int)task->attributes.num_instances;
+
+          /* num_instances more tasks in flight for action */
+          embb_atomic_fetch_and_add_int(
+            &local_action->num_tasks, num_instances);
 
           embb_mtapi_task_set_state(task, MTAPI_TASK_SCHEDULED);
 
@@ -284,7 +288,7 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
 
           if (was_scheduled) {
             /* if task is detached, do not return a handle, it will be deleted
-            on completion */
+               on completion */
             if (task->attributes.is_detached) {
               task_hndl.id = EMBB_MTAPI_IDPOOL_INVALID_ID;
             }
@@ -294,6 +298,9 @@ static mtapi_task_hndl_t embb_mtapi_task_start(
             /* task could not be pushed */
             local_status = MTAPI_ERR_TASK_LIMIT;
             embb_mtapi_task_set_state(task, MTAPI_TASK_ERROR);
+            /* num_instances tasks not in flight for action */
+            embb_atomic_fetch_and_add_int(
+              &local_action->num_tasks, -num_instances);
           }
         }
 
