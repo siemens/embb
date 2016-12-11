@@ -242,6 +242,10 @@ void embb_mtapi_scheduler_finalize_task(
 
   /* tell queue that a task is done */
   if (MTAPI_NULL != queue) {
+    if (queue->attributes.ordered) {
+      /* tell queue that execution of ordered task is done */
+      embb_mtapi_queue_ordered_task_finish(queue);
+    }
     embb_mtapi_queue_task_finished(queue);
   }
   /* issue task complete callback if set */
@@ -272,6 +276,8 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
   mtapi_boolean_t result = MTAPI_FALSE;
   embb_mtapi_queue_t * local_queue = MTAPI_NULL;
   mtapi_task_state_t next_task_state = MTAPI_TASK_INTENTIONALLY_UNUSED;
+  embb_mtapi_task_t * ordered_task = MTAPI_NULL;
+  mtapi_uint_t ordered_priority = 0;
 
   /* is task associated with a queue? */
   if (embb_mtapi_queue_pool_is_handle_valid(
@@ -300,24 +306,22 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     embb_mtapi_task_context_initialize_with_thread_context_and_task(
       &task_context, thread_context, task);
     if (embb_mtapi_task_execute(task, &task_context, &next_task_state)) {
+      if (MTAPI_NULL != local_queue) {
+        if (local_queue->attributes.ordered) {
+          /* fetch task that has been kept back */
+          ordered_task = embb_mtapi_task_queue_pop_front(
+            &local_queue->ordered_tasks);
+          ordered_priority = local_queue->attributes.priority;
+        }
+      }
       embb_mtapi_scheduler_finalize_task(task, node, next_task_state);
     } else {
       embb_mtapi_scheduler_schedule_task(node->scheduler, task);
     }
-    if (MTAPI_NULL != local_queue) {
-      if (local_queue->attributes.ordered) {
-        /* tell queue that execution of ordered task is done */
-        embb_mtapi_queue_ordered_task_finish(local_queue);
-        /* fetch task that has been kept back */
-        embb_mtapi_task_t * ordered_task =
-          embb_mtapi_task_queue_pop_front(&local_queue->ordered_tasks);
-        if (MTAPI_NULL != ordered_task) {
-          /* add ordered task to front of private queue */
-          embb_mtapi_task_queue_push_front(
-            thread_context->private_queue[local_queue->attributes.priority],
-            ordered_task);
-        }
-      }
+    if (MTAPI_NULL != ordered_task) {
+      /* add ordered task to front of private queue */
+      embb_mtapi_task_queue_push_front(
+        thread_context->private_queue[ordered_priority], ordered_task);
     }
     result = MTAPI_TRUE;
     break;
@@ -326,12 +330,6 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     /* set return value to cancelled */
     task->error_code = MTAPI_ERR_ACTION_CANCELLED;
     embb_mtapi_scheduler_finalize_task(task, node, MTAPI_TASK_CANCELLED);
-    if (MTAPI_NULL != local_queue) {
-      if (local_queue->attributes.ordered) {
-        /* tell queue that execution of ordered task is done */
-        embb_mtapi_queue_ordered_task_finish(local_queue);
-      }
-    }
     break;
 
   case MTAPI_TASK_RETAINED:
