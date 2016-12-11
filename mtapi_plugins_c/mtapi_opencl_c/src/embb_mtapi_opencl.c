@@ -115,6 +115,16 @@ static void CL_API_CALL opencl_task_complete(
         assert(CL_SUCCESS == err);
       }
 
+      if (embb_mtapi_action_pool_is_handle_valid(
+        node->action_pool, local_task->action)) {
+        embb_mtapi_action_t * local_action =
+          embb_mtapi_action_pool_get_storage_for_handle(
+            node->action_pool, local_task->action);
+
+        embb_atomic_fetch_and_add_int(&local_action->num_tasks,
+          -(int)local_task->attributes.num_instances);
+      }
+
       embb_mtapi_task_set_state(local_task, MTAPI_TASK_COMPLETED);
     }
   }
