@@ -225,7 +225,7 @@ PROJECT_DIR_FULLPATH=`realpath ${d}`
 
 echo "--> Generating Doxygen"
 
-REMEMBER_CUR_DIR=$(pwd)
+REMEMBER_CUR_DIR=`realpath $(pwd)`
 cd "$MYTMPDIR_DOXY_BUILD"
 echo "---> Initialize CMake"
 redirect_cmd cmake "$PROJECT_DIR_FULLPATH" 
