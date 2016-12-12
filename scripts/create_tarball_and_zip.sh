@@ -225,7 +225,8 @@ PROJECT_DIR_FULLPATH=`realpath ${d}`
 
 echo "--> Generating Doxygen"
 
-REMEMBER_CUR_DIR=`realpath $(pwd)`
+REMEMBER_CUR_DIR=$(pwd)
+REMEMBER_FULL_CUR_DIR=`realpath $(pwd)`
 cd "$MYTMPDIR_DOXY_BUILD"
 echo "---> Initialize CMake"
 redirect_cmd cmake "$PROJECT_DIR_FULLPATH" 
@@ -426,7 +427,7 @@ if [ "$CREATE_ZIP" = true ]; then
 	echo "--> Calling zip"
 	cd $MYTMPDIR
         zip -r -q $ZIP_NAME ./*
-	mv $ZIP_NAME $REMEMBER_CUR_DIR
+	mv $ZIP_NAME $REMEMBER_FULL_CUR_DIR
         echo "--> Done. Created $ZIP_NAME."
 fi
 
