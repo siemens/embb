@@ -424,10 +424,10 @@ fi
 #build the zip, if CREATE_ZIP is true
 if [ "$CREATE_ZIP" = true ]; then
 	echo "--> Calling zip"
-        REMEMBER_FULL_CUR_DIR="`realpath $(pwd)`"
 	cd $MYTMPDIR
         zip -r -q $ZIP_NAME ./*
-	mv $ZIP_NAME $REMEMBER_FULL_CUR_DIR
+        cd -
+	mv $MYTMPDIR/$ZIP_NAME .
         echo "--> Done. Created $ZIP_NAME."
 fi
 
