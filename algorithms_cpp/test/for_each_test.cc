@@ -111,7 +111,7 @@ void ForEachTest::TestRanges() {
     init[i] = static_cast<int>(i+2);
   }
 
-  // Ommit first element
+  // Omit first element
   vector = init;
   ForEach(vector.begin() + 1, vector.end(), Square());
   PT_EXPECT_EQ(vector[0], init[0]);
@@ -119,7 +119,7 @@ void ForEachTest::TestRanges() {
     PT_EXPECT_EQ(vector[i], init[i]*init[i]);
   }
 
-  // Ommit last element
+  // Omit last element
   vector = init;
   ForEach(vector.begin(), vector.end() - 1, Square());
   for (size_t i = 0; i < count - 1; i++) {
@@ -127,7 +127,7 @@ void ForEachTest::TestRanges() {
   }
   PT_EXPECT_EQ(vector[count - 1], init[count - 1]);
 
-  // Ommit first and last element
+  // Omit first and last element
   vector = init;
   ForEach(vector.begin() + 1, vector.end() - 1, Square());
   PT_EXPECT_EQ(vector[0], init[0]);

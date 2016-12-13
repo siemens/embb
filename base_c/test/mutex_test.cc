@@ -77,9 +77,13 @@ void MutexTest::TestRecursiveMutex() {
 }
 
 SpinLockTest::SpinLockTest() : counter_(0),
-number_threads_(partest::TestSuite::GetDefaultNumThreads()),
+  number_threads_(partest::TestSuite::GetDefaultNumThreads()),
   number_iterations_(partest::TestSuite::GetDefaultNumIterations()),
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  counter_iterations_(10) {
+#else
   counter_iterations_(10000) {
+#endif
   CreateUnit("Protected counter using Lock")
   .Pre(&SpinLockTest::PreSpinLockInc, this)
   .Add(&SpinLockTest::TestSpinLockIncUseLock, this,

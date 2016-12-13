@@ -101,7 +101,7 @@ void MergeSortTest::TestRanges() {
     init[i] = static_cast<int>(i+2);
   }
 
-  // Ommit first element
+  // Omit first element
   vector = init;
   vector_copy = init;
   std::sort(vector_copy.begin() + 1, vector_copy.end());
@@ -110,7 +110,7 @@ void MergeSortTest::TestRanges() {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }
 
-  // Ommit last element
+  // Omit last element
   vector = init;
   vector_copy = init;
   std::sort(vector_copy.begin(), vector_copy.end() - 1);
@@ -119,7 +119,7 @@ void MergeSortTest::TestRanges() {
      PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }
 
-  // Ommit first and last element
+  // Omit first and last element
   vector = init;
   vector_copy = init;
   std::sort(vector_copy.begin() + 1, vector_copy.end() - 1);

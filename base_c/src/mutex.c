@@ -37,7 +37,12 @@ int embb_mutex_init(embb_mutex_t* mutex, int type) {
     return EMBB_ERROR;
   }
   /* Critical sections in Windows are always recursive */
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  /* don't spin in analysis mode */
+  InitializeCriticalSectionAndSpinCount(mutex, 0);
+#else
   InitializeCriticalSection(mutex);
+#endif
   EMBB_UNUSED(type);
   return EMBB_SUCCESS;
 }

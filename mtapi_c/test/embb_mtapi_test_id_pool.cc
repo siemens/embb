@@ -28,8 +28,13 @@
 #include <vector>
 
 IdPoolTest::IdPoolTest() {
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  const int iterations(10);
+#else
+  const int iterations(1000);
+#endif
   CreateUnit("mtapi id pool test single threaded").
-    Add(&IdPoolTest::TestBasic, this, 1, 1000).
+    Add(&IdPoolTest::TestBasic, this, 1, iterations).
     Pre(&IdPoolTest::TestBasicPre, this).
     Post(&IdPoolTest::TestBasicPost, this);
 

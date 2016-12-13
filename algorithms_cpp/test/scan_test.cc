@@ -167,7 +167,7 @@ void ScanTest::TestRanges() {
   }
   vector = init;
 
-  // Ommit first element
+  // Omit first element
   outputVector = init;
   Scan(vector.begin() + 1, vector.end(), outputVector.begin() + 1,
        0, std::plus<int>());
@@ -178,7 +178,7 @@ void ScanTest::TestRanges() {
     PT_EXPECT_EQ(expected, outputVector[i]);
   }
 
-  // Ommit last element
+  // Omit last element
   outputVector = init;
   Scan(vector.begin(), vector.end() - 1, outputVector.begin(), 0,
        std::plus<int>());
@@ -189,7 +189,7 @@ void ScanTest::TestRanges() {
   }
   PT_EXPECT_EQ(outputVector[count - 1], vector[count - 1]);
 
-  // Ommit first and last element
+  // Omit first and last element
   outputVector = init;
   Scan(vector.begin() + 1, vector.end() - 1, outputVector.begin() + 1, 0,
        std::plus<int>());

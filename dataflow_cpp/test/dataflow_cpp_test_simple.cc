@@ -163,7 +163,12 @@ void SimpleTest::TrySimple(bool reuse_main_thread) {
     MTAPI_NODE_ID,
     node_attr);
 
-  for (int ii = 0; ii < 1000; ii++) {
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  const int iterations(10);
+#else
+  const int iterations(1000);
+#endif
+  for (int ii = 0; ii < iterations; ii++) {
     ArraySink<TEST_COUNT> asink;
     MyNetwork network(NUM_SLICES);
     MyConstantSource constant(network, 4);
