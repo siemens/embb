@@ -74,7 +74,7 @@ GroupTest::GroupTest() {
 #ifdef EMBB_THREADING_ANALYSIS_MODE
   const int iterations(10);
 #else
-  const int iterations(1000);
+  const int iterations(100);
 #endif
   CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this, 1, iterations);
 }

@@ -116,7 +116,7 @@ void TaskTest::TrySimple() {
   mtapi_action_attributes_t action_attr;
   mtapi_job_hndl_t job;
   mtapi_uint_t ii;
-  static const mtapi_uint_t kTaskCount = 100u;
+  static const mtapi_uint_t kTaskCount = 10u;
   mtapi_task_hndl_t task[kTaskCount];
 
   status = MTAPI_ERR_UNKNOWN;
@@ -187,7 +187,7 @@ void TaskTest::TryDetached() {
   mtapi_job_hndl_t job;
   mtapi_uint_t ii;
   /* use up all tasks, to see if autodeletion works */
-  static const mtapi_uint_t kTaskCount = MTAPI_NODE_MAX_TASKS_DEFAULT;
+  static const mtapi_uint_t kTaskCount = 10u;
   mtapi_task_attributes_t taskattr;
   mtapi_boolean_t detached = MTAPI_TRUE;
 
@@ -328,6 +328,15 @@ void TaskTest::TestBasic() {
     &node_attr,
     MTAPI_NODE_TYPE,
     MTAPI_ATTRIBUTE_VALUE(MTAPI_NODE_TYPE_SMP),
+    MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_nodeattr_set(
+    &node_attr,
+    MTAPI_NODE_MAX_TASKS,
+    MTAPI_ATTRIBUTE_VALUE(10u),
     MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
     &status);
   MTAPI_CHECK_STATUS(status);

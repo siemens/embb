@@ -426,7 +426,8 @@ if [ "$CREATE_ZIP" = true ]; then
 	echo "--> Calling zip"
 	cd $MYTMPDIR
         zip -r -q $ZIP_NAME ./*
-	mv $ZIP_NAME $REMEMBER_CUR_DIR
+        cd -
+	mv $MYTMPDIR/$ZIP_NAME .
         echo "--> Done. Created $ZIP_NAME."
 fi
 

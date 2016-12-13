@@ -440,7 +440,8 @@ static mtapi_status_t embb_mtapi_network_handle_return_result(
 
             local_task->error_code = (mtapi_status_t)task_status;
             embb_atomic_store_int(&local_task->state, MTAPI_TASK_COMPLETED);
-            embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
+            embb_atomic_fetch_and_add_int(&local_action->num_tasks,
+              -(int)local_task->attributes.num_instances);
 
             /* is task associated with a group? */
             if (embb_mtapi_group_pool_is_handle_valid(
@@ -503,7 +504,8 @@ static mtapi_status_t embb_mtapi_network_handle_return_failure(
             embb_mtapi_action_pool_get_storage_for_handle(
               node->action_pool, local_task->action);
 
-          embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
+          embb_atomic_fetch_and_add_int(&local_action->num_tasks,
+            -(int)local_task->attributes.num_instances);
           local_task->error_code = (mtapi_status_t)task_status;
           if (MTAPI_ERR_ACTION_CANCELLED == task_status) {
             embb_atomic_store_int(&local_task->state, MTAPI_TASK_CANCELLED);
@@ -860,7 +862,6 @@ static void network_task_start(
 
         // check if everything fit into the buffer
         if (actual == expected) {
-          embb_atomic_fetch_and_add_int(&local_action->num_tasks, 1);
           embb_atomic_store_int(&local_task->state, MTAPI_TASK_RUNNING);
           int sent = embb_mtapi_network_socket_sendbuffer(
             &network_action->socket, send_buf);
@@ -871,7 +872,6 @@ static void network_task_start(
           } else {
             // could not send the whole task, this will fail on the remote side,
             // so we can safely assume that the task is in error
-            embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
             embb_atomic_store_int(&local_task->state, MTAPI_TASK_ERROR);
           }
         }

@@ -216,17 +216,43 @@ embb_mtapi_thread_context_t * embb_mtapi_scheduler_get_current_thread_context(
 void embb_mtapi_scheduler_finalize_task(
   embb_mtapi_task_t * task,
   embb_mtapi_node_t * node,
-  embb_mtapi_queue_t * queue,
-  embb_mtapi_group_t * group,
   mtapi_task_state_t next_task_state) {
+  embb_mtapi_queue_t * queue = MTAPI_NULL;
+  embb_mtapi_group_t * group = MTAPI_NULL;
+  embb_mtapi_action_t * action = MTAPI_NULL;
+  int num_instances = (int)task->attributes.num_instances;
+
+  if (embb_mtapi_queue_pool_is_handle_valid(
+    node->queue_pool, task->queue)) {
+    queue = embb_mtapi_queue_pool_get_storage_for_handle(
+      node->queue_pool, task->queue);
+  }
+
+  if (embb_mtapi_group_pool_is_handle_valid(
+    node->group_pool, task->group)) {
+    group = embb_mtapi_group_pool_get_storage_for_handle(
+      node->group_pool, task->group);
+  }
+
+  if (embb_mtapi_action_pool_is_handle_valid(
+    node->action_pool, task->action)) {
+    action = embb_mtapi_action_pool_get_storage_for_handle(
+      node->action_pool, task->action);
+  }
+
   /* tell queue that a task is done */
   if (MTAPI_NULL != queue) {
+    if (queue->attributes.ordered) {
+      /* tell queue that execution of ordered task is done */
+      embb_mtapi_queue_ordered_task_finish(queue);
+    }
     embb_mtapi_queue_task_finished(queue);
   }
   /* issue task complete callback if set */
   if (MTAPI_NULL != task->attributes.complete_func) {
     task->attributes.complete_func(task->handle, MTAPI_NULL);
   }
+
   embb_mtapi_task_set_state(task, next_task_state);
   if (MTAPI_NULL != group) {
     /* move task to group queue */
@@ -237,6 +263,9 @@ void embb_mtapi_scheduler_finalize_task(
       embb_mtapi_task_delete(task, node->task_pool);
     }
   }
+  if (MTAPI_NULL != action) {
+    embb_atomic_fetch_and_add_int(&action->num_tasks, -num_instances);
+  }
 }
 
 mtapi_boolean_t embb_mtapi_scheduler_execute_task(
@@ -246,9 +275,9 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
   embb_mtapi_task_context_t task_context;
   mtapi_boolean_t result = MTAPI_FALSE;
   embb_mtapi_queue_t * local_queue = MTAPI_NULL;
-  embb_mtapi_group_t * local_group = MTAPI_NULL;
-  embb_mtapi_action_t * local_action = MTAPI_NULL;
   mtapi_task_state_t next_task_state = MTAPI_TASK_INTENTIONALLY_UNUSED;
+  embb_mtapi_task_t * ordered_task = MTAPI_NULL;
+  mtapi_uint_t ordered_priority = 0;
 
   /* is task associated with a queue? */
   if (embb_mtapi_queue_pool_is_handle_valid(
@@ -269,21 +298,6 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     }
   }
 
-  /* is task associated with a group? */
-  if (embb_mtapi_group_pool_is_handle_valid(
-    node->group_pool, task->group)) {
-    local_group =
-      embb_mtapi_group_pool_get_storage_for_handle(
-        node->group_pool, task->group);
-  }
-
-  if (embb_mtapi_action_pool_is_handle_valid(
-    node->action_pool, task->action)) {
-    local_action =
-      embb_mtapi_action_pool_get_storage_for_handle(
-        node->action_pool, task->action);
-  }
-
   switch (embb_atomic_load_int(&task->state)) {
   case MTAPI_TASK_SCHEDULED:
     /* multi-instance task, another instance might be running */
@@ -292,25 +306,22 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
     embb_mtapi_task_context_initialize_with_thread_context_and_task(
       &task_context, thread_context, task);
     if (embb_mtapi_task_execute(task, &task_context, &next_task_state)) {
-      embb_mtapi_scheduler_finalize_task(task, node,
-        local_queue, local_group, next_task_state);
+      if (MTAPI_NULL != local_queue) {
+        if (local_queue->attributes.ordered) {
+          /* fetch task that has been kept back */
+          ordered_task = embb_mtapi_task_queue_pop_front(
+            &local_queue->ordered_tasks);
+          ordered_priority = local_queue->attributes.priority;
+        }
+      }
+      embb_mtapi_scheduler_finalize_task(task, node, next_task_state);
     } else {
       embb_mtapi_scheduler_schedule_task(node->scheduler, task);
     }
-    if (MTAPI_NULL != local_queue) {
-      if (local_queue->attributes.ordered) {
-        /* tell queue that execution of ordered task is done */
-        embb_mtapi_queue_ordered_task_finish(local_queue);
-        /* fetch task that has been kept back */
-        embb_mtapi_task_t * ordered_task =
-          embb_mtapi_task_queue_pop_front(&local_queue->ordered_tasks);
-        if (MTAPI_NULL != ordered_task) {
-          /* add ordered task to front of private queue */
-          embb_mtapi_task_queue_push_front(
-            thread_context->private_queue[local_queue->attributes.priority],
-            ordered_task);
-        }
-      }
+    if (MTAPI_NULL != ordered_task) {
+      /* add ordered task to front of private queue */
+      embb_mtapi_task_queue_push_front(
+        thread_context->private_queue[ordered_priority], ordered_task);
     }
     result = MTAPI_TRUE;
     break;
@@ -318,20 +329,7 @@ mtapi_boolean_t embb_mtapi_scheduler_execute_task(
   case MTAPI_TASK_CANCELLED:
     /* set return value to cancelled */
     task->error_code = MTAPI_ERR_ACTION_CANCELLED;
-    if (embb_atomic_fetch_and_add_unsigned_int(
-      &task->instances_todo, (unsigned int)-1) == 1) {
-      embb_mtapi_scheduler_finalize_task(task, node,
-        local_queue, local_group, MTAPI_TASK_CANCELLED);
-    }
-    if (MTAPI_NULL != local_queue) {
-      if (local_queue->attributes.ordered) {
-        /* tell queue that execution of ordered task is done */
-        embb_mtapi_queue_ordered_task_finish(local_queue);
-      }
-    }
-    if (MTAPI_NULL != local_action) {
-      embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
-    }
+    embb_mtapi_scheduler_finalize_task(task, node, MTAPI_TASK_CANCELLED);
     break;
 
   case MTAPI_TASK_RETAINED:
@@ -688,9 +686,6 @@ mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
       affinity = node->affinity_all;
     }
 
-    /* one more task in flight for this action */
-    embb_atomic_fetch_and_add_int(&local_action->num_tasks, 1);
-
     if (affinity == node->affinity_all) {
       /* no affinity restrictions, schedule for stealing */
       pushed = embb_mtapi_task_queue_push_back(
@@ -718,9 +713,6 @@ mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
         embb_condition_notify_one(
           &scheduler->worker_contexts[ii].work_available);
       }
-    } else {
-      /* task could not be launched */
-      embb_atomic_fetch_and_add_int(&local_action->num_tasks, -1);
     }
   }
 
