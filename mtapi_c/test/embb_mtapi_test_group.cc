@@ -71,7 +71,12 @@ static void testDoSomethingElse() {
 }
 
 GroupTest::GroupTest() {
-  CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this, 1, 100);
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  const int iterations(10);
+#else
+  const int iterations(100);
+#endif
+  CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this, 1, iterations);
 }
 
 void GroupTest::TestBasic() {

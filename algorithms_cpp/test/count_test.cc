@@ -87,13 +87,13 @@ void CountTest::TestRanges() {
     vector[i] = static_cast<int>(-1);
   }
 
-  // Ommit first element
+  // Omit first element
   PT_EXPECT_EQ(Count(vector.begin() + 1, vector.end(), -1), 3);
 
-  // Ommit last element
+  // Omit last element
   PT_EXPECT_EQ(Count(vector.begin(), vector.end() - 1, -1), 3);
 
-  // Ommit first and last element
+  // Omit first and last element
   PT_EXPECT_EQ(Count(vector.begin() + 1, vector.end() - 1, -1), 2);
 
   // Only do first element

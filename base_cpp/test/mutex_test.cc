@@ -209,9 +209,13 @@ void MutexTest::TestUniqueLock() {
 }
 
 SpinLockTest::SpinLockTest() : spinlock_(), counter_(0),
-number_threads_(partest::TestSuite::GetDefaultNumThreads()),
+  number_threads_(partest::TestSuite::GetDefaultNumThreads()),
   number_iterations_(partest::TestSuite::GetDefaultNumIterations()),
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  counter_iterations_(10) {
+#else
   counter_iterations_(10000) {
+#endif
   CreateUnit("Spinlock protected counter (using Lock)")
     .Add(&SpinLockTest::TestSpinlockCountLock, this, number_threads_,
         number_iterations_)

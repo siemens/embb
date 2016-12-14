@@ -123,13 +123,13 @@ void ReduceTest::TestRanges() {
   }
   vector = init;
 
-  // Ommit first element
+  // Omit first element
   PT_EXPECT_EQ(Reduce(vector.begin() + 1, vector.end(), 0, std::plus<int>()),
                sum - vector[0]);
-  // Ommit last element
+  // Omit last element
   PT_EXPECT_EQ(Reduce(vector.begin(), vector.end() - 1, 0, std::plus<int>()),
                sum - vector[vector.size() - 1]);
-  // Ommit first and last element
+  // Omit first and last element
   PT_EXPECT_EQ(Reduce(vector.begin() + 1, vector.end() - 1, 0,
                std::plus<int>()), sum - vector[0] - vector[vector.size() - 1]);
   // Only do first element

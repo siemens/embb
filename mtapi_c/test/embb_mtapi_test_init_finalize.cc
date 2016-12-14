@@ -41,7 +41,12 @@ void InitFinalizeTest::TestBasic() {
   mtapi_info_t info;
   mtapi_status_t status;
 
-  for (int ii = 0; ii < 100; ii++) {
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  const int iterations(10);
+#else
+  const int iterations(100);
+#endif
+  for (int ii = 0; ii < iterations; ii++) {
     status = MTAPI_ERR_UNKNOWN;
     mtapi_nodeattr_init(&node_attr, &status);
     MTAPI_CHECK_STATUS(status);
