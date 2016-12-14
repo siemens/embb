@@ -47,7 +47,11 @@ PoolTest<ValuePool_t>::PoolTest() :
     .Pre(&PoolTest::PreAllocFreeParallel, this)
     .Add(&PoolTest::AllocFreeParallel, this,
     static_cast<size_t>(number_threads_),
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+    static_cast<size_t>(100))
+#else
     static_cast<size_t>(10000))
+#endif
     .Post(&PoolTest::PostAllocFreeParallel, this);
 }
 

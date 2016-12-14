@@ -37,7 +37,11 @@ template<typename Stack_t>
 StackTest<Stack_t>::StackTest() :
 n_threads(static_cast<int>
   (partest::TestSuite::GetDefaultNumThreads())),
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  n_iterations(10),
+#else
   n_iterations(200),
+#endif
   n_stack_elements_per_thread(100),
   n_stack_elements(n_stack_elements_per_thread*n_threads),
   stack(static_cast<size_t>(n_stack_elements)),

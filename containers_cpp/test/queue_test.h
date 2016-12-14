@@ -45,8 +45,13 @@ class QueueTest : public partest::TestCase {
  private:
   /// Minimum number of elements enqueued by every producer
   /// in MP/MC unit test. Must be a multiple of 8.
+#ifdef EMBB_THREADING_ANALYSIS_MODE
+  static const int MIN_ENQ_ELEMENTS = 24;
+  static const int MIN_TOTAL_PRODUCE_CONSUME_COUNT = 200;
+#else
   static const int MIN_ENQ_ELEMENTS = 120;
   static const int MIN_TOTAL_PRODUCE_CONSUME_COUNT = 1000;
+#endif
 
  private:
   class Consumer {
