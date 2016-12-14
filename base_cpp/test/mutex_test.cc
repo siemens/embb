@@ -222,8 +222,12 @@ number_threads_(partest::TestSuite::GetDefaultNumThreads()),
         number_iterations_)
     .Post(&SpinLockTest::PostSpinlockCount, this);
 
+  /* Disable tests that assume non-recursive behavior */
+#if !(defined(EMBB_THREADING_ANALYSIS_MODE) && \
+  defined(EMBB_PLATFORM_THREADING_WINTHREADS))
   CreateUnit("Test spinning (too many spins), single thread")
     .Add(&SpinLockTest::TestSpinLockTooManySpins, this, 1, 1);
+#endif
 }
 
 void SpinLockTest::TestSpinlockCountLock() {
