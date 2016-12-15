@@ -76,7 +76,8 @@ GroupTest::GroupTest() {
 #else
   const int iterations(100);
 #endif
-  CreateUnit("mtapi group test").Add(&GroupTest::TestBasic, this, 1, iterations);
+  CreateUnit("mtapi group test").
+  Add(&GroupTest::TestBasic, this, 1, iterations);
 }
 
 void GroupTest::TestBasic() {
