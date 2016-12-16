@@ -414,21 +414,23 @@ if ! [ -f $MYTMPDIR/${n}/doc/reference/doxygen_html_generated/index.html ]; then
         exit 1;
 fi
 
+if [ -f $MYTMPDIR/${n}/myfile.properties ]; then
+        rm $MYTMPDIR/${n}/myfile.properties
+fi
+
 #build the tarball, if CREATE_TARBALL is true.
 if [ "$CREATE_TARBALL" = true ]; then
-	echo "--> Calling tar"
-	tar -czf $TARBALL_NAME -C $MYTMPDIR ${n}
-	echo "--> Done. Created $TARBALL_NAME."
+        echo "--> Calling tar"
+        tar -czf $TARBALL_NAME -C $MYTMPDIR ${n}
+        echo "--> Done. Created $TARBALL_NAME."
 fi
 
 #build the zip, if CREATE_ZIP is true
 if [ "$CREATE_ZIP" = true ]; then
-	echo "--> Calling zip"
-	cd $MYTMPDIR
+        echo "--> Calling zip"
+        cd $MYTMPDIR
         zip -r -q $ZIP_NAME ./*
         cd -
-	mv $MYTMPDIR/$ZIP_NAME .
+        mv $MYTMPDIR/$ZIP_NAME .
         echo "--> Done. Created $ZIP_NAME."
 fi
-
-
