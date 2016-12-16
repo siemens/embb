@@ -342,14 +342,17 @@ void mtapi_action_delete(
           context);
       }
 
-      /* delete action */
-      if (embb_mtapi_job_is_id_valid(node, local_action->job_id)) {
-        embb_mtapi_job_t* local_job = embb_mtapi_job_get_storage_for_id(
-          node, local_action->job_id);
-        embb_mtapi_job_remove_action(local_job, local_action);
+      if (MTAPI_SUCCESS == local_status)
+      {
+        /* delete action */
+        if (embb_mtapi_job_is_id_valid(node, local_action->job_id)) {
+          embb_mtapi_job_t* local_job = embb_mtapi_job_get_storage_for_id(
+            node, local_action->job_id);
+          embb_mtapi_job_remove_action(local_job, local_action);
+        }
+        embb_mtapi_action_finalize(local_action);
+        embb_mtapi_action_pool_deallocate(node->action_pool, local_action);
       }
-      embb_mtapi_action_finalize(local_action);
-      embb_mtapi_action_pool_deallocate(node->action_pool, local_action);
     } else {
       local_status = MTAPI_ERR_ACTION_INVALID;
     }
