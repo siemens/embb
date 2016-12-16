@@ -26,7 +26,17 @@
 #
 function(SetGNUCompilerFlags compiler_libs)
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-    set(compiler_libs pthread rt PARENT_SCOPE)
+    find_library(PTHREAD_LIBRARY pthread)
+    set(pthread_lib "")
+    if (PTHREAD_LIBRARY)
+      set(pthread_lib "pthread")
+    endif()
+    set(rt_lib "")
+    find_library(RT_LIBRARY rt)
+    if (RT_LIBRARY)
+      set(rt_lib "rt")
+    endif()
+    set(compiler_libs ${pthread_lib} ${rt_lib} PARENT_SCOPE)
     # -Wall   -> All warnings
     # -Wextra -> Even more warnings
     # -Werror -> Warnings are errors
