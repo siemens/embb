@@ -69,7 +69,7 @@ void ConditionVarTest::TestNotify() {
     embb_mutex_unlock(&mutex_cond_notify_);
     // All threads called wait on the condition (even last thread)
 
-    embb_counter_init(&counter_);
+    embb_counter_reset(&counter_);
 
     embb_condition_notify_one(&cond_notify_);
     embb_mutex_lock(&mutex_cond_wait_);
