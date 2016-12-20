@@ -105,6 +105,17 @@ unsigned int embb_counter_decrement(
   );
 
 /**
+ * Resets an initialized counter to 0.
+ *
+ * \pre \c counter is initialized and not NULL.
+ * \waitfree
+ */
+void embb_counter_reset(
+  embb_counter_t* counter
+  /**< [IN,OUT] Pointer to counter */
+  );
+
+/**
  * Destroys an initialized counter.
  *
  * \pre \c counter is initialized and not NULL.

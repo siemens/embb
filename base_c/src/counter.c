@@ -42,6 +42,11 @@ unsigned int embb_counter_get(embb_counter_t* counter) {
   return embb_atomic_load_unsigned_int(&(counter->value));
 }
 
+void embb_counter_reset(embb_counter_t* counter) {
+  assert(counter != NULL);
+  embb_atomic_store_unsigned_int(&(counter->value), 0);
+}
+
 unsigned int embb_counter_increment(embb_counter_t* counter) {
   assert(counter != NULL);
   return embb_atomic_fetch_and_add_unsigned_int(&(counter->value), 1);
