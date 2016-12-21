@@ -342,8 +342,7 @@ void mtapi_action_delete(
           context);
       }
 
-      if (MTAPI_SUCCESS == local_status)
-      {
+      if (MTAPI_SUCCESS == local_status) {
         /* delete action */
         if (embb_mtapi_job_is_id_valid(node, local_action->job_id)) {
           embb_mtapi_job_t* local_job = embb_mtapi_job_get_storage_for_id(

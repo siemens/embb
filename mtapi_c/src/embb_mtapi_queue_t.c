@@ -422,8 +422,7 @@ void mtapi_queue_delete(
           context);
       }
 
-      if (MTAPI_SUCCESS == local_status)
-      {
+      if (MTAPI_SUCCESS == local_status) {
         /* delete queue */
         embb_mtapi_queue_finalize(local_queue);
         embb_mtapi_queue_pool_deallocate(node->queue_pool, local_queue);
