@@ -91,7 +91,7 @@ void ConditionVarTest::TestNotify() {
     lock_notify.Unlock();
     // All threads called wait on the condition (Even last thread)
 
-    embb_counter_init(&counter_);
+    embb_counter_reset(&counter_);
     UniqueLock<Mutex> lock_wait(mutex_cond_wait_);
 
     cond_notify_.NotifyOne();

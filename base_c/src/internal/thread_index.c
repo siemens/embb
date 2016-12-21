@@ -146,5 +146,5 @@ void embb_internal_thread_index_reset() {
    */
   embb_internal_thread_index_var = UINT_MAX;
 
-  embb_counter_init(embb_thread_index_counter());
+  embb_counter_reset(embb_thread_index_counter());
 }
