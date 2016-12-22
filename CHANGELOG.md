@@ -2,6 +2,82 @@ Embedded Multicore Building Blocks (EMB²)
 =========================================
 
 
+Version 0.5.0
+-------------
+
+### Features:
+- Enhanced C++ interfaces for MTAPI task handling
+- CUDA plugin for MTAPI task scheduler (experimental)
+- Added support for worker thread priorities
+- Added support for task priorities and affinities in dataflow_cpp
+
+### Changes and improvements:
+- Introduced threading analysis mode and added mutex-based atomics
+- Reduced number of test iterations in threading analysis mode
+- Replaced spinlocks with mutexes in threading analysis mode
+- Added initialization and destroy methods for atomics
+- Added initialization checks in debug mode for atomics
+- Resolved AppVerifier warnings
+- Added counter reset function
+- Removed double initializations of counters
+- Removed deletion of resources in timeout scenario
+- Improved portability on POSIX systems
+- Added big endian support for MTAPI attributes
+- Removed legacy group constructor in MTAPI
+- Resolved potential integer overflows on 32-bit targets
+- Added missing <sys/select.h>, removed inclusion of <memory.h>
+- Removed separate storage for internal task queues
+- Removed spinlock workaround
+- Resolved issue with Visual Studio 2012
+- Removed unnecessary value copy
+- Removed tasks_cpp component
+- Switched C style cast to C++ style cast in containers_cpp
+- Resolved problem with non-monotonic time readings and timeouts
+- Moved processing of sources in dataflow_cpp to worker threads
+- Added setter to enable main thread reuse
+- Added functionality to start function objects directly as tasks
+- Added tests for dataflow_cpp with and without main thread reuse
+- Added test for detached tasks
+- Added test to reproduce out-of-order execution of queued task when waiting for other tasks
+- Improved tests for base_cpp, mtapi_cpp, containers_cpp, dataflow_cpp
+
+### Bug fixes:
+- Fixed Pthread API error reported by helgrind
+- Fixed bug where notification of action was missing when a task finished
+- Fixed bug causing ordered queue to be deleted before last task finished
+- Fixed problem with network plugin and removed dead code
+- Fixed problem with mtapi_action_delete which was not blocking until all associtated tasks were completely deleted
+- Fixed race condition in task handling
+- Fixed incomplete initialization with user provided NodeAttributes
+- Fixed problem with ordered queues where tasks were executed out of order while waiting
+- Fixed behavior of retained tasks
+- Fixed bug in handling of canceled tasks causing the network test to hang
+- Fixed handling of detached tasks in conjunction with retaining queues and multi-instance tasks
+- Fixed automatic initialization in mtapi_cpp
+- Fixed handling of tasks executed during a wait operation
+- Fixed deletion of detached tasks
+- Fixed bug in MTAPI scheduler related to dataflow_cpp
+
+### Build system:
+- Performed analysis using AppVerifier
+- Fixed path problems in tarball and zip creation
+- Added creation of zip release files
+- Added message if documentation build is enabled but Doxygen is not found
+- Updated Travis CI integration
+- Fixed build on FreeBSD
+- Added installation of PDB files in Visual Studio debug builds
+- Added missing install directive for config header
+- Resolved warning in hazard pointer implementation
+- Changed CMake scripts (caching of install prefix)
+
+### Documentation:
+- Revised and updated README.md
+- Added CONTRIBUTING.md
+- Improved examples for mtapi_cpp
+- Updated and extended Doxygen documentation
+- Updated license headers in MTAPI plugin sources
+
+
 Version 0.4.0
 -------------
 
