@@ -204,15 +204,19 @@ int embb_spin_lock(embb_spinlock_t* spinlock) {
     return EMBB_ERROR;
   }
   int expected = 0;
-  int spins = 1;
-
-  while (0 == embb_atomic_compare_and_swap_int(
-    &spinlock->atomic_spin_variable_, &expected, 1)) {
+  unsigned int spins = 1;
+  while (1) {
+	// Wait until spinlock is released to avoid unnecessary RMW operations
+	while (0 != embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {}
+	if (1 == embb_atomic_compare_and_swap_int(
+		&spinlock->atomic_spin_variable_, &expected, 1)) {
+	  break;
+	}
     if (0 == (spins & 1023)) {
       embb_thread_yield();
     }
     spins++;
-    // reset expected, as CAS might change it...
+    // Reset expected, as CAS might change it...
     expected = 0;
   }
   return EMBB_SUCCESS;
@@ -223,20 +227,24 @@ int embb_spin_try_lock(embb_spinlock_t* spinlock,
   if (NULL == spinlock) {
     return EMBB_ERROR;
   }
-  if (max_number_spins == 0)
-    return EMBB_BUSY;
-
+  if (max_number_spins == 0) {
+	return EMBB_BUSY;
+  }
   int expected = 0;
-  while (0 == embb_atomic_compare_and_swap_int(
-    &spinlock->atomic_spin_variable_,
-    &expected, 1)) {
+  while (1) {
+	// Wait until spinlock is released to avoid unnecessary RMW operations
+	while (0 != embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {}
+	if (1 == embb_atomic_compare_and_swap_int(
+		&spinlock->atomic_spin_variable_, &expected, 1)) {
+	  break;
+	}
     max_number_spins--;
     if (0 == max_number_spins) {
       return EMBB_BUSY;
     }
+    // Reset expected, as CAS might change it...
     expected = 0;
   }
-
   return EMBB_SUCCESS;
 }
 
@@ -244,10 +252,14 @@ int embb_spin_unlock(embb_spinlock_t* spinlock) {
   if (NULL == spinlock) {
     return EMBB_ERROR;
   }
+#if defined(EMBB_DEBUG)
   int expected = 1;
   return embb_atomic_compare_and_swap_int(&spinlock->atomic_spin_variable_,
-    &expected, 0) ?
-  EMBB_SUCCESS : EMBB_ERROR;
+    &expected, 0) ? EMBB_SUCCESS : EMBB_ERROR;
+#else
+  embb_atomic_store_int(&spinlock->atomic_spin_variable_, 0);
+  return EMBB_SUCCESS;
+#endif
 }
 
 void embb_spin_destroy(embb_spinlock_t* spinlock) {

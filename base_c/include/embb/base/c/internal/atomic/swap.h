@@ -58,8 +58,7 @@
   EMBB_PLATFORM_INLINE EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) EMBB_CAT2(embb_internal__atomic_swap_, EMBB_PARAMETER_SIZE_BYTE)(\
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value)\
   { \
-  /*the lock prefix is implicit for xchg*/  \
-  __asm__ __volatile__("xchg" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
+  __asm__ __volatile__("lock xchg" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "+m" (*pointer_to_value), "+q" (new_value) \
   : \
   : "memory"); \
