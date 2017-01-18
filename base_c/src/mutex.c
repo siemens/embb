@@ -214,7 +214,7 @@ int embb_spin_lock(embb_spinlock_t* spinlock) {
       }
       // Reset expected, as CAS might change it...
       expected = 0;
-	}
+    }
     if (0 == (spins & 1023)) {
       embb_thread_yield();
     }
@@ -241,7 +241,7 @@ int embb_spin_try_lock(embb_spinlock_t* spinlock,
       }
       // Reset expected, as CAS might change it...
       expected = 0;
-	}
+    }
     max_number_spins--;
     if (0 == max_number_spins) {
       return EMBB_BUSY;
