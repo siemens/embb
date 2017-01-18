@@ -114,7 +114,7 @@ define_or_assign @embb_internal__atomic_or_assign_1_asm@8, byte, dl
 define_store macro name, size, value
 	public name
 	name proc
-		xchg size ptr [ecx], value
+		lock xchg size ptr [ecx], value
 		ret
 	name endp
 endm
