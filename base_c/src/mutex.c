@@ -206,18 +206,19 @@ int embb_spin_lock(embb_spinlock_t* spinlock) {
   int expected = 0;
   unsigned int spins = 1;
   while (1) {
-	// Wait until spinlock is released to avoid unnecessary RMW operations
-	while (0 != embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {}
-	if (1 == embb_atomic_compare_and_swap_int(
-		&spinlock->atomic_spin_variable_, &expected, 1)) {
-	  break;
+    // Wait until spinlock is released to avoid unnecessary RMW operations
+    if (0 == embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {
+      if (1 == embb_atomic_compare_and_swap_int(
+          &spinlock->atomic_spin_variable_, &expected, 1)) {
+        break;
+      }
+      // Reset expected, as CAS might change it...
+      expected = 0;
 	}
     if (0 == (spins & 1023)) {
       embb_thread_yield();
     }
     spins++;
-    // Reset expected, as CAS might change it...
-    expected = 0;
   }
   return EMBB_SUCCESS;
 }
@@ -228,22 +229,23 @@ int embb_spin_try_lock(embb_spinlock_t* spinlock,
     return EMBB_ERROR;
   }
   if (max_number_spins == 0) {
-	return EMBB_BUSY;
+    return EMBB_BUSY;
   }
   int expected = 0;
   while (1) {
-	// Wait until spinlock is released to avoid unnecessary RMW operations
-	while (0 != embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {}
-	if (1 == embb_atomic_compare_and_swap_int(
-		&spinlock->atomic_spin_variable_, &expected, 1)) {
-	  break;
+    // Wait until spinlock is released to avoid unnecessary RMW operations
+    if (0 == embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {
+      if (1 == embb_atomic_compare_and_swap_int(
+          &spinlock->atomic_spin_variable_, &expected, 1)) {
+        break;
+      }
+      // Reset expected, as CAS might change it...
+      expected = 0;
 	}
     max_number_spins--;
     if (0 == max_number_spins) {
       return EMBB_BUSY;
     }
-    // Reset expected, as CAS might change it...
-    expected = 0;
   }
   return EMBB_SUCCESS;
 }
