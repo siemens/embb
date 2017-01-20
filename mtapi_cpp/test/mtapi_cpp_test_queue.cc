@@ -60,8 +60,10 @@ void QueueTest::TestBasic() {
   embb::mtapi::Action action = node.CreateAction(
     JOB_TEST_QUEUE, testQueueAction, MTAPI_NULL, 0);
 
+  embb::mtapi::Queue queue;
+
   {
-    embb::mtapi::Queue queue = node.CreateQueue(job);
+    queue = node.CreateQueue(job);
 
     int result = 0;
     embb::mtapi::Task task = queue.Enqueue<void, int>(MTAPI_NULL, &result);
@@ -71,6 +73,8 @@ void QueueTest::TestBasic() {
     mtapi_status_t status = task.Wait();
     PT_EXPECT_EQ(status, MTAPI_ERR_ACTION_CANCELLED);
     PT_EXPECT_EQ(result, 1);
+
+    queue.Delete();
   }
 
   action.Delete();

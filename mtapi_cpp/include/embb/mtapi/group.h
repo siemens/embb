@@ -52,6 +52,14 @@ namespace mtapi {
 class Group {
  public:
   /**
+   * Constructs an invalid Group.
+   */
+  Group() {
+    handle_.id = 0;
+    handle_.tag = 0;
+  }
+
+  /**
    * Copies a Group.
    *
    * \waitfree

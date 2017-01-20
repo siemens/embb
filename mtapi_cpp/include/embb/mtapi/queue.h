@@ -52,6 +52,14 @@ namespace mtapi {
 class Queue {
  public:
   /**
+   * Constructs an invalid Queue.
+   */
+  Queue() {
+    handle_.id = 0;
+    handle_.tag = 0;
+  }
+
+  /**
    * Copies a Queue.
    *
    * \waitfree
@@ -280,9 +288,6 @@ class Queue {
   friend class Node;
 
  private:
-  // no default constructor
-  Queue();
-
   Queue(
     mtapi_queue_id_t queue_id,
     Job const & job,
