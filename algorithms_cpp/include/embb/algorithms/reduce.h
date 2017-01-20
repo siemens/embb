@@ -27,6 +27,7 @@
 #ifndef EMBB_ALGORITHMS_REDUCE_H_
 #define EMBB_ALGORITHMS_REDUCE_H_
 
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
@@ -101,6 +102,48 @@ ReturnType Reduce(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  embb::mtapi::Job reduction,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType, typename ReductionFunction>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  ReductionFunction reduction,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType, typename TransformationFunction>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  embb::mtapi::Job reduction,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.

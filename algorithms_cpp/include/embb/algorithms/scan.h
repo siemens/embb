@@ -27,6 +27,7 @@
 #ifndef EMBB_ALGORITHMS_SCAN_H_
 #define EMBB_ALGORITHMS_SCAN_H_
 
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
@@ -108,6 +109,53 @@ void Scan(
   );
 
 #else // DOXYGEN
+
+  /**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  embb::mtapi::Job scan,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename ScanFunction>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  ScanFunction scan,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename TransformationFunction>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  embb::mtapi::Job scan,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.

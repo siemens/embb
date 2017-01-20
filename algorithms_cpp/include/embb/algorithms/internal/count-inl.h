@@ -29,6 +29,7 @@
 
 #include <functional>
 #include <embb/algorithms/reduce.h>
+#include <embb/algorithms/internal/predicate_job_functor.h>
 
 namespace embb {
 namespace algorithms {
@@ -88,6 +89,19 @@ typename std::iterator_traits<RAI>::difference_type
   return Reduce(first, last, Difference(0), std::plus<Difference>(),
                 internal::ValueComparisonFunction<ValueType>(value), policy,
                 block_size);
+}
+
+template<typename RAI>
+typename std::iterator_traits<RAI>::difference_type
+CountIf(RAI first, RAI last, embb::mtapi::Job comparison,
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+  typedef typename std::iterator_traits<RAI>::difference_type Difference;
+  typedef internal::PredicateJobFunctor<
+    std::iterator_traits<RAI>::value_type> Predicate;
+  return Reduce(first, last, Difference(0), std::plus<Difference>(),
+    internal::FunctionComparisonFunction<Predicate>(
+      Predicate(comparison, policy)),
+    policy, block_size);
 }
 
 template<typename RAI, typename ComparisonFunction>

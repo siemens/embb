@@ -33,6 +33,7 @@
 #include <embb/mtapi/mtapi.h>
 #include <embb/algorithms/internal/partition.h>
 #include <embb/algorithms/zip_iterator.h>
+#include <embb/algorithms/internal/foreach_job_functor.h>
 
 namespace embb {
 namespace algorithms {
@@ -146,6 +147,16 @@ void ForEachIteratorCheck(RAI first, RAI last, Function unary,
 }
 
 }  // namespace internal
+
+template<typename RAI>
+void ForEach(RAI first, const RAI last, embb::mtapi::Job unary,
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+  typename std::iterator_traits<RAI>::iterator_category category;
+  internal::ForEachIteratorCheck(first, last,
+    internal::ForeachJobFunctor<std::iterator_traits<RAI>::value_type>(
+      unary, policy),
+    policy, block_size, category);
+}
 
 template<typename RAI, typename Function>
 void ForEach(RAI first, const RAI last, Function unary,

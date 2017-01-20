@@ -36,6 +36,7 @@
 #include <embb/base/exceptions.h>
 #include <embb/mtapi/mtapi.h>
 #include <embb/algorithms/internal/partition.h>
+#include <embb/algorithms/internal/comparison_job_functor.h>
 
 namespace embb {
 namespace algorithms {
@@ -226,6 +227,16 @@ void QuickSortIteratorCheck(RAI first, RAI last,
 }
 
 }  // namespace internal
+
+template <typename RAI>
+void QuickSort(RAI first, RAI last, embb::mtapi::Job comparison,
+  const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+  typedef typename std::iterator_traits<RAI>::iterator_category category;
+  internal::QuickSortIteratorCheck(first, last,
+    internal::ComparisonJobFunctor<std::iterator_traits<RAI>::value_type>(
+      comparison, policy),
+    policy, block_size, category());
+}
 
 template <typename RAI, typename ComparisonFunction>
 void QuickSort(RAI first, RAI last, ComparisonFunction comparison,

@@ -27,6 +27,7 @@
 #ifndef EMBB_ALGORITHMS_COUNT_H_
 #define EMBB_ALGORITHMS_COUNT_H_
 
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 #include <iterator>
 
@@ -160,6 +161,18 @@ typename std::iterator_traits<RAI>::difference_type Count(
   ) {
   return Count(first, last, value, policy, 0);
 }
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ComparisonFunction>
+typename std::iterator_traits<RAI>::difference_type CountIf(
+  RAI first,
+  RAI last,
+  embb::mtapi::Job comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.

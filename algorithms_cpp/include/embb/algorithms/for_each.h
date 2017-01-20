@@ -27,6 +27,7 @@
 #ifndef EMBB_ALGORITHMS_FOR_EACH_H_
 #define EMBB_ALGORITHMS_FOR_EACH_H_
 
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 
 namespace embb {
@@ -79,6 +80,18 @@ void ForEach(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI>
+void ForEach(
+  RAI first,
+  RAI last,
+  embb::mtapi::Job unary,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+);
 
 /**
  * Overload of above described Doxygen dummy.

@@ -120,6 +120,42 @@ class TaskWrapper {
     function_();
   }
 };
+
+/**
+ * Spawns an MTAPI task on construction and waits for it on destruction.
+ */
+template<>
+class TaskWrapper<embb::mtapi::Job> {
+ public:
+  /**
+   * Wraps the function into an embb::tasks::Action and spawns an
+   * embb::tasks::Task.
+   */
+  explicit TaskWrapper(
+    embb::mtapi::Job function,
+    const embb::mtapi::ExecutionPolicy& policy)
+      : function_(function), task_() {
+    embb::mtapi::TaskAttributes attr;
+    attr.SetPolicy(policy);
+    task_ = embb::mtapi::Node::GetInstance().Start(
+      function,
+      static_cast<void const *>(MTAPI_NULL),
+      static_cast<void *>(MTAPI_NULL),
+      attr);
+  }
+
+  /**
+   * Waits until the task has finished execution.
+   */
+  ~TaskWrapper() {
+    task_.Wait(MTAPI_INFINITE);
+  }
+
+ private:
+  embb::mtapi::Job function_;
+  embb::mtapi::Task task_;
+};
+
 } // namespace internal
 
 template<typename Function1, typename Function2>

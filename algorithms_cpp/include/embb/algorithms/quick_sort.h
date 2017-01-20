@@ -28,6 +28,7 @@
 #define EMBB_ALGORITHMS_QUICK_SORT_H_
 
 #include <functional>
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 
 namespace embb {
@@ -86,6 +87,18 @@ void QuickSort(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template <typename RAI>
+void QuickSort(
+  RAI first,
+  RAI last,
+  embb::mtapi::Job comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.
