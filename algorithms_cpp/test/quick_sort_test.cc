@@ -41,11 +41,36 @@ static bool DescendingComparisonFunction(double lhs, double rhs) {
   }
 }
 
+#define COMPARISON_JOB 17
+
+static void DescendingComparisonActionFunction(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/) {
+  typedef struct {
+    int lhs;
+    int rhs;
+  } InT;
+  typedef struct {
+    bool out;
+  } OutT;
+  PT_EXPECT_EQ(args_size, sizeof(InT));
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  InT const * inputs = static_cast<InT const *>(args);
+  OutT * outputs = static_cast<OutT *>(result_buffer);
+  outputs->out = inputs->lhs < inputs->rhs;
+}
+
 QuickSortTest::QuickSortTest() {
   CreateUnit("Different data structures")
     .Add(&QuickSortTest::TestDataStructures, this);
   CreateUnit("Function Pointers").Add(&QuickSortTest::TestFunctionPointers,
       this);
+  CreateUnit("Heterogeneous").Add(&QuickSortTest::TestHeterogeneous, this);
   CreateUnit("Ranges").Add(&QuickSortTest::TestRanges, this);
   CreateUnit("Block sizes").Add(&QuickSortTest::TestBlockSizes, this);
   CreateUnit("Policies").Add(&QuickSortTest::TestPolicy, this);
@@ -91,6 +116,29 @@ void QuickSortTest::TestFunctionPointers() {
   for (size_t i = 0; i < kCountSize; i++) {
     PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }
+}
+
+void QuickSortTest::TestHeterogeneous() {
+  using embb::algorithms::QuickSort;
+
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::mtapi::Action action = node.CreateAction(
+    COMPARISON_JOB, DescendingComparisonActionFunction);
+  embb::mtapi::Job job = node.GetJob(COMPARISON_JOB);
+
+  std::vector<int> vector(kCountSize);
+  for (size_t i = 0; i < kCountSize; i++) {
+    vector[i] = static_cast<int>(i + 2);
+  }
+  std::vector<int> vector_copy(vector);
+  std::sort(vector_copy.begin(), vector_copy.end(),
+    &DescendingComparisonFunction);
+  QuickSort(vector.begin(), vector.end(), job);
+  for (size_t i = 0; i < kCountSize; i++) {
+    PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  action.Delete();
 }
 
 void QuickSortTest::TestRanges() {

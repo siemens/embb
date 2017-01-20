@@ -37,11 +37,36 @@ static bool DescendingComparisonFunction(double lhs, double rhs) {
   return lhs < rhs ? true : false;
 }
 
+#define COMPARISON_JOB 17
+
+static void DescendingComparisonActionFunction(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/) {
+  typedef struct {
+    int lhs;
+    int rhs;
+  } InT;
+  typedef struct {
+    bool out;
+  } OutT;
+  PT_EXPECT_EQ(args_size, sizeof(InT));
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  InT const * inputs = static_cast<InT const *>(args);
+  OutT * outputs = static_cast<OutT *>(result_buffer);
+  outputs->out = inputs->lhs < inputs->rhs;
+}
+
 MergeSortTest::MergeSortTest() {
   CreateUnit("Different data structures")
     .Add(&MergeSortTest::TestDataStructures, this);
   CreateUnit("Function Pointers").Add(&MergeSortTest::TestFunctionPointers,
       this);
+  CreateUnit("Homogeneous").Add(&MergeSortTest::TestHomogeneous, this);
   CreateUnit("Ranges").Add(&MergeSortTest::TestRanges, this);
   //CreateUnit("Block sizes").Add(&MergeSortTest::TestBlockSizes, this);
   CreateUnit("Policies").Add(&MergeSortTest::TestPolicy, this);
@@ -89,6 +114,30 @@ void MergeSortTest::TestFunctionPointers() {
   for (size_t i = 0; i < kCountSize; i++) {
     PT_EXPECT_EQ(vector_copy[i], vector[i]);
   }
+}
+
+void MergeSortTest::TestHomogeneous() {
+  using embb::algorithms::MergeSortAllocate;
+  using embb::mtapi::ExecutionPolicy;
+
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::mtapi::Action action = node.CreateAction(
+    COMPARISON_JOB, DescendingComparisonActionFunction);
+  embb::mtapi::Job job = node.GetJob(COMPARISON_JOB);
+
+  std::vector<int> vector(kCountSize);
+  for (size_t i = kCountSize - 1; i > 0; i--) {
+    vector[i] = static_cast<int>(i + 2);
+  }
+  std::vector<int> vector_copy(vector);
+  std::sort(vector_copy.begin(), vector_copy.end(),
+    &DescendingComparisonFunction);
+  MergeSortAllocate(vector.begin(), vector.end(), job);
+  for (size_t i = 0; i < kCountSize; i++) {
+    PT_EXPECT_EQ(vector_copy[i], vector[i]);
+  }
+
+  action.Delete();
 }
 
 void MergeSortTest::TestRanges() {

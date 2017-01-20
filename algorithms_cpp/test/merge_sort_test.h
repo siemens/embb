@@ -51,6 +51,11 @@ class MergeSortTest : public partest::TestCase {
   void TestFunctionPointers();
 
   /**
+   * Tests the compatibility with homogeneous systems.
+   */
+  void TestHomogeneous();
+
+  /**
    * Tests setting various ranges to be iterated.
    */
   void TestRanges();

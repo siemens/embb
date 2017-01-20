@@ -48,11 +48,58 @@ static int AddFunction(int lhs, int rhs) {
   return lhs + rhs;
 }
 
+#define TRANSFORMATION_JOB 17
+#define REDUCTION_JOB 18
+
+static void SquareActionFunction(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/) {
+  typedef struct {
+    int in;
+  } InT;
+  typedef struct {
+    int out;
+  } OutT;
+  PT_EXPECT_EQ(args_size, sizeof(InT));
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  InT const * inputs = static_cast<InT const *>(args);
+  OutT * outputs = static_cast<OutT *>(result_buffer);
+  outputs->out = inputs->in * inputs->in;
+}
+
+static void AddActionFunction(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/) {
+  typedef struct {
+    int in1;
+    int in2;
+  } InT;
+  typedef struct {
+    int out;
+  } OutT;
+  PT_EXPECT_EQ(args_size, sizeof(InT));
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  InT const * inputs = static_cast<InT const *>(args);
+  OutT * outputs = static_cast<OutT *>(result_buffer);
+  outputs->out = inputs->in1 + inputs->in2;
+}
+
 ScanTest::ScanTest() {
   CreateUnit("Different data structures")
       .Add(&ScanTest::TestDataStructures, this);
   CreateUnit("Transform").Add(&ScanTest::TestTransform, this);
   CreateUnit("Function Pointers").Add(&ScanTest::TestFunctionPointers, this);
+  CreateUnit("Heterogeneous").Add(&ScanTest::TestHeterogeneous, this);
   CreateUnit("Ranges").Add(&ScanTest::TestRanges, this);
   CreateUnit("Block sizes").Add(&ScanTest::TestBlockSizes, this);
   CreateUnit("Policies").Add(&ScanTest::TestPolicy, this);
@@ -153,6 +200,63 @@ void ScanTest::TestFunctionPointers() {
     expected += vector[i] * vector[i];
     PT_EXPECT_EQ(expected, outputVector[i]);
   }
+}
+
+void ScanTest::TestHeterogeneous() {
+  using embb::algorithms::Scan;
+
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::mtapi::Action reduce_action = node.CreateAction(
+    REDUCTION_JOB, AddActionFunction);
+  embb::mtapi::Job reduce_job = node.GetJob(REDUCTION_JOB);
+  embb::mtapi::Action transform_action = node.CreateAction(
+    TRANSFORMATION_JOB, SquareActionFunction);
+  embb::mtapi::Job transform_job = node.GetJob(TRANSFORMATION_JOB);
+
+  std::vector<int> vector(kCountSize);
+  std::vector<int> init(kCountSize);
+  std::vector<int> outputVector(kCountSize);
+  for (size_t i = 0; i < kCountSize; i++) {
+    vector[i] = static_cast<int>(i+2);
+    init[i] = 0;
+  }
+
+  Scan(vector.begin(), vector.end(), outputVector.begin(), 0, reduce_job);
+  int expected = 0;
+  for (size_t i = 0; i < kCountSize; i++) {
+    expected += vector[i];
+    PT_EXPECT_EQ(expected, outputVector[i]);
+  }
+
+  outputVector = init;
+  Scan(vector.begin(), vector.end(), outputVector.begin(), 0, reduce_job,
+       transform_job);
+  expected = 0;
+  for (size_t i = 0; i < kCountSize; i++) {
+    expected += vector[i] * vector[i];
+    PT_EXPECT_EQ(expected, outputVector[i]);
+  }
+
+  outputVector = init;
+  Scan(vector.begin(), vector.end(), outputVector.begin(), 0, reduce_job,
+       Square());
+  expected = 0;
+  for (size_t i = 0; i < kCountSize; i++) {
+    expected += vector[i] * vector[i];
+    PT_EXPECT_EQ(expected, outputVector[i]);
+  }
+
+  outputVector = init;
+  Scan(vector.begin(), vector.end(), outputVector.begin(), 0, std::plus<int>(),
+       transform_job);
+  expected = 0;
+  for (size_t i = 0; i < kCountSize; i++) {
+    expected += vector[i] * vector[i];
+    PT_EXPECT_EQ(expected, outputVector[i]);
+  }
+
+  reduce_action.Delete();
+  transform_action.Delete();
 }
 
 void ScanTest::TestRanges() {

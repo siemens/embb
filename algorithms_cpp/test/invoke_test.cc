@@ -42,6 +42,19 @@ static void Invocable8() {}
 static void Invocable9() {}
 static void Invocable10() {}
 
+#define HETEROGENEOUS_JOB 17
+
+static void InvocableActionFunction(
+  const void* /*args*/,
+  mtapi_size_t /*args_size*/,
+  void* /*result_buffer*/,
+  mtapi_size_t /*result_buffer_size*/,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/) {
+  // emtpy
+}
+
 void InvokeTest::Test() {
   using embb::algorithms::Invoke;
   Invoke(&Invocable1, &Invocable2);
@@ -80,4 +93,14 @@ void InvokeTest::Test() {
   Invoke(&Invocable1, &Invocable2, &Invocable3, &Invocable4, &Invocable5,
          &Invocable6, &Invocable7, &Invocable8, &Invocable9, &Invocable10,
          policy);
+
+  // test one heterogeneous variant
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::mtapi::Action action = node.CreateAction(
+    HETEROGENEOUS_JOB, InvocableActionFunction);
+  embb::mtapi::Job job = node.GetJob(HETEROGENEOUS_JOB);
+
+  Invoke(job, &Invocable1);
+
+  action.Delete();
 }
