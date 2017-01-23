@@ -31,6 +31,8 @@
 
 #include <embb/dataflow/internal/inputs.h>
 
+#include <embb/mtapi/mtapi.h>
+
 namespace embb {
 namespace dataflow {
 namespace internal {
@@ -66,7 +68,10 @@ class SinkExecutor< Inputs<I1> > {
     } inputs = { i1 };
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+        &inputs, sizeof(inputs),
+        MTAPI_NULL, 0,
+        MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
   }
 };
@@ -101,7 +106,10 @@ class SinkExecutor< Inputs<I1, I2> > {
     } inputs = { i1, i2 };
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+        &inputs, sizeof(inputs),
+        MTAPI_NULL, 0,
+        MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
   }
 };
@@ -139,7 +147,10 @@ class SinkExecutor< Inputs<I1, I2, I3> > {
     } inputs = { i1, i2, i3 };
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+        &inputs, sizeof(inputs),
+        MTAPI_NULL, 0,
+        MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
   }
 };
@@ -180,7 +191,10 @@ class SinkExecutor< Inputs<I1, I2, I3, I4> > {
     } inputs = { i1, i2, i3, i4 };
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+        &inputs, sizeof(inputs),
+        MTAPI_NULL, 0,
+        MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
   }
 };
@@ -224,7 +238,10 @@ class SinkExecutor< Inputs<I1, I2, I3, I4, I5> > {
     } inputs = { i1, i2, i3, i4, i5 };
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+        &inputs, sizeof(inputs),
+        MTAPI_NULL, 0,
+        MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
   }
 };

@@ -33,6 +33,8 @@
 #include <embb/dataflow/internal/inputs.h>
 #include <embb/dataflow/internal/outputs.h>
 
+#include <embb/mtapi/mtapi.h>
+
 namespace embb {
 namespace dataflow {
 namespace internal {
@@ -80,7 +82,11 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1> > {
       O1 o1_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
   }
@@ -130,7 +136,11 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2> > {
       O2 o2_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -186,7 +196,11 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3> > {
       O3 o3_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -248,7 +262,11 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3, O4> > {
       O4 o4_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -300,7 +318,11 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1> > {
       O1 o1_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
   }
@@ -353,7 +375,11 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2> > {
       O2 o2_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -412,7 +438,11 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2, O3> > {
       O3 o3_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -465,7 +495,11 @@ class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1> > {
       O1 o1_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
   }
@@ -521,7 +555,11 @@ class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1, O2> > {
       O2 o2_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -576,7 +614,11 @@ class ProcessExecutor< Inputs<I1, I2, I3, I4>, Outputs<O1> > {
       O1 o1_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(job_, &inputs, &outputs);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
   }

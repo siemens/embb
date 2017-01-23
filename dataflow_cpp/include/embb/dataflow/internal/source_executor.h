@@ -32,6 +32,8 @@
 #include <embb/dataflow/internal/signal.h>
 #include <embb/dataflow/internal/outputs.h>
 
+#include <embb/mtapi/mtapi.h>
+
 namespace embb {
 namespace dataflow {
 namespace internal {
@@ -72,7 +74,10 @@ class SourceExecutor< Outputs<O1> > {
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, static_cast<void *>(MTAPI_NULL), &outputs);
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     return outputs.result != MTAPI_FALSE;
@@ -115,7 +120,10 @@ class SourceExecutor< Outputs<O1, O2> > {
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, static_cast<void *>(MTAPI_NULL), &outputs);
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -162,7 +170,10 @@ class SourceExecutor< Outputs<O1, O2, O3> > {
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, static_cast<void *>(MTAPI_NULL), &outputs);
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -213,7 +224,10 @@ class SourceExecutor< Outputs<O1, O2, O3, O4> > {
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, static_cast<void *>(MTAPI_NULL), &outputs);
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
@@ -265,11 +279,14 @@ class SourceExecutor< Outputs<O1, O2, O3, O4, O5> > {
       O2 o2_;
       O3 o3_;
       O4 o4_;
-      O5 o5_
+      O5 o5_;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
     embb::mtapi::Task task =
-      node.Start(job_, static_cast<void *>(MTAPI_NULL), &outputs);
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
     task.Wait();
     o1 = outputs.o1_;
     o2 = outputs.o2_;
