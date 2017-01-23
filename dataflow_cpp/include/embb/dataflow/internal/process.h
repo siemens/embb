@@ -70,6 +70,24 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     SetScheduler(sched);
   }
 
+  Process(Scheduler * sched, embb::mtapi::Job job)
+    : inputs_()
+    , executor_(job)
+    , action_(NULL)
+    , slices_(0) {
+    next_clock_ = 0;
+    queued_clock_ = 0;
+    bool ordered = Serial;
+    if (ordered) {
+      queue_id_ = GetNextProcessID();
+    }
+    else {
+      queue_id_ = 0;
+    }
+    inputs_.SetListener(this);
+    SetScheduler(sched);
+  }
+
   ~Process() {
     if (NULL != action_) {
       embb::base::Allocation::Free(action_);

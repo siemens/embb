@@ -30,6 +30,7 @@
 #include <cstddef>
 #include <embb/base/exceptions.h>
 #include <embb/mtapi/execution_policy.h>
+#include <embb/mtapi/job.h>
 #include <embb/dataflow/internal/scheduler.h>
 #include <embb/dataflow/internal/clock_listener.h>
 

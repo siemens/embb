@@ -44,6 +44,10 @@ class SinkExecutor< Inputs<I1> > {
   typedef embb::base::Function<void, I1 const &> FunctionType;
 
   explicit SinkExecutor(FunctionType func) : function_(func) {}
+  explicit SinkExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SinkExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -54,6 +58,17 @@ class SinkExecutor< Inputs<I1> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(I1 const & i1) {
+    struct {
+      I1 i1_;
+    } inputs = { i1 };
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+    task.Wait();
+  }
 };
 
 template <typename I1, typename I2>
@@ -62,6 +77,10 @@ class SinkExecutor< Inputs<I1, I2> > {
   typedef embb::base::Function<void, I1 const &, I2 const &> FunctionType;
 
   explicit SinkExecutor(FunctionType func) : function_(func) {}
+  explicit SinkExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SinkExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -73,6 +92,18 @@ class SinkExecutor< Inputs<I1, I2> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(I1 const & i1, I2 const & i2) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+    } inputs = { i1, i2 };
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+    task.Wait();
+  }
 };
 
 template <typename I1, typename I2, typename I3>
@@ -82,6 +113,10 @@ class SinkExecutor< Inputs<I1, I2, I3> > {
     FunctionType;
 
   explicit SinkExecutor(FunctionType func) : function_(func) {}
+  explicit SinkExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SinkExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -94,6 +129,19 @@ class SinkExecutor< Inputs<I1, I2, I3> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(I1 const & i1, I2 const & i2, I3 const & i3) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+      I3 i3_;
+    } inputs = { i1, i2, i3 };
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+    task.Wait();
+  }
 };
 
 template <typename I1, typename I2, typename I3, typename I4>
@@ -103,6 +151,10 @@ class SinkExecutor< Inputs<I1, I2, I3, I4> > {
     I4 const &> FunctionType;
 
   explicit SinkExecutor(FunctionType func) : function_(func) {}
+  explicit SinkExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SinkExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -116,6 +168,21 @@ class SinkExecutor< Inputs<I1, I2, I3, I4> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(I1 const & i1, I2 const & i2, I3 const & i3,
+    I4 const & i4) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+      I3 i3_;
+      I4 i4_;
+    } inputs = { i1, i2, i3, i4 };
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+    task.Wait();
+  }
 };
 
 template <typename I1, typename I2, typename I3, typename I4,
@@ -126,6 +193,10 @@ class SinkExecutor< Inputs<I1, I2, I3, I4, I5> > {
     I4 const &, I5 const &> FunctionType;
 
   explicit SinkExecutor(FunctionType func) : function_(func) {}
+  explicit SinkExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SinkExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -140,6 +211,22 @@ class SinkExecutor< Inputs<I1, I2, I3, I4, I5> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(I1 const & i1, I2 const & i2, I3 const & i3,
+    I4 const & i4, I5 const & i5) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+      I3 i3_;
+      I4 i4_;
+      I5 i5_;
+    } inputs = { i1, i2, i3, i4, i5 };
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(job_, &inputs, static_cast<void*>(MTAPI_NULL));
+    task.Wait();
+  }
 };
 
 } // namespace internal

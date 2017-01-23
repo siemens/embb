@@ -869,6 +869,14 @@ class Network : public internal::ClockListener {
       this->SetPolicy(policy);
       network.processes_.push_back(this);
     }
+
+    SerialProcess(Network & network, embb::mtapi::Job job)
+      : internal::Process< true,
+      internal::Inputs<I1, I2, I3, I4, I5>,
+      internal::Outputs<O1, O2, O3, O4, O5> >(
+        network.sched_, job) {
+      network.processes_.push_back(this);
+    }
   };
 
   template <class Inputs, class Outputs> class ParallelProcess;
@@ -903,6 +911,14 @@ class Network : public internal::ClockListener {
       internal::Outputs<O1, O2, O3, O4, O5> >(
         network.sched_, function) {
       this->SetPolicy(policy);
+      network.processes_.push_back(this);
+    }
+
+    ParallelProcess(Network & network, embb::mtapi::Job job)
+      : internal::Process< false,
+      internal::Inputs<I1, I2, I3, I4, I5>,
+      internal::Outputs<O1, O2, O3, O4, O5> >(
+        network.sched_, job) {
       network.processes_.push_back(this);
     }
   };
@@ -967,6 +983,14 @@ class Network : public internal::ClockListener {
       network.sinks_.push_back(this);
       network.sink_count_++;
     }
+
+    Sink(Network & network, embb::mtapi::Job job)
+      : internal::Sink<
+      internal::Inputs<I1, I2, I3, I4, I5> >(
+        network.sched_, &network, job) {
+      network.sinks_.push_back(this);
+      network.sink_count_++;
+    }
   };
 
   template<typename O1, typename O2 = embb::base::internal::Nil,
@@ -992,6 +1016,12 @@ class Network : public internal::ClockListener {
       : internal::Source<
       internal::Outputs<O1, O2, O3, O4, O5> >(network.sched_, function) {
       this->SetPolicy(policy);
+      network.sources_.push_back(this);
+    }
+
+    Source(Network & network, embb::mtapi::Job job)
+      : internal::Source<
+      internal::Outputs< O1, O2, O3, O4, O5> >(network.sched_, job) {
       network.sources_.push_back(this);
     }
   };
