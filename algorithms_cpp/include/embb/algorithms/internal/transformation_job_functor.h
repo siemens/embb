@@ -51,8 +51,11 @@ class TransformationJobFunctor {
       ReturnType out;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task =
-      node.Start(transformation_, &inputs, &outputs, attr_);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, transformation_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      &attr_.GetInternal());
     task.Wait(MTAPI_INFINITE);
     return outputs.out;
   }

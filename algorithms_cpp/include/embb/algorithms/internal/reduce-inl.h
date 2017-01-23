@@ -190,10 +190,11 @@ ReturnType Reduce(RAI first, RAI last, ReturnType neutral,
   typename std::iterator_traits<RAI>::iterator_category category;
   return internal::ReduceIteratorCheck(
     first, last,
-    internal::ReductionJobFunctor<std::iterator_traits<RAI>::value_type>(
-      reduction, policy),
+    internal::ReductionJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(
+        reduction, policy),
     internal::TransformationJobFunctor<ReturnType,
-      std::iterator_traits<RAI>::value_type>(transformation, policy),
+      typename std::iterator_traits<RAI>::value_type>(transformation, policy),
     neutral, policy, block_size, category);
 }
 
@@ -209,7 +210,7 @@ ReturnType Reduce(
     first, last,
     reduction,
     internal::TransformationJobFunctor<ReturnType,
-      std::iterator_traits<RAI>::value_type>(transformation, policy),
+      typename std::iterator_traits<RAI>::value_type>(transformation, policy),
     neutral, policy, block_size, category);
 }
 
@@ -223,8 +224,9 @@ ReturnType Reduce(
   typename std::iterator_traits<RAI>::iterator_category category;
   return internal::ReduceIteratorCheck(
     first, last,
-    internal::ReductionJobFunctor<std::iterator_traits<RAI>::value_type>(
-      reduction, policy),
+    internal::ReductionJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(
+        reduction, policy),
     transformation,
     neutral, policy, block_size, category);
 }

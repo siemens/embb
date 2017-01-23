@@ -97,7 +97,7 @@ CountIf(RAI first, RAI last, embb::mtapi::Job comparison,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::difference_type Difference;
   typedef internal::PredicateJobFunctor<
-    std::iterator_traits<RAI>::value_type> Predicate;
+    typename std::iterator_traits<RAI>::value_type> Predicate;
   return Reduce(first, last, Difference(0), std::plus<Difference>(),
     internal::FunctionComparisonFunction<Predicate>(
       Predicate(comparison, policy)),

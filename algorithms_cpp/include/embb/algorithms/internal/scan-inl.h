@@ -232,7 +232,8 @@ void Scan(RAIIn first, RAIIn last, RAIOut output_iterator, ReturnType neutral,
   internal::ScanIteratorCheck(first, last, output_iterator, neutral,
     internal::ScanJobFunctor<ReturnType>(scan, policy),
     internal::TransformationJobFunctor<ReturnType,
-      std::iterator_traits<RAIIn>::value_type>(transformation, policy),
+      typename std::iterator_traits<RAIIn>::value_type>(
+        transformation, policy),
     policy, block_size, category());
 }
 
@@ -244,7 +245,8 @@ void Scan(RAIIn first, RAIIn last, RAIOut output_iterator, ReturnType neutral,
   typedef typename std::iterator_traits<RAIIn>::iterator_category category;
   internal::ScanIteratorCheck(first, last, output_iterator, neutral,
     scan, internal::TransformationJobFunctor<ReturnType,
-      std::iterator_traits<RAIIn>::value_type>(transformation, policy),
+      typename std::iterator_traits<RAIIn>::value_type>(
+        transformation, policy),
     policy, block_size, category());
 }
 

@@ -53,7 +53,11 @@ class ScanJobFunctor {
       ReturnType out;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(scan_, &inputs, &outputs, attr_);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, scan_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      &attr_.GetInternal());
     task.Wait(MTAPI_INFINITE);
     return outputs.out;
   }

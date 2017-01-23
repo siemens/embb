@@ -28,6 +28,7 @@
 #define EMBB_ALGORITHMS_MERGE_SORT_H_
 
 #include <functional>
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 #include <embb/base/memory_allocation.h>
 
@@ -139,6 +140,19 @@ void MergeSort(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename RAITemp>
+void MergeSort(
+  RAI first,
+  RAI last,
+  RAITemp temporary_first,
+  embb::mtapi::Job comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.

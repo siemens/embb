@@ -271,8 +271,9 @@ void MergeSort(RAI first, RAI last, RAITemp temporary_first,
   size_t block_size) {
   typedef typename std::iterator_traits<RAI>::iterator_category category;
   internal::MergeSortIteratorCheck(first, last, temporary_first,
-    internal::ComparisonJobFunctor<std::iterator_traits<RAI>::value_type>(
-      comparison, policy),
+    internal::ComparisonJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(
+        comparison, policy),
     policy, block_size, category());
 }
 

@@ -165,7 +165,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
 /**
  * Overload of above described Doxygen dummy.
  */
-template<typename RAI, typename ComparisonFunction>
+template<typename RAI>
 typename std::iterator_traits<RAI>::difference_type CountIf(
   RAI first,
   RAI last,

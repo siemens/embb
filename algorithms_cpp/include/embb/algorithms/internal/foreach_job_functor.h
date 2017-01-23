@@ -51,7 +51,11 @@ class ForeachJobFunctor {
       ElementType out;
     } outputs;
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    embb::mtapi::Task task = node.Start(unary_, &inputs, &outputs, attr_);
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, unary_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      &attr_.GetInternal());
     task.Wait(MTAPI_INFINITE);
     val = outputs.out;
   }

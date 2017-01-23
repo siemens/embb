@@ -153,8 +153,9 @@ void ForEach(RAI first, const RAI last, embb::mtapi::Job unary,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
   internal::ForEachIteratorCheck(first, last,
-    internal::ForeachJobFunctor<std::iterator_traits<RAI>::value_type>(
-      unary, policy),
+    internal::ForeachJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(
+        unary, policy),
     policy, block_size, category);
 }
 

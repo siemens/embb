@@ -233,8 +233,8 @@ void QuickSort(RAI first, RAI last, embb::mtapi::Job comparison,
   const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
   typedef typename std::iterator_traits<RAI>::iterator_category category;
   internal::QuickSortIteratorCheck(first, last,
-    internal::ComparisonJobFunctor<std::iterator_traits<RAI>::value_type>(
-      comparison, policy),
+    internal::ComparisonJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(comparison, policy),
     policy, block_size, category());
 }
 
