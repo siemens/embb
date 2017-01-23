@@ -143,6 +143,67 @@ class ArraySink {
   }
 };
 
+#define SOURCE_JOB 17
+#define SINK_JOB 18
+#define MULT_JOB 19
+
+static void sourceAction(
+  const void* /*args*/,
+  mtapi_size_t /*arg_size*/,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t* /*task_context*/) {
+  typedef struct {
+    mtapi_boolean_t result;
+    int out;
+  } OutT;
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  OutT * output = static_cast<OutT*>(result_buffer);
+  output->result = sourceFunc(output->out) ? MTAPI_TRUE : MTAPI_FALSE;
+}
+
+static ArraySink<TEST_COUNT> * array_sink;
+
+static void sinkAction(
+  const void* args,
+  mtapi_size_t arg_size,
+  void* /*result_buffer*/,
+  mtapi_size_t /*result_buffer_size*/,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t* /*task_context*/) {
+  typedef struct {
+    int in;
+  } InT;
+  PT_EXPECT_EQ(arg_size, sizeof(InT));
+  InT const * input = static_cast<InT const *>(args);
+  array_sink->Run(input->in);
+}
+
+static void multAction(
+  const void* args,
+  mtapi_size_t arg_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t* /*task_context*/) {
+  typedef struct {
+    int in1;
+    int in2;
+  } InT;
+  typedef struct {
+    int out;
+  } OutT;
+  PT_EXPECT_EQ(arg_size, sizeof(InT));
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  InT const * input = static_cast<InT const *>(args);
+  OutT * output = static_cast<OutT*>(result_buffer);
+  multFunc(input->in1, input->in2, output->out);
+}
+
 SimpleTest::SimpleTest() {
   CreateUnit("dataflow_cpp simple test").Add(&SimpleTest::TestBasic, this);
 }
@@ -231,7 +292,92 @@ void SimpleTest::TrySimple(bool reuse_main_thread) {
   PT_EXPECT(embb_get_bytes_allocated() == 0);
 }
 
+void SimpleTest::TryHeterogeneous() {
+  embb::mtapi::NodeAttributes node_attr;
+  node_attr
+    .SetReuseMainThread(MTAPI_TRUE);
+  embb::mtapi::Node::Initialize(
+    MTAPI_DOMAIN_ID,
+    MTAPI_NODE_ID,
+    node_attr);
+
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+
+  embb::mtapi::Action source_action = node.CreateAction(SOURCE_JOB, sourceAction);
+  embb::mtapi::Job source_job = node.GetJob(SOURCE_JOB);
+
+  embb::mtapi::Action sink_action = node.CreateAction(SINK_JOB, sinkAction);
+  embb::mtapi::Job sink_job = node.GetJob(SINK_JOB);
+
+  embb::mtapi::Action mult_action = node.CreateAction(MULT_JOB, multAction);
+  embb::mtapi::Job mult_job = node.GetJob(MULT_JOB);
+
+  {
+    ArraySink<TEST_COUNT> asink;
+    array_sink = &asink;
+    MyNetwork network(NUM_SLICES);
+    MyConstantSource constant(network, 4);
+    MySource source(network, source_job);
+    MyFilter filter(network, embb::base::MakeFunction(filterFunc));
+    MyMult mult(network, mult_job);
+    MySink sink(network, sink_job);
+    MyPred pred(network, embb::base::MakeFunction(predFunc));
+    MySwitch sw(network);
+    MySelect sel(network);
+
+    for (int kk = 0; kk < TEST_COUNT; kk++) {
+      source_array[kk] = -1;
+      pred_array[kk] = false;
+      filter_array[kk] = -1;
+      mult_array[kk] = -1;
+    }
+
+    source_counter = 0;
+    pred_counter = 0;
+    mult_counter = 0;
+    filter_counter = 0;
+
+    filter.HasInputs();
+    filter.HasOutputs();
+
+    source.GetOutput<0>() >> sw.GetInput<1>();
+
+    source >> pred >> sw >> filter;
+
+    pred.GetOutput<0>() >> sel.GetInput<0>();
+
+    filter.GetOutput<0>() >> sel.GetInput<1>();
+
+    constant.GetOutput<0>() >> mult.GetInput<0>();
+    sw.GetOutput<1>() >> mult.GetInput<1>();
+    mult.GetOutput<0>() >> sel.GetInput<2>();
+
+    sel.GetOutput<0>() >> sink.GetInput<0>();
+
+    try {
+      if (!network.IsValid()) {
+        EMBB_THROW(embb::base::ErrorException, "network is invalid");
+      }
+      network();
+    }
+    catch (embb::base::ErrorException & e) {
+      PT_ASSERT_MSG(false, e.What());
+    }
+
+    PT_EXPECT(asink.Check());
+  }
+
+  source_action.Delete();
+  sink_action.Delete();
+  mult_action.Delete();
+
+  embb::mtapi::Node::Finalize();
+
+  PT_EXPECT(embb_get_bytes_allocated() == 0);
+}
+
 void SimpleTest::TestBasic() {
   TrySimple(false);
   TrySimple(true);
+  TryHeterogeneous();
 }
