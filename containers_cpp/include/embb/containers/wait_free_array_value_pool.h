@@ -157,6 +157,30 @@ class WaitFreeArrayValuePool {
   WaitFreeArrayValuePool& operator=(const WaitFreeArrayValuePool&);
 
  public:
+  class Iterator {
+   private:
+    explicit Iterator(WaitFreeArrayValuePool & pool);
+    Iterator(WaitFreeArrayValuePool & pool, int index);
+    void Advance();
+
+    WaitFreeArrayValuePool & pool_;
+    int index_;
+
+    friend class WaitFreeArrayValuePool;
+
+   public:
+    Iterator(Iterator const & other);
+    void operator ++ ();
+    int GetIndex();
+    Type GetValue();
+    bool operator == (Iterator const & rhs);
+    bool operator != (Iterator const & rhs);
+  };
+
+  Iterator Begin();
+
+  Iterator End();
+
   /**
    * Constructs a pool and fills it with the elements in the specified range.
    *

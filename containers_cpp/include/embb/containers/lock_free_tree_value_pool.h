@@ -258,6 +258,30 @@ class LockFreeTreeValuePool {
   );
 
  public:
+  class Iterator {
+   private:
+    explicit Iterator(LockFreeTreeValuePool & pool);
+    Iterator(LockFreeTreeValuePool & pool, int index);
+    void Advance();
+
+    LockFreeTreeValuePool & pool_;
+    int index_;
+
+    friend class LockFreeTreeValuePool;
+
+   public:
+    Iterator(Iterator const & other);
+    void operator ++ ();
+    int GetIndex();
+    Type GetValue();
+    bool operator == (Iterator const & rhs);
+    bool operator != (Iterator const & rhs);
+  };
+
+  Iterator Begin();
+
+  Iterator End();
+
   /**
    * Constructs a pool and fills it with the elements in the specified range.
    *

@@ -191,6 +191,14 @@ Type* ObjectPool<Type, ValuePool, ObjectAllocator>::Allocate(
 
 template<class Type, typename ValuePool, class ObjectAllocator>
 ObjectPool<Type, ValuePool, ObjectAllocator>::~ObjectPool() {
+  // Destroy still allocated objects
+  typename ValuePool::Iterator it = value_pool_.Begin();
+  for (; it != value_pool_.End(); ++it) {
+    //int index = it.GetIndex();
+    //Type * obj = &
+    objects_array_[it.GetIndex()].~Type();
+    //obj->~Type();
+  }
   // Deallocate the objects
   object_allocator_.deallocate(objects_array_, value_pool_size_);
 }

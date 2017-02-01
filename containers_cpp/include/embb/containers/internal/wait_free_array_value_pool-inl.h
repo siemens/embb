@@ -29,6 +29,80 @@
 
 namespace embb {
 namespace containers {
+
+template<typename Type, Type Undefined, class Allocator >
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::Iterator(WaitFreeArrayValuePool & pool) : pool_(pool) {
+  index_ = 0;
+  Advance();
+}
+
+template<typename Type, Type Undefined, class Allocator >
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::Iterator(WaitFreeArrayValuePool & pool, int index) : pool_(pool) {
+  index_ = index;
+  Advance();
+}
+
+template<typename Type, Type Undefined, class Allocator >
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::Iterator(Iterator const & other) : pool_(other.pool_) {
+  index_ = other.index_;
+}
+
+template<typename Type, Type Undefined, class Allocator >
+void WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::Advance() {
+  while (pool_.pool_array_[index_] != Undefined && index_ < pool_.size_) {
+    index_++;
+  }
+}
+
+template<typename Type, Type Undefined, class Allocator >
+void WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::operator ++ () {
+  index_++;
+  Advance();
+}
+
+template<typename Type, Type Undefined, class Allocator >
+int WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::GetIndex() {
+  return index_;
+}
+
+template<typename Type, Type Undefined, class Allocator >
+Type WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::GetValue() {
+  return pool_.pool_array_[index_];
+}
+
+template<typename Type, Type Undefined, class Allocator >
+bool WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::operator ==(Iterator const & rhs) {
+  return (&pool_ == &rhs.pool_) && (index_ == rhs.index_);
+}
+
+template<typename Type, Type Undefined, class Allocator >
+bool WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::operator !=(Iterator const & rhs) {
+  return (&pool_ != &rhs.pool_) || (index_ != rhs.index_);
+}
+
+template<typename Type, Type Undefined, class Allocator >
+typename WaitFreeArrayValuePool<Type, Undefined, Allocator>::Iterator
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Begin() {
+  return Iterator(*this);
+}
+
+template<typename Type, Type Undefined, class Allocator >
+typename WaitFreeArrayValuePool<Type, Undefined, Allocator>::Iterator
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+End() {
+  return Iterator(*this, size_);
+}
+
 template<typename Type, Type Undefined, class Allocator >
 void WaitFreeArrayValuePool<Type, Undefined, Allocator>::
 Free(Type element, int index) {
