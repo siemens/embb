@@ -32,7 +32,7 @@ Mailing list:
   - embb-announcements@googlegroups.com (low volume, release announcements, news, etc.)<br/>
     Join: https://groups.google.com/forum/#!forum/embb-announcements/join
 	
-Community:
+Community (help, bug reports, etc.):
   - https://github.com/siemens/embb/issues (for help, create an issue labeled with 'question').
 
 Contact:
