@@ -231,12 +231,34 @@ class Network {
     SerialProcess(Network & network, FunctionType function);
 
     /**
+     * Constructs a SerialProcess with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a struct
+     * containing copies of the inputs as its argument buffer and a struct
+     * containing the outputs as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     */
+    SerialProcess(Network & network, embb::mtapi::Job job);
+
+    /**
      * Constructs a SerialProcess with a user specified processing function.
      * \param network The network this node is going to be part of.
      * \param function The Function to call to process a token.
      * \param policy The execution policy of the process.
      */
     SerialProcess(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
+
+    /**
+     * Constructs a SerialProcess with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a struct
+     * containing copies of the inputs as its argument buffer and a struct
+     * containing the outputs as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     * \param policy The execution policy of the process.
+     */
+    SerialProcess(Network & network, embb::mtapi::Job job,
       embb::mtapi::ExecutionPolicy const & policy);
 
     /**
@@ -322,12 +344,34 @@ class Network {
     ParallelProcess(Network & network, FunctionType function);
 
     /**
+     * Constructs a ParallelProcess with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a struct
+     * containing copies of the inputs as its argument buffer and a struct
+     * containing the outputs as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     */
+    ParallelProcess(Network & network, embb::mtapi::Job job);
+
+    /**
      * Constructs a ParallelProcess with a user specified processing function.
      * \param network The network this node is going to be part of.
      * \param function The Function to call to process a token.
      * \param policy The execution policy of the process.
      */
     ParallelProcess(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
+
+    /**
+     * Constructs a ParallelProcess with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a struct
+     * containing copies of the inputs as its argument buffer and a struct
+     * containing the outputs as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     * \param policy The execution policy of the process.
+     */
+    ParallelProcess(Network & network, embb::mtapi::Job job,
       embb::mtapi::ExecutionPolicy const & policy);
 
     /**
@@ -583,12 +627,34 @@ class Network {
     Sink(Network & network, FunctionType function);
 
     /**
+     * Constructs a Sink with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a struct
+     * containing copies of the inputs as its argument buffer and a
+     * null pointer as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     */
+    Sink(Network & network, embb::mtapi::Job job);
+
+    /**
      * Constructs a Sink with a user specified processing function.
      * \param network The network this node is going to be part of.
      * \param function The Function to call to process a token.
      * \param policy The execution policy of the process.
      */
     Sink(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
+
+    /**
+     * Constructs a Sink with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a struct
+     * containing copies of the inputs as its argument buffer and a
+     * null pointer as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     * \param policy The execution policy of the process.
+     */
+    Sink(Network & network, embb::mtapi::Job job,
       embb::mtapi::ExecutionPolicy const & policy);
 
     /**
@@ -652,12 +718,34 @@ class Network {
     Source(Network & network, FunctionType function);
 
     /**
+     * Constructs a Source with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a
+     * null pointer as its argument buffer and a struct
+     * containing the outputs as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     */
+    Source(Network & network, embb::mtapi::Job job);
+
+    /**
      * Constructs a Source with a user specified processing function.
      * \param network The network this node is going to be part of.
      * \param function The Function to call to emit a token.
      * \param policy The execution policy of the process.
      */
     Source(Network & network, FunctionType function,
+      embb::mtapi::ExecutionPolicy const & policy);
+
+    /**
+     * Constructs a Source with a user specified embb::mtapi::Job.
+     * The Job must be associated with an action function accepting a
+     * null pointer as its argument buffer and a struct
+     * containing the outputs as its result buffer.
+     * \param network The network this node is going to be part of.
+     * \param job The embb::mtapi::Job to process a token.
+     * \param policy The execution policy of the process.
+     */
+    Source(Network & network, embb::mtapi::Job job,
       embb::mtapi::ExecutionPolicy const & policy);
 
     /**
