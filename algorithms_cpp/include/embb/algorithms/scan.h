@@ -73,10 +73,16 @@ namespace algorithms {
  * \tparam ReturnType Type of output elements of scan operation, deduced from
  *         \c neutral
  * \tparam ScanFunction Binary scan function object with signature
- *         <tt>ReturnType ScanFunction(ReturnType, ReturnType)</tt>
+ *         <tt>ReturnType ScanFunction(ReturnType, ReturnType)</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing two ReturnType members as its argument buffer
+ *         and a struct containing one ReturnType member as its result buffer.
  * \tparam TransformationFunction Unary transformation function object with
  *         signature <tt>ReturnType TransformationFunction(typename
- *         std::iterator_traits<RAIIn>::value_type)</tt>.
+ *         std::iterator_traits<RAIIn>::value_type)</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing one InputType member as its argument buffer
+ *         and a struct containing one ReturnType member as its result buffer.
  */
 template<typename RAIIn, typename RAIOut, typename ReturnType,
          typename ScanFunction, typename TransformationFunction>

@@ -49,7 +49,8 @@ typedef embb::base::Function<void> InvokeFunctionType;
 #ifdef DOXYGEN
 
 /**
- * Spawns two to ten function objects at once and runs them in parallel.
+ * Spawns two to ten function objects or embb::mtapi::Job at once and runs
+ * them in parallel.
  *
  * Blocks until all of them are done.
  *
@@ -64,13 +65,13 @@ void Invoke(
   ...);
 
 /**
-* Spawns two to ten function objects at once and runs them in parallel using the
-* given embb::mtapi::ExecutionPolicy.
-*
-* Blocks until all of them are done.
-*
-* \ingroup CPP_ALGORITHMS_INVOKE
-*/
+ * Spawns two to ten function objects or embb::mtapi::Job at once and runs
+ * them in parallel using the given embb::mtapi::ExecutionPolicy.
+ *
+ * Blocks until all of them are done.
+ *
+ * \ingroup CPP_ALGORITHMS_INVOKE
+ */
 template<typename Function1, typename Function2, ...>
 void Invoke(
   Function1 func1,

@@ -57,7 +57,13 @@ namespace algorithms {
  * \see embb::mtapi::ExecutionPolicy, ZipIterator
  * \tparam RAI Random access iterator
  * \tparam Function Unary function with argument of type
- *         <tt>std::iterator_traits<RAI>::value_type</tt>.
+ *         <tt>std::iterator_traits<RAI>::value_type</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing one member of type
+ *         <tt>std::iterator_traits<RAI>::value_type</tt>
+ *         as its argument buffer and a struct containing one member of type
+ *         <tt>std::iterator_traits<RAI>::value_type</tt>
+ *         as its result buffer.
  */
 template<typename RAI, typename Function>
 void ForEach(
