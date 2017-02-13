@@ -51,11 +51,13 @@ class ExecutionPolicy{
    * Constructs the default execution policy.
    * Sets the affinity to all worker threads and the priority to the default
    * value.
+   * \notthreadsafe
    */
   ExecutionPolicy();
 
   /**
    * Constructs an execution policy with the specified affinity and priority.
+   * \notthreadsafe
    */
   ExecutionPolicy(
       bool initial_affinity,           /**< [in] \c true sets the affinity to
@@ -68,6 +70,7 @@ class ExecutionPolicy{
   /**
    * Constructs an execution policy with the specified priority.
    * Sets the affinity to all worker threads.
+   * \notthreadsafe
    */
   explicit ExecutionPolicy(
       mtapi_uint_t priority            /**< [in] Priority for the execution
@@ -77,6 +80,7 @@ class ExecutionPolicy{
   /**
    * Constructs an execution policy with the specified affinity.
    * Sets the priority to the default value.
+   * \notthreadsafe
    */
   explicit ExecutionPolicy(
       bool initial_affinity            /**< [in] \c true sets the affinity to
@@ -85,7 +89,8 @@ class ExecutionPolicy{
   );
 
   /**
-   *  Sets affinity to a specific worker thread.
+   * Sets affinity to a specific worker thread.
+   * \notthreadsafe
    */
   void AddWorker(
     mtapi_uint_t worker                /**< [in] Worker thread index */
@@ -93,6 +98,7 @@ class ExecutionPolicy{
 
   /**
    * Removes affinity to a specific worker thread.
+   * \notthreadsafe
    */
   void RemoveWorker(
     mtapi_uint_t worker                /**< [in] Worker thread index */
@@ -102,6 +108,7 @@ class ExecutionPolicy{
    * Checks if affinity to a specific worker thread is set.
    *
    * \return \c true if affinity is set, otherwise \c false
+   * \waitfree
    */
   bool IsSetWorker(
     mtapi_uint_t worker                /**< [in] Worker thread index */
@@ -111,6 +118,7 @@ class ExecutionPolicy{
    * Returns the number of cores the policy is affine to.
    *
    * \return the number of cores
+   * \waitfree
    */
   unsigned int GetCoreCount() const;
 
@@ -118,12 +126,14 @@ class ExecutionPolicy{
    * Returns the affinity
    *
    * \return the affinity
+   * \waitfree
    */
   mtapi_affinity_t GetAffinity() const;
 
   /** Returns the priority
    *
    * \return the priority
+   * \waitfree
    */
   mtapi_uint_t GetPriority() const;
 

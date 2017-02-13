@@ -53,6 +53,7 @@ class Queue {
  public:
   /**
    * Constructs an invalid Queue.
+   * \waitfree
    */
   Queue() {
     handle_.id = 0;
@@ -61,7 +62,6 @@ class Queue {
 
   /**
    * Copies a Queue.
-   *
    * \waitfree
    */
   Queue(
@@ -85,7 +85,6 @@ class Queue {
 
   /**
    * Deletes a Queue object.
-   *
    * \threadsafe
    */
   void Delete() {

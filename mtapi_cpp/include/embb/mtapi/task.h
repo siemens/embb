@@ -42,6 +42,7 @@ class Task {
  public:
   /**
    * Constructs an invalid Task.
+   * \waitfree
    */
   Task() {
     handle_.id = 0;
@@ -50,6 +51,7 @@ class Task {
 
   /**
    * Copies a Task.
+   * \waitfree
    */
   Task(
     Task const & other                 /**< The task to copy. */
@@ -59,6 +61,7 @@ class Task {
 
   /**
    * Copies a Task.
+   * \waitfree
    */
   void operator=(
     Task const & other                 /**< The task to copy. */
@@ -68,6 +71,7 @@ class Task {
 
   /**
    * Destroys a Task.
+   * \waitfree
    */
   ~Task() {
     // empty

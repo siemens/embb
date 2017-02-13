@@ -42,6 +42,7 @@ class GroupAttributes {
  public:
   /**
    * Constructs a GroupAttributes object.
+   * \notthreadsafe
    */
   GroupAttributes() {
     mtapi_status_t status;

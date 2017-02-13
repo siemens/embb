@@ -43,6 +43,7 @@ class Job {
   /**
    * Constructs a Job.
    * The Job object will be invalid.
+   * \waitfree
    */
   Job() {
     handle_.id = 0;
@@ -51,6 +52,7 @@ class Job {
 
   /**
    * Copies a Job object.
+   * \waitfree
    */
   Job(
     Job const & other                  /**< The Job to copy from */
@@ -60,6 +62,7 @@ class Job {
 
   /**
    * Copies a Job object.
+   * \waitfree
    */
   void operator=(
     Job const & other                  /**< The Job to copy from */

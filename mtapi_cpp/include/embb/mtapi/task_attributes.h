@@ -43,6 +43,7 @@ class TaskAttributes {
  public:
   /**
    * Constructs a TaskAttributes object.
+   * \notthreadsafe
    */
   TaskAttributes() {
     mtapi_status_t status;
