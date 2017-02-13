@@ -44,7 +44,6 @@ class Action {
   /**
    * Constructs an Action.
    * The Action object will be invalid.
-   *
    * \waitfree
    */
   Action() {
@@ -54,7 +53,6 @@ class Action {
 
   /**
    * Copies an Action.
-   *
    * \waitfree
    */
   Action(
@@ -101,7 +99,6 @@ class Action {
  private:
   /**
    * Constructs an Action.
-   *
    * \threadsafe
    */
   Action(

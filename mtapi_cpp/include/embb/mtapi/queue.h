@@ -52,8 +52,16 @@ namespace mtapi {
 class Queue {
  public:
   /**
+   * Constructs an invalid Queue.
+   * \waitfree
+   */
+  Queue() {
+    handle_.id = 0;
+    handle_.tag = 0;
+  }
+
+  /**
    * Copies a Queue.
-   *
    * \waitfree
    */
   Queue(
@@ -77,7 +85,6 @@ class Queue {
 
   /**
    * Deletes a Queue object.
-   *
    * \threadsafe
    */
   void Delete() {
@@ -280,9 +287,6 @@ class Queue {
   friend class Node;
 
  private:
-  // no default constructor
-  Queue();
-
   Queue(
     mtapi_queue_id_t queue_id,
     Job const & job,

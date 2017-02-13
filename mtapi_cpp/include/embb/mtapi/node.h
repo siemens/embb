@@ -75,7 +75,6 @@ class Node {
 
   /**
    * Destroys the runtime singleton.
-   *
    * \notthreadsafe
    */
   ~Node() {

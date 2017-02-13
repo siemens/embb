@@ -42,6 +42,7 @@ class StatusException : public embb::base::Exception {
  public:
   /**
    * Constructs a StatusException.
+   * \notthreadsafe
    */
   explicit StatusException(
     const char* message                /**< The message to use. */

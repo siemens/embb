@@ -43,7 +43,6 @@ class NodeAttributes {
  public:
   /**
    * Constructs a NodeAttributes object.
-   *
    * \waitfree
    */
   NodeAttributes() {
@@ -54,7 +53,6 @@ class NodeAttributes {
 
   /**
    * Copies a NodeAttributes object.
-   *
    * \waitfree
    */
   NodeAttributes(
@@ -66,7 +64,6 @@ class NodeAttributes {
 
   /**
    * Copies a NodeAttributes object.
-   *
    * \waitfree
    */
   void operator=(

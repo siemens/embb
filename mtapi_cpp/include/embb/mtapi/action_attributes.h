@@ -43,6 +43,7 @@ class ActionAttributes {
  public:
   /**
    * Constructs an ActionAttributes object.
+   * \waitfree
    */
   ActionAttributes() {
     mtapi_status_t status;
@@ -55,6 +56,7 @@ class ActionAttributes {
    * This determines whether the object will be visible across nodes.
    *
    * \returns Reference to this object.
+   * \waitfree
    */
   ActionAttributes & SetGlobal(
     bool state                         /**< The state to set */
@@ -71,6 +73,7 @@ class ActionAttributes {
    * Sets the affinity of an Action.
    *
    * \returns Reference to this object.
+   * \waitfree
    */
   ActionAttributes & SetAffinity(
     Affinity const & affinity          /**< The Affinity to set. */
@@ -88,6 +91,7 @@ class ActionAttributes {
    * This determines whether the object will be visible across domains.
    *
    * \returns Reference to this object.
+   * \waitfree
    */
   ActionAttributes & SetDomainShared(
     bool state                         /**< The state to set */

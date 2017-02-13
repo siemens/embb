@@ -42,6 +42,7 @@ class Affinity {
  public:
   /**
    * Constructs an Affinity object.
+   * \notthreadsafe
    */
   Affinity() {
     Init(true);
@@ -49,6 +50,7 @@ class Affinity {
 
   /**
    * Copies an Affinity object.
+   * \waitfree
    */
   Affinity(
     Affinity const & other             /**< The Affinity to copy from */
@@ -59,6 +61,7 @@ class Affinity {
 
   /**
    * Copies an Affinity object.
+   * \waitfree
    */
   void operator=(
     Affinity const & other             /**< The Affinity to copy from */
@@ -70,6 +73,7 @@ class Affinity {
    * Constructs an Affinity object with the given initial affinity.
    * If \c initial_affinity is \c true the Affinity will map to all worker
    * threads, otherwise it will map to no worker threads.
+   * \notthreadsafe
    */
   Affinity(
     bool initial_affinity              /**< The initial affinity to set. */
@@ -81,7 +85,6 @@ class Affinity {
    * Initializes an Affinity object with the given initial affinity.
    * If \c initial_affinity is \c true the Affinity will map to all worker
    * threads, otherwise it will map to no worker threads.
-   *
    * \notthreadsafe
    */
   void Init(
@@ -95,7 +98,6 @@ class Affinity {
 
   /**
    * Sets affinity to the given worker.
-   *
    * \notthreadsafe
    */
   void Set(

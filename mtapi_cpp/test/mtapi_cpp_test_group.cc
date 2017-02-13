@@ -67,8 +67,10 @@ void GroupTest::TestBasic() {
   embb::mtapi::Action action =
     node.CreateAction(JOB_TEST_GROUP, testGroupAction);
 
+  embb::mtapi::Group group;
+
   {
-    embb::mtapi::Group group = node.CreateGroup();
+    group = node.CreateGroup();
 
     result_example_t buffer[TASK_COUNT];
     for (int ii = 0; ii < TASK_COUNT; ii++) {
@@ -88,7 +90,7 @@ void GroupTest::TestBasic() {
   }
 
   {
-    embb::mtapi::Group group = node.CreateGroup();
+    group = node.CreateGroup();
 
     result_example_t buffer[TASK_COUNT];
     for (int ii = 0; ii < 4; ii++) {

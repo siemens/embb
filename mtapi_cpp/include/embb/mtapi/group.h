@@ -52,8 +52,16 @@ namespace mtapi {
 class Group {
  public:
   /**
+   * Constructs an invalid Group.
+   * \waitfree
+   */
+  Group() {
+    handle_.id = 0;
+    handle_.tag = 0;
+  }
+
+  /**
    * Copies a Group.
-   *
    * \waitfree
    */
   Group(
@@ -64,7 +72,6 @@ class Group {
 
   /**
    * Copies a Group.
-   *
    * \returns Reference to this object.
    * \waitfree
    */
@@ -77,7 +84,6 @@ class Group {
 
   /**
    * Deletes a Group object.
-   *
    * \threadsafe
    */
   void Delete() {
@@ -262,7 +268,6 @@ class Group {
   /**
    * Constructs a Group object with given attributes and ID.
    * Requires an initialized Node.
-   *
    * \threadsafe
    */
   Group(

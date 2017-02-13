@@ -42,6 +42,7 @@ class TaskContext {
  public:
   /**
    * Constructs a TaskContext from the given C representation.
+   * \waitfree
    */
   explicit TaskContext(
     mtapi_task_context_t * task_context

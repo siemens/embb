@@ -42,6 +42,7 @@ class QueueAttributes {
  public:
   /**
    * Constructs a QueueAttributes object.
+   * \notthreadsafe
    */
   QueueAttributes() {
     mtapi_status_t status;
