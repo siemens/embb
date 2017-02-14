@@ -167,21 +167,35 @@ class WaitFreeArrayValuePool {
   class Iterator : public std::iterator<
     std::forward_iterator_tag, std::pair<int, Type> > {
    private:
-    explicit Iterator(WaitFreeArrayValuePool & pool);
-    Iterator(WaitFreeArrayValuePool & pool, int index);
+    explicit Iterator(WaitFreeArrayValuePool * pool);
+    Iterator(WaitFreeArrayValuePool * pool, int index);
     void Advance();
 
-    WaitFreeArrayValuePool & pool_;
+    WaitFreeArrayValuePool * pool_;
     int index_;
 
     friend class WaitFreeArrayValuePool;
 
    public:
     /**
+     * Constructs an invalid iterator.
+     * \waitfree
+     */
+    Iterator();
+
+    /**
      * Copies an iterator.
      * \waitfree
      */
     Iterator(
+      Iterator const & other           /**< [IN] Iterator to copy. */
+    );
+
+    /**
+     * Copies an iterator.
+     * \waitfree
+     */
+    Iterator & operator =(
       Iterator const & other           /**< [IN] Iterator to copy. */
     );
 

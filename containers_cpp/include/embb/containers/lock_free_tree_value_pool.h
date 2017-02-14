@@ -268,21 +268,35 @@ class LockFreeTreeValuePool {
   class Iterator : public std::iterator<
     std::forward_iterator_tag, std::pair<int, Type> > {
    private:
-    explicit Iterator(LockFreeTreeValuePool & pool);
-    Iterator(LockFreeTreeValuePool & pool, int index);
+    explicit Iterator(LockFreeTreeValuePool * pool);
+    Iterator(LockFreeTreeValuePool * pool, int index);
     void Advance();
 
-    LockFreeTreeValuePool & pool_;
+    LockFreeTreeValuePool * pool_;
     int index_;
 
     friend class LockFreeTreeValuePool;
 
    public:
     /**
+     * Constructs an invalid iterator.
+     * \waitfree
+     */
+    Iterator();
+
+    /**
      * Copies an iterator.
      * \waitfree
      */
     Iterator(
+      Iterator const & other           /**< [IN] Iterator to copy. */
+    );
+
+    /**
+     * Copies an iterator.
+     * \waitfree
+     */
+    Iterator & operator =(
       Iterator const & other           /**< [IN] Iterator to copy. */
     );
 
