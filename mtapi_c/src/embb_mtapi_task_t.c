@@ -124,7 +124,7 @@ mtapi_boolean_t embb_mtapi_task_execute(
       context->thread_context->node->action_pool, that->action);
 
     /* only continue if there was no error so far */
-    if (context->task->error_code == MTAPI_SUCCESS) {
+    if (that->error_code == MTAPI_SUCCESS) {
       local_action->action_function(
         that->arguments,
         that->arguments_size,
@@ -139,8 +139,18 @@ mtapi_boolean_t embb_mtapi_task_execute(
       &that->instances_todo, (unsigned int)-1);
 
     if (todo == 1) {
-      /* task has completed successfully */
-      *new_task_state = MTAPI_TASK_COMPLETED;
+      /* task has completed */
+      switch (that->error_code) {
+      case MTAPI_ERR_ACTION_CANCELLED:
+        *new_task_state = MTAPI_TASK_CANCELLED;
+        break;
+      case MTAPI_SUCCESS:
+        *new_task_state = MTAPI_TASK_COMPLETED;
+        break;
+      default:
+        *new_task_state = MTAPI_TASK_ERROR;
+        break;
+      }
     }
   } else {
     /* action was deleted, task did not complete */
@@ -514,13 +524,13 @@ void mtapi_task_cancel(
         if (local_action->is_plugin_action) {
           local_action->plugin_task_cancel_function(task, &local_status);
         } else {
-          embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
           local_task->error_code = MTAPI_ERR_ACTION_CANCELLED;
+          embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
           local_status = MTAPI_SUCCESS;
         }
       } else {
-        embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
         local_task->error_code = MTAPI_ERR_ACTION_CANCELLED;
+        embb_mtapi_task_set_state(local_task, MTAPI_TASK_CANCELLED);
         local_status = MTAPI_SUCCESS;
       }
     } else {
