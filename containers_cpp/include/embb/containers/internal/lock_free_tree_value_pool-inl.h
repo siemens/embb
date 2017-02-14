@@ -29,6 +29,108 @@
 
 namespace embb {
 namespace containers {
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::Iterator(LockFreeTreeValuePool & pool)
+  : pool_(pool)
+  , index_(0) {
+  Advance();
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::Iterator(LockFreeTreeValuePool & pool, int index)
+  : pool_(pool)
+  , index_(index) {
+  Advance();
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::Iterator(Iterator const & other)
+  : pool_(other.pool_)
+  , index_(other.index_) {
+  // empty
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+void
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::Advance() {
+  while (index_ < pool_.real_size_ && pool_.pool_[index_] != Undefined) {
+    index_++;
+  }
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
+  TreeAllocator>::Iterator &
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator ++ () {
+  index_++;
+  Advance();
+  return *this;
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
+  TreeAllocator>::Iterator
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator ++ (int) {
+  Iterator tmp(*this);
+  operator++();
+  return tmp;
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+std::pair<int, Type>
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator * () {
+  return std::make_pair(index_, pool_.pool_[index_].Load());
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+bool
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator == (Iterator const & rhs) {
+  return (&pool_ == &rhs.pool_) && (index_ == rhs.index_);
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+bool
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator != (Iterator const & rhs) {
+  return (&pool_ != &rhs.pool_) || (index_ != rhs.index_);
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
+  TreeAllocator>::Iterator
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Begin() {
+  return Iterator(*this);
+}
+
+template<typename Type, Type Undefined, class PoolAllocator,
+  class TreeAllocator >
+typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
+  TreeAllocator>::Iterator
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+End() {
+  return Iterator(*this, real_size_);
+}
+
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
