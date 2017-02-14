@@ -140,16 +140,12 @@ mtapi_boolean_t embb_mtapi_task_execute(
 
     if (todo == 1) {
       /* task has completed */
-      switch (that->error_code) {
-      case MTAPI_ERR_ACTION_CANCELLED:
-        *new_task_state = MTAPI_TASK_CANCELLED;
-        break;
-      case MTAPI_SUCCESS:
+      if (MTAPI_SUCCESS == that->error_code) {
         *new_task_state = MTAPI_TASK_COMPLETED;
-        break;
-      default:
+      } else if (MTAPI_ERR_ACTION_CANCELLED == that->error_code) {
+        *new_task_state = MTAPI_TASK_CANCELLED;
+      } else {
         *new_task_state = MTAPI_TASK_ERROR;
-        break;
       }
     }
   } else {
