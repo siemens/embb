@@ -33,29 +33,34 @@ namespace containers {
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::Iterator(LockFreeTreeValuePool & pool) : pool_(pool) {
-  index_ = 0;
+Iterator::Iterator(LockFreeTreeValuePool & pool)
+  : pool_(pool)
+  , index_(0) {
   Advance();
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::Iterator(LockFreeTreeValuePool & pool, int index) : pool_(pool) {
-  index_ = index;
+Iterator::Iterator(LockFreeTreeValuePool & pool, int index)
+  : pool_(pool)
+  , index_(index) {
   Advance();
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::Iterator(Iterator const & other) : pool_(other.pool_) {
-  index_ = other.index_;
+Iterator::Iterator(Iterator const & other)
+  : pool_(other.pool_)
+  , index_(other.index_) {
+  // empty
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
-void LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+void
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 Iterator::Advance() {
   while (pool_.pool_[index_] != Undefined && index_ < pool_.real_size_) {
     index_++;
@@ -64,37 +69,47 @@ Iterator::Advance() {
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
-void LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
+  TreeAllocator>::Iterator &
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 Iterator::operator ++ () {
   index_++;
   Advance();
+  return *this;
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
-int LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::GetIndex() {
-  return index_;
+typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
+  TreeAllocator>::Iterator
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator ++ (int) {
+  Iterator tmp(*this);
+  operator++();
+  return tmp;
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
-Type LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::GetValue() {
-  return pool_.pool_[index_];
+std::pair<int, Type>
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator * () {
+  return std::make_pair(index_, pool_.pool_[index_].Load());
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
-bool LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::operator ==(Iterator const & rhs) {
+bool
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator == (Iterator const & rhs) {
   return (&pool_ == &rhs.pool_) && (index_ == rhs.index_);
 }
 
 template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
-bool LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::operator !=(Iterator const & rhs) {
+bool
+LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
+Iterator::operator != (Iterator const & rhs) {
   return (&pool_ != &rhs.pool_) || (index_ != rhs.index_);
 }
 

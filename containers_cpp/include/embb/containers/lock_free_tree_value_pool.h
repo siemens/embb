@@ -29,6 +29,8 @@
 
 #include <embb/base/atomic.h>
 #include <embb/base/memory_allocation.h>
+#include <iterator>
+#include <utility>
 
 namespace embb {
 namespace containers {
@@ -258,7 +260,13 @@ class LockFreeTreeValuePool {
   );
 
  public:
-  class Iterator {
+  /**
+   * Forward iterator to iterate over the allocated elements of the pool.
+   * \note Iterators are invalidated by any change to the pool
+   *       (Allocate and Free calls).
+   */
+  class Iterator : public std::iterator<
+    std::forward_iterator_tag, std::pair<int, Type> > {
    private:
     explicit Iterator(LockFreeTreeValuePool & pool);
     Iterator(LockFreeTreeValuePool & pool, int index);
@@ -270,16 +278,71 @@ class LockFreeTreeValuePool {
     friend class LockFreeTreeValuePool;
 
    public:
-    Iterator(Iterator const & other);
-    void operator ++ ();
-    int GetIndex();
-    Type GetValue();
-    bool operator == (Iterator const & rhs);
-    bool operator != (Iterator const & rhs);
+    /**
+     * Copies an iterator.
+     * \waitfree
+     */
+    Iterator(
+      Iterator const & other           /**< [IN] Iterator to copy. */
+    );
+
+    /**
+     * Pre-increments an iterator.
+     *
+     * \returns Reference to this iterator.
+     * \notthreadsafe
+     */
+    Iterator & operator ++ ();
+
+    /**
+     * Post-increments an iterator.
+     *
+     * \returns Copy of this iterator before increment.
+     * \notthreadsafe
+     */
+    Iterator operator ++ (int);
+
+    /**
+     * Compares two iterators for equality.
+     *
+     * \returns true, if the two iterators are equal, false otherwise.
+     * \waitfree
+     */
+    bool operator == (
+      Iterator const & rhs             /**< [IN] Iterator to compare to. */
+    );
+
+    /**
+     * Compares two iterators for inequality.
+     *
+     * \returns true, if the two iterators are not equal, false otherwise.
+     * \waitfree
+     */
+    bool operator != (
+      Iterator const & rhs             /**< [IN] Iterator to compare to. */
+    );
+
+    /**
+     * Dereferences the iterator.
+     *
+     * \returns A pair consisting of index and value of the element pointed to.
+     * \waitfree
+     */
+    std::pair<int, Type> operator * ();
   };
 
+  /**
+   * Returns a forward iterator pointing to the first allocated element in
+   * the pool.
+   * \waitfree
+   */
   Iterator Begin();
 
+  /**
+   * Returns a forward iterator pointing after the last allocated element in
+   * the pool.
+   * \waitfree
+   */
   Iterator End();
 
   /**

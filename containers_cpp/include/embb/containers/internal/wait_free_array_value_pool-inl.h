@@ -32,26 +32,31 @@ namespace containers {
 
 template<typename Type, Type Undefined, class Allocator >
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::Iterator(WaitFreeArrayValuePool & pool) : pool_(pool) {
-  index_ = 0;
+Iterator::Iterator(WaitFreeArrayValuePool & pool)
+  : pool_(pool)
+  , index_(0) {
   Advance();
 }
 
 template<typename Type, Type Undefined, class Allocator >
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::Iterator(WaitFreeArrayValuePool & pool, int index) : pool_(pool) {
-  index_ = index;
+Iterator::Iterator(WaitFreeArrayValuePool & pool, int index)
+  : pool_(pool)
+  , index_(index) {
   Advance();
 }
 
 template<typename Type, Type Undefined, class Allocator >
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::Iterator(Iterator const & other) : pool_(other.pool_) {
-  index_ = other.index_;
+Iterator::Iterator(Iterator const & other)
+  : pool_(other.pool_)
+  , index_(other.index_) {
+  // empty
 }
 
 template<typename Type, Type Undefined, class Allocator >
-void WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+void
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
 Iterator::Advance() {
   while (pool_.pool_array_[index_] != Undefined && index_ < pool_.size_) {
     index_++;
@@ -59,33 +64,41 @@ Iterator::Advance() {
 }
 
 template<typename Type, Type Undefined, class Allocator >
-void WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+typename WaitFreeArrayValuePool<Type, Undefined, Allocator>::Iterator &
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
 Iterator::operator ++ () {
   index_++;
   Advance();
+  return *this;
 }
 
 template<typename Type, Type Undefined, class Allocator >
-int WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::GetIndex() {
-  return index_;
+typename WaitFreeArrayValuePool<Type, Undefined, Allocator>::Iterator
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::operator ++ (int) {
+  Iterator tmp(*this);
+  operator++();
+  return tmp;
 }
 
 template<typename Type, Type Undefined, class Allocator >
-Type WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::GetValue() {
-  return pool_.pool_array_[index_];
+std::pair<int, Type>
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::operator * () {
+  return std::make_pair(index_, pool_.pool_array_[index_].Load());
 }
 
 template<typename Type, Type Undefined, class Allocator >
-bool WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::operator ==(Iterator const & rhs) {
+bool
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::operator == (Iterator const & rhs) {
   return (&pool_ == &rhs.pool_) && (index_ == rhs.index_);
 }
 
 template<typename Type, Type Undefined, class Allocator >
-bool WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::operator !=(Iterator const & rhs) {
+bool
+WaitFreeArrayValuePool<Type, Undefined, Allocator>::
+Iterator::operator != (Iterator const & rhs) {
   return (&pool_ != &rhs.pool_) || (index_ != rhs.index_);
 }
 
