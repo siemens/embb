@@ -553,7 +553,7 @@ static mtapi_status_t embb_mtapi_network_handle_cancel_task(
       embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
 
       // search for task to cancel
-      for (mtapi_uint_t ii = 0; ii < node->attributes.max_tasks; ii++) {
+      for (mtapi_uint_t ii = 1; ii <= node->attributes.max_tasks; ii++) {
         embb_mtapi_task_t * task = &node->task_pool->storage[ii];
         // is this our task?
         if (embb_mtapi_network_task_complete ==
