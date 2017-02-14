@@ -27,6 +27,8 @@
 #ifndef EMBB_CONTAINERS_INTERNAL_WAIT_FREE_ARRAY_VALUE_POOL_INL_H_
 #define EMBB_CONTAINERS_INTERNAL_WAIT_FREE_ARRAY_VALUE_POOL_INL_H_
 
+#include <utility>
+
 namespace embb {
 namespace containers {
 
@@ -66,7 +68,7 @@ Iterator::Advance() {
 template<typename Type, Type Undefined, class Allocator >
 typename WaitFreeArrayValuePool<Type, Undefined, Allocator>::Iterator &
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::operator ++ () {
+Iterator::operator ++() {
   index_++;
   Advance();
   return *this;
@@ -75,7 +77,7 @@ Iterator::operator ++ () {
 template<typename Type, Type Undefined, class Allocator >
 typename WaitFreeArrayValuePool<Type, Undefined, Allocator>::Iterator
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::operator ++ (int) {
+Iterator::operator ++(int) {
   Iterator tmp(*this);
   operator++();
   return tmp;
@@ -84,21 +86,21 @@ Iterator::operator ++ (int) {
 template<typename Type, Type Undefined, class Allocator >
 std::pair<int, Type>
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::operator * () {
+Iterator::operator *() {
   return std::make_pair(index_, pool_.pool_array_[index_].Load());
 }
 
 template<typename Type, Type Undefined, class Allocator >
 bool
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::operator == (Iterator const & rhs) {
+Iterator::operator ==(Iterator const & rhs) {
   return (&pool_ == &rhs.pool_) && (index_ == rhs.index_);
 }
 
 template<typename Type, Type Undefined, class Allocator >
 bool
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
-Iterator::operator != (Iterator const & rhs) {
+Iterator::operator !=(Iterator const & rhs) {
   return (&pool_ != &rhs.pool_) || (index_ != rhs.index_);
 }
 

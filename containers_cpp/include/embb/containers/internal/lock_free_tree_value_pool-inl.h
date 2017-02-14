@@ -27,6 +27,8 @@
 #ifndef EMBB_CONTAINERS_INTERNAL_LOCK_FREE_TREE_VALUE_POOL_INL_H_
 #define EMBB_CONTAINERS_INTERNAL_LOCK_FREE_TREE_VALUE_POOL_INL_H_
 
+#include <utility>
+
 namespace embb {
 namespace containers {
 
@@ -72,7 +74,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
 typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
   TreeAllocator>::Iterator &
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::operator ++ () {
+Iterator::operator ++() {
   index_++;
   Advance();
   return *this;
@@ -83,7 +85,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
 typename LockFreeTreeValuePool<Type, Undefined, PoolAllocator,
   TreeAllocator>::Iterator
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::operator ++ (int) {
+Iterator::operator ++(int) {
   Iterator tmp(*this);
   operator++();
   return tmp;
@@ -93,7 +95,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 std::pair<int, Type>
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::operator * () {
+Iterator::operator *() {
   return std::make_pair(index_, pool_.pool_[index_].Load());
 }
 
@@ -101,7 +103,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 bool
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::operator == (Iterator const & rhs) {
+Iterator::operator ==(Iterator const & rhs) {
   return (&pool_ == &rhs.pool_) && (index_ == rhs.index_);
 }
 
@@ -109,7 +111,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
   class TreeAllocator >
 bool
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
-Iterator::operator != (Iterator const & rhs) {
+Iterator::operator !=(Iterator const & rhs) {
   return (&pool_ != &rhs.pool_) || (index_ != rhs.index_);
 }
 

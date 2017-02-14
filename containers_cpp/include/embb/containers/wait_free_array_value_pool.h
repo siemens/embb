@@ -191,7 +191,7 @@ class WaitFreeArrayValuePool {
      * \returns Reference to this iterator.
      * \notthreadsafe
      */
-    Iterator & operator ++ ();
+    Iterator & operator ++();
 
     /**
      * Post-increments an iterator.
@@ -199,7 +199,7 @@ class WaitFreeArrayValuePool {
      * \returns Copy of this iterator before increment.
      * \notthreadsafe
      */
-    Iterator operator ++ (int);
+    Iterator operator ++(int);
 
     /**
      * Compares two iterators for equality.
@@ -208,7 +208,7 @@ class WaitFreeArrayValuePool {
      *          \c false otherwise.
      * \waitfree
      */
-    bool operator == (
+    bool operator ==(
       Iterator const & rhs             /**< [IN] Iterator to compare to. */
     );
 
@@ -219,7 +219,7 @@ class WaitFreeArrayValuePool {
      *          \c false otherwise.
      * \waitfree
      */
-    bool operator != (
+    bool operator !=(
       Iterator const & rhs             /**< [IN] Iterator to compare to. */
     );
 
@@ -229,7 +229,7 @@ class WaitFreeArrayValuePool {
      * \returns A pair consisting of index and value of the element pointed to.
      * \waitfree
      */
-    std::pair<int, Type> operator * ();
+    std::pair<int, Type> operator *();
   };
 
   /**

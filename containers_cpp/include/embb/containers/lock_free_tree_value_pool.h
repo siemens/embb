@@ -292,7 +292,7 @@ class LockFreeTreeValuePool {
      * \returns Reference to this iterator.
      * \notthreadsafe
      */
-    Iterator & operator ++ ();
+    Iterator & operator ++();
 
     /**
      * Post-increments an iterator.
@@ -300,7 +300,7 @@ class LockFreeTreeValuePool {
      * \returns Copy of this iterator before increment.
      * \notthreadsafe
      */
-    Iterator operator ++ (int);
+    Iterator operator ++(int);
 
     /**
      * Compares two iterators for equality.
@@ -309,7 +309,7 @@ class LockFreeTreeValuePool {
      *          \c false otherwise.
      * \waitfree
      */
-    bool operator == (
+    bool operator ==(
       Iterator const & rhs             /**< [IN] Iterator to compare to. */
     );
 
@@ -320,7 +320,7 @@ class LockFreeTreeValuePool {
      *          \c false otherwise.
      * \waitfree
      */
-    bool operator != (
+    bool operator !=(
       Iterator const & rhs             /**< [IN] Iterator to compare to. */
     );
 
@@ -330,7 +330,7 @@ class LockFreeTreeValuePool {
      * \returns A pair consisting of index and value of the element pointed to.
      * \waitfree
      */
-    std::pair<int, Type> operator * ();
+    std::pair<int, Type> operator *();
   };
 
   /**
