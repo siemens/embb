@@ -305,7 +305,8 @@ class LockFreeTreeValuePool {
     /**
      * Compares two iterators for equality.
      *
-     * \returns true, if the two iterators are equal, false otherwise.
+     * \returns \c true, if the two iterators are equal,
+     *          \c false otherwise.
      * \waitfree
      */
     bool operator == (
@@ -315,7 +316,8 @@ class LockFreeTreeValuePool {
     /**
      * Compares two iterators for inequality.
      *
-     * \returns true, if the two iterators are not equal, false otherwise.
+     * \returns \c true, if the two iterators are not equal,
+     *          \c false otherwise.
      * \waitfree
      */
     bool operator != (
@@ -332,15 +334,18 @@ class LockFreeTreeValuePool {
   };
 
   /**
-   * Returns a forward iterator pointing to the first allocated element in
-   * the pool.
+   * Gets a forward iterator to the first allocated element in the pool.
+   *
+   * \returns a forward iterator pointing to the first allocated element.
    * \waitfree
    */
   Iterator Begin();
 
   /**
-   * Returns a forward iterator pointing after the last allocated element in
+   * Gets a forward iterator pointing after the last allocated element in
    * the pool.
+   *
+   * \returns a forward iterator pointing after the last allocated element.
    * \waitfree
    */
   Iterator End();
