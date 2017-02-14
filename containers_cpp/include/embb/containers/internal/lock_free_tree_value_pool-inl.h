@@ -62,7 +62,7 @@ template<typename Type, Type Undefined, class PoolAllocator,
 void
 LockFreeTreeValuePool<Type, Undefined, PoolAllocator, TreeAllocator>::
 Iterator::Advance() {
-  while (pool_.pool_[index_] != Undefined && index_ < pool_.real_size_) {
+  while (index_ < pool_.real_size_ && pool_.pool_[index_] != Undefined) {
     index_++;
   }
 }

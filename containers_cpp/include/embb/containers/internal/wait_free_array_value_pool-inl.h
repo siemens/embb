@@ -58,7 +58,7 @@ template<typename Type, Type Undefined, class Allocator >
 void
 WaitFreeArrayValuePool<Type, Undefined, Allocator>::
 Iterator::Advance() {
-  while (pool_.pool_array_[index_] != Undefined && index_ < pool_.size_) {
+  while (index_ < pool_.size_ && pool_.pool_array_[index_] != Undefined) {
     index_++;
   }
 }
