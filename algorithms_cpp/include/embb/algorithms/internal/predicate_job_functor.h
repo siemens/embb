@@ -36,7 +36,7 @@ namespace internal {
 template<typename ElementType>
 class PredicateJobFunctor {
  public:
-   PredicateJobFunctor(embb::mtapi::Job comparison,
+  PredicateJobFunctor(embb::mtapi::Job comparison,
     embb::mtapi::ExecutionPolicy const & policy)
     : comparison_(comparison) {
     attr_.SetPolicy(policy);

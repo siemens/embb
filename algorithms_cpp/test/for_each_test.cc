@@ -133,7 +133,7 @@ void ForEachTest::TestHeterogeneous() {
   embb::mtapi::Action action = node.CreateAction(
     HETEROGENEOUS_JOB, SquareActionFunction);
   embb::mtapi::Job job = node.GetJob(HETEROGENEOUS_JOB);
-  
+
   std::vector<int> vector(kCountSize);
   for (size_t i = 0; i < kCountSize; i++) {
     vector[i] = static_cast<int>(i + 2);
