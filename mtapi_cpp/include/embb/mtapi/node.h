@@ -461,6 +461,24 @@ class Node {
 
   friend class embb::base::Allocation;
 
+  Task Start(
+    mtapi_task_id_t task_id,
+    mtapi_job_hndl_t job,
+    const void * arguments,
+    mtapi_size_t arguments_size,
+    void * results,
+    mtapi_size_t results_size,
+    mtapi_task_attributes_t const * attributes
+    ) {
+    mtapi_status_t status;
+    mtapi_task_hndl_t task_hndl =
+      mtapi_task_start(task_id, job, arguments, arguments_size,
+      results, results_size, attributes, MTAPI_GROUP_NONE,
+      &status);
+    internal::CheckStatus(status);
+    return Task(task_hndl);
+  }
+
  private:
   // not copyable
   Node(Node const & node);
@@ -486,24 +504,6 @@ class Node {
 
     function_action_ =
       CreateAction(EMBB_MTAPI_FUNCTION_JOB_ID, ActionFunction);
-  }
-
-  Task Start(
-    mtapi_task_id_t task_id,
-    mtapi_job_hndl_t job,
-    const void * arguments,
-    mtapi_size_t arguments_size,
-    void * results,
-    mtapi_size_t results_size,
-    mtapi_task_attributes_t const * attributes
-    ) {
-    mtapi_status_t status;
-    mtapi_task_hndl_t task_hndl =
-      mtapi_task_start(task_id, job, arguments, arguments_size,
-      results, results_size, attributes, MTAPI_GROUP_NONE,
-      &status);
-    internal::CheckStatus(status);
-    return Task(task_hndl);
   }
 
   static void ActionFunction(

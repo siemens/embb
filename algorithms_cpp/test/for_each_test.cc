@@ -52,10 +52,34 @@ static void SquareFunction(int &val) {
   val = val * val;
 }
 
+#define HETEROGENEOUS_JOB 17
+
+static void SquareActionFunction(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/ ) {
+  typedef struct {
+    int in;
+  } InT;
+  typedef struct {
+    int out;
+  } OutT;
+  PT_EXPECT_EQ(args_size, sizeof(InT));
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  InT const * inputs = static_cast<InT const *>(args);
+  OutT * outputs = static_cast<OutT *>(result_buffer);
+  outputs->out = inputs->in * inputs->in;
+}
+
 ForEachTest::ForEachTest() {
   CreateUnit("Different data structures")
     .Add(&ForEachTest::TestDataStructures, this);
   CreateUnit("Function Pointers").Add(&ForEachTest::TestFunctionPointers, this);
+  CreateUnit("Heterogeneous").Add(&ForEachTest::TestHeterogeneous, this);
   CreateUnit("Ranges").Add(&ForEachTest::TestRanges, this);
   CreateUnit("Block sizes").Add(&ForEachTest::TestBlockSizes, this);
   CreateUnit("Policies").Add(&ForEachTest::TestPolicy, this);
@@ -100,6 +124,28 @@ void ForEachTest::TestFunctionPointers() {
     expected = expected * expected;
     PT_EXPECT_EQ(expected, vector[i]);
   }
+}
+
+void ForEachTest::TestHeterogeneous() {
+  using embb::algorithms::ForEach;
+
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::mtapi::Action action = node.CreateAction(
+    HETEROGENEOUS_JOB, SquareActionFunction);
+  embb::mtapi::Job job = node.GetJob(HETEROGENEOUS_JOB);
+  
+  std::vector<int> vector(kCountSize);
+  for (size_t i = 0; i < kCountSize; i++) {
+    vector[i] = static_cast<int>(i + 2);
+  }
+  ForEach(vector.begin(), vector.end(), job);
+  for (size_t i = 0; i < kCountSize; i++) {
+    int expected = static_cast<int>(i + 2);
+    expected = expected * expected;
+    PT_EXPECT_EQ(expected, vector[i]);
+  }
+
+  action.Delete();
 }
 
 void ForEachTest::TestRanges() {

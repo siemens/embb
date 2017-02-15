@@ -24,58 +24,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ALGORITHMS_CPP_TEST_MERGE_SORT_TEST_H_
-#define ALGORITHMS_CPP_TEST_MERGE_SORT_TEST_H_
+#ifndef EMBB_ALGORITHMS_INTERNAL_PREDICATE_JOB_FUNCTOR_H_
+#define EMBB_ALGORITHMS_INTERNAL_PREDICATE_JOB_FUNCTOR_H_
 
-#include <partest/partest.h>
+#include <embb/mtapi/mtapi.h>
 
-/**
- * Provides tests for the QuickSort method.
- */
-class MergeSortTest : public partest::TestCase {
+namespace embb {
+namespace algorithms {
+namespace internal {
+
+template<typename ElementType>
+class PredicateJobFunctor {
  public:
-  /**
-   * Creates test units.
-   */
-  MergeSortTest();
+   PredicateJobFunctor(embb::mtapi::Job comparison,
+    embb::mtapi::ExecutionPolicy const & policy)
+    : comparison_(comparison) {
+    attr_.SetPolicy(policy);
+  }
+
+  bool operator () (ElementType const & val) const {
+    struct {
+      ElementType in;
+    } inputs;
+    inputs.in = val;
+    struct {
+      bool out;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, comparison_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      &attr_.GetInternal());
+    task.Wait(MTAPI_INFINITE);
+    return outputs.out;
+  }
 
  private:
-  /**
-   * Tests the compatibility with different data structures.
-   */
-  void TestDataStructures();
-
-  /**
-   * Tests the compatibility with function pointers.
-   */
-  void TestFunctionPointers();
-
-  /**
-   * Tests the compatibility with homogeneous systems.
-   */
-  void TestHomogeneous();
-
-  /**
-   * Tests setting various ranges to be iterated.
-   */
-  void TestRanges();
-
-  /**
-   * Tests various block sizes for the workers.
-   */
-  void TestBlockSizes();
-
-  /**
-   * Tests setting policies (without checking their actual execution).
-   */
-  void TestPolicy();
-
-  /**
-   * Stress tests by giving work for all workers.
-   */
-  void StressTest();
-
-  static const size_t kCountSize = 5;
+  embb::mtapi::Job comparison_;
+  embb::mtapi::TaskAttributes attr_;
 };
 
-#endif  // ALGORITHMS_CPP_TEST_MERGE_SORT_TEST_H_
+}  // namespace internal
+}  // namespace algorithms
+}  // namespace embb
+
+#endif  // EMBB_ALGORITHMS_INTERNAL_PREDICATE_JOB_FUNCTOR_H_

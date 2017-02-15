@@ -34,6 +34,7 @@
 #include <embb/base/exceptions.h>
 #include <embb/mtapi/mtapi.h>
 #include <embb/algorithms/internal/partition.h>
+#include <embb/algorithms/internal/comparison_job_functor.h>
 
 namespace embb {
 namespace algorithms {
@@ -263,6 +264,18 @@ void MergeSortIteratorCheck(
 }
 
 }  // namespace internal
+
+template<typename RAI, typename RAITemp>
+void MergeSort(RAI first, RAI last, RAITemp temporary_first,
+  embb::mtapi::Job comparison, const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size) {
+  typedef typename std::iterator_traits<RAI>::iterator_category category;
+  internal::MergeSortIteratorCheck(first, last, temporary_first,
+    internal::ComparisonJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(
+        comparison, policy),
+    policy, block_size, category());
+}
 
 template<typename RAI, typename RAITemp, typename ComparisonFunction>
 void MergeSort(RAI first, RAI last, RAITemp temporary_first,

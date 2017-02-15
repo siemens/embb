@@ -47,6 +47,29 @@ bool IsEvenFunction(int val) {
     return false;
 }
 
+#define PREDICATE_JOB 17
+
+static void IsEvenActionFunction(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* /*node_local_data*/,
+  mtapi_size_t /*node_local_data_size*/,
+  mtapi_task_context_t * /*context*/) {
+  typedef struct {
+    int val;
+  } InT;
+  typedef struct {
+    bool out;
+  } OutT;
+  PT_EXPECT_EQ(args_size, sizeof(InT));
+  PT_EXPECT_EQ(result_buffer_size, sizeof(OutT));
+  InT const * inputs = static_cast<InT const *>(args);
+  OutT * outputs = static_cast<OutT *>(result_buffer);
+  outputs->out = (inputs->val % 2) == 0;
+}
+
 CountTest::CountTest() {
   CreateUnit("Different data structures")
     .Add(&CountTest::TestDataStructures, this);
@@ -77,6 +100,15 @@ void CountTest::TestCountIf() {
   int array[] = { 10, 21, 30, 31, 20, 11, 10, 21, 20, 20 };
   PT_EXPECT_EQ(CountIf(array, array + size, IsEven()), 6);
   PT_EXPECT_EQ(CountIf(array, array + size, &IsEvenFunction), 6);
+
+  embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+  embb::mtapi::Action action = node.CreateAction(
+    PREDICATE_JOB, IsEvenActionFunction);
+  embb::mtapi::Job job = node.GetJob(PREDICATE_JOB);
+
+  PT_EXPECT_EQ(CountIf(array, array + size, job), 6);
+
+  action.Delete();
 }
 
 void CountTest::TestRanges() {

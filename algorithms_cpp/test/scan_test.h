@@ -56,6 +56,11 @@ class ScanTest : public partest::TestCase {
   void TestFunctionPointers();
 
   /**
+   * Tests the compatibility with heterogeneous systems.
+   */
+  void TestHeterogeneous();
+
+  /**
    * Tests setting various ranges to be iterated.
    */
   void TestRanges();

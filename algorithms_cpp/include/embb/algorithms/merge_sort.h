@@ -28,6 +28,7 @@
 #define EMBB_ALGORITHMS_MERGE_SORT_H_
 
 #include <functional>
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 #include <embb/base/memory_allocation.h>
 
@@ -62,7 +63,11 @@ namespace algorithms {
  * \see embb::mtapi::ExecutionPolicy, MergeSort()
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Binary predicate with both arguments of type
- *         <tt>std::iterator_traits<RAI>::value_type</tt>.
+ *         <tt>std::iterator_traits<RAI>::value_type</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing two members of type 
+ *         <tt>std::iterator_traits<RAI>::value_type</tt> as its argument
+ *         buffer and a struct containing one bool member as its result buffer.
  */
 template<typename RAI, typename ComparisonFunction>
 void MergeSortAllocate(
@@ -139,6 +144,19 @@ void MergeSort(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename RAITemp>
+void MergeSort(
+  RAI first,
+  RAI last,
+  RAITemp temporary_first,
+  embb::mtapi::Job comparison,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.

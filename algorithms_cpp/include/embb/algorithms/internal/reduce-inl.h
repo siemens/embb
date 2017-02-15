@@ -29,6 +29,8 @@
 
 #include <embb/mtapi/mtapi.h>
 #include <embb/algorithms/internal/partition.h>
+#include <embb/algorithms/internal/transformation_job_functor.h>
+#include <embb/algorithms/internal/reduce_job_functor.h>
 
 #include <functional>
 #include <embb/base/exceptions.h>
@@ -179,16 +181,71 @@ ReturnType ReduceIteratorCheck(RAI first, RAI last, ReductionFunction reduction,
 
 }  // namespace internal
 
-template<typename RAI, typename ReturnType, typename ReductionFunction,
-         typename TransformationFunction >
+template<typename RAI, typename ReturnType>
 ReturnType Reduce(RAI first, RAI last, ReturnType neutral,
-                  ReductionFunction reduction,
-                  TransformationFunction transformation,
-                  const embb::mtapi::ExecutionPolicy& policy,
-                  size_t block_size) {
+  embb::mtapi::Job reduction,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size) {
   typename std::iterator_traits<RAI>::iterator_category category;
-  return internal::ReduceIteratorCheck(first, last, reduction, transformation,
-                                       neutral, policy, block_size, category);
+  return internal::ReduceIteratorCheck(
+    first, last,
+    internal::ReductionJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(
+        reduction, policy),
+    internal::TransformationJobFunctor<ReturnType,
+      typename std::iterator_traits<RAI>::value_type>(transformation, policy),
+    neutral, policy, block_size, category);
+}
+
+template<typename RAI, typename ReturnType, typename ReductionFunction>
+ReturnType Reduce(
+  RAI first, RAI last, ReturnType neutral,
+  ReductionFunction reduction,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size) {
+  typename std::iterator_traits<RAI>::iterator_category category;
+  return internal::ReduceIteratorCheck(
+    first, last,
+    reduction,
+    internal::TransformationJobFunctor<ReturnType,
+      typename std::iterator_traits<RAI>::value_type>(transformation, policy),
+    neutral, policy, block_size, category);
+}
+
+template<typename RAI, typename ReturnType, typename TransformationFunction>
+ReturnType Reduce(
+  RAI first, RAI last, ReturnType neutral,
+  embb::mtapi::Job reduction,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size) {
+  typename std::iterator_traits<RAI>::iterator_category category;
+  return internal::ReduceIteratorCheck(
+    first, last,
+    internal::ReductionJobFunctor<
+      typename std::iterator_traits<RAI>::value_type>(
+        reduction, policy),
+    transformation,
+    neutral, policy, block_size, category);
+}
+
+
+template<typename RAI, typename ReturnType, typename ReductionFunction,
+         typename TransformationFunction>
+ReturnType Reduce(
+  RAI first, RAI last, ReturnType neutral,
+  ReductionFunction reduction,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size) {
+  typename std::iterator_traits<RAI>::iterator_category category;
+  return internal::ReduceIteratorCheck(
+    first, last,
+    reduction,
+    transformation,
+    neutral, policy, block_size, category);
 }
 
 }  // namespace algorithms

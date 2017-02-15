@@ -27,6 +27,7 @@
 #ifndef EMBB_ALGORITHMS_SCAN_H_
 #define EMBB_ALGORITHMS_SCAN_H_
 
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
@@ -72,10 +73,16 @@ namespace algorithms {
  * \tparam ReturnType Type of output elements of scan operation, deduced from
  *         \c neutral
  * \tparam ScanFunction Binary scan function object with signature
- *         <tt>ReturnType ScanFunction(ReturnType, ReturnType)</tt>
+ *         <tt>ReturnType ScanFunction(ReturnType, ReturnType)</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing two ReturnType members as its argument buffer
+ *         and a struct containing one ReturnType member as its result buffer.
  * \tparam TransformationFunction Unary transformation function object with
  *         signature <tt>ReturnType TransformationFunction(typename
- *         std::iterator_traits<RAIIn>::value_type)</tt>.
+ *         std::iterator_traits<RAIIn>::value_type)</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing one InputType member as its argument buffer
+ *         and a struct containing one ReturnType member as its result buffer.
  */
 template<typename RAIIn, typename RAIOut, typename ReturnType,
          typename ScanFunction, typename TransformationFunction>
@@ -108,6 +115,53 @@ void Scan(
   );
 
 #else // DOXYGEN
+
+  /**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  embb::mtapi::Job scan,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename ScanFunction>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  ScanFunction scan,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename TransformationFunction>
+void Scan(
+  RAIIn first,
+  RAIIn last,
+  RAIOut output_iterator,
+  ReturnType neutral,
+  embb::mtapi::Job scan,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.

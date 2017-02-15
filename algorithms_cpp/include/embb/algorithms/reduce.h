@@ -27,6 +27,7 @@
 #ifndef EMBB_ALGORITHMS_REDUCE_H_
 #define EMBB_ALGORITHMS_REDUCE_H_
 
+#include <embb/mtapi/job.h>
 #include <embb/mtapi/execution_policy.h>
 #include <embb/algorithms/identity.h>
 
@@ -69,10 +70,16 @@ namespace algorithms {
  * \tparam ReturnType Type of result of reduction operation, deduced from
  *         \c neutral
  * \tparam ReductionFunction Binary reduction function object with signature
- *         <tt>ReturnType ReductionFunction(ReturnType, ReturnType)</tt>.
+ *         <tt>ReturnType ReductionFunction(ReturnType, ReturnType)</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing two ReturnType members as its argument buffer
+ *         and a struct containing one ReturnType member as its result buffer.
  * \tparam TransformationFunction Unary transformation function object with
  *         signature <tt>ReturnType TransformationFunction(typename
- *         std::iterator_traits<RAI>::value_type)</tt>
+ *         std::iterator_traits<RAI>::value_type)</tt> or a
+ *         embb::mtapi::Job associated with an action function accepting a
+ *         struct containing one InputType member as its argument buffer
+ *         and a struct containing one ReturnType member as its result buffer.
  */
 template<typename RAI, typename ReturnType, typename ReductionFunction,
          typename TransformationFunction>
@@ -101,6 +108,48 @@ ReturnType Reduce(
   );
 
 #else // DOXYGEN
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  embb::mtapi::Job reduction,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType, typename ReductionFunction>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  ReductionFunction reduction,
+  embb::mtapi::Job transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
+
+/**
+ * Overload of above described Doxygen dummy.
+ */
+template<typename RAI, typename ReturnType, typename TransformationFunction>
+ReturnType Reduce(
+  RAI first,
+  RAI last,
+  ReturnType neutral,
+  embb::mtapi::Job reduction,
+  TransformationFunction transformation,
+  const embb::mtapi::ExecutionPolicy& policy,
+  size_t block_size
+  );
 
 /**
  * Overload of above described Doxygen dummy.

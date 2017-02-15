@@ -32,6 +32,8 @@
 #include <embb/base/function.h>
 #include <embb/mtapi/mtapi.h>
 #include <embb/algorithms/internal/partition.h>
+#include <embb/algorithms/internal/transformation_job_functor.h>
+#include <embb/algorithms/internal/scan_job_functor.h>
 
 namespace embb {
 namespace algorithms {
@@ -220,6 +222,44 @@ void ScanIteratorCheck(RAIIn first, RAIIn last, RAIOut output_iterator,
 }
 
 }  // namespace internal
+
+template<typename RAIIn, typename RAIOut, typename ReturnType>
+void Scan(RAIIn first, RAIIn last, RAIOut output_iterator, ReturnType neutral,
+          embb::mtapi::Job scan,
+          embb::mtapi::Job transformation,
+          const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+  typedef typename std::iterator_traits<RAIIn>::iterator_category category;
+  internal::ScanIteratorCheck(first, last, output_iterator, neutral,
+    internal::ScanJobFunctor<ReturnType>(scan, policy),
+    internal::TransformationJobFunctor<ReturnType,
+      typename std::iterator_traits<RAIIn>::value_type>(
+        transformation, policy),
+    policy, block_size, category());
+}
+
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename ScanFunction>
+void Scan(RAIIn first, RAIIn last, RAIOut output_iterator, ReturnType neutral,
+          ScanFunction scan, embb::mtapi::Job transformation,
+          const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+  typedef typename std::iterator_traits<RAIIn>::iterator_category category;
+  internal::ScanIteratorCheck(first, last, output_iterator, neutral,
+    scan, internal::TransformationJobFunctor<ReturnType,
+      typename std::iterator_traits<RAIIn>::value_type>(
+        transformation, policy),
+    policy, block_size, category());
+}
+
+template<typename RAIIn, typename RAIOut, typename ReturnType,
+         typename TransformationFunction>
+void Scan(RAIIn first, RAIIn last, RAIOut output_iterator, ReturnType neutral,
+          embb::mtapi::Job scan, TransformationFunction transformation,
+          const embb::mtapi::ExecutionPolicy& policy, size_t block_size) {
+  typedef typename std::iterator_traits<RAIIn>::iterator_category category;
+  internal::ScanIteratorCheck(first, last, output_iterator, neutral,
+    internal::ScanJobFunctor<ReturnType>(scan, policy), transformation,
+    policy, block_size, category());
+}
 
 template<typename RAIIn, typename RAIOut, typename ReturnType,
          typename ScanFunction, typename TransformationFunction>
