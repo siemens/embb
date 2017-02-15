@@ -70,7 +70,14 @@ static void cancel_test(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t * context) {
   mtapi_status_t status;
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
   while (true) {
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
     mtapi_task_state_t state = mtapi_context_taskstate_get(context, &status);
     if (status != MTAPI_SUCCESS) {
       break;
