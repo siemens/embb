@@ -63,7 +63,7 @@ namespace algorithms {
  * \see embb::mtapi::ExecutionPolicy, MergeSort()
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Binary predicate with both arguments of type
- *         <tt>std::iterator_traits<RAI>::value_type</tt> or a
+ *         <tt>std::iterator_traits<RAI>::value_type</tt> or an
  *         embb::mtapi::Job associated with an action function accepting a
  *         struct containing two members of type 
  *         <tt>std::iterator_traits<RAI>::value_type</tt> as its argument

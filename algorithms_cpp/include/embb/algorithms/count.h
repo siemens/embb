@@ -100,7 +100,7 @@ typename std::iterator_traits<RAI>::difference_type Count(
  * \see Count(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Unary predicate with argument of type
- *         <tt>std::iterator_traits<RAI>::value_type</tt> or a
+ *         <tt>std::iterator_traits<RAI>::value_type</tt> or an
  *         embb::mtapi::Job associated with an action function accepting a
  *         struct containing one member of type 
  *         <tt>std::iterator_traits<RAI>::value_type</tt> as its argument

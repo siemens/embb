@@ -244,7 +244,7 @@ class HazardPointer  {
 
   /**
    * Mapping from EMBB thread id to hazard pointer thread ids. Hazard pointer
-   * thread ids are in range [0;accesor_count-1]. The position of a EMBB thread
+   * thread ids are in range [0;accesor_count-1]. The position of an EMBB thread
    * id in that array determines the respective hazard pointer thread id.
    */
   embb::base::Atomic<int>* thread_id_mapping_;
