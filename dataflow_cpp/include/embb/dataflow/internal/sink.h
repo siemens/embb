@@ -62,6 +62,20 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     SetScheduler(sched);
   }
 
+  Sink(Scheduler * sched, ClockListener * listener,
+    embb::mtapi::Job job)
+    : inputs_()
+    , executor_(job)
+    , action_(NULL)
+    , slices_(0) {
+    next_clock_ = 0;
+    queued_clock_ = 0;
+    queue_id_ = GetNextProcessID();
+    inputs_.SetListener(this);
+    listener_ = listener;
+    SetScheduler(sched);
+  }
+
   ~Sink() {
     if (NULL != action_) {
       embb::base::Allocation::Free(action_);

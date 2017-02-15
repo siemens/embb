@@ -32,6 +32,8 @@
 #include <embb/dataflow/internal/signal.h>
 #include <embb/dataflow/internal/outputs.h>
 
+#include <embb/mtapi/mtapi.h>
+
 namespace embb {
 namespace dataflow {
 namespace internal {
@@ -45,6 +47,10 @@ class SourceExecutor< Outputs<O1> > {
   typedef embb::base::Function<bool, O1 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
+  explicit SourceExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SourceExecutor::ExecuteJob);
+  }
 
   bool Execute(
     int clock,
@@ -59,6 +65,23 @@ class SourceExecutor< Outputs<O1> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  bool ExecuteJob(O1 & o1) {
+    struct {
+      mtapi_boolean_t result;
+      O1 o1_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    return outputs.result != MTAPI_FALSE;
+  }
 };
 
 template <typename O1, typename O2>
@@ -67,6 +90,10 @@ class SourceExecutor< Outputs<O1, O2> > {
   typedef embb::base::Function<bool, O1 &, O2 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
+  explicit SourceExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SourceExecutor::ExecuteJob);
+  }
 
   bool Execute(
     int clock,
@@ -83,6 +110,25 @@ class SourceExecutor< Outputs<O1, O2> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  bool ExecuteJob(O1 & o1, O2 & o2) {
+    struct {
+      mtapi_boolean_t result;
+      O1 o1_;
+      O2 o2_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+    return outputs.result != MTAPI_FALSE;
+  }
 };
 
 template <typename O1, typename O2, typename O3>
@@ -91,6 +137,10 @@ class SourceExecutor< Outputs<O1, O2, O3> > {
   typedef embb::base::Function<bool, O1 &, O2 &, O3 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
+  explicit SourceExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SourceExecutor::ExecuteJob);
+  }
 
   bool Execute(
     int clock,
@@ -109,6 +159,27 @@ class SourceExecutor< Outputs<O1, O2, O3> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  bool ExecuteJob(O1 & o1, O2 & o2, O3 & o3) {
+    struct {
+      mtapi_boolean_t result;
+      O1 o1_;
+      O2 o2_;
+      O3 o3_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+    o3 = outputs.o3_;
+    return outputs.result != MTAPI_FALSE;
+  }
 };
 
 template <typename O1, typename O2, typename O3, typename O4>
@@ -117,6 +188,10 @@ class SourceExecutor< Outputs<O1, O2, O3, O4> > {
   typedef embb::base::Function<bool, O1 &, O2 &, O3 &, O4 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
+  explicit SourceExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SourceExecutor::ExecuteJob);
+  }
 
   bool Execute(
     int clock,
@@ -137,6 +212,29 @@ class SourceExecutor< Outputs<O1, O2, O3, O4> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  bool ExecuteJob(O1 & o1, O2 & o2, O3 & o3, O4 & o4) {
+    struct {
+      mtapi_boolean_t result;
+      O1 o1_;
+      O2 o2_;
+      O3 o3_;
+      O4 o4_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+    o3 = outputs.o3_;
+    o4 = outputs.o4_;
+    return outputs.result != MTAPI_FALSE;
+  }
 };
 
 template <typename O1, typename O2, typename O3, typename O4,
@@ -146,6 +244,10 @@ class SourceExecutor< Outputs<O1, O2, O3, O4, O5> > {
   typedef embb::base::Function<bool, O1 &, O2 &, O3 &, O4 &, O5 &> FunctionType;
 
   explicit SourceExecutor(FunctionType func) : function_(func) {}
+  explicit SourceExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &SourceExecutor::ExecuteJob);
+  }
 
   bool Execute(
     int clock,
@@ -168,6 +270,31 @@ class SourceExecutor< Outputs<O1, O2, O3, O4, O5> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  bool ExecuteJob(O1 & o1, O2 & o2, O3 & o3, O4 & o4, O5 & o5) {
+    struct {
+      mtapi_boolean_t result;
+      O1 o1_;
+      O2 o2_;
+      O3 o3_;
+      O4 o4_;
+      O5 o5_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task =
+      node.Start(MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      MTAPI_NULL, 0,
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+    o3 = outputs.o3_;
+    o4 = outputs.o4_;
+    o5 = outputs.o5_;
+    return outputs.result != MTAPI_FALSE;
+  }
 };
 
 } // namespace internal

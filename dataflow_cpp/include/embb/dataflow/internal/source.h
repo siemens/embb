@@ -54,6 +54,11 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
     SetScheduler(sched);
   }
 
+  Source(Scheduler * sched, embb::mtapi::Job job)
+    : executor_(job), not_done_(true) {
+    SetScheduler(sched);
+  }
+
   virtual bool HasOutputs() const {
     return outputs_.Size() > 0;
   }

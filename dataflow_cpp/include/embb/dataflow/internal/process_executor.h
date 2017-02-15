@@ -33,6 +33,8 @@
 #include <embb/dataflow/internal/inputs.h>
 #include <embb/dataflow/internal/outputs.h>
 
+#include <embb/mtapi/mtapi.h>
+
 namespace embb {
 namespace dataflow {
 namespace internal {
@@ -46,6 +48,10 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1> > {
   typedef embb::base::Function<void, I1 const &, O1 &> FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -64,6 +70,26 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1,
+    O1 & o1) {
+    struct {
+      I1 i1_;
+    } inputs = { i1 };
+    struct {
+      O1 o1_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+  }
 };
 
 template <typename I1, typename O1, typename O2>
@@ -72,6 +98,10 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2> > {
   typedef embb::base::Function<void, I1 const &, O1 &, O2 &> FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -93,6 +123,28 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1,
+    O1 & o1, O2 & o2) {
+    struct {
+      I1 i1_;
+    } inputs = { i1 };
+    struct {
+      O1 o1_;
+      O2 o2_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+  }
 };
 
 template <typename I1, typename O1, typename O2, typename O3>
@@ -102,6 +154,10 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3> > {
     FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -126,6 +182,30 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1,
+    O1 & o1, O2 & o2, O3 & o3) {
+    struct {
+      I1 i1_;
+    } inputs = { i1 };
+    struct {
+      O1 o1_;
+      O2 o2_;
+      O3 o3_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+    o3 = outputs.o3_;
+  }
 };
 
 template <typename I1, typename O1, typename O2, typename O3,
@@ -136,6 +216,10 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3, O4> > {
     FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -163,6 +247,32 @@ class ProcessExecutor< Inputs<I1>, Outputs<O1, O2, O3, O4> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1,
+    O1 & o1, O2 & o2, O3 & o3, O4 & o4) {
+    struct {
+      I1 i1_;
+    } inputs = { i1 };
+    struct {
+      O1 o1_;
+      O2 o2_;
+      O3 o3_;
+      O4 o4_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+    o3 = outputs.o3_;
+    o4 = outputs.o4_;
+  }
 };
 
 template <typename I1, typename I2, typename O1>
@@ -172,6 +282,10 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1> > {
     FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -191,6 +305,27 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1, I2 const & i2,
+    O1 & o1) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+    } inputs = { i1, i2 };
+    struct {
+      O1 o1_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+  }
 };
 
 template <typename I1, typename I2, typename O1, typename O2>
@@ -200,6 +335,10 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2> > {
     FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -222,6 +361,29 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1, I2 const & i2,
+    O1 & o1, O2 & o2) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+    } inputs = { i1, i2 };
+    struct {
+      O1 o1_;
+      O2 o2_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+  }
 };
 
 template <typename I1, typename I2, typename O1, typename O2,
@@ -232,6 +394,10 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2, O3> > {
     FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -257,6 +423,31 @@ class ProcessExecutor< Inputs<I1, I2>, Outputs<O1, O2, O3> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1, I2 const & i2,
+    O1 & o1, O2 & o2, O3 & o3) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+    } inputs = { i1, i2 };
+    struct {
+      O1 o1_;
+      O2 o2_;
+      O3 o3_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+    o3 = outputs.o3_;
+  }
 };
 
 template <typename I1, typename I2, typename I3, typename O1>
@@ -266,6 +457,10 @@ class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1> > {
     FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -286,6 +481,28 @@ class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1, I2 const & i2, I3 const & i3,
+    O1 & o1) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+      I3 i3_;
+    } inputs = { i1, i2, i3 };
+    struct {
+      O1 o1_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+  }
 };
 
 template <typename I1, typename I2, typename I3, typename O1,
@@ -296,6 +513,10 @@ class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1, O2> > {
     O1 &, O2 &> FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -319,6 +540,30 @@ class ProcessExecutor< Inputs<I1, I2, I3>, Outputs<O1, O2> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1, I2 const & i2, I3 const & i3,
+    O1 & o1, O2 & o2) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+      I3 i3_;
+    } inputs = { i1, i2, i3 };
+    struct {
+      O1 o1_;
+      O2 o2_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+    o2 = outputs.o2_;
+  }
 };
 
 template <typename I1, typename I2, typename I3, typename I4,
@@ -329,6 +574,10 @@ class ProcessExecutor< Inputs<I1, I2, I3, I4>, Outputs<O1> > {
     I4 const &, O1 &> FunctionType;
 
   explicit ProcessExecutor(FunctionType func) : function_(func) {}
+  explicit ProcessExecutor(embb::mtapi::Job job)
+    : job_(job) {
+    function_ = FunctionType(*this, &ProcessExecutor::ExecuteJob);
+  }
 
   void Execute(
     int clock,
@@ -350,6 +599,29 @@ class ProcessExecutor< Inputs<I1, I2, I3, I4>, Outputs<O1> > {
 
  private:
   FunctionType function_;
+  embb::mtapi::Job job_;
+
+  void ExecuteJob(
+    I1 const & i1, I2 const & i2, I3 const & i3, I4 const & i4,
+    O1 & o1) {
+    struct {
+      I1 i1_;
+      I2 i2_;
+      I3 i3_;
+      I4 i4_;
+    } inputs = { i1, i2, i3, i4 };
+    struct {
+      O1 o1_;
+    } outputs;
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    embb::mtapi::Task task = node.Start(
+      MTAPI_TASK_ID_NONE, job_.GetInternal(),
+      &inputs, sizeof(inputs),
+      &outputs, sizeof(outputs),
+      MTAPI_DEFAULT_TASK_ATTRIBUTES);
+    task.Wait();
+    o1 = outputs.o1_;
+  }
 };
 
 } // namespace internal

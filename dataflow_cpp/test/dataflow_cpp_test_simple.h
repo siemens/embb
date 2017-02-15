@@ -37,6 +37,8 @@ class SimpleTest : public partest::TestCase {
   void TestBasic();
 
   void TrySimple(bool reuse_main_thread);
+
+  void TryHeterogeneous();
 };
 
 #endif // DATAFLOW_CPP_TEST_DATAFLOW_CPP_TEST_SIMPLE_H_
