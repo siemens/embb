@@ -303,7 +303,8 @@ void SimpleTest::TryHeterogeneous() {
 
   embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
 
-  embb::mtapi::Action source_action = node.CreateAction(SOURCE_JOB, sourceAction);
+  embb::mtapi::Action source_action =
+    node.CreateAction(SOURCE_JOB, sourceAction);
   embb::mtapi::Job source_job = node.GetJob(SOURCE_JOB);
 
   embb::mtapi::Action sink_action = node.CreateAction(SINK_JOB, sinkAction);

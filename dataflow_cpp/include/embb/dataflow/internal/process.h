@@ -80,8 +80,7 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     bool ordered = Serial;
     if (ordered) {
       queue_id_ = GetNextProcessID();
-    }
-    else {
+    } else {
       queue_id_ = 0;
     }
     inputs_.SetListener(this);
