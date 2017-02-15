@@ -205,7 +205,14 @@ int embb_spin_lock(embb_spinlock_t* spinlock) {
   }
   int expected = 0;
   unsigned int spins = 1;
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
   while (1) {
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
     // Wait until spinlock is released to avoid unnecessary RMW operations
     if (0 == embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {
       if (1 == embb_atomic_compare_and_swap_int(
@@ -232,7 +239,14 @@ int embb_spin_try_lock(embb_spinlock_t* spinlock,
     return EMBB_BUSY;
   }
   int expected = 0;
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
   while (1) {
+#ifdef EMBB_PLATFORM_COMPILER_MSVC
+#pragma warning(pop)
+#endif
     // Wait until spinlock is released to avoid unnecessary RMW operations
     if (0 == embb_atomic_load_int(&spinlock->atomic_spin_variable_)) {
       if (1 == embb_atomic_compare_and_swap_int(
