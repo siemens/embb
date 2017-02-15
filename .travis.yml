@@ -26,6 +26,13 @@ language: cpp
 compiler:
   - gcc
   - clang
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake
+      - cmake-data
 branches:
   only:
   - master
