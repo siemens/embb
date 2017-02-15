@@ -36,14 +36,10 @@
 #define THIS_DOMAIN_ID 1
 #define THIS_NODE_ID 1
 
-static void embb_mtapi_check_status(mtapi_status_t status) {
-  if (MTAPI_SUCCESS != status) {
-    embb_mtapi_log_error("...error %d\n\n", status);
-  }
-}
-
 #define MTAPI_CHECK_STATUS(status) \
-  embb_mtapi_check_status(status); \
+  if (MTAPI_SUCCESS != status) { \
+    embb_mtapi_log_error("...error %d\n\n", status); \
+  } \
   PT_ASSERT(MTAPI_SUCCESS == status)
 
 #endif // MTAPI_C_TEST_EMBB_MTAPI_TEST_CONFIG_H_
