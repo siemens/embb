@@ -21,11 +21,14 @@ branches:
     - coverity_scan
 
 script:
-  - mkdir build && cd build
-  - cmake ..
-  - make
-  - chmod a+x binaries/run_tests.sh
-  - ./binaries/run_tests.sh
+  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then
+      mkdir build && \
+      cd build && \
+      cmake .. && \
+      make && \
+      chmod a+x binaries/run_tests.sh && \
+      ./binaries/run_tests.sh;
+    fi
 
 # Coverity Scan
 
