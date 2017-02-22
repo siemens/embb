@@ -18,6 +18,7 @@ branches:
   only:
     - master
     - development
+    - coverity_scan
 
 script:
   - mkdir build && cd build
