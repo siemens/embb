@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/siemens/embb.svg?branch=master)](https://travis-ci.org/siemens/embb)
+[![Coverity Scan Status](https://scan.coverity.com/projects/11842/badge.svg)](https://scan.coverity.com/projects/siemens-embb)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/654/badge)](https://bestpractices.coreinfrastructure.org/projects/654)
 
 Embedded Multicore Building Blocks (EMB²)
