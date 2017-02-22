@@ -22,10 +22,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Build and Test
+
 language: cpp
+
 compiler:
   - gcc
   - clang
+
 addons:
   apt:
     sources:
@@ -33,13 +37,34 @@ addons:
     packages:
       - cmake
       - cmake-data
+
 branches:
   only:
-  - master
-  - development
+    - master
+    - development
+
 script:
   - mkdir build && cd build
   - cmake ..
   - make
   - chmod a+x binaries/run_tests.sh
   - ./binaries/run_tests.sh
+
+# Coverity Scan
+
+env:
+  global:
+    - secure: "JFbvE2Q8uU5Rcooq369CzBmocjWlW3aQkdzLAWbk69S2TsuIRr3qXEnPOYqBkSXaa2yauVmDUb5E89txK5zn1TXUIZFqUh1zjFfvPsAaMbEJZTeQIJzZvWH4O6UjtG3or3v3ZXIpbUw5SEivWvRMnhbSz8o+d9lpKt8u6VC73Ws="
+
+before_install:
+    - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  coverity_scan:
+    project:
+      name: "siemens/embb"
+      description: "Build submitted via Travis CI"
+    notification_email: tobias.schuele@siemens.com
+    build_command_prepend: "mkdir build && cd build && cmake .."
+    build_command: "make"
+    branch_pattern: coverity_scan
