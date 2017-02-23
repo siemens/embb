@@ -42,7 +42,7 @@ namespace containers {
 namespace internal {
   template< typename T >
   LockFreeStackNode< T >::LockFreeStackNode(T const& element) :
-    element(element) {
+    element(element), next(NULL) {
   }
 
   template< typename T >
