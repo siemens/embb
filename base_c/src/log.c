@@ -32,6 +32,7 @@
 #include <embb/base/c/log.h>
 
 #include <embb/base/c/internal/config.h>
+#include <embb/base/c/internal/unused.h>
 
 void embb_log_write_file(
   void * context,
@@ -150,6 +151,24 @@ void embb_log_info(
   va_start(argp, message);
   embb_log_write_internal(channel, EMBB_LOG_LEVEL_INFO, message, argp);
   va_end(argp);
+}
+#else
+#undef embb_log_trace
+void embb_log_trace(
+  char const * channel,
+  char const * message,
+  ...) {
+  EMBB_UNUSED(channel);
+  EMBB_UNUSED(message);
+}
+
+#undef embb_log_info
+void embb_log_info(
+  char const * channel,
+  char const * message,
+  ...) {
+  EMBB_UNUSED(channel);
+  EMBB_UNUSED(message);
 }
 #endif
 

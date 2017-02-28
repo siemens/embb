@@ -1,0 +1,14 @@
+LIBRARY embb_mtapi_cpp
+EXPORTS
+?node_instance_@Node@mtapi@embb@@0PAV123@A
+?CheckStatus@internal@mtapi@embb@@YAXW4mtapi_status_enum@@@Z
+?Initialize@Node@mtapi@embb@@SAXII@Z
+?Initialize@Node@mtapi@embb@@SAXIIABVNodeAttributes@23@@Z
+?Finalize@Node@mtapi@embb@@SAXXZ
+?GetInstance@Node@mtapi@embb@@SAAAV123@XZ
+??0ExecutionPolicy@mtapi@embb@@QAE@XZ
+??0ExecutionPolicy@mtapi@embb@@QAE@_N@Z
+??0ExecutionPolicy@mtapi@embb@@QAE@_NI@Z
+?GetAffinity@ExecutionPolicy@mtapi@embb@@QBE_KXZ
+?GetPriority@ExecutionPolicy@mtapi@embb@@QBEIXZ
+?GetCoreCount@ExecutionPolicy@mtapi@embb@@QBEIXZ

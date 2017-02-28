@@ -28,6 +28,12 @@ include_directories(${EMBB_MTAPI_INCLUDE_DIRS}
 
 add_library(embb_mtapi_c ${EMBB_MTAPI_C_SOURCES} ${EMBB_MTAPI_C_HEADERS})
 target_link_libraries(embb_mtapi_c embb_base_c)
+if (BUILD_SHARED_LIBS STREQUAL ON)
+  if (MSVC)
+    set_target_properties(embb_mtapi_c PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/src/exports.def\"")
+    CopyBin(BIN embb_mtapi_c DEST ${local_install_dir})
+  endif()
+endif()
 
 if (BUILD_TESTS STREQUAL ON)
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/../partest/include)
