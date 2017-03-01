@@ -43,7 +43,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
         DESTINATION include FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/embb
         DESTINATION include FILES_MATCHING PATTERN "*.h")
-install(TARGETS embb_mtapi_cpp DESTINATION lib)
+install(TARGETS embb_mtapi_cpp EXPORT EMBB-Targets DESTINATION lib)
 if (MSVC)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/embb_mtapi_cpp.pdb
           DESTINATION lib
