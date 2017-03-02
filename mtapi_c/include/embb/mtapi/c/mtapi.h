@@ -415,7 +415,8 @@ enum mtapi_status_enum {
                                             \a mtapi_action_result_set. */
 
   /* context specific */
-  MTAPI_ERR_CONTEXT_INVALID,
+  MTAPI_ERR_CONTEXT_INVALID,           /**< returned if the context found is
+                                            in an invalid state */
   MTAPI_ERR_CONTEXT_OUTOFCONTEXT,      /**< returned if action code is not
                                             called in the context of a task
                                             execution. This function must be
@@ -424,7 +425,7 @@ enum mtapi_status_enum {
                                             from the MTAPI runtime system */
 
   /* task specific */
-  MTAPI_ERR_TASK_INVALID,
+  MTAPI_ERR_TASK_INVALID,              /**< invalid task handle encountered */
   MTAPI_ERR_TASK_LIMIT,                /**< exceeded maximum number of tasks
                                             allowed */
 
@@ -442,7 +443,7 @@ enum mtapi_status_enum {
                                             allowed */
 
   /* group specific */
-  MTAPI_ERR_GROUP_INVALID,
+  MTAPI_ERR_GROUP_INVALID,             /**< invalid group handle encountered */
   MTAPI_ERR_GROUP_LIMIT,               /**< exceeded maximum number of groups
                                             allowed */
   MTAPI_GROUP_COMPLETED,               /**< group completed, i.e., there are no
@@ -504,18 +505,20 @@ enum mtapi_task_state_enum {
   MTAPI_TASK_ERROR,                    /**< indicates internal error */
   MTAPI_TASK_PRENATAL,                 /**< initialization value for newly
                                             allocated task descriptor */
-  MTAPI_TASK_CREATED,
-  MTAPI_TASK_SCHEDULED,
-  MTAPI_TASK_RUNNING,
-  MTAPI_TASK_WAITING,
-  MTAPI_TASK_RETAINED,
-  MTAPI_TASK_DELETED,
+  MTAPI_TASK_CREATED,                  /**< task is fully initialized */
+  MTAPI_TASK_SCHEDULED,                /**< task was scheduled */
+  MTAPI_TASK_RUNNING,                  /**< task is running */
+  MTAPI_TASK_WAITING,                  /**< task is being waited for */
+  MTAPI_TASK_RETAINED,                 /**< task was started via a queue and
+                                            is retained */
+  MTAPI_TASK_DELETED,                  /**< task was deleted */
   MTAPI_TASK_CANCELLED,                /**< \a MTAPI_TASK_CANCELLED is the only
                                             value specified by the MTAPI
                                             specification, the others are
                                             implementation specific and can be
                                             used for debugging purposes. */
-  MTAPI_TASK_COMPLETED
+  MTAPI_TASK_COMPLETED                 /**< task completed execution
+                                            successfully */
 };
 typedef enum mtapi_task_state_enum mtapi_task_state_t;
                                        /**< internal task state */
@@ -706,10 +709,13 @@ enum mtapi_task_attributes_enum {
                                             corresponding action code will be
                                             executed n times, if possible in
                                             parallel */
-  MTAPI_TASK_PRIORITY,
-  MTAPI_TASK_AFFINITY,
-  MTAPI_TASK_USER_DATA,
-  MTAPI_TASK_COMPLETE_FUNCTION
+  MTAPI_TASK_PRIORITY,                 /**< the priority the task should be
+                                            run at */
+  MTAPI_TASK_AFFINITY,                 /**< the affinity of the task */
+  MTAPI_TASK_USER_DATA,                /**< pointer to user data associated
+                                            with the task */
+  MTAPI_TASK_COMPLETE_FUNCTION         /**< pointer to a function being called
+                                            when the task finishes execution */
 };
 /** size of the \a MTAPI_TASK_DETACHED attribute */
 #define MTAPI_TASK_DETACHED_SIZE sizeof(mtapi_boolean_t)
@@ -725,9 +731,12 @@ enum mtapi_task_attributes_enum {
  * action attributes
  */
 enum mtapi_action_attributes_enum {
-  MTAPI_ACTION_GLOBAL,
-  MTAPI_ACTION_AFFINITY,
-  MTAPI_ACTION_DOMAIN_SHARED
+  MTAPI_ACTION_GLOBAL,                 /**< indicates global visibility of the
+                                            action */
+  MTAPI_ACTION_AFFINITY,               /**< the affinity of tasks using the
+                                            action */
+  MTAPI_ACTION_DOMAIN_SHARED           /**< indicates domain wide visibility of
+                                            the action */
 };
 /** size of the \a MTAPI_ACTION_GLOBAL attribute */
 #define MTAPI_ACTION_GLOBAL_SIZE sizeof(mtapi_boolean_t)
@@ -741,12 +750,17 @@ enum mtapi_action_attributes_enum {
  * queue attributes
  */
 enum mtapi_queue_attributes_enum {
-  MTAPI_QUEUE_GLOBAL,
-  MTAPI_QUEUE_PRIORITY,
-  MTAPI_QUEUE_LIMIT,
-  MTAPI_QUEUE_ORDERED,
-  MTAPI_QUEUE_RETAIN,
-  MTAPI_QUEUE_DOMAIN_SHARED
+  MTAPI_QUEUE_GLOBAL,                  /**< indicates global visibility of the
+                                            queue */
+  MTAPI_QUEUE_PRIORITY,                /**< the priority of tasks launched via
+                                            the queue */
+  MTAPI_QUEUE_LIMIT,                   /**< maximum tasks in the queue */
+  MTAPI_QUEUE_ORDERED,                 /**< toggles ordered execution of tasks
+                                            in the queue */
+  MTAPI_QUEUE_RETAIN,                  /**< indicates whether tasks should be
+                                            retained if the queue is disabled */
+  MTAPI_QUEUE_DOMAIN_SHARED            /**< indicates domain wide visibility of
+                                            the action */
 };
 /** size of the \a MTAPI_QUEUE_GLOBAL attribute */
 #define MTAPI_QUEUE_GLOBAL_SIZE sizeof(mtapi_boolean_t)
@@ -2802,6 +2816,34 @@ void mtapi_taskattr_init(
  *         (see chapter 4.1.7 Multi-Instance Tasks, page 107)</td>
  *     <td>\c mtapi_uint_t</td>
  *     <td>1</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_TASK_PRIORITY</td>
+ *     <td>Indicates the prority this task should be run at. Priorities range
+ *         from zero to one minus the maximum number of priorities specified at
+ *         the call to mtapi_initialize().</td>
+ *     <td>\c mtapi_uint_t</td>
+ *     <td>0 (default priority)</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_TASK_AFFINITY</td>
+ *     <td>Indicates the affinity of this task. Affinities are manipulated by
+ *         the matpi_affinity_init() and mtapi_affinity_set() calls.</td>
+ *     <td>\c mtapi_affinity_t</td>
+ *     <td>all workers</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_TASK_USER_DATA</td>
+ *     <td>Provides a pointer to some data required by the user during scheduling
+ *         (e.g. in a MTAPI plugin).</td>
+ *     <td>\c void*</td>
+ *     <td>\c MTAPI_NULL</td>
+ *   </tr>
+ *   <tr>
+ *     <td>\c MTAPI_TASK_COMPLETE_FUNCTION</td>
+ *     <td>Pointer to a function being called when the task finishes.</td>
+ *     <td>\c mtapi_task_complete_function_t</td>
+ *     <td>\c MTAPI_NULL</td>
  *   </tr>
  * </table>
  *
