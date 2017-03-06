@@ -20,10 +20,12 @@
 &nbsp;&nbsp;[Foreach Loops](#sec_algorithms_foreach)  
 &nbsp;&nbsp;[Reductions](#sec_algorithms_reductions)  
 &nbsp;&nbsp;[Prefix Computations](#sec_algorithms_prefix)  
+&nbsp;&nbsp;[Heterogeneous Systems](#sec_algorithms_heterogeneous_systems)  
 
 [**Dataflow**](#cha_dataflow)  
 &nbsp;&nbsp;[Linear Pipelines](#sec_dataflow_linear_pipelines)  
 &nbsp;&nbsp;[Nonlinear Pipelines](#sec_dataflow_nonlinear_pipelines)  
+&nbsp;&nbsp;[Heterogeneous Systems](#sec_dataflow_heterogeneous_systems)  
 
 [**Containers**](#cha_containers)  
 &nbsp;&nbsp;[Object Pools](#sec_containers_object_pools)  
@@ -308,7 +310,7 @@ The action function does not need to be registered with a job. Instead a preregi
 
 ### <a name="sec_mtapi_plugins"></a>Plugins
 
-The implementation of MTAPI provides an extension to allow for custom actions that are not executed by the scheduler for software actions as detailed in the previous sections. Two plugins are delivered with , one for supporting distributed systems through TCP/IP networking and the other to allow for transparently using OpenCL accelerators.
+The implementation of MTAPI provides an extension to allow for custom actions that are not executed by the scheduler for software actions as detailed in the previous sections. Three plugins are delivered with EMB², one for supporting distributed systems through TCP/IP networking and the other two to allow for transparently using OpenCL or CUDA accelerators.
 
 #### Plugin API
 
@@ -425,6 +427,36 @@ Now the `OPENCL_JOB` can be used like a normal MTAPI job to start tasks.
 After all work is done, the plugin needs to be finalized. This will free all memory on the accelerator and delete the corresponding OpenCL context:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_opencl.cc:mtapi_opencl_c_plugin_finalize}
+
+#### CUDA
+
+The MTAPI CUDA plugin allows the user to incorporate the computational power of an CUDA accelerator, if one is available in the system.
+
+The vector addition example from the OpenCL plugin is used again. The action function looks slightly in CUDA:
+
+    \\\inputlistingsnippet{../examples/mtapi/mtapi_cuda_c_test_kernel.cu:mtapi_cuda_c_kernel}
+
+The kernel needs to be precompiled and will be transformed into a header file containing the resulting binary in a `char const *` array named `imageBytes`.
+
+As with the OpenCL plugin, the CUDA plugin header file needs to be included first:
+
+    \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda.cc:mtapi_cuda_c_header}
+
+Then, the CUDA plugin needs to be initialized after the node has been initialized:
+
+    \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda.cc:mtapi_cuda_c_plugin_initialize}
+
+Now the plugin action can be registered with the `CUDA_JOB`:
+
+    \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda.cc:mtapi_cuda_c_action_create}
+
+The precompiled kernel binary and the name of the kernel to use need to be specified while creating the action. The kernel and node local data provided are transferred to accelerator memory. The local work size is the number of threads that will share CUDA local memory, in this case 32. The element size instructs the CUDA plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The CUDA plugin will launch `result_buffer_size/element_size` CUDA threads to calculate the result.
+	
+Now the `CUDA_JOB` can be used like a normal MTAPI job to start tasks.
+
+After all work is done, the plugin needs to be finalized. This will free all memory on the accelerator and delete the corresponding CUDA context:
+
+    \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda.cc:mtapi_cuda_c_plugin_finalize}
 
 ## <a name="cha_algorithms"></a>Algorithms
 
@@ -562,6 +594,137 @@ Note the dependency on loop iteration _i-1_ to compute the result in iteration _
     \\\inputlistingsnippet{../examples/algorithms/scan.cc:prefix_sum}
 
 As in the case of reductions, the neutral element has to be given explicitly. Also, a transformation function can be passed as additional argument to `Scan`. The elements of the input range are then transformed before given to the prefix operation.
+
+### <a name="sec_algorithms_heterogeneous_systems"></a>Heterogeneous Systems
+
+All of the above algorithms can be used on heterogeneous systems as well. Instead of functions, functors or lambdas the algoritm functions accept MTAPI job handles that implement the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used above. For the sake of simplicity, CPU actions are used to simulate a heterogeneous system. The CPU actions are functions that use the following signature:
+
+    void Action(
+      const void* args,
+      mtapi_size_t args_size,
+      void* result_buffer,
+      mtapi_size_t result_buffer_size,
+      const void* node_local_data,
+      mtapi_size_t node_local_data_size,
+      mtapi_task_context_t* task_context
+      );
+
+A node handle is retrieved and used by all the following examples like this:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:get_node}
+
+#### Invoke
+
+First `Invoke` is used to start two jobs in parallel. Two action functions `InvokeA` and `InvokeB` are defined that have no parameters and just increment a global value (`a` and `b`):
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:invoke_action}
+
+The actions are associated with the job ids `JOB_A` and `JOB_B`. The job handles are retrieved:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:invoke_jobs}
+
+After that, the jobs can be started:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:invoke_call}
+
+The global variables `a` and `b` are now both set to `1`.
+
+#### Sorting
+
+To use `QuickSort` we need a comparison function. An action function `DescendingCompare` is defined that has two arguments of type `int` and one result of type `bool`. Since the function signature is fixed, the arguments are packed into a struct:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_input_int_int}
+
+The same holds for the result:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_output_bool}
+
+`args` needs to be cast to `InT` and `result_buffer` to `OutT`:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:cast_parameters}
+
+Now, the arguments can be accessed and compared and then the result can be written:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_action_body}
+
+`DescendingCompare` is associated with the job id `JOB_COMPARE` and the job handle can be retrieved:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_job}
+
+Then, a vector with `int`s to sort is prepared
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_data}
+
+Finally `QuickSort` is called
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_call}
+
+and the `int`s in the vector are now in descending order.
+
+#### Counting
+
+In `CountIf` a predicate can be supplied and is implemented in the action function `CheckZero` that has one argument of type `int` and one result of type `bool`. The arguments are packed into a struct:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_input_int}
+
+The result struct is the same as in the sorting example. Again `args` and `result_buffer` need to be cast to `InT` and `OutT`. Then the body of `CheckZero` is simply:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_action_body}
+
+After retrieving the job handle
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_job}
+
+a vector with `int`s to count (if they are zero) is prepared
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_data}
+
+Finally `CountIf` is called
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_call}
+
+and the numer of zeros in the vector is returned.
+
+#### Foreach Loops
+
+`ForEach` accepts functions receiving a reference from an iterator to work on the referenced object. An action function `Double` is implemented to double the given value. It has one argument of type `int` and one result of type `int`. The argument struct is thus the same as in the counting example. The result resides in a struct containing one `int`:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_output_int}
+
+`args` and `result_buffer` need to be cast to `InT` and `OutT` once more. The body of `Double` is the:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:double_action_body}
+
+After retrieving the job handle
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:foreach_job}
+
+a vector with `int`s to double is filled and `ForEach` is called
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:foreach_call}
+
+#### Reductions and Prefix Computations
+
+`Reduce` and `Scan` use a reduction and a transformation function. The reduction function has two arguments and a result that all have the same type. The transformation function has one argument and one result with potentially different types. In this case they all are of type `int`. The `Double` action and `JOB_DOUBLE` from the `ForEach` example is reused as the transformation function and a new `Add` action is implemented to facilitate the reduction. After casting the parameters from the signature the body of `Add` is:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:add_action_body}
+
+The job handles are retrieved
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:reduce_jobs}
+
+and a vector with `int`s to reduce or scan is prepared:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:reduce_data}
+
+The reduction can then be achieved using:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:reduce_call}
+
+and the prefix sum is computed using:
+
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:scan_call}
+
 
 ## <a name="cha_dataflow"></a>Dataflow
 
@@ -728,6 +891,93 @@ In general, however, we could also have a sink for each output of the sorting ne
 
 <sub>_<a name="footnote_2"></a><sup>2</sup> For the sake of brevity, we omit the functionality. A complete
 implementation can be found in the examples directory._</sub>
+
+### <a name="sec_dataflow_heterogeneous_systems"></a>Heterogeneous Systems
+
+Dataflow can be used on heterogeneous systems as well. In addition to functions and functors the dataflow sources, sinks and processes accept MTAPI job handles that implement the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used above. To simulate a heterogeneous system CPU actions with the following signature are used:
+
+    void Action(
+      const void* args,
+      mtapi_size_t args_size,
+      void* result_buffer,
+      mtapi_size_t result_buffer_size,
+      const void* node_local_data,
+      mtapi_size_t node_local_data_size,
+      mtapi_task_context_t* task_context
+      );
+
+As an example the integers from 0 to 9 shall be doubled and summed. For that, three action functions are defined, one for a source called `Generate`, one for a process called `Double` and one for a sink called `Accumulate`. Each of them is associated with a different job.
+
+#### Generate
+
+The source function generates integers from 0 to 9. It receives no arguments and returns a `bool` that indicates whether generating integers shall continue, and an `int` that represents the generated value. The results are packed into a struct:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:source_output_struct_int}
+
+and the `result_buffer` pointer needs to be cast to that `OutT`:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_output}
+
+Then the body of the function is:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:source_action_body}
+
+#### Double
+
+The process function expects and `int` and returns the double value of it. Both arguments and results are packed into a struct:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:input_struct_int}
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:output_struct_int}
+
+and `args` as well as `result_buffer` need to be cast:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_input}
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_output}
+
+Finally the calculation can commence:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:double_action_body}
+
+#### Accumulate
+
+The sink is supposed to add up all incoming values. It returns no results and expects a value of type `int` wich is packed into a struct again: 
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:input_struct_int}
+
+The argument is packed into a struct:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:input_struct_int}
+
+`args` needs to be cast to `InT`:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_input}
+
+and then the inputs are accumulated:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:sink_action_body}
+
+#### The Network
+
+In the main function the node handle is retrieved:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:get_node}
+
+Then, the job handles are obtained:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:get_jobs}
+
+After that the network, source, sink and process can be defined: 
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:define_net}
+
+Now the network is connected
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:net_connect}
+
+and finally run:
+
+    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:net_run}
 
 ## <a name="cha_containers"></a>Containers
 

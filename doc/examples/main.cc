@@ -33,9 +33,13 @@ void RunMTAPI_C_Network();
 #ifdef EMBB_WITH_OPENCL
 void RunMTAPI_C_OpenCL();
 #endif
+#ifdef EMBB_WITH_CUDA
+void RunMTAPI_C_CUDA();
+#endif
 void RunMTAPI_CPP();
 void RunDataflowLinear();
 void RunDataflowNonLinear();
+void RunDataflowHeterogeneous();
 void RunSTLForEach();
 void RunForEach();
 void RunInvoke();
@@ -43,6 +47,7 @@ void RunSorting();
 void RunReduce();
 void RunCounting();
 void RunScan();
+void RunHeterogeneous();
 void RunObjectPoolExamples();
 void RunStackExamples();
 void RunQueueExamples();
@@ -73,6 +78,12 @@ int main() {
   std::cout << "RunMTAPI_C_OpenCL() ... done" << std::endl;
 #endif
 
+#ifdef EMBB_WITH_CUDA
+  std::cout << "RunMTAPI_C_CUDA() ..." << std::endl;
+  RunMTAPI_C_CUDA();
+  std::cout << "RunMTAPI_C_CUDA() ... done" << std::endl;
+#endif
+
   std::cout << "RunMTAPI_CPP() ..." << std::endl;
   RunMTAPI_CPP();
   std::cout << "RunMTAPI_CPP() ... done" << std::endl;
@@ -84,6 +95,10 @@ int main() {
   std::cout << "RunDataflowNonLinear() ..." << std::endl;
   RunDataflowNonLinear();
   std::cout << "RunDataflowNonLinear() ... done" << std::endl;
+
+  std::cout << "RunDataflowHeterogeneous() ..." << std::endl;
+  RunDataflowHeterogeneous();
+  std::cout << "RunDataflowHeterogeneous() ... done" << std::endl;
 
   std::cout << "RunSTLForEach() ..." << std::endl;
   RunSTLForEach();
@@ -108,11 +123,15 @@ int main() {
   std::cout << "RunCounting() ..." << std::endl;
   RunCounting();
   std::cout << "RunCounting() ... done" << std::endl;
-  /*
+
   std::cout << "RunScan() ..." << std::endl;
   RunScan();
   std::cout << "RunScan() ... done" << std::endl;
-  */
+
+  std::cout << "RunHeterogeneous() ..." << std::endl;
+  RunHeterogeneous();
+  std::cout << "RunHeterogeneous() ... done" << std::endl;
+
   std::cout << "RunObjectPoolExamples() ..." << std::endl;
   RunObjectPoolExamples();
   std::cout << "RunObjectPoolExamples() ... done" << std::endl;
