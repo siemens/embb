@@ -284,11 +284,8 @@ redirect_cmd rsync \
         --exclude "*.out" \
         --exclude "*.toc" \
         --exclude "*.aux" \
-        --exclude "doc/tutorial/sty" \
-        --exclude "doc/tutorial/pics" \
-        --exclude "doc/tutorial/content" \
-        --exclude "doc/tutorial/*.tex" \
-        --exclude "doc/tutorial/*.bib" \
+        --exclude "doc/tutorial/tutorial.template.md" \
+        --exclude "doc/tutorial/bakemd.py" \
         --exclude "doc/reference/*.xml" \
         --exclude "doc/reference/*.dox" \
         --exclude "doc/reference/*.in" \
@@ -310,27 +307,23 @@ fi
 
 echo "--> Calling rsync to temporary folder 2/2 ($MYTMPDIR_BUILD)"
 
-#doing a rsync to another temporary folder, which will be used to build things, like e.g. the tutorial pdf.
+#doing a rsync to another temporary folder, which will be used to build things, like e.g. the tutorial.
 redirect_cmd rsync \
         --archive --recursive ${d} $MYTMPDIR_BUILD 
 
-echo "--> Generating Tutorial PDF"
-TUTORIAL_TEX_DIR="$MYTMPDIR_BUILD/doc/tutorial"
+echo "--> Generating Tutorial MD"
+TUTORIAL_MD_DIR="$MYTMPDIR_BUILD/doc/tutorial"
+TUTORIAL_SOURCE="$MYTMPDIR_BUILD/doc/tutorial/tutorial.md"
+TUTORIAL_TARGET="$MYTMPDIR/${n}/doc/tutorial/tutorial.md"
 REMEMBER_CUR_DIR=$(pwd)
-TUTORIAL_PDF_SOURCE="$TUTORIAL_TEX_DIR/tutorial.pdf"
-TUTORIAL_PDF_TARGET="$MYTMPDIR/${n}/doc/tutorial/tutorial.pdf"
 
-if [ -f "$TUTORIAL_TEX_DIR/tutorial.tex" ]; then
-
-        cd "$TUTORIAL_TEX_DIR"	
-        for ((i=1; i<=$PDFRUNS; i++)); do
-
-                echo "---> LaTeX Run ($i/$PDFRUNS)"
-                redirect_cmd pdflatex tutorial.tex  
-                redirect_cmd bibtex tutorial  
-        done
-        if [ -f "$TUTORIAL_PDF_SOURCE" ]; then
-                cp $TUTORIAL_PDF_SOURCE $TUTORIAL_PDF_TARGET
+if [ -f "$TUTORIAL_MD_DIR/tutorial.template.md" ]; then
+        cd "$TUTORIAL_MD_DIR"
+        if [ -f "$TUTORIAL_MD_DIR/bakemd.py" ]; then
+                redirect_cmd python bakemd.py >> tutorial.md
+        fi
+        if [ -f "$TUTORIAL_SOURCE" ]; then
+                cp $TUTORIAL_SOURCE $TUTORIAL_TARGET
         fi
 fi
 cd "$REMEMBER_CUR_DIR"
@@ -338,32 +331,17 @@ cd "$REMEMBER_CUR_DIR"
 REFMAN_TARGET="$MYTMPDIR/${n}/doc/reference/reference.pdf"
 REFMAN_SOURCE="$MYTMPDIR_DOXY_BUILD/latex/refman.pdf"
 
-echo "--> Integrating Example Snippets"
+echo "--> Copying Examples"
 REMEMBER_CUR_DIR=$(pwd)
 
 EXAMPLES_DIR="$MYTMPDIR_BUILD/doc/examples"
-INTEGRATE_SNIPPETS_SCRIPT="insert_snippets.py"
 EXAMPLES_TARGET_DIR="$MYTMPDIR/${n}/doc/"
 
-if [ -f $EXAMPLES_DIR/$INTEGRATE_SNIPPETS_SCRIPT ]; then
-        cd "$EXAMPLES_DIR"
-
-
-        echo "---> Calling integrate script"
-        redirect_cmd python insert_snippets.py 
-
-        if [ -d $EXAMPLES_TARGET_DIR ]; then
-                echo "---> Copy integrated examples back"
-                #The examples have been integrated. Copy the integrated source files.
-                redirect_cmd rsync --archive --recursive $EXAMPLES_DIR $EXAMPLES_TARGET_DIR \
-                        --exclude=*snippet.h \
-                        --exclude=*fragmented.h \
-                        --exclude=*snippet.cc \
-                        --exclude=*fragmented.cc \
-                        --exclude=*$INTEGRATE_SNIPPETS_SCRIPT 
-        fi
+cd "$EXAMPLES_DIR"
+if [ -d $EXAMPLES_TARGET_DIR ]; then
+        #Copy the example source files.
+        redirect_cmd rsync --archive --recursive $EXAMPLES_DIR $EXAMPLES_TARGET_DIR
 fi
-
 cd "$REMEMBER_CUR_DIR"
 
 echo "--> Copy reference manual"
@@ -399,8 +377,8 @@ if ! [ -f $MYTMPDIR/${n}/doc/examples/main.cc ]; then
         exit 1;
 fi
 
-if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.pdf ]; then
-        echo "--> ! Tutorial PDF missing. Exiting."
+if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.md ]; then
+        echo "--> ! Tutorial MD missing. Exiting."
         exit 1;
 fi
 
