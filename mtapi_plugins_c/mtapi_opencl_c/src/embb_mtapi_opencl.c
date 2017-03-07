@@ -429,3 +429,12 @@ mtapi_action_hndl_t mtapi_opencl_action_create(
 
   return action_hndl;
 }
+
+cl_context mtapi_opencl_get_context(
+  MTAPI_OUT mtapi_status_t* status     /**< [out] Pointer to error code,
+                                       may be \c MTAPI_NULL */
+) {
+  embb_mtapi_opencl_plugin_t * plugin = &embb_mtapi_opencl_plugin;
+  mtapi_status_set(status, MTAPI_SUCCESS);
+  return plugin->context;
+}

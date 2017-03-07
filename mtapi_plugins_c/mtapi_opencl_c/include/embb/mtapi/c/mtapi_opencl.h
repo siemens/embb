@@ -189,6 +189,12 @@ mtapi_action_hndl_t mtapi_opencl_action_create(
                                             may be \c MTAPI_NULL */
 );
 
+typedef struct _cl_context * cl_context;
+
+cl_context mtapi_opencl_get_context(
+  MTAPI_OUT mtapi_status_t* status     /**< [out] Pointer to error code,
+                                            may be \c MTAPI_NULL */
+);
 
 #ifdef __cplusplus
 }
