@@ -189,6 +189,12 @@ mtapi_action_hndl_t mtapi_cuda_action_create(
                                             may be \c MTAPI_NULL */
 );
 
+typedef struct CUctx_st * CUcontext;
+
+CUcontext mtapi_cuda_get_context(
+  MTAPI_OUT mtapi_status_t* status     /**< [out] Pointer to error code,
+                                            may be \c MTAPI_NULL */
+);
 
 #ifdef __cplusplus
 }
