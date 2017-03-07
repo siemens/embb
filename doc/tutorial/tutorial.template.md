@@ -434,7 +434,7 @@ The MTAPI CUDA plugin allows the user to incorporate the computational power of 
 
 The vector addition example from the OpenCL plugin is used again. The action function looks slightly in CUDA:
 
-    \\\inputlistingsnippet{../examples/mtapi/mtapi_cuda_c_test_kernel.cu:mtapi_cuda_c_kernel}
+    \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda_kernel.cu:mtapi_cuda_c_kernel}
 
 The kernel needs to be precompiled and will be transformed into a header file containing the resulting binary in a `char const *` array named `imageBytes`.
 

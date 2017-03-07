@@ -43,7 +43,7 @@ if (MTAPI_SUCCESS != status) { \
 #define CUDA_JOB 2
 
 // precompiled CUDA kernel function for element by element vector addition
-#include <embb_mtapi_cuda_test_kernel.h>
+#include <mtapi_c_cuda_kernel.h>
 
 void RunMTAPI_C_CUDA() {
   mtapi_status_t status;
