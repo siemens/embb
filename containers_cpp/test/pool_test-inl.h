@@ -138,6 +138,8 @@ void PoolTest<ValuePool_t>::PoolTestStatic() {
 
   //create pool with bottom element -1, elements 0-(size-1) are added
   ValuePool_t ap(arr, arr + size);
+  
+  delete[] arr;
 
   int element;
   int index;
