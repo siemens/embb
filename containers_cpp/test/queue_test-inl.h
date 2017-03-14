@@ -46,7 +46,9 @@ QueueTest<Queue_t, MultipleProducers, MultipleConsumers>::QueueTest() :
   next_consumer_id(0),
   n_producer_elements(
     static_cast<int>(partest::TestSuite::GetDefaultNumIterations() *
-    MIN_ENQ_ELEMENTS)) {
+    MIN_ENQ_ELEMENTS)),
+  consume_count(0),
+  queue(NULL) {
   CreateUnit("QueueTestSingleThreadEnqueueDequeue").
   Pre(&QueueTest::QueueTestSingleThreadEnqueueDequeue_Pre, this).
   Add(&QueueTest::QueueTestSingleThreadEnqueueDequeue_ThreadMethod, this).
