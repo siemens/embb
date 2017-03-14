@@ -49,7 +49,7 @@ class In {
  public:
   typedef Signal<Type> SignalType;
 
-  In() : values_(NULL), connected_(false), slices_(0) {}
+  In() : values_(NULL), connected_(false), slices_(0), listener_(NULL) {}
 
   ~In() {
     if (NULL != values_) {
