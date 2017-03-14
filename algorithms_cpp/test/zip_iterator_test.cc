@@ -190,7 +190,7 @@ struct MultiDotProductFunctor{
   mtapi_int64_t operator()(
       embb::algorithms::ZipPair<embb::algorithms::ZipPair<int&, int&>,
       embb::algorithms::ZipPair<int&, int&> > rhs) const {
-    return rhs.First().First() * rhs.First().Second() *
+    return mtapi_int64_t(rhs.First().First()) * rhs.First().Second() *
            rhs.Second().First() * rhs.Second().Second();
   }
 };

@@ -508,10 +508,14 @@ n_threads(static_cast<int>
 #endif
   delete_pointer_callback_(
   *this,
-  &HazardPointerTest2::DeletePointerCallback)
+  &HazardPointerTest2::DeletePointerCallback),
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+  shared_guarded_(NULL),
+  shared_allocated_(NULL),
+  test_pool_(NULL),
+  hazard_pointer_(NULL)
 {
   guards_per_phread_count_ = 5;
   guaranteed_capacity_pool_ = guards_per_phread_count_*n_threads;

@@ -45,6 +45,7 @@ n_threads(static_cast<int>
   n_stack_elements_per_thread(100),
   n_stack_elements(n_stack_elements_per_thread*n_threads),
   stack(static_cast<size_t>(n_stack_elements)),
+  thread_local_vectors(NULL),
   stackSize(0) {
   CreateUnit("StackTestThreadsPushAndPopToGlobalStack").
   Pre(&StackTest::StackTest1_Pre, this).
