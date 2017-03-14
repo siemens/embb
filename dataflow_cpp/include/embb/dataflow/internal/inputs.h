@@ -70,7 +70,7 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() : count_(NULL), slices_(0) {
+  Inputs() : count_(NULL), slices_(0), listener_(NULL) {
     // empty
   }
   void SetSlices(int slices) {
@@ -139,7 +139,7 @@ class Inputs<T1, T2, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() : count_(NULL), slices_(0) {
+  Inputs() : count_(NULL), slices_(0), listener_(NULL) {
     // empty
   }
   void SetSlices(int slices) {
@@ -214,7 +214,7 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() : count_(NULL), slices_(0) {
+  Inputs() : count_(NULL), slices_(0), listener_(NULL) {
     // empty
   }
   void SetSlices(int slices) {
@@ -294,7 +294,7 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
       In<T4>, embb::base::internal::Nil>
   , public ClockListener {
  public:
-  Inputs() : count_(NULL), slices_(0) {
+  Inputs() : count_(NULL), slices_(0), listener_(NULL) {
     // empty
   }
   void SetSlices(int slices) {
@@ -381,7 +381,7 @@ class Inputs
       In<T4>, In<T5> >
   , public ClockListener {
  public:
-  Inputs() : count_(NULL), slices_(0) {
+  Inputs() : count_(NULL), slices_(0), listener_(NULL) {
     // empty
   }
   void SetSlices(int slices) {
