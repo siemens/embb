@@ -62,7 +62,6 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     queued_clock_ = 0;
     bool ordered = Serial;
     if (ordered) {
-      // coverity[dead_error_line]
       queue_id_ = GetNextProcessID();
     } else {
       queue_id_ = 0;
@@ -80,7 +79,6 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     queued_clock_ = 0;
     bool ordered = Serial;
     if (ordered) {
-      // coverity[dead_error_line]
       queue_id_ = GetNextProcessID();
     } else {
       queue_id_ = 0;
