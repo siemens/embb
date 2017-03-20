@@ -61,6 +61,8 @@ class Network {
    * \note The number of concurrent tokens will automatically be derived from
    * the structure of the network on the first call to operator(), and the
    * corresponding resources will be allocated then.
+   * \note If mixing Dataflow and Algorithms, the tasklimit may be exceeded
+   * since both adjust their task count to the task limit of the MTAPI node.
    */
   Network() {}
 
@@ -69,6 +71,8 @@ class Network {
    * \param slices Number of concurrent tokens allowed in the network.
    * \note The number of slices might be reduced internally if the task
    * limit of the underlying MTAPI node would be exceeded.
+   * \note If mixing Dataflow and Algorithms, the tasklimit may be exceeded
+   * since both adjust their task count to the task limit of the MTAPI node.
    */
   explicit Network(int slices) {}
 
@@ -78,6 +82,8 @@ class Network {
    * \note The number of concurrent tokens will automatically be derived from
    * the structure of the network on the first call to operator(), and the
    * corresponding resources will be allocated then.
+   * \note If mixing Dataflow and Algorithms, the tasklimit may be exceeded
+   * since both adjust their task count to the task limit of the MTAPI node.
    */
   explicit Network(embb::mtapi::ExecutionPolicy const & policy) {}
 
@@ -87,6 +93,8 @@ class Network {
    * \param policy Default execution policy of the processes in the network.
    * \note The number of slices might be reduced internally if the task
    * limit of the underlying MTAPI node would be exceeded.
+   * \note If mixing Dataflow and Algorithms, the tasklimit may be exceeded
+   * since both adjust their task count to the task limit of the MTAPI node.
    */
   Network(int slices, embb::mtapi::ExecutionPolicy const & policy) {}
 
