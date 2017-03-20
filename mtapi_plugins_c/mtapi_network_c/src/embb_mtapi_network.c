@@ -324,6 +324,7 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
       // allocate buffers
       results = embb_alloc((size_t)results_size);
       if (results == NULL) {
+        embb_free(network_task);
         embb_mtapi_network_return_failure(
           remote_task_id, remote_task_tag, MTAPI_ERR_UNKNOWN,
           socket, buffer);
@@ -331,6 +332,7 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
       }
       arguments = embb_alloc((size_t)arguments_size);
       if (arguments == NULL) {
+        embb_free(network_task);
         embb_free(results);
         embb_mtapi_network_return_failure(
           remote_task_id, remote_task_tag, MTAPI_ERR_UNKNOWN,
@@ -371,6 +373,7 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
           &local_status);
       }
       if (local_status != MTAPI_SUCCESS) {
+        embb_free(network_task);
         embb_free(arguments);
         embb_free(results);
         embb_mtapi_network_return_failure(
@@ -1025,11 +1028,16 @@ mtapi_action_hndl_t mtapi_network_action_create(
             &local_status);
         } else {
           embb_mutex_destroy(&action->send_mutex);
-          embb_mtapi_network_buffer_finalize(&action->send_buffer);
           embb_mtapi_network_socket_finalize(&action->socket);
+          embb_mtapi_network_buffer_finalize(&action->send_buffer);
           embb_free(action);
         }
+      } else {
+        embb_mtapi_network_buffer_finalize(&action->send_buffer);
+        embb_free(action);
       }
+    } else {
+      embb_free(action);
     }
   }
 
