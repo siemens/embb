@@ -80,6 +80,8 @@ namespace algorithms {
  *         embb::mtapi::Job associated with an action function accepting a
  *         struct containing one InputType member as its argument buffer
  *         and a struct containing one ReturnType member as its result buffer.
+ * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
+ * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename ReturnType, typename ReductionFunction,
          typename TransformationFunction>

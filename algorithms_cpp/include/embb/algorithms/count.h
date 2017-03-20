@@ -61,6 +61,8 @@ namespace algorithms {
  * \tparam RAI Random access iterator
  * \tparam ValueType Type of \c value that is compared to the elements in the
  *         range using the \c operator==.
+ * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
+ * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename ValueType>
 typename std::iterator_traits<RAI>::difference_type Count(
@@ -105,6 +107,8 @@ typename std::iterator_traits<RAI>::difference_type Count(
  *         struct containing one member of type 
  *         <tt>std::iterator_traits<RAI>::value_type</tt> as its argument
  *         buffer and a struct containing one bool member as its result buffer.
+ * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
+ * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename ComparisonFunction>
 typename std::iterator_traits<RAI>::difference_type CountIf(

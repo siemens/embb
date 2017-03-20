@@ -63,6 +63,8 @@ namespace algorithms {
  *         struct containing two members of type 
  *         <tt>std::iterator_traits<RAI>::value_type</tt> as its argument
  *         buffer and a struct containing one bool member as its result buffer.
+ * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
+ * since both adjust their task count to the task limit of the MTAPI node.
  */
 template <typename RAI, typename ComparisonFunction>
 void QuickSort(
