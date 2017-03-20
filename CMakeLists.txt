@@ -85,7 +85,7 @@ option(USE_AUTOMATIC_INITIALIZATION "Specify whether the MTAPI C++ interface, al
 option(BUILD_OPENCL_PLUGIN "Specify whether the MTAPI OpenCL plugin should be built" OFF)
 option(BUILD_CUDA_PLUGIN "Specify whether the MTAPI CUDA plugin should be built" OFF)
 option(THREADING_ANALYSIS_MODE "Replaces lock-free synchronization constructs by mutex-based implementations to support threading analysis tools" OFF)
-option(BUILD_SHARED_LIBS "Specify whether shared libs should be built" ON)
+option(BUILD_SHARED_LIBS "Specify whether shared libs should be built" OFF)
 
 if (BUILD_CUDA_PLUGIN STREQUAL ON)
   include(FindCUDA)

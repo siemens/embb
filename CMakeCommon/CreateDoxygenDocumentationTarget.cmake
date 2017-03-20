@@ -26,11 +26,11 @@
 #
 #  Is only generated when option(.* ON) is set...
 function (CreateDoxygenDocumentationTarget)
-  option(BUILD_DOCUMENTATION "Use Doxygen to create the HTML based API documentation" ON)
+  option(BUILD_DOCUMENTATION "Use Doxygen to create the HTML based API documentation" OFF)
   if (BUILD_DOCUMENTATION STREQUAL ON)
-    message("-- Building documentation enabled (default)")
+    message("-- Building documentation enabled")
   else()
-    message("-- Building documentation disabled")
+    message("-- Building documentation disabled (default)")
   endif()
   message("   (set with command line option -DBUILD_DOCUMENTATION=ON/OFF)")
   if(BUILD_DOCUMENTATION)
