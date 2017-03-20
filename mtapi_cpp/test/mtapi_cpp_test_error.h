@@ -24,22 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MTAPI_CPP_TEST_MTAPI_CPP_TEST_ERROR_H_
+#define MTAPI_CPP_TEST_MTAPI_CPP_TEST_ERROR_H_
+
 #include <partest/partest.h>
 
-#include <embb/base/c/thread.h>
-#include <embb/base/c/atomic.h>
+class ErrorTest : public partest::TestCase {
+ public:
+  ErrorTest();
 
-#include <mtapi_cpp_test_error.h>
-#include <mtapi_cpp_test_task.h>
-#include <mtapi_cpp_test_group.h>
-#include <mtapi_cpp_test_queue.h>
+ private:
+  void TestBasic();
+};
 
-
-PT_MAIN("MTAPI C++") {
-  embb_thread_set_max_count(1024);
-
-  PT_RUN(ErrorTest);
-  PT_RUN(TaskTest);
-  PT_RUN(GroupTest);
-  PT_RUN(QueueTest);
-}
+#endif // MTAPI_CPP_TEST_MTAPI_CPP_TEST_ERROR_H_
