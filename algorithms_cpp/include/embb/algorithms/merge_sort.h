@@ -59,7 +59,9 @@ namespace algorithms {
  * \threadsafe if the elements in the range <tt>[first,last)</tt> are not
  *             modified by another thread while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
-         operations.
+ *       operations.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see embb::mtapi::ExecutionPolicy, MergeSort()
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Binary predicate with both arguments of type
@@ -68,8 +70,6 @@ namespace algorithms {
  *         struct containing two members of type 
  *         <tt>std::iterator_traits<RAI>::value_type</tt> as its argument
  *         buffer and a struct containing one bool member as its result buffer.
- * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
- * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename ComparisonFunction>
 void MergeSortAllocate(
@@ -111,15 +111,15 @@ void MergeSortAllocate(
  *             <tt>[temporary_first,temporary_first+(last-first)</tt> are not
  *             modified by another thread while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
- *       operations.
+ *       operations.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see embb::mtapi::ExecutionPolicy, MergeSortAllocate()
  * \tparam RAI Random access iterator
  * \tparam RAITemp Random access iterator for temporary memory. Has to have the
  *         same value type as RAI.
  * \tparam ComparisonFunction Binary predicate with both arguments of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt>.
- * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
- * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename RAITemp, typename ComparisonFunction>
 void MergeSort(

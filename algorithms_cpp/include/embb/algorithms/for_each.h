@@ -53,7 +53,9 @@ namespace algorithms {
  * \threadsafe if the elements in the range are not modified by another thread
  *             while the algorithm is executed.
  * \note No guarantee is given on the order in which the function is applied to
- *       the elements.
+ *       the elements.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see embb::mtapi::ExecutionPolicy, ZipIterator
  * \tparam RAI Random access iterator
  * \tparam Function Unary function with argument of type
@@ -64,8 +66,6 @@ namespace algorithms {
  *         as its argument buffer and a struct containing one member of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt>
  *         as its result buffer.
- * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
- * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename Function>
 void ForEach(

@@ -56,13 +56,13 @@ namespace algorithms {
  * \threadsafe if the elements in the range are not modified by another thread
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
- *       operations.
+ *       operations.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see CountIf(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ValueType Type of \c value that is compared to the elements in the
  *         range using the \c operator==.
- * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
- * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename ValueType>
 typename std::iterator_traits<RAI>::difference_type Count(
@@ -98,7 +98,9 @@ typename std::iterator_traits<RAI>::difference_type Count(
  * \threadsafe if the elements in the range are not modified by another thread
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
- *       function.
+ *       function.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see Count(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Unary predicate with argument of type
@@ -107,8 +109,6 @@ typename std::iterator_traits<RAI>::difference_type Count(
  *         struct containing one member of type 
  *         <tt>std::iterator_traits<RAI>::value_type</tt> as its argument
  *         buffer and a struct containing one bool member as its result buffer.
- * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
- * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename ComparisonFunction>
 typename std::iterator_traits<RAI>::difference_type CountIf(

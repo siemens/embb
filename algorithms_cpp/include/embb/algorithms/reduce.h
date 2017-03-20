@@ -64,7 +64,9 @@ namespace algorithms {
  *       The reduction operation need not be commutative but must be
  *       associative, i.e., <tt>reduction(x, reduction(y, z)) ==
  *       reduction(reduction(x, y), z))</tt> for all \c x, \c y, \c z of type
- *       \c ReturnType.
+ *       \c ReturnType.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see embb::mtapi::ExecutionPolicy, ZipIterator, Identity
  * \tparam RAI Random access iterator
  * \tparam ReturnType Type of result of reduction operation, deduced from
@@ -80,8 +82,6 @@ namespace algorithms {
  *         embb::mtapi::Job associated with an action function accepting a
  *         struct containing one InputType member as its argument buffer
  *         and a struct containing one ReturnType member as its result buffer.
- * \note If mixing Algorithms and Dataflow, the tasklimit may be exceeded
- * since both adjust their task count to the task limit of the MTAPI node.
  */
 template<typename RAI, typename ReturnType, typename ReductionFunction,
          typename TransformationFunction>
