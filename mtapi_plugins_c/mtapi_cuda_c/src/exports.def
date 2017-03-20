@@ -1,0 +1,5 @@
+LIBRARY embb_mtapi_cuda_c
+EXPORTS
+mtapi_cuda_plugin_initialize
+mtapi_cuda_plugin_finalize
+mtapi_cuda_action_create

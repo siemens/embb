@@ -20,7 +20,7 @@ include_directories(${EMBB_ALGORITHMS_CPP_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_SOURCE_DIR}/../mtapi_cpp/include
                     ${CMAKE_CURRENT_BINARY_DIR}/../mtapi_cpp/include)
 
-add_library(embb_algorithms_cpp ${EMBB_ALGORITHMS_CPP_SOURCES}
+add_library(embb_algorithms_cpp STATIC ${EMBB_ALGORITHMS_CPP_SOURCES}
             ${EMBB_ALGORITHMS_CPP_HEADERS})
 target_link_libraries(embb_algorithms_cpp embb_mtapi_cpp)
 
