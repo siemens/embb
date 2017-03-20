@@ -192,7 +192,7 @@ mtapi_action_hndl_t mtapi_cuda_action_create(
 typedef struct CUctx_st * CUcontext;
 
 /**
- * Retreives the handle of the CUDA context used by the plugin.
+ * Retrieves the handle of the CUDA context used by the plugin.
  *
  * \returns CUcontext used by the plugin
  * \threadsafe

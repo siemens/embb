@@ -192,7 +192,7 @@ mtapi_action_hndl_t mtapi_opencl_action_create(
 typedef struct _cl_context * cl_context;
 
 /**
- * Retreives the handle of the OpenCL context used by the plugin.
+ * Retrieves the handle of the OpenCL context used by the plugin.
  *
  * \returns cl_context used by the plugin
  * \threadsafe
