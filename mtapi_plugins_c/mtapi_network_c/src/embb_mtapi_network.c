@@ -379,6 +379,10 @@ static mtapi_status_t embb_mtapi_network_handle_start_task(
         embb_mtapi_network_return_failure(
           remote_task_id, remote_task_tag, local_status, socket, buffer);
       }
+    } else {
+      embb_free(network_task);
+      embb_mtapi_network_return_failure(
+        remote_task_id, remote_task_tag, local_status, socket, buffer);
     }
   }
 
