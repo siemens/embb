@@ -86,6 +86,7 @@ option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors
 option(USE_AUTOMATIC_INITIALIZATION "Specify whether the MTAPI C++ interface, algorithms and dataflow should automatically intialize the MTAPI node if no explicit initialization is present" ON)
 option(BUILD_OPENCL_PLUGIN "Specify whether the MTAPI OpenCL plugin should be built" OFF)
 option(THREADING_ANALYSIS_MODE "Replaces lock-free synchronization constructs by mutex-based implementations to support threading analysis tools" OFF)
+option(USE_C11_AND_CXX11 "Use C11 and C++11 standard versions" OFF)
 
 ## LOCAL INSTALLATION OF SUBPROJECT BINARIES
 #

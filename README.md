@@ -61,7 +61,7 @@ EMB² is regularly built and tested on a variety of OS/compiler/architecture com
 
 ### Prerequisites
 
-The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Besides a C/C++ compiler supporting these standards, [CMake](https://cmake.org/) 2.8.9 or higher is required to build EMB² (CMake is a build file generator which abstracts from the concrete build tools).
+The project is based on the standards C99 (for C code) and C++03 (for C++ code) to be usable on a wide range of target systems. Besides a C/C++ compiler supporting these standards, [CMake](https://cmake.org/) 2.8.9 or higher is required to build EMB² (CMake is a build file generator which abstracts from the concrete build tools).  It is possible to select the standards C11 (for C code) and C++11 (for C++ code) to enable the use of standard provided atomic operations.
 
 ### Quick Installation on Linux
 
@@ -110,6 +110,10 @@ As mentioned above, it is recommended to build EMB² in a subdirectory such as "
     cmake -G <generator> .. [OPTIONS]
 
 Note that on Linux, the architecture (32/64 bit) cannot be selected by the generator. The default is "Unix Makefiles" for which reason `-G <generator>` may be omitted.
+
+To select the C11 and C++11 standards use:
+
+     cmake .. -DUSE_C11_AND_CXX11=ON
 
 EMB² can be built in Release or Debug mode. The latter contains additional checks during runtime and is only recommended for development purposes. On Linux, the build mode can be specified using the option `-DCMAKE_BUILD_TYPE=[Release|Debug]`, for example:
 

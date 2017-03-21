@@ -28,6 +28,8 @@
 
 #include <embb/base/c/atomic.h>
 
+#if !defined EMBB_PLATFORM_ARCH_C11 && !defined EMBB_PLATFORM_ARCH_CXX11
+
 // Break compiling, if we assumed wrong sizes for types...
 // Function should never be called!
 void __embb_atomic_internal_compile_time_checks() {
@@ -46,3 +48,5 @@ void __embb_atomic_internal_compile_time_checks() {
   BUILD_BUG_ON(sizeof(ptrdiff_t) != EMBB_PTRDIFF_T_TYPE_SIZE);
   BUILD_BUG_ON(sizeof(uintmax_t) != EMBB_UINTMAX_T_TYPE_SIZE);
 }
+
+#endif
