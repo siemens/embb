@@ -33,7 +33,7 @@ Repository:
 Mailing list:
   - embb-announcements@googlegroups.com (low volume, release announcements, news, etc.)<br/>
     Join: https://groups.google.com/forum/#!forum/embb-announcements/join
-	
+
 Community (help, bug reports, etc.):
   - https://github.com/siemens/embb/issues (for help, create an issue labeled with 'question').
 
@@ -113,7 +113,7 @@ Note that on Linux, the architecture (32/64 bit) cannot be selected by the gener
 
 EMB² can be built in Release or Debug mode. The latter contains additional checks during runtime and is only recommended for development purposes. On Linux, the build mode can be specified using the option `-DCMAKE_BUILD_TYPE=[Release|Debug]`, for example:
 
-     cmake .. -DCMAKE_BUILD_TYPE=Debug
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 If no build mode is given, the default (Release) is used. The Visual Studio generators create build files for both modes (the selection is done at build time as described below).
 
@@ -134,7 +134,15 @@ Similarly, automatic initialization of the task scheduler by the MTAPI C++ inter
 
 Furthermore, EMB² can be built to work with threading analysis tools such as Helgrind or ThreadSanitizer with `-DTHREADING_ANALYSIS_MODE=ON`. This uses mutexes around atomics to avoid false positives but degrades performance significantly.
 
+Warnings can be treated as errors by the option `-DWARNINGS_ARE_ERRORS=ON`.
+
+EMB² comes with OpenCL and CUDA plugins to support exectuion on GPUs that may be build by setting `-DBUILD_OPENCL_PLUGIN=ON` and `-DBUILD_CUDA_PLUGIN=ON`. The CUDA build process requires an installed CUDA SDK.
+
+When installing EMB² into the system it might be desireable to build shared libraries by specifying `-DBUILD_SHARED_LIBS=ON`.
+
 The tutorial of EMB² comes with a number of examples in `doc/examples/`. These can be built with the other source files using the option `-DBUILD_EXAMPLES=ON`. Note, however, that the examples use C++11 features and require an appropriate compiler.
+
+The documentation may be build by setting `-DBUILD_DOCUMENTATION=ON` if doxygen is installed. The installation step will copy the documentation to the install directory if `-DINSTALL_DOCS=ON` is specified in addition to building the documentation.
 
 By default, the included unit tests are built as part of the installation process. To override the default behavior, add the option `-DBUILD_TESTS=OFF`.
 
