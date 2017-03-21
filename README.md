@@ -246,16 +246,16 @@ The C header files can be included as follows:
 
 Alternatively, you can include MTAPI by `#include <mtapi.h>`.
 
-### Integration into own projects using CMake
+### Integration using CMake
 
-If you are using CMake in your build, integration into your own project is easy. After installing EMB² the installation folder contains a CMake folder that contains a simple finder that is used like this:
+If you are using CMake for your application, integration of EMB² is easy. After installing EMB², the installation folder contains a CMake folder with a simple finder which is used as follows:
 
     find_package(EMBB REQUIRED NO_MODULE)
     include(${EMBB_USE_FILE})
 
-After that you can link the libraries by name (embb_base_c, embb_mtapi_c, etc.) and the include directories are set up to include the headers as described above.
+After that, you can link the libraries by name (embb_base_c, embb_mtapi_c, etc.) and the include directories are set up as described above.
 
-If EMB² was not installed to the default directory, you have to specify the directory your CMake-script before using `find_package`:
+If EMB² was not installed to the default directory, you have to specify the directory of the CMake script before using `find_package`:
 
     set(EMBB_DIR ${your_install_directory}/CMake)
 
