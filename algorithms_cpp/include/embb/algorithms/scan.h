@@ -66,7 +66,9 @@ namespace algorithms {
  *       The reduction operation need not be commutative but must be
  *       associative, i.e., <tt>reduction(x, reduction(y, z)) ==
  *       reduction(reduction(x, y), z))</tt> for all \c x, \c y, \c z of type
- *       \c ReturnType.
+ *       \c ReturnType.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see embb::mtapi::ExecutionPolicy, Identity, ZipIterator
  * \tparam RAIIn Random access iterator type of input range
  * \tparam RAIOut Random access iterator type of output range

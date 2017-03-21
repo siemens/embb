@@ -53,7 +53,9 @@ namespace algorithms {
  * \threadsafe if the elements in the range are not modified by another thread
  *             while the algorithm is executed.
  * \note No guarantee is given on the order in which the function is applied to
- *       the elements.
+ *       the elements.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see embb::mtapi::ExecutionPolicy, ZipIterator
  * \tparam RAI Random access iterator
  * \tparam Function Unary function with argument of type

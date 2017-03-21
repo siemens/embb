@@ -56,7 +56,9 @@ namespace algorithms {
  * \threadsafe if the elements in the range are not modified by another thread
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
- *       operations.
+ *       operations.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see CountIf(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ValueType Type of \c value that is compared to the elements in the
@@ -96,7 +98,9 @@ typename std::iterator_traits<RAI>::difference_type Count(
  * \threadsafe if the elements in the range are not modified by another thread
  *             while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
- *       function.
+ *       function.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see Count(), embb::mtapi::ExecutionPolicy
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Unary predicate with argument of type
