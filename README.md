@@ -132,17 +132,17 @@ EMB² can be built with C++ exception handling (default) or without exceptions. 
 
 Similarly, automatic initialization of the task scheduler by the MTAPI C++ interface can be disabled with `-DUSE_AUTOMATIC_INITIALIZATION=OFF`. This way, unexpected delays after startup can be avoided, e.g. for timing measurements.
 
-Furthermore, EMB² can be built to work with threading analysis tools such as Helgrind or ThreadSanitizer with `-DTHREADING_ANALYSIS_MODE=ON`. This uses mutexes around atomics to avoid false positives but degrades performance significantly.
+EMB² comes with OpenCL and CUDA plugins to support execution on GPUs that may be built by setting `-DBUILD_OPENCL_PLUGIN=ON` and `-DBUILD_CUDA_PLUGIN=ON`, respectively. The CUDA build process requires an installed CUDA SDK.
+
+If multiple applications use EMB², it might be desireable to build shared libraries by specifying `-DBUILD_SHARED_LIBS=ON`.
+
+Furthermore, EMB² can be built to work with threading analysis tools such as Helgrind or ThreadSanitizer with `-DTHREADING_ANALYSIS_MODE=ON`. This uses mutexes around atomics to avoid false positives and degrades performance significantly.
 
 Warnings can be treated as errors by the option `-DWARNINGS_ARE_ERRORS=ON`.
 
-EMB² comes with OpenCL and CUDA plugins to support exectuion on GPUs that may be build by setting `-DBUILD_OPENCL_PLUGIN=ON` and `-DBUILD_CUDA_PLUGIN=ON`. The CUDA build process requires an installed CUDA SDK.
+The tutorial of EMB² comes with a number of examples in `doc/examples/`. These can be built using the option `-DBUILD_EXAMPLES=ON`. Note, however, that the examples use C++11 features and require an appropriate compiler.
 
-When installing EMB² into the system it might be desireable to build shared libraries by specifying `-DBUILD_SHARED_LIBS=ON`.
-
-The tutorial of EMB² comes with a number of examples in `doc/examples/`. These can be built with the other source files using the option `-DBUILD_EXAMPLES=ON`. Note, however, that the examples use C++11 features and require an appropriate compiler.
-
-The documentation may be build by setting `-DBUILD_DOCUMENTATION=ON` if doxygen is installed. The installation step will copy the documentation to the install directory if `-DINSTALL_DOCS=ON` is specified in addition to building the documentation.
+The documentation may be built by setting `-DBUILD_DOCUMENTATION=ON` if Doxygen is installed.
 
 By default, the included unit tests are built as part of the installation process. To override the default behavior, add the option `-DBUILD_TESTS=OFF`.
 
