@@ -71,7 +71,8 @@ int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
   time->nanoseconds = win_time.QuadPart % 10000000;
   /* Add duration to time */
   int carry = (int)((time->nanoseconds + duration->nanoseconds) / 1000000000);
-  if (time->seconds + duration->seconds + carry > EMBB_TIME_MAX_SECONDS) {
+  if ((double)time->seconds + duration->seconds + carry >
+    EMBB_TIME_MAX_SECONDS) {
     return EMBB_OVERFLOW;
   }
   time->seconds += duration->seconds + carry;
@@ -93,7 +94,8 @@ int embb_time_in(embb_time_t* time, const embb_duration_t* duration) {
   time->seconds = unix_time.tv_sec;
   time->nanoseconds = unix_time.tv_nsec;
   int carry = (time->nanoseconds + duration->nanoseconds) / 1000000000;
-  if (time->seconds + duration->seconds + carry > EMBB_TIME_MAX_SECONDS) {
+  if ((double)time->seconds + duration->seconds + carry >
+    EMBB_TIME_MAX_SECONDS) {
     return EMBB_OVERFLOW;
   }
   time->seconds += duration->seconds + carry;

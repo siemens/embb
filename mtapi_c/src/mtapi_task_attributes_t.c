@@ -48,6 +48,7 @@ void mtapi_taskattr_init(
     attributes->is_detached = MTAPI_FALSE;
     attributes->priority = 0;
     attributes->complete_func = MTAPI_NULL;
+    attributes->user_data = MTAPI_NULL;
     mtapi_affinity_init(&attributes->affinity, MTAPI_TRUE, &local_status);
   } else {
     local_status = MTAPI_ERR_PARAMETER;

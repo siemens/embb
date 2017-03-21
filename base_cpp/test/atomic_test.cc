@@ -105,7 +105,7 @@ AtomicTest::TestStressLoadStore::TestStressLoadStore(
 AtomicTest::TestStressProduceConsume::TestStressProduceConsume(
   size_t number_threads, size_t number_iterations)
   : TestUnit("Produce/Consume Stress test for Atomics"), flag(0),
-  counter_producer(0), counter_consumer(0) {
+  counter_producer(0), counter_consumer(0), prod_cons_value(0) {
   PT_ASSERT(number_threads == 1);
   Pre(&TestStressProduceConsume::Init, this);
 

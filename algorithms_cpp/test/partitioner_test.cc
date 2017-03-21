@@ -34,7 +34,8 @@
 #include <list>
 
 PartitionerTest::PartitionerTest()
-: partitioned_array_size_(16384) {
+  : partitioned_array_(NULL)
+  , partitioned_array_size_(16384) {
   // Size of array to be partitioned should be power of 2
   CreateUnit("TestBasic")
     .Add(&PartitionerTest::TestBasic, this);
