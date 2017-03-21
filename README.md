@@ -227,11 +227,11 @@ If you want to use the C++ functionalities of EMB², you have to link the follow
 
 The C++ header files can be included as follows:
 
-    #include<embb/base/base.h>
-    #include<embb/mtapi/mtapi.h>
-    #include<embb/containers/containers.h>
-    #include<embb/dataflow/algorithms.h>
-    #include<embb/dataflow/dataflow.h>
+    #include <embb/base/base.h>
+    #include <embb/mtapi/mtapi.h>
+    #include <embb/containers/containers.h>
+    #include <embb/dataflow/algorithms.h>
+    #include <embb/dataflow/dataflow.h>
 
 ### Using C
 
@@ -241,10 +241,23 @@ If you only want to use the C versions of MTAPI and the base library, link them 
 
 The C header files can be included as follows:
 
-    #include<embb/base/c/base.h>
-    #include<embb/mtapi/c/mtapi.h>
+    #include <embb/base/c/base.h>
+    #include <embb/mtapi/c/mtapi.h>
 
-Alternatively, you can include MTAPI by `#include<mtapi.h>`.
+Alternatively, you can include MTAPI by `#include <mtapi.h>`.
+
+### Integration into own projects using CMake
+
+If you are using CMake in your build, integration into your own project is easy. After installing EMB² the installation folder contains a CMake folder that contains a simple finder that is used like this:
+
+    find_package(EMBB REQUIRED NO_MODULE)
+    include(${EMBB_USE_FILE})
+
+After that you can link the libraries by name (embb_base_c, embb_mtapi_c, etc.) and the include directories are set up to include the headers as described above.
+
+If EMB² was not installed to the default directory, you have to specify the directory your CMake-script before using `find_package`:
+
+    set(EMBB_DIR ${your_install_directory}/CMake)
 
 ### Documentation
 

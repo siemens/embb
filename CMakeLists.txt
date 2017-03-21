@@ -188,9 +188,7 @@ if (BUILD_CUDA_PLUGIN STREQUAL ON)
   endif()
 endif()
 
-
 ## Copy test execution script to local binaries folder
-
 if (DEFINED CYGWIN)
   set(test_script_in run_tests_cygwin.sh)
   set(test_script_out run_tests.sh)
@@ -201,7 +199,7 @@ else()
   set(test_script_in run_tests_windows.bat)
   set(test_script_out run_tests.bat)
 endif()
-CONFIGURE_FILE( ${CMAKE_SOURCE_DIR}/scripts/${test_script_in}.cmake binaries/${test_script_out} )
+configure_file( ${CMAKE_SOURCE_DIR}/scripts/${test_script_in}.cmake binaries/${test_script_out} )
 
 ## Test and Partest build
 #
@@ -263,3 +261,14 @@ if (INSTALL_DOCS STREQUAL ON)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/
           DESTINATION ${INSTALL_PREFIX_DOCS} FILES_MATCHING PATTERN "*.*" PATTERN "CMakeLists.txt" EXCLUDE)
 endif()
+
+## create cmake finder
+configure_file("EMBBConfig.cmake.in" "EMBBConfig.cmake")
+configure_file("UseEMBB.cmake.in" "UseEMBB.cmake")
+install(FILES "${CMAKE_BINARY_DIR}/EMBBConfig.cmake" DESTINATION "CMake")
+install(FILES "${CMAKE_BINARY_DIR}/UseEMBB.cmake" DESTINATION "CMake")
+install(
+   EXPORT EMBB-Targets
+   DESTINATION "CMake"
+   FILE EMBB-Targets.cmake
+)
