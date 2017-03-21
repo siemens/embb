@@ -35,6 +35,6 @@ addons:
     project:
       name: "siemens/embb"
     notification_email: tobias.schuele@siemens.com
-    build_command_prepend: "mkdir build && cd build && cmake .."
+    build_command_prepend: "mkdir build && cd build && cmake .. -DTHREADING_ANALYSIS_MODE=ON"
     build_command: "make"
     branch_pattern: coverity_scan

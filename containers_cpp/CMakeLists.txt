@@ -17,7 +17,7 @@ include_directories(${EMBB_CONTAINERS_CPP_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_SOURCE_DIR}/../base_cpp/include
                     ${CMAKE_CURRENT_BINARY_DIR}/../base_cpp/include)
 
-add_library (embb_containers_cpp ${EMBB_CONTAINERS_CPP_SOURCES} ${EMBB_CONTAINERS_CPP_HEADERS})
+add_library (embb_containers_cpp STATIC ${EMBB_CONTAINERS_CPP_SOURCES} ${EMBB_CONTAINERS_CPP_HEADERS})
 target_link_libraries(embb_containers_cpp embb_base_cpp)
 
 if (BUILD_TESTS STREQUAL ON)

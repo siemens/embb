@@ -109,7 +109,17 @@ include_directories(
     )
 
 add_library(embb_base_c ${EMBB_BASE_SOURCES} ${EMBB_BASE_HEADERS} 
-             ${EMBB_BASE_ASM_SOURCES} ${EMBB_BASE_ASM_OBJS})                      
+             ${EMBB_BASE_ASM_SOURCES} ${EMBB_BASE_ASM_OBJS})
+if (BUILD_SHARED_LIBS STREQUAL ON)
+  if (MSVC)
+    if(EMBB_INTPTR_T_TYPE_SIZE EQUAL 8)
+      set_target_properties(embb_base_c PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/src/exports_64.def\"")
+    else()
+      set_target_properties(embb_base_c PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/src/exports_32.def\"")
+    endif()
+    CopyBin(BIN embb_base_c DEST ${local_install_dir})
+  endif()
+endif()
 
 if (BUILD_TESTS STREQUAL ON)
   include_directories(test/ ${CMAKE_CURRENT_BINARY_DIR}/../partest/include)

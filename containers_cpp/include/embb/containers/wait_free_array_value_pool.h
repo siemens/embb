@@ -193,6 +193,8 @@ class WaitFreeArrayValuePool {
 
     /**
      * Copies an iterator.
+     *
+     * \returns Reference to this iterator.
      * \waitfree
      */
     Iterator & operator =(

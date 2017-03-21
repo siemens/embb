@@ -461,14 +461,21 @@ class Node {
 
   friend class embb::base::Allocation;
 
+  /**
+   * Starts a new Task.
+   *
+   * \returns The handle to the started Task.
+   * \threadsafe
+   */
   Task Start(
-    mtapi_task_id_t task_id,
-    mtapi_job_hndl_t job,
-    const void * arguments,
-    mtapi_size_t arguments_size,
-    void * results,
-    mtapi_size_t results_size,
+    mtapi_task_id_t task_id,           /**< A user defined ID of the Task. */
+    mtapi_job_hndl_t job,              /**< The Job to execute. */
+    const void * arguments,            /**< Pointer to the arguments buffer */
+    mtapi_size_t arguments_size,       /**< Size of the arguments buffer */
+    void * results,                    /**< Pointer to the result buffer */
+    mtapi_size_t results_size,         /**< Size of the result buffer */
     mtapi_task_attributes_t const * attributes
+                                       /**< Attributes to use for the task */
     ) {
     mtapi_status_t status;
     mtapi_task_hndl_t task_hndl =

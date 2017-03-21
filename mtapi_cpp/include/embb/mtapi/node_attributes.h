@@ -242,7 +242,7 @@ class NodeAttributes {
    * \notthreadsafe
    */
   NodeAttributes & SetReuseMainThread(
-    mtapi_boolean_t reuse
+    mtapi_boolean_t reuse              /**< The state to set. */
     ) {
     mtapi_status_t status;
     mtapi_nodeattr_set(&attributes_, MTAPI_NODE_REUSE_MAIN_THREAD,

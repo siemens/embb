@@ -31,6 +31,17 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
 #
 add_library (embb_base_cpp ${EMBB_BASE_CPP_SOURCES} ${EMBB_BASE_CPP_HEADERS})
 target_link_libraries(embb_base_cpp embb_base_c)
+if (BUILD_SHARED_LIBS STREQUAL ON)
+  if (MSVC)
+    if(EMBB_INTPTR_T_TYPE_SIZE EQUAL 8)
+      set_target_properties(embb_base_cpp PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/src/exports_64.def\"")
+    else()
+      set_target_properties(embb_base_cpp PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/src/exports_32.def\"")
+    endif()
+    CopyBin(BIN embb_base_cpp DEST ${local_install_dir})
+  endif()
+endif()
+
 if (BUILD_TESTS STREQUAL ON)
   include_directories(test/
                       ${CMAKE_CURRENT_BINARY_DIR}/../partest/include

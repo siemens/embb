@@ -54,7 +54,9 @@ namespace algorithms {
  * \threadsafe if the elements in the range <tt>[first,last)</tt> are not
  *             modified by another thread while the algorithm is executed.
  * \note No guarantee is given on the execution order of the comparison
- *       operations.
+ *       operations.<br/>
+ *       For nested algorithms, the task limit may be exceeded. In that case,
+ *       increase the task limit of the MTAPI node.
  * \see embb::mtapi::ExecutionPolicy, MergeSort()
  * \tparam RAI Random access iterator
  * \tparam ComparisonFunction Binary predicate with both arguments of type

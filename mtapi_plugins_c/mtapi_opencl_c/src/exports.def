@@ -1,0 +1,6 @@
+LIBRARY embb_mtapi_opencl_c
+EXPORTS
+embb_mtapi_opencl_link_at_runtime
+mtapi_opencl_plugin_initialize
+mtapi_opencl_plugin_finalize
+mtapi_opencl_action_create
