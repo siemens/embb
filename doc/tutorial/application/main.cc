@@ -41,7 +41,7 @@ bool readFromFile(AVFrame* &frame) {
   // if frame is not ready just send a nullptr frame
   if (!success)
     frame = nullptr;
-  return ret;
+  return ret != 0;
 }
 
 void writeToFile(AVFrame* const &frame) {

@@ -157,7 +157,6 @@ void edgeDetection(AVFrame* frame) {
   int width = frame->width;
   int height = frame->height;
   int gx, gy;
-  int r, g, b;
   int Gx[3][3];
   int Gy[3][3];
   int p;
@@ -185,7 +184,7 @@ void edgeDetection(AVFrame* frame) {
       gx = 0;
       gy = 0;
       convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
-      f_value = sqrt(gx*gx + gy*gy);
+      f_value = (int)sqrt(gx*gx + gy*gy);
       buffer[p] = f_value;
       buffer[p+1] = f_value;
       buffer[p+2] = f_value;
@@ -241,7 +240,7 @@ void applyCartoonify(AVFrame* frame, int threshold, int discr) {
       gx = 0;
       gy = 0;
       convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
-      f_value = sqrt(gx*gx + gy*gy);
+      f_value = (int)sqrt(gx*gx + gy*gy);
       if (f_value > threshold) {
         buffer[p] = 0;
         buffer[p + 1] = 0;
@@ -290,7 +289,7 @@ void changeSaturation(AVFrame* frame, double amount) {
       b = frame->data[0][p + 2];
       maximum = std::max(r, std::max(g, b));
       minimum = std::min(r, std::min(g, b));
-      factor = (maximum - minimum)*amount;
+      factor = (int)((maximum - minimum)*amount);
 
       frame->data[0][p] = (r == maximum) ? std::min(255, r + factor) : std::max(0, r - factor*2);
       frame->data[0][p + 1] = (g == maximum) ? std::min(255, g + factor) : std::max(0, g - factor*2);
@@ -361,9 +360,7 @@ void applyVariableMeanFilter(AVFrame* frame) {
 
   int width = frame->width;
   int height = frame->height;
-  int p, p2;
-  int r, g, b;
-  int close;
+  int p;
 
   av_frame_make_writable(frame);
 
@@ -401,9 +398,6 @@ void applyVariableMeanFilter(AVFrame* frame) {
 void applyMeanFilter(AVFrame* frame, int size) {
   int width = frame->width;
   int height = frame->height;
-  int p, p2;
-  int r, g, b;
-  int close;
 
   av_frame_make_writable(frame);
 
