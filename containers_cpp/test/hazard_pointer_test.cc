@@ -515,8 +515,7 @@ n_threads(static_cast<int>
   shared_guarded_(NULL),
   shared_allocated_(NULL),
   test_pool_(NULL),
-  hazard_pointer_(NULL)
-{
+  hazard_pointer_(NULL) {
   guards_per_phread_count_ = 5;
   guaranteed_capacity_pool_ = guards_per_phread_count_*n_threads;
   pool_size_using_hazard_pointer_ = guaranteed_capacity_pool_ +

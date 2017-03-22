@@ -121,7 +121,8 @@ static void TestLimits() {
   embb_atomic_store_int(&wait, 0);
 
   embb::mtapi::Task task =
-    node.Start(job, (void*)MTAPI_NULL, (void*)MTAPI_NULL);
+    node.Start(job, reinterpret_cast<void*>(MTAPI_NULL),
+      reinterpret_cast<void*>(MTAPI_NULL));
 
   mtapi_status_t status = task.Wait();
   PT_EXPECT_EQ(status, MTAPI_SUCCESS);
@@ -133,12 +134,14 @@ static void TestLimits() {
   embb_atomic_store_int(&wait, 1);
 
   /* this task will wait until wait is set to 0 */
-  task = node.Start(job, (void*)MTAPI_NULL, (void*)MTAPI_NULL);
+  task = node.Start(job, reinterpret_cast<void*>(MTAPI_NULL),
+    reinterpret_cast<void*>(MTAPI_NULL));
 
   /* we cannot start another task since the limit is 1 */
   EMBB_TRY {
     embb::mtapi::Task task_invalid =
-      node.Start(job, (void*)MTAPI_NULL, (void*)MTAPI_NULL);
+      node.Start(job, reinterpret_cast<void*>(MTAPI_NULL),
+        reinterpret_cast<void*>(MTAPI_NULL));
     EMBB_UNUSED(task_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
@@ -188,12 +191,14 @@ static void TestLimits() {
   embb_atomic_store_int(&wait, 1);
 
   /* enqueue the task */
-  task = queue.Enqueue((void*)MTAPI_NULL, (void*)MTAPI_NULL);
+  task = queue.Enqueue(reinterpret_cast<void*>(MTAPI_NULL),
+    reinterpret_cast<void*>(MTAPI_NULL));
 
   /* enqueue another one, this will fail since the limit is one */
   EMBB_TRY {
     embb::mtapi::Task task_invalid =
-      queue.Enqueue((void*)MTAPI_NULL, (void*)MTAPI_NULL);
+      queue.Enqueue(reinterpret_cast<void*>(MTAPI_NULL),
+        reinterpret_cast<void*>(MTAPI_NULL));
     EMBB_UNUSED(task_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
@@ -215,7 +220,8 @@ static void TestLimits() {
   /* try to enqueue another task, this will fail since the queue is disabled */
   EMBB_TRY {
     embb::mtapi::Task task_invalid =
-      queue.Enqueue((void*)MTAPI_NULL, (void*)MTAPI_NULL);
+      queue.Enqueue(reinterpret_cast<void*>(MTAPI_NULL),
+        reinterpret_cast<void*>(MTAPI_NULL));
     EMBB_UNUSED(task_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
