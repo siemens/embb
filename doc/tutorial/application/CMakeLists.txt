@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project (video_app)
 
-set(EMBB_DIR "d:/EMBB/_install/CMake")
+set(EMBB_DIR "/home/marcus/install/CMake")
 find_package(EMBB REQUIRED NO_MODULE)
 include(${EMBB_USE_FILE})
 
@@ -14,8 +14,11 @@ if (MSVC)
     include_directories("${FFMPEG_DIR}/include")
     link_directories("${FFMPEG_DIR}/lib")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
-else()
-    find_package(ffmpeg REQUIRED)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS "-std=c++11 -pthread")
+  set (EXTRA_LIBS pthread dl rt)
 endif()
 
 set(LINK_EMBB

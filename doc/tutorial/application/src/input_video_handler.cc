@@ -17,15 +17,15 @@ void InputVideoHandler::init(char* name) {
   int numStreams;
 
   if (avformat_open_input(&formatCtx, name, NULL, NULL) != 0)
-    throw std::exception("Invalid input file name.");
+    throw std::runtime_error("Invalid input file name.");
 
   if (avformat_find_stream_info(formatCtx, NULL)<0)
-    throw std::exception("Could not find stream information.");
+    throw std::runtime_error("Could not find stream information.");
 
   numStreams = formatCtx->nb_streams;
 
   if (numStreams < 0)
-    throw std::exception("No streams in input video file.");
+    throw std::runtime_error("No streams in input video file.");
 
   for (int i = 0; i < numStreams; i++) {
     if (formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -35,23 +35,23 @@ void InputVideoHandler::init(char* name) {
   }
 
   if (streamIndex < 0)
-    throw std::exception("No video stream in input video file.");
+    throw std::runtime_error("No video stream in input video file.");
 
   // find decoder using id
   codec = avcodec_find_decoder(formatCtx->streams[streamIndex]->codec->codec_id);
   if (codec == nullptr)
-    throw std::exception("Could not find suitable decoder for input file.");
+    throw std::runtime_error("Could not find suitable decoder for input file.");
 
   // copy context from input stream
   codecCtx = avcodec_alloc_context3(codec);
   if (avcodec_copy_context(codecCtx, formatCtx->streams[streamIndex]->codec) != 0)
-    throw std::exception("Could not copy codec context from input stream.");
+    throw std::runtime_error("Could not copy codec context from input stream.");
 
   if (avcodec_open2(codecCtx, codec, NULL) < 0)
-    throw std::exception("Could not open decoder.");
+    throw std::runtime_error("Could not open decoder.");
 
   // by setting this option we ensure that the reference to each frame
-  // is kept across multiple calls to read_frame function. This is 
+  // is kept across multiple calls to read_frame function. This is
   // needed if reading and writing are done by different processes.
   codecCtx->refcounted_frames = 1;
 }

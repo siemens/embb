@@ -144,23 +144,23 @@ int main(int argc, char *argv[]) {
   if (parallel){
     Network nw(8);
 
-    Network::Source<AVFrame*> read(nw, embb::base::MakeFunction(&readFromFile));
+    Network::Source<AVFrame*> read(nw, embb::base::MakeFunction(readFromFile));
 
-    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*>>
-      convertToRGB(nw, embb::base::MakeFunction(&convertToRGB));
+    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*> >
+      convertToRGBProc(nw, embb::base::MakeFunction(convertToRGB));
 
-    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*>>
-      convertToOriginal(nw, embb::base::MakeFunction(&convertToOriginal));
+    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*> >
+      convertToOriginalProc(nw, embb::base::MakeFunction(convertToOriginal));
 
-    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*>>
-      applyFilter(nw, embb::base::MakeFunction(&applyFilter));
+    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*> >
+      applyFilterProc(nw, embb::base::MakeFunction(applyFilter));
 
-    Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(&writeToFile));
+    Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(writeToFile));
 
-    read.GetOutput<0>() >> convertToRGB.GetInput<0>();
-    convertToRGB.GetOutput<0>() >> applyFilter.GetInput<0>();
-    applyFilter.GetOutput<0>() >> convertToOriginal.GetInput<0>();
-    convertToOriginal.GetOutput<0>() >> write.GetInput<0>();
+    read >> convertToRGBProc;
+    convertToRGBProc  >> applyFilterProc;
+    applyFilterProc >> convertToOriginalProc;
+    convertToOriginalProc >> write;
 
     nw();
   } else {
