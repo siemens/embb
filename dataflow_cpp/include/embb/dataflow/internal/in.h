@@ -107,9 +107,9 @@ class In {
 
  private:
   SignalType * values_;
-  ClockListener * listener_;
   bool connected_;
   int slices_;
+  ClockListener * listener_;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
   embb::base::Spinlock lock_;
   std::vector<SignalType> history_;

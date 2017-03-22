@@ -64,6 +64,7 @@ static void TestNodeNotInit() {
 
   EMBB_TRY {
     embb::mtapi::Affinity affinity;
+    EMBB_UNUSED(affinity);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -98,6 +99,7 @@ static void TestLimits() {
   /* try to create another action, since the limit is one this will fail */
   EMBB_TRY {
     embb::mtapi::Action action_invalid = node.CreateAction(1, testErrorAction);
+    EMBB_UNUSED(action_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -109,6 +111,7 @@ static void TestLimits() {
   /* try to get the invalid job number 3, limit is 2 */
   EMBB_TRY {
     embb::mtapi::Job job_invalid = node.GetJob(3);
+    EMBB_UNUSED(job_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -136,6 +139,7 @@ static void TestLimits() {
   EMBB_TRY {
     embb::mtapi::Task task_invalid =
       node.Start(job, (void*)MTAPI_NULL, (void*)MTAPI_NULL);
+    EMBB_UNUSED(task_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -156,6 +160,7 @@ static void TestLimits() {
   /* try to create another group, this will fail since the limit is 1 */
   EMBB_TRY {
     embb::mtapi::Group group_invalid = node.CreateGroup();
+    EMBB_UNUSED(group_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -173,6 +178,7 @@ static void TestLimits() {
   /* try to create another queue, this will fail since the limit is 1 */
   EMBB_TRY {
     embb::mtapi::Queue queue_invalid = node.CreateQueue(job);
+    EMBB_UNUSED(queue_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -188,6 +194,7 @@ static void TestLimits() {
   EMBB_TRY {
     embb::mtapi::Task task_invalid =
       queue.Enqueue((void*)MTAPI_NULL, (void*)MTAPI_NULL);
+    EMBB_UNUSED(task_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -209,6 +216,7 @@ static void TestLimits() {
   EMBB_TRY {
     embb::mtapi::Task task_invalid =
       queue.Enqueue((void*)MTAPI_NULL, (void*)MTAPI_NULL);
+    EMBB_UNUSED(task_invalid);
     PT_EXPECT(false);
   } EMBB_CATCH(embb::mtapi::StatusException &) {
     PT_EXPECT(true);
@@ -216,6 +224,9 @@ static void TestLimits() {
 
   /* delete our queue */
   queue.Delete();
+
+  /* delete our action */
+  action.Delete();
 #endif
 
   /* and we're done */

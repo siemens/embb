@@ -128,8 +128,8 @@ class Inputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
   }
  private:
   embb::base::Atomic<int> * count_;
-  ClockListener * listener_;
   int slices_;
+  ClockListener * listener_;
 };
 
 template <typename T1, typename T2>
@@ -203,8 +203,8 @@ class Inputs<T1, T2, embb::base::internal::Nil,
   }
  private:
   embb::base::Atomic<int> * count_;
-  ClockListener * listener_;
   int slices_;
+  ClockListener * listener_;
 };
 
 template <typename T1, typename T2, typename T3>
@@ -284,8 +284,8 @@ class Inputs<T1, T2, T3, embb::base::internal::Nil,
   }
  private:
   embb::base::Atomic<int> * count_;
-  ClockListener * listener_;
   int slices_;
+  ClockListener * listener_;
 };
 
 template <typename T1, typename T2, typename T3, typename T4>
@@ -370,8 +370,8 @@ class Inputs<T1, T2, T3, T4, embb::base::internal::Nil>
   }
  private:
   embb::base::Atomic<int> * count_;
-  ClockListener * listener_;
   int slices_;
+  ClockListener * listener_;
 };
 
 template <typename T1, typename T2, typename T3, typename T4,
@@ -463,8 +463,8 @@ class Inputs
   }
  private:
   embb::base::Atomic<int> * count_;
-  ClockListener * listener_;
   int slices_;
+  ClockListener * listener_;
 };
 
 } // namespace internal
