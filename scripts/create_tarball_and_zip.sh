@@ -228,7 +228,7 @@ echo "--> Generating Doxygen"
 REMEMBER_CUR_DIR=$(pwd)
 cd "$MYTMPDIR_DOXY_BUILD"
 echo "---> Initialize CMake"
-redirect_cmd cmake "$PROJECT_DIR_FULLPATH" 
+redirect_cmd cmake "$PROJECT_DIR_FULLPATH" -DBUILD_DOCUMENTATION=ON
 echo "---> Call CMake with target Doxygen"
 redirect_cmd cmake --build . --target doxygen
 REFMAN_TEXFILE="$MYTMPDIR_DOXY_BUILD/latex/refman.tex"
