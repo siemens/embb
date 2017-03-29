@@ -1,6 +1,6 @@
 #include <iostream>
 #include <exception>
-#include <time.h>
+#include <ctime>
 
 #include "input_video_handler.h"
 #include "output_video_builder.h"
@@ -18,7 +18,10 @@ static InputVideoHandler* inputHandler = nullptr;
 static OutputVideoBuilder* outputBuilder = nullptr;
 static FrameFormatConverter converter;
 
-#define TERMINATE() std::cout << e.what() << std::endl; exit(1)
+void terminate(char const * message, int code) {
+  std::cout << message << std::endl;
+  exit(code);
+}
 
 void filter(AVFrame* frame) {
   // apply filters to the frame. Here are some examples:
@@ -35,12 +38,14 @@ bool readFromFile(AVFrame* &frame) {
   int success = 0;
   int ret = 1;
   frame = av_frame_alloc();
-  while (!success && ret)
+  while (!success && ret) {
     // ret != 1 if there are no more frames to process
     ret = inputHandler->readFrame(frame, &success);
+  }
   // if frame is not ready just send a nullptr frame
-  if (!success)
+  if (!success) {
     frame = nullptr;
+  }
   return ret != 0;
 }
 
@@ -49,10 +54,10 @@ void writeToFile(AVFrame* const &frame) {
     try {
       outputBuilder->writeFrame(frame);
     } catch (std::exception& e) {
-      TERMINATE();
+      terminate(e.what(), 10);
     }
     AVFrame* copy = frame;
-    av_frame_unref(copy);
+    //av_frame_unref(copy);
     av_frame_free(&copy);
   }
 }
@@ -64,7 +69,6 @@ void applyFilter(AVFrame* const &input_frame, AVFrame* &output_frame) {
   }
   output_frame = input_frame;
   filter(output_frame);
-
 }
 
 void convertToRGB(AVFrame* const &input_frame, AVFrame* &output_frame) {
@@ -89,28 +93,97 @@ void convertToOriginal(AVFrame* const &input_frame, AVFrame* &output_frame) {
   av_frame_free(&input);
 }
 
-int main(int argc, char *argv[]) {
-  // silent warnings from ffmpeg
-  av_log_set_level(AV_LOG_QUIET);
+void process_parallel() {
+  Network nw(8);
 
+  Network::Source<AVFrame*> read(nw, embb::base::MakeFunction(readFromFile));
+
+  Network::ParallelProcess<Network::Inputs<AVFrame*>,
+    Network::Outputs<AVFrame*> >
+      rgb(nw, embb::base::MakeFunction(convertToRGB));
+
+  Network::ParallelProcess<Network::Inputs<AVFrame*>,
+    Network::Outputs<AVFrame*> >
+      original(nw, embb::base::MakeFunction(convertToOriginal));
+
+  Network::ParallelProcess<Network::Inputs<AVFrame*>,
+    Network::Outputs<AVFrame*> >
+      filter(nw, embb::base::MakeFunction(applyFilter));
+
+  Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(writeToFile));
+
+  read >> rgb;
+  rgb >> filter;
+  filter >> original;
+  original >> write;
+
+  nw();
+}
+
+void process_serial() {
   AVFrame* frame;
   AVFrame* convertedFrame;
   int gotFrame = 0;
-  int parallel = 1;
 
-  if (argc < 3) {
-    std::cout << "Video processing test application" << std::endl;
-    std::cout << "Given an input video file, the program applies some simple filter to each frame ";
-    std::cout << "and creates a new output video file." << std::endl << std::endl;
-    std::cout << "Please provide an input video file as first argument and the name of the output file ";
-    std::cout << "as second argument" << std::endl << std::endl;
-    std::cout << "Use the third optional parameter to decide if processing in parallel (1)" << std::endl;
-    std::cout << "or not (!1) (by default, parallel is enabled)" << std::endl;
-    return -1;
+  frame = av_frame_alloc();
+  convertedFrame = av_frame_alloc();
+  while (inputHandler->readFrame(frame, &gotFrame)) {
+    if (gotFrame) {
+      converter.convertFormat(&frame, &convertedFrame, TO_RGB);
+      filter(convertedFrame);
+      av_frame_unref(frame);
+      av_frame_free(&frame);
+      frame = av_frame_alloc();
+      converter.convertFormat(&convertedFrame, &frame, TO_ORIGINAL);
+      try {
+        outputBuilder->writeFrame(frame);
+      } catch (std::exception & e) {
+        terminate(e.what(), 20);
+      }
+    }
+  }
+  av_frame_free(&frame);
+  av_frame_free(&convertedFrame);
+}
+
+int parallel = 1;
+
+bool check_arguments(int argc, char * argv[]) {
+  bool result = true;
+
+  std::cout << std::endl << "Video processing application" <<
+    std::endl << std::endl;
+
+  if (argc >= 3 && argc <= 4) {
+    if (argc == 4) {
+      try {
+        parallel = std::stoi(argv[3]);
+      } catch (std::exception &) {
+        result = false;
+      }
+    }
+  } else {
+    result = false;
   }
 
-  if (argc == 4) {
-    parallel = atoi(argv[3]);
+  if (!result) {
+    std::cout << "usage: video_app <input> <output> [parallel]" << std::endl;
+    std::cout << "  <input>     source video file name" << std::endl;
+    std::cout << "  <output>    output video file name" << std::endl;
+    std::cout << "  [parallel]  process in parallel (!=0, default)"
+      " or serially (0), optional" << std::endl << std::endl;
+  }
+
+  return result;
+}
+
+int main(int argc, char *argv[]) {
+
+  // silence warnings from ffmpeg
+  av_log_set_level(AV_LOG_QUIET);
+
+  if (!check_arguments(argc, argv)) {
+    return 30;
   }
 
   // initialize ffmpeg libraries
@@ -119,17 +192,16 @@ int main(int argc, char *argv[]) {
   // open input video file
   try {
     inputHandler = new InputVideoHandler(argv[1]);
-  }
-  catch (std::exception& e) {
-    TERMINATE();
+  } catch (std::exception& e) {
+    terminate(e.what(), 31);
   }
 
   // open output video file
   try {
-    outputBuilder = new OutputVideoBuilder(argv[2], inputHandler->getCodecContext());
-  }
-  catch (std::exception& e) {
-    TERMINATE();
+    outputBuilder = new OutputVideoBuilder(argv[2],
+      inputHandler->getCodecContext());
+  } catch (std::exception& e) {
+    terminate(e.what(), 32);
   }
 
   converter.getFormatInfo(inputHandler->getCodecContext());
@@ -138,53 +210,14 @@ int main(int argc, char *argv[]) {
   outputBuilder->setMaxQB(7);
 
   std::string mode = parallel ? "enabled" : "disabled";
-  std::cout << "Start reading and processing video: parallel mode " << mode <<std::endl;
+  std::cout << "Reading and processing video: parallel mode " <<
+    mode << std::endl;
   clock_t start = clock();
 
-  if (parallel){
-    Network nw(8);
-
-    Network::Source<AVFrame*> read(nw, embb::base::MakeFunction(readFromFile));
-
-    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*> >
-      convertToRGBProc(nw, embb::base::MakeFunction(convertToRGB));
-
-    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*> >
-      convertToOriginalProc(nw, embb::base::MakeFunction(convertToOriginal));
-
-    Network::ParallelProcess<Network::Inputs<AVFrame*>, Network::Outputs<AVFrame*> >
-      applyFilterProc(nw, embb::base::MakeFunction(applyFilter));
-
-    Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(writeToFile));
-
-    read >> convertToRGBProc;
-    convertToRGBProc  >> applyFilterProc;
-    applyFilterProc >> convertToOriginalProc;
-    convertToOriginalProc >> write;
-
-    nw();
+  if (parallel) {
+    process_parallel();
   } else {
-    frame = av_frame_alloc();
-    convertedFrame = av_frame_alloc();
-    while (inputHandler->readFrame(frame, &gotFrame)) {
-
-      if (gotFrame) {
-        converter.convertFormat(&frame, &convertedFrame, TO_RGB);
-        filter(convertedFrame);
-        av_frame_unref(frame);
-        av_frame_free(&frame);
-        frame = av_frame_alloc();
-        converter.convertFormat(&convertedFrame, &frame, TO_ORIGINAL);
-        try {
-          outputBuilder->writeFrame(frame);
-        }
-        catch (std::exception& e) {
-          TERMINATE();
-        }
-      }
-    }
-    av_frame_free(&frame);
-    av_frame_free(&convertedFrame);
+    process_serial();
   }
 
   outputBuilder->writeVideo();
@@ -194,5 +227,6 @@ int main(int argc, char *argv[]) {
 
   delete inputHandler;
   delete outputBuilder;
+
   return 0;
 }

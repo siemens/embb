@@ -1,19 +1,11 @@
 #ifndef _INPUT_VIDEO_HANDLER_H_
 #define _INPUT_VIDEO_HANDLER_H_
 
-#include <exception>
-#include <iostream>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-
-#ifdef __cplusplus
-}
-#endif
+struct AVCodecContext;
+struct AVFormatContext;
+struct AVPacket;
+struct AVCodec;
+struct AVFrame;
 
 /**
  * This class takes care of the input file (opening and closing
@@ -48,11 +40,12 @@ public:
 private:
   InputVideoHandler();
   void init(char* name);
-  AVFormatContext* formatCtx;
-  AVCodec* codec;
-  AVCodecContext* codecCtx;
-  AVPacket packet;
-  int streamIndex;
+
+  AVFormatContext* formatCtx_;
+  AVCodec* codec_;
+  AVCodecContext* codecCtx_;
+  AVPacket* packet_;
+  int streamIndex_;
 };
 
 #endif  // _INPUT_VIDEO_HANDLER_H_

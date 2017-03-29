@@ -4,36 +4,24 @@
 #include <iostream>
 #include <exception>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <libavcodec/avcodec.h>
-#include <libavutil/avassert.h>
-#include <libavutil/channel_layout.h>
-#include <libavutil/opt.h>
-#include <libavutil/mathematics.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libswresample/swresample.h>
-
-
-#ifdef __cplusplus
-}
-#endif
-
 #include "input_video_handler.h"
+
+struct AVCodecContext;
+struct AVPacket;
+struct AVRational;
+struct AVCodec;
+struct AVStream;
 
 // #define LOG_MODE
 
 /**
-* This class takes care of the output file (opening and closing
-* the file, extracting frames..). The builder cannot be created
-* without an input file (whose name is provided at construction
-* time). If during construction problems occur (file not found,
-* file cannot be opened,...) an exception is thrown.
-*
-*/
+ * This class takes care of the output file (opening and closing
+ * the file, extracting frames..). The builder cannot be created
+ * without an input file (whose name is provided at construction
+ * time). If during construction problems occur (file not found,
+ * file cannot be opened,...) an exception is thrown.
+ *
+ */
 class OutputVideoBuilder {
 public:
   OutputVideoBuilder(char* name, AVCodecContext* inputCtx);
