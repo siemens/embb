@@ -95,7 +95,7 @@ void OutputVideoBuilder::writeFrame(AVFrame* frame) {
 #endif
     av_interleaved_write_frame(formatCtx, &packet);
   }
-  av_free_packet(&packet);
+  av_packet_unref(&packet);
 }
 
 void OutputVideoBuilder::writeVideo() {

@@ -57,7 +57,7 @@ void writeToFile(AVFrame* const &frame) {
       terminate(e.what(), 10);
     }
     AVFrame* copy = frame;
-    //av_frame_unref(copy);
+    av_free(copy->data[0]);
     av_frame_free(&copy);
   }
 }
@@ -90,6 +90,7 @@ void convertToOriginal(AVFrame* const &input_frame, AVFrame* &output_frame) {
   AVFrame* input = input_frame;
   output_frame = av_frame_alloc();
   converter.convertFormat(&input, &output_frame, TO_ORIGINAL);
+  av_free(input->data[0]);
   av_frame_free(&input);
 }
 
@@ -126,23 +127,27 @@ void process_serial() {
   int gotFrame = 0;
 
   frame = av_frame_alloc();
-  convertedFrame = av_frame_alloc();
   while (inputHandler->readFrame(frame, &gotFrame)) {
     if (gotFrame) {
+      convertedFrame = av_frame_alloc();
       converter.convertFormat(&frame, &convertedFrame, TO_RGB);
       filter(convertedFrame);
-      av_frame_unref(frame);
-      av_frame_free(&frame);
-      frame = av_frame_alloc();
       converter.convertFormat(&convertedFrame, &frame, TO_ORIGINAL);
       try {
         outputBuilder->writeFrame(frame);
       } catch (std::exception & e) {
         terminate(e.what(), 20);
       }
+      av_free(frame->data[0]);
+      av_frame_free(&frame);
+      av_free(convertedFrame->data[0]);
+      av_frame_free(&convertedFrame);
+      frame = av_frame_alloc();
     }
   }
+  av_frame_unref(frame);
   av_frame_free(&frame);
+  av_frame_unref(convertedFrame);
   av_frame_free(&convertedFrame);
 }
 
