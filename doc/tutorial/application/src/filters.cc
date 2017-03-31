@@ -1,9 +1,12 @@
 #include "filters.h"
 
+#include "int_iterator.h"
+
 #include <exception>
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
+#include <embb/algorithms/algorithms.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,90 +18,18 @@ extern "C" {
 }
 #endif
 
-namespace filters {
+namespace {
 
 /**
- * Shuffle the rgb values of the picture:
- * - red is assigned to green channel
- * - gree is assigned to blue channel
- * - blue is assigned to red channel
+ * Map the point (x,y) into the corresponding index in the 
+ * image buffer.
  *
- * @param frame frame to be processed
+ * @param x x coordinate of the pixel.
+ * @param y y coordinate of the pixel.
+ * @param width width in pixels of the image
  */
-void applyShuffleColors(AVFrame* frame) {
-  av_frame_make_writable(frame);
-
-  int width = frame->width;
-  int height = frame->height;
-  int p;
-  int r, g, b;
-
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      p = mapToData(x, y, width);
-      r = frame->data[0][p];
-      g = frame->data[0][p + 1];
-      b = frame->data[0][p + 2];
-      frame->data[0][p] = b;
-      frame->data[0][p + 1] = r;
-      frame->data[0][p + 2] = g;
-    }
-  }
-}
-
-/**
- * Convert the frame to black and white by setting
- * the rgb values to the average of the three.
- *
- * @param frame frame to be processed
- */
-void applyBlackAndWhite(AVFrame* frame) {
-  av_frame_make_writable(frame);
-
-  int width = frame->width;
-  int height = frame->height;
-  int p;
-  int r, g, b, mean;
-
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      p = mapToData(x, y, width);
-      r = frame->data[0][p];
-      g = frame->data[0][p + 1];
-      b = frame->data[0][p + 2];
-      mean = (r + g + b) / 3;
-      frame->data[0][p] = mean;
-      frame->data[0][p + 1] = mean;
-      frame->data[0][p + 2] = mean;
-    }
-  }
-}
-
-/**
- * Convert the frame to its negative by applying
- * the rule 'color = 255 - color' to each channel.
- *
- * @param frame frame to be processed
- */
-void applyNegative(AVFrame* frame) {
-  av_frame_make_writable(frame);
-
-  int width = frame->width;
-  int height = frame->height;
-  int p;
-  int r, g, b;
-
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      p = mapToData(x, y, width);
-      r = frame->data[0][p];
-      g = frame->data[0][p + 1];
-      b = frame->data[0][p + 2];
-      frame->data[0][p] = 255 - r;
-      frame->data[0][p + 1] = 255 - g;
-      frame->data[0][p + 2] = 255 - b;
-    }
-  }
+inline int mapToData(int x, int y, int width) { 
+  return 3*(x+y*width); 
 }
 
 /**
@@ -115,7 +46,7 @@ void applyNegative(AVFrame* frame) {
  * @param v_k2 output value of the second kernel
  */
 void convolve(int x, int y, uint8_t* data, int width, int height,
-  int kernel1[][3], int kernel2[][3], int* v_k1, int* v_k2) {
+  int kernel1[3][3], int kernel2[3][3], int* v_k1, int* v_k2) {
   int x1, y1;
   int p;
   int value1 = 0;
@@ -136,11 +67,141 @@ void convolve(int x, int y, uint8_t* data, int width, int height,
 }
 
 /**
- * Apply the Sobel operator to a frame to detect edges.
- * see https://en.wikipedia.org/wiki/Sobel_operator
+ * Apply mean filter with specified size to a stripe and writes result to a
+ * buffer (buffer must have size of the original image).
  *
- * @param frame frame to be processed
+ * @param y_in lowest value of y coordinate of the stripe
+ * @param y_out highest value of y coordinate of the stripe
+ * @param size size of the square used for the averaging
+ * @param width width in pixels of the frame
+ * @param height height in pixels of the frame
+ * @param in_buffer input buffer
+ * @param out_buffer output buffer
  */
+void blurStripe(int y_in, int y_end, int size, int width, int height,
+  uint8_t* in_buffer, uint8_t* out_buffer) {
+  // number of pixels top left
+  int const size_lt = (size % 2 != 0) ? size / 2 : size / 2 - 1;
+  // number of pixels bottom right
+  int const size_rb = size / 2;
+
+  for (int y = y_in; y < y_end; y++) {
+    for (int x = 0; x < width; x++) {
+      int close = 0;
+      int p = mapToData(x, y, width);
+      int r = 0;
+      int g = 0;
+      int b = 0;
+
+      for (int k1 = y - size_lt; k1 <= y + size_rb; k1++) {
+        for (int k2 = x - size_lt; k2 <= x + size_rb; k2++) {
+          if (k1 >= 0 && k1 < height && k2 >= 0 && k2 < width) {
+            close++;
+            int p2 = mapToData(k2, k1, width);
+            r += in_buffer[p2];
+            g += in_buffer[p2 + 1];
+            b += in_buffer[p2 + 2];
+          }
+        }
+      }
+      out_buffer[p] = r / close;
+      out_buffer[p + 1] = g / close;
+      out_buffer[p + 2] = b / close;
+    }
+  }
+}
+
+/**
+ * Apply mean filter with specified size to a stripe and writes result to a
+ * buffer (buffer must have size of the original image).
+ *
+ * @param y_in lowest value of y coordinate of the stripe
+ * @param y_out highest value of y coordinate of the stripe
+ * @param size size of the square used for the averaging
+ * @param width width in pixels of the frame
+ * @param height height in pixels of the frame
+ * @param in_buffer input buffer
+ * @param out_buffer output buffer
+ */
+void blurStripeParallel(int y_in, int y_end, int size, int width, int height,
+  uint8_t* in_buffer, uint8_t* out_buffer) {
+  // number of pixels top left
+  int const size_lt = (size % 2 != 0) ? size / 2 : size / 2 - 1;
+  // number of pixels bottom right
+  int const size_rb = size / 2;
+
+  embb::algorithms::ForEach(
+    int_iterator(y_in*width), int_iterator(y_end*width), [&](int idx) {
+    int x = idx % width;
+    int y = idx / width;
+    int close = 0;
+    int p = mapToData(x, y, width);
+    int r = 0;
+    int g = 0;
+    int b = 0;
+
+    for (int k1 = y - size_lt; k1 <= y + size_rb; k1++) {
+      for (int k2 = x - size_lt; k2 <= x + size_rb; k2++) {
+        if (k1 >= 0 && k1 < height && k2 >= 0 && k2 < width) {
+          close++;
+          int p2 = mapToData(k2, k1, width);
+          r += in_buffer[p2];
+          g += in_buffer[p2 + 1];
+          b += in_buffer[p2 + 2];
+        }
+      }
+    }
+    out_buffer[p] = r / close;
+    out_buffer[p + 1] = g / close;
+    out_buffer[p + 2] = b / close;
+  });
+}
+
+}
+
+namespace filters {
+
+void applyBlackAndWhite(AVFrame* frame) {
+  av_frame_make_writable(frame);
+
+  int const width = frame->width;
+  int const height = frame->height;
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      int p = mapToData(x, y, width);
+      int r = frame->data[0][p];
+      int g = frame->data[0][p + 1];
+      int b = frame->data[0][p + 2];
+      int mean = (r + g + b) / 3;
+      frame->data[0][p] = mean;
+      frame->data[0][p + 1] = mean;
+      frame->data[0][p + 2] = mean;
+    }
+  }
+}
+
+void applyBlackAndWhiteParallel(AVFrame* frame) {
+  av_frame_make_writable(frame);
+
+  int const width = frame->width;
+  int const height = frame->height;
+
+  embb::algorithms::ForEach(
+    int_iterator(0), int_iterator(width*height), [&](int idx) {
+    int x = idx % width;
+    int y = idx / width;
+    int p = mapToData(x, y, width);
+    int r = frame->data[0][p];
+    int g = frame->data[0][p + 1];
+    int b = frame->data[0][p + 2];
+    int mean = (r + g + b) / 3;
+    frame->data[0][p] = mean;
+    frame->data[0][p + 1] = mean;
+    frame->data[0][p + 2] = mean;
+  });
+}
+
 void edgeDetection(AVFrame* frame) {
   int width = frame->width;
   int height = frame->height;
@@ -183,29 +244,54 @@ void edgeDetection(AVFrame* frame) {
   frame->data[0] = buffer;
 }
 
-/**
- * Apply a cartoon-style filter to a frame. The Sobel operator is used
- * to obtain the edges, which are coloured in black. The threshold parameter
- * in the function prototype determines the minimum value of gradient that
- * classify a specific pixel as a contour pixel (lower values of threshold
- * correspond to thicker but more accurate edges). The number of colours in the
- * frame are then reducted based on the value of the discr parameter (discr = 1
- * outputs an unchanged picture, discr = 255 outputs a picture with only one
- * colour).
- *
- * @param frame frame to be processed
- * @param thershold gradient value used to classify edges
- * @param discr number that determines the intensity of color reduction.
- */
-void applyCartoonify(AVFrame* frame, int threshold, int discr) {
+void edgeDetectionParallel(AVFrame* frame) {
   int width = frame->width;
   int height = frame->height;
   int gx, gy;
-  int r, g, b;
   int Gx[3][3];
   int Gy[3][3];
   int p;
   int f_value;
+
+  Gx[0][0] = -1; Gy[0][0] = -1;
+  Gx[0][1] =  0; Gy[0][1] = -2;
+  Gx[0][2] =  1; Gy[0][2] = -1;
+  Gx[1][0] = -2; Gy[1][0] =  0;
+  Gx[1][1] =  0; Gy[1][1] =  0;
+  Gx[1][2] =  2; Gy[1][2] =  0;
+  Gx[2][0] = -1; Gy[2][0] =  1;
+  Gx[2][1] =  0; Gy[2][1] =  2;
+  Gx[2][2] =  1; Gy[2][2] =  1;
+
+  uint8_t* data = frame->data[0];
+  av_frame_make_writable(frame);
+
+  int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
+  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+
+  embb::algorithms::ForEach(
+    int_iterator(0), int_iterator(width*height), [&](int idx){
+    int x = idx % width;
+    int y = idx / width;
+    p = mapToData(x, y, width);
+    gx = 0;
+    gy = 0;
+    convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
+    f_value = (int)sqrt(gx*gx + gy*gy);
+    buffer[p] = f_value;
+    buffer[p + 1] = f_value;
+    buffer[p + 2] = f_value;
+  });
+
+  av_free(frame->data[0]);
+  frame->data[0] = buffer;
+}
+
+void applyCartoonify(AVFrame* frame, int threshold, int discr) {
+  int const width = frame->width;
+  int const height = frame->height;
+  int Gx[3][3];
+  int Gy[3][3];
 
   Gx[0][0] = -1; Gy[0][0] = -1;
   Gx[0][1] = 0; Gy[0][1] = -2;
@@ -225,19 +311,19 @@ void applyCartoonify(AVFrame* frame, int threshold, int discr) {
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
-      p = mapToData(x, y, width);
-      gx = 0;
-      gy = 0;
+      int p = mapToData(x, y, width);
+      int gx = 0;
+      int gy = 0;
       convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
-      f_value = (int)sqrt(gx*gx + gy*gy);
+      int f_value = (int)sqrt(gx*gx + gy*gy);
       if (f_value > threshold) {
         buffer[p] = 0;
         buffer[p + 1] = 0;
         buffer[p + 2] = 0;
       } else {
-        r = (data[p] / discr) * discr;
-        g = (data[p + 1] / discr) * discr;
-        b = (data[p + 2] / discr) * discr;
+        int r = (data[p] / discr) * discr;
+        int g = (data[p + 1] / discr) * discr;
+        int b = (data[p + 2] / discr) * discr;
 
         buffer[p] = r;
         buffer[p + 1] = g;
@@ -251,31 +337,72 @@ void applyCartoonify(AVFrame* frame, int threshold, int discr) {
   frame->data[0] = buffer;
 }
 
-/**
- * Change value of saturation of a picture based on the
- * specified amount (the higher the amount, the higher
- * the increase in saturation)
- *
- * @param frame frame to be processed
- * @param amount amount of saturation to add/subtract
- */
+void applyCartoonifyParallel(AVFrame* frame, int threshold, int discr) {
+  int const width = frame->width;
+  int const height = frame->height;
+  int Gx[3][3];
+  int Gy[3][3];
+
+  Gx[0][0] = -1; Gy[0][0] = -1;
+  Gx[0][1] = 0; Gy[0][1] = -2;
+  Gx[0][2] = 1; Gy[0][2] = -1;
+  Gx[1][0] = -2; Gy[1][0] = 0;
+  Gx[1][1] = 0; Gy[1][1] = 0;
+  Gx[1][2] = 2; Gy[1][2] = 0;
+  Gx[2][0] = -1; Gy[2][0] = 1;
+  Gx[2][1] = 0; Gy[2][1] = 2;
+  Gx[2][2] = 1; Gy[2][2] = 1;
+
+  uint8_t* data = frame->data[0];
+  av_frame_make_writable(frame);
+
+  int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
+  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+
+  embb::algorithms::ForEach(
+    int_iterator(0), int_iterator(height*width), [&](int idx) {
+    int const x = idx % width;
+    int const y = idx / width;
+    int p = mapToData(x, y, width);
+    int gx = 0;
+    int gy = 0;
+    convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
+    int f_value = (int)sqrt(gx*gx + gy*gy);
+    if (f_value > threshold) {
+      buffer[p] = 0;
+      buffer[p + 1] = 0;
+      buffer[p + 2] = 0;
+    }
+    else {
+      int r = (data[p] / discr) * discr;
+      int g = (data[p + 1] / discr) * discr;
+      int b = (data[p + 2] / discr) * discr;
+
+      buffer[p] = r;
+      buffer[p + 1] = g;
+      buffer[p + 2] = b;
+    }
+  });
+
+  av_free(frame->data[0]);
+  frame->data[0] = buffer;
+}
+
 void changeSaturation(AVFrame* frame, double amount) {
-  int width = frame->width;
-  int height = frame->height;
-  int p;
-  int r, g, b, maximum, minimum;
-  int factor;
+  int const width = frame->width;
+  int const height = frame->height;
+
   av_frame_make_writable(frame);
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
-      p = mapToData(x, y, width);
-      r = frame->data[0][p];
-      g = frame->data[0][p + 1];
-      b = frame->data[0][p + 2];
-      maximum = std::max(r, std::max(g, b));
-      minimum = std::min(r, std::min(g, b));
-      factor = (int)((maximum - minimum)*amount);
+      int p = mapToData(x, y, width);
+      int r = frame->data[0][p];
+      int g = frame->data[0][p + 1];
+      int b = frame->data[0][p + 2];
+      int maximum = std::max(r, std::max(g, b));
+      int minimum = std::min(r, std::min(g, b));
+      int factor = (int)((maximum - minimum)*amount);
 
       frame->data[0][p] =
         (r == maximum) ? std::min(255, r + factor) : std::max(0, r - factor*2);
@@ -287,98 +414,33 @@ void changeSaturation(AVFrame* frame, double amount) {
   }
 }
 
-/**
- * Apply mean filter with specified size to a stripe and writes result to a
- * buffer (buffer must have size of the original image).
- *
- * @param y_in lowest value of y coordinate of the stripe
- * @param y_out highest value of y coordinate of the stripe
- * @param size size of the square used for the averaging
- * @param width width in pixels of the frame
- * @param height height in pixels of the frame
- * @param in_buffer input buffer
- * @param out_buffer output buffer
- */
-void blurStripe(int y_in, int y_end, int size, int width, int height,
-  uint8_t* in_buffer, uint8_t* out_buffer) {
-  int close;
-  int r, g, b;
-  int p, p2;
-
-  // number of pixels top left
-  int size_lt = (size % 2 != 0) ? size / 2 : size / 2 - 1;
-  // number of pixels bottom right
-  int size_rb = size / 2;
-
-  for (int y = y_in; y < y_end; y++) {
-    for (int x = 0; x < width; x++) {
-      close = 0;
-      p = mapToData(x, y, width);
-      r = 0;
-      g = 0;
-      b = 0;
-
-      for (int k1 = y - size_lt; k1 <= y + size_rb; k1++) {
-        for (int k2 = x - size_lt; k2 <= x + size_rb; k2++) {
-          if (k1 >= 0 && k1 < height && k2 >= 0 && k2 < width) {
-            close++;
-            p2 = mapToData(k2, k1, width);
-            r += in_buffer[p2];
-            g += in_buffer[p2 + 1];
-            b += in_buffer[p2 + 2];
-          }
-        }
-      }
-      out_buffer[p] = r / close;
-      out_buffer[p + 1] = g / close;
-      out_buffer[p + 2] = b / close;
-    }
-  }
-}
-
-/**
- * Apply variable blur to a frame. The image is divided into
- * horizontal stripes and mean filters with different kernels
- * is applied to each one of those.
- *
- * @param frame frame to be processed
- */
-void applyVariableMeanFilter(AVFrame* frame) {
-  int width = frame->width;
-  int height = frame->height;
-  int p;
+void changeSaturationParallel(AVFrame* frame, double amount) {
+  int const width = frame->width;
+  int const height = frame->height;
 
   av_frame_make_writable(frame);
 
-  int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
-  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  embb::algorithms::ForEach(
+    int_iterator(0), int_iterator(height*width), [&](int idx) {
+    int const x = idx % width;
+    int const y = idx / width;
+    int p = mapToData(x, y, width);
+    int r = frame->data[0][p];
+    int g = frame->data[0][p + 1];
+    int b = frame->data[0][p + 2];
+    int maximum = std::max(r, std::max(g, b));
+    int minimum = std::min(r, std::min(g, b));
+    int factor = (int)((maximum - minimum)*amount);
 
-  uint8_t* data = frame->data[0];
-
-  blurStripe(0, height / 6, 7, width, height, data, buffer);
-  blurStripe(height/6, height/2, 4, width, height, data, buffer);
-  blurStripe(height/2, height/2 + height/6, 2, width, height, data, buffer);
-
-  for (int y = height / 2 + height/6; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      p = mapToData(x, y, width);
-      buffer[p] = data[p];
-      buffer[p+1] = data[p + 1];
-      buffer[p+2] = data[p + 2];
-    }
-  }
-
-  av_free(frame->data[0]);
-  frame->data[0] = buffer;
+    frame->data[0][p] =
+      (r == maximum) ? std::min(255, r + factor) : std::max(0, r - factor * 2);
+    frame->data[0][p + 1] =
+      (g == maximum) ? std::min(255, g + factor) : std::max(0, g - factor * 2);
+    frame->data[0][p + 2] =
+      (b == maximum) ? std::min(255, b + factor) : std::max(0, b - factor * 2);
+  });
 }
 
-/**
- * Apply mean filter to a frame. The size of the kernel
- * must be specified.
- *
- * @param frame frame to be processed
- * @param size size of the square used for averaging
- */
 void applyMeanFilter(AVFrame* frame, int size) {
   int width = frame->width;
   int height = frame->height;
@@ -387,10 +449,25 @@ void applyMeanFilter(AVFrame* frame, int size) {
 
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
   uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
-
   uint8_t* data = frame->data[0];
 
   blurStripe(0, height, size, width, height, data, buffer);
+
+  av_free(frame->data[0]);
+  frame->data[0] = buffer;
+}
+
+void applyMeanFilterParallel(AVFrame* frame, int size) {
+  int width = frame->width;
+  int height = frame->height;
+
+  av_frame_make_writable(frame);
+
+  int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
+  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  uint8_t* data = frame->data[0];
+
+  blurStripeParallel(0, height, size, width, height, data, buffer);
 
   av_free(frame->data[0]);
   frame->data[0] = buffer;

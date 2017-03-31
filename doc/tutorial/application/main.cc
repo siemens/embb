@@ -26,12 +26,19 @@ void terminate(char const * message, int code) {
 void filter(AVFrame* frame) {
   // apply filters to the frame. Here are some examples:
   // filters::applyBlackAndWhite(frame);
-  // filters::applyVariableMeanFilter(frame);
+  // filters::edgeDetection(frame);
   // filters::changeSaturation(frame, 0.2);
-  // filters::applyShuffleColors(frame);
-  // filters::applyNegative(frame);
   filters::applyMeanFilter(frame, 3);
   filters::applyCartoonify(frame, 90, 40);
+}
+
+void filter_parallel(AVFrame* frame) {
+  // apply filters to the frame. Here are some examples:
+  // filters::applyBlackAndWhiteParallel(frame);
+  // filters::edgeDetectionParallel(frame);
+  // filters::changeSaturationParallel(frame, 0.2);
+  filters::applyMeanFilterParallel(frame, 3);
+  filters::applyCartoonifyParallel(frame, 90, 40);
 }
 
 bool readFromFile(AVFrame* &frame) {
@@ -72,6 +79,15 @@ void applyFilter(AVFrame* const &input_frame, AVFrame* &output_frame) {
   filter(output_frame);
 }
 
+void applyFilterParallel(AVFrame* const &input_frame, AVFrame* &output_frame) {
+  if (input_frame == nullptr) {
+    output_frame = nullptr;
+    return;
+  }
+  output_frame = input_frame;
+  filter_parallel(output_frame);
+}
+
 void convertToRGB(AVFrame* const &input_frame, AVFrame* &output_frame) {
   if (input_frame == nullptr) {
     output_frame = nullptr;
@@ -95,7 +111,31 @@ void convertToOriginal(AVFrame* const &input_frame, AVFrame* &output_frame) {
   av_frame_free(&input);
 }
 
-void process_parallel() {
+void process_parallel_dataflow_and_algorithms() {
+  Network nw(8);
+
+  Network::Source<AVFrame*> read(nw, embb::base::MakeFunction(readFromFile));
+
+  Network::ParallelProcess<Network::Inputs<AVFrame*>,
+    Network::Outputs<AVFrame*> >
+    rgb(nw, embb::base::MakeFunction(convertToRGB));
+
+  Network::ParallelProcess<Network::Inputs<AVFrame*>,
+    Network::Outputs<AVFrame*> >
+    original(nw, embb::base::MakeFunction(convertToOriginal));
+
+  Network::ParallelProcess<Network::Inputs<AVFrame*>,
+    Network::Outputs<AVFrame*> >
+    filter(nw, embb::base::MakeFunction(applyFilterParallel));
+
+  Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(writeToFile));
+
+  read >> rgb >> filter >> original >> write;
+
+  nw();
+}
+
+void process_parallel_dataflow() {
   Network nw(8);
 
   Network::Source<AVFrame*> read(nw, embb::base::MakeFunction(readFromFile));
@@ -119,35 +159,35 @@ void process_parallel() {
   nw();
 }
 
-void process_serial() {
-  AVFrame* frame;
-  AVFrame* convertedFrame;
-  AVFrame* originalFrame;
+void process_parallel_algorithms() {
+  AVFrame* frame = nullptr;
+  AVFrame* convertedFrame = nullptr;
+  AVFrame* originalFrame = nullptr;
   int gotFrame = 0;
 
-  frame = av_frame_alloc();
-  convertedFrame = av_frame_alloc();
-  originalFrame = av_frame_alloc();
-  while (inputHandler->readFrame(frame, &gotFrame)) {
-    if (gotFrame) {
-      converter.convertFormat(&frame, &convertedFrame, TO_RGB);
-      filter(convertedFrame);
-      converter.convertFormat(&convertedFrame, &originalFrame, TO_ORIGINAL);
-      try {
-        outputBuilder->writeFrame(originalFrame);
-      } catch (std::exception & e) {
-        terminate(e.what(), 20);
-      }
-      av_free(convertedFrame->data[0]);
-      av_free(originalFrame->data[0]);
-    }
+  while (readFromFile(frame)) {
+    convertToRGB(frame, convertedFrame);
+    filter_parallel(convertedFrame);
+    convertToOriginal(convertedFrame, originalFrame);
+    writeToFile(originalFrame);
   }
-  av_frame_free(&frame);
-  av_frame_free(&convertedFrame);
-  av_frame_free(&originalFrame);
 }
 
-int parallel = 1;
+void process_serial() {
+  AVFrame* frame = nullptr;
+  AVFrame* convertedFrame = nullptr;
+  AVFrame* originalFrame = nullptr;
+  int gotFrame = 0;
+
+  while (readFromFile(frame)) {
+    convertToRGB(frame, convertedFrame);
+    filter(convertedFrame);
+    convertToOriginal(convertedFrame, originalFrame);
+    writeToFile(originalFrame);
+  }
+}
+
+int parallel = 0;
 
 bool check_arguments(int argc, char * argv[]) {
   bool result = true;
@@ -159,6 +199,9 @@ bool check_arguments(int argc, char * argv[]) {
     if (argc == 4) {
       try {
         parallel = std::stoi(argv[3]);
+        if (parallel < 0 || parallel > 3) {
+          result = false;
+        }
       } catch (std::exception &) {
         result = false;
       }
@@ -168,11 +211,15 @@ bool check_arguments(int argc, char * argv[]) {
   }
 
   if (!result) {
-    std::cout << "usage: video_app <input> <output> [parallel]" << std::endl;
+    std::cout << "usage: video_app <input> <output> [mode]" << std::endl;
     std::cout << "  <input>     source video file name" << std::endl;
     std::cout << "  <output>    output video file name" << std::endl;
-    std::cout << "  [parallel]  process in parallel (!=0, default)"
-      " or serially (0), optional" << std::endl << std::endl;
+    std::cout << "  [mode]      0 = serial (default)" << std::endl;
+    std::cout << "              1 = parallel algorithms" << std::endl;
+    std::cout << "              2 = parallel dataflow" << std::endl;
+    std::cout << "              3 = parallel dataflow and algorithms" <<
+      std::endl;
+    std::cout << std::endl;
   }
 
   return result;
@@ -209,15 +256,40 @@ int main(int argc, char *argv[]) {
   // change this value to determine output quality
   outputBuilder->setMaxQB(7);
 
-  std::string mode = parallel ? "enabled" : "disabled";
-  std::cout << "Reading and processing video: parallel mode " <<
-    mode << std::endl;
+  std::string mode = "serial";
+  switch (parallel)
+  {
+  default:
+  case 0:
+    mode = "serial";
+    break;
+  case 1:
+    mode = "parallel algorithms";
+    break;
+  case 2:
+    mode = "parallel dataflow";
+    break;
+  case 3:
+    mode = "parallel dataflow and algorithms";
+    break;
+  }
+  std::cout << "Reading and processing video: " << mode <<
+    " mode" << std::endl;
   clock_t start = clock();
 
-  if (parallel) {
-    process_parallel();
-  } else {
+  switch (parallel) {
+  case 0:
     process_serial();
+    break;
+  case 1:
+    process_parallel_algorithms();
+    break;
+  case 2:
+    process_parallel_dataflow();
+    break;
+  case 3:
+    process_parallel_dataflow_and_algorithms();
+    break;
   }
 
   outputBuilder->writeVideo();
