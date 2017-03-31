@@ -14,7 +14,10 @@ extern "C" {
 
 #include "embb/base/base.h"
 
-typedef enum {TO_RGB, TO_ORIGINAL} ConvertionType;
+enum ConversionType {
+  TO_RGB,
+  TO_ORIGINAL
+};
 
 /**
  * This class is used for converting Frames from YUV format
@@ -42,7 +45,7 @@ public:
    * @param outout output frame
    * @param ct convertion type: either TO_RGB or TO_ORIGINAL
    */
-  void convertFormat(AVFrame** input, AVFrame** output, ConvertionType ct);
+  void convertFormat(AVFrame** input, AVFrame** output, ConversionType ct);
 
 private:
   struct SwsContext* toRGBCtx;

@@ -25,7 +25,7 @@ void FrameFormatConverter::getFormatInfo(AVCodecContext* codecCtx) {
 void FrameFormatConverter::convertFormat(
   AVFrame** input,
   AVFrame** output,
-  ConvertionType ct) {
+  ConversionType ct) {
   embb::base::LockGuard<embb::base::Mutex> guard(mutex);
   AVFrame* convertedFrame = *output;
   struct SwsContext* ctx =

@@ -44,6 +44,7 @@ bool readFromFile(AVFrame* &frame) {
   }
   // if frame is not ready just send a nullptr frame
   if (!success) {
+    av_frame_free(&frame);
     frame = nullptr;
   }
   return ret != 0;
@@ -113,10 +114,7 @@ void process_parallel() {
 
   Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(writeToFile));
 
-  read >> rgb;
-  rgb >> filter;
-  filter >> original;
-  original >> write;
+  read >> rgb >> filter >> original >> write;
 
   nw();
 }
@@ -124,31 +122,29 @@ void process_parallel() {
 void process_serial() {
   AVFrame* frame;
   AVFrame* convertedFrame;
+  AVFrame* originalFrame;
   int gotFrame = 0;
 
   frame = av_frame_alloc();
+  convertedFrame = av_frame_alloc();
+  originalFrame = av_frame_alloc();
   while (inputHandler->readFrame(frame, &gotFrame)) {
     if (gotFrame) {
-      convertedFrame = av_frame_alloc();
       converter.convertFormat(&frame, &convertedFrame, TO_RGB);
       filter(convertedFrame);
-      converter.convertFormat(&convertedFrame, &frame, TO_ORIGINAL);
+      converter.convertFormat(&convertedFrame, &originalFrame, TO_ORIGINAL);
       try {
-        outputBuilder->writeFrame(frame);
+        outputBuilder->writeFrame(originalFrame);
       } catch (std::exception & e) {
         terminate(e.what(), 20);
       }
-      av_free(frame->data[0]);
-      av_frame_free(&frame);
       av_free(convertedFrame->data[0]);
-      av_frame_free(&convertedFrame);
-      frame = av_frame_alloc();
+      av_free(originalFrame->data[0]);
     }
   }
-  av_frame_unref(frame);
   av_frame_free(&frame);
-  av_frame_unref(convertedFrame);
   av_frame_free(&convertedFrame);
+  av_frame_free(&originalFrame);
 }
 
 int parallel = 1;
@@ -183,7 +179,6 @@ bool check_arguments(int argc, char * argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-
   // silence warnings from ffmpeg
   av_log_set_level(AV_LOG_QUIET);
 
