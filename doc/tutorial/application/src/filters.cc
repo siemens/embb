@@ -161,6 +161,101 @@ void blurStripeParallel(int y_in, int y_end, int size, int width, int height,
 
 namespace filters {
 
+char const * mean_kernel =
+"__kernel void mean(\n"
+"  __global void* arguments,\n"
+"  int arguments_size,\n"
+"  __global void* result_buffer,\n"
+"  int result_buffer_size,\n"
+"  __global void* node_local_data,\n"
+"  int node_local_data_size) {\n"
+"  int idx = get_global_id(0);\n"
+"  int elements = (arguments_size - sizeof(int) * 3) / 3;\n"
+"  if (idx >= elements)"
+"    return;"
+"  __global int * param = (__global int*)arguments;\n"
+"  __global unsigned char * in_buffer = ((__global unsigned char*)arguments) + sizeof(int) * 3;\n"
+"  __global unsigned char * out_buffer = (__global unsigned char*)result_buffer;\n"
+"  int width = param[0];\n"
+"  int height = param[1];\n"
+"  int size = param[2];\n"
+"  int size_lt = (size % 2 != 0) ? size / 2 : size / 2 - 1;\n"
+"  int const size_rb = size / 2;\n"
+"  int x = idx % width;\n"
+"  int y = idx / width; \n"
+"  int close = 0;\n"
+"  int p = (x + y * width) * 3;\n"
+"  int r = 0;\n"
+"  int g = 0;\n"
+"  int b = 0;\n"
+"  for (int k1 = y - size_lt; k1 <= y + size_rb; k1++) {\n"
+"    for (int k2 = x - size_lt; k2 <= x + size_rb; k2++) {\n"
+"      if (k1 >= 0 && k1 < height && k2 >= 0 && k2 < width) {\n"
+"        close++;\n"
+"        int p2 = (k2 + k1 * width) * 3;\n"
+"        r += in_buffer[p2];\n"
+"        g += in_buffer[p2 + 1];\n"
+"        b += in_buffer[p2 + 2];\n"
+"      }\n"
+"    }\n"
+"  }\n"
+"  out_buffer[p] = r / close;\n"
+"  out_buffer[p + 1] = g / close;\n"
+"  out_buffer[p + 2] = b / close;\n"
+"}\n";
+
+char const * cartoonify_kernel =
+"__kernel void cartoonify(\n"
+"  __global void* arguments,\n"
+"  int arguments_size,\n"
+"  __global void* result_buffer,\n"
+"  int result_buffer_size,\n"
+"  __global void* node_local_data,\n"
+"  int node_local_data_size) {\n"
+"  int idx = get_global_id(0);\n"
+"  int elements = (arguments_size - sizeof(int) * 4) / 3;\n"
+"  if (idx >= elements)"
+"    return;"
+"  __global int * param = (__global int*)arguments;\n"
+"  __global unsigned char * data = ((__global unsigned char*)arguments) + sizeof(int) * 4;\n"
+"  __global unsigned char * buffer = (__global unsigned char*)result_buffer;\n"
+"  int width = param[0];\n"
+"  int height = param[1];\n"
+"  int threshold = param[2];\n"
+"  int discr = param[3];\n"
+"  int x = idx % width;\n"
+"  int y = idx / width;\n"
+"  int p = (x + y * width) * 3;\n"
+"  int Gx[3][3];\n"
+"  int Gy[3][3];\n"
+"  Gx[0][0] = -1; Gy[0][0] = -1;\n"
+"  Gx[0][1] = 0; Gy[0][1] = -2;\n"
+"  Gx[0][2] = 1; Gy[0][2] = -1;\n"
+"  Gx[1][0] = -2; Gy[1][0] = 0;\n"
+"  Gx[1][1] = 0; Gy[1][1] = 0;\n"
+"  Gx[1][2] = 2; Gy[1][2] = 0;\n"
+"  Gx[2][0] = -1; Gy[2][0] = 1;\n"
+"  Gx[2][1] = 0; Gy[2][1] = 2;\n"
+"  Gx[2][2] = 1; Gy[2][2] = 1;\n"
+"  int gx = 0;\n"
+"  int gy = 0;\n"
+"  for (int i = 0; i < 3; i++) {\n"
+"    for (int j = 0; j < 3; j++) {\n"
+"      int x1 = x + i - 1;\n"
+"      int y1 = y + j - 1;\n"
+"      if (x1 < 0) x1 = 0; if (x1 > width-1) x1 = width-1;\n"
+"      if (y1 < 0) y1 = 0; if (y1 > height-1) y1 = height-1;\n"
+"      int p1 = (x1 + y1 * width) * 3;\n"
+"      gx += Gx[i][j] * (data[p1] + data[p1 + 1] + data[p1 + 2]) / 3;\n"
+"      gy += Gy[i][j] * (data[p1] + data[p1 + 1] + data[p1 + 2]) / 3;\n"
+"    }\n"
+"  }\n"
+"  int f_value = (int)sqrt(gx*gx + gy*gy);\n"
+"  buffer[p] = f_value;\n"
+"  buffer[p + 1] = f_value;\n"
+"  buffer[p + 2] = f_value;\n"
+"}\n";
+
 void applyBlackAndWhite(AVFrame* frame) {
   av_frame_make_writable(frame);
 
@@ -442,8 +537,8 @@ void changeSaturationParallel(AVFrame* frame, double amount) {
 }
 
 void applyMeanFilter(AVFrame* frame, int size) {
-  int width = frame->width;
-  int height = frame->height;
+  int const width = frame->width;
+  int const height = frame->height;
 
   av_frame_make_writable(frame);
 
@@ -458,8 +553,8 @@ void applyMeanFilter(AVFrame* frame, int size) {
 }
 
 void applyMeanFilterParallel(AVFrame* frame, int size) {
-  int width = frame->width;
-  int height = frame->height;
+  int const width = frame->width;
+  int const height = frame->height;
 
   av_frame_make_writable(frame);
 

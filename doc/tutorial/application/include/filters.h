@@ -71,6 +71,8 @@ void applyCartoonify(AVFrame* frame, int threshold, int discr);
  */
 void applyCartoonifyParallel(AVFrame* frame, int threshold, int discr);
 
+extern char const * cartoonify_kernel;
+
 /**
  * Change value of saturation of a picture based on the 
  * specified amount (the higher the amount, the higher
@@ -108,6 +110,8 @@ void applyMeanFilter(AVFrame* frame, int size);
  * @param size size of the square used for averaging
  */
 void applyMeanFilterParallel(AVFrame* frame, int size);
+
+extern char const * mean_kernel;
 
 }  // namespace filters
 

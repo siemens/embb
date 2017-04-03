@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project (video_app)
 
-set(EMBB_DIR "/home/marcus/install/CMake")
+set(EMBB_DIR "D:/EMBB/_install/CMake")
 find_package(EMBB REQUIRED NO_MODULE)
 include(${EMBB_USE_FILE})
 
@@ -24,6 +24,7 @@ endif()
 set(LINK_EMBB
     embb_dataflow_cpp
     embb_mtapi_cpp
+    embb_mtapi_opencl_c
     embb_mtapi_c
     embb_base_cpp
     embb_base_c
