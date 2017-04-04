@@ -49,7 +49,6 @@ void filter_opencl(AVFrame* frame) {
   int const width = frame->width;
   int const height = frame->height;
 
-  av_frame_make_writable(frame);
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
 
   embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
@@ -59,10 +58,10 @@ void filter_opencl(AVFrame* frame) {
   unsigned char * args;
   int * param;
   unsigned char * data;
-  void * res;
+  unsigned char * res;
 
   args = new unsigned char[n_bytes + sizeof(int) * 4];
-  res = frame->data[0];
+  res = new unsigned char[n_bytes + sizeof(int) * 4];
 
   size = n_bytes + sizeof(int) * 3;
   param = reinterpret_cast<int*>(args);
@@ -72,8 +71,13 @@ void filter_opencl(AVFrame* frame) {
   param[2] = 3;
   memcpy(data, frame->data[0], n_bytes);
   job = node.GetJob(JOB_MEAN);
-  task = node.Start(MTAPI_TASK_ID_NONE, job.GetInternal(), args, size, res, n_bytes, MTAPI_DEFAULT_TASK_ATTRIBUTES);
+  task = node.Start(MTAPI_TASK_ID_NONE, job.GetInternal(), args, size,
+    res + sizeof(int)*4, n_bytes, MTAPI_DEFAULT_TASK_ATTRIBUTES);
   task.Wait();
+
+  delete[] args;
+  args = res;
+  res = frame->data[0];
 
   size = n_bytes + sizeof(int) * 4;
   param = reinterpret_cast<int*>(args);
@@ -82,9 +86,9 @@ void filter_opencl(AVFrame* frame) {
   param[1] = height;
   param[2] = 90;
   param[3] = 40;
-  memcpy(data, frame->data[0], n_bytes);
   job = node.GetJob(JOB_CARTOONIFY);
-  task = node.Start(MTAPI_TASK_ID_NONE, job.GetInternal(), args, size, res, n_bytes, MTAPI_DEFAULT_TASK_ATTRIBUTES);
+  task = node.Start(MTAPI_TASK_ID_NONE, job.GetInternal(), args, size,
+    res, n_bytes, MTAPI_DEFAULT_TASK_ATTRIBUTES);
   task.Wait();
 
   delete[] args;
