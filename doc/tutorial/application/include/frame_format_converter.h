@@ -1,18 +1,12 @@
 #ifndef _FRAME_FORMAT_CONVERTER_H
 #define _FRAME_FORMAT_CONVERTER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <embb/base/base.h>
 
-#include <libavcodec/avcodec.h>
-#include <libswscale/swscale.h>
-
-#ifdef __cplusplus
-}
-#endif
-
-#include "embb/base/base.h"
+struct AVFrame;
+struct AVCodecContext;
+struct SwsContext;
+enum AVPixelFormat;
 
 enum ConversionType {
   TO_RGB,
@@ -48,9 +42,9 @@ public:
   void convertFormat(AVFrame** input, AVFrame** output, ConversionType ct);
 
 private:
-  struct SwsContext* toRGBCtx;
-  struct SwsContext* toOriginalFormatCtx;
-  enum AVPixelFormat originalFormat;
+  SwsContext* toRGBCtx;
+  SwsContext* toOriginalFormatCtx;
+  AVPixelFormat originalFormat;
   embb::base::Mutex mutex;
 
 };

@@ -1,22 +1,9 @@
 #include "output_video_builder.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdexcept>
+#include <iostream>
 
-#include <libavcodec/avcodec.h>
-#include <libavutil/avassert.h>
-#include <libavutil/channel_layout.h>
-#include <libavutil/opt.h>
-#include <libavutil/mathematics.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libswresample/swresample.h>
-
-
-#ifdef __cplusplus
-}
-#endif
+#include "ffmpeg.h"
 
 
 OutputVideoBuilder::OutputVideoBuilder(char* name, AVCodecContext* inputCtx) :

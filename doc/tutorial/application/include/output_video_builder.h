@@ -1,16 +1,13 @@
 #ifndef _OUTPUT_VIDEO_BUILDER_H_
 #define _OUTPUT_VIDEO_BUILDER_H_
 
-#include <iostream>
-#include <exception>
-
-#include "input_video_handler.h"
-
 struct AVCodecContext;
+struct AVFormatContext;
 struct AVPacket;
 struct AVRational;
 struct AVCodec;
 struct AVStream;
+struct AVFrame;
 
 // #define LOG_MODE
 

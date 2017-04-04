@@ -1,5 +1,8 @@
 #include "frame_format_converter.h"
 
+#include "ffmpeg.h"
+
+
 FrameFormatConverter::FrameFormatConverter()
   : toRGBCtx(nullptr)
   , toOriginalFormatCtx(nullptr) {

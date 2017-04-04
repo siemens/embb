@@ -1,8 +1,6 @@
 #ifndef _FILTER_H_
 #define _FILTER_H_
 
-#include <cstdint>
-
 struct AVFrame;
 
 namespace filters {

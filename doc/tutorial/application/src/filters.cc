@@ -1,22 +1,14 @@
 #include "filters.h"
 
 #include "int_iterator.h"
+#include "ffmpeg.h"
 
 #include <exception>
 #include <cmath>
 #include <cstdlib>
+#include <cstdint>
 #include <algorithm>
 #include <embb/algorithms/algorithms.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <libavformat/avformat.h>
-
-#ifdef __cplusplus
-}
-#endif
 
 namespace {
 

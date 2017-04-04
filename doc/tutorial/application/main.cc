@@ -1,16 +1,17 @@
 #include <iostream>
 #include <exception>
-#include <ctime>
+#include <chrono>
 
 #include "input_video_handler.h"
 #include "output_video_builder.h"
 #include "frame_format_converter.h"
-#include "ffmpeg.h"
 #include "filters.h"
+#include "ffmpeg.h"
 
-#include <embb/dataflow/dataflow.h>
 #include <embb/base/base.h>
 #include <embb/mtapi/c/mtapi_opencl.h>
+#include <embb/dataflow/dataflow.h>
+
 
 typedef embb::dataflow::Network Network;
 
@@ -418,7 +419,7 @@ int main(int argc, char *argv[]) {
   }
   std::cout << "Reading and processing video: " << mode <<
     " mode" << std::endl;
-  clock_t start = clock();
+  auto start = std::chrono::high_resolution_clock::now();
 
   switch (parallel) {
   case 0:
@@ -439,8 +440,10 @@ int main(int argc, char *argv[]) {
   }
 
   outputBuilder->writeVideo();
-  clock_t end = clock();
-  float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+  auto end = std::chrono::high_resolution_clock::now();
+  float seconds =
+    std::chrono::duration_cast<std::chrono::duration<float> >
+      (end - start).count();
   std::cout << "Elapsed time = " << seconds << " s" << std::endl;
 
   delete inputHandler;
