@@ -144,6 +144,15 @@ void applyFilterParallel(AVFrame* const &input_frame, AVFrame* &output_frame) {
   filter_parallel(output_frame);
 }
 
+void applyFilterOpenCL(AVFrame* const &input_frame, AVFrame* &output_frame) {
+  if (input_frame == nullptr) {
+    output_frame = nullptr;
+    return;
+  }
+  output_frame = input_frame;
+  filter_opencl(output_frame);
+}
+
 void convertToRGB(AVFrame* const &input_frame, AVFrame* &output_frame) {
   if (input_frame == nullptr) {
     output_frame = nullptr;
@@ -211,7 +220,7 @@ void process_parallel_dataflow_and_opencl() {
 
   Network::ParallelProcess<Network::Inputs<AVFrame*>,
     Network::Outputs<AVFrame*> >
-    filter(nw, embb::base::MakeFunction(applyFilter));
+    filter(nw, embb::base::MakeFunction(applyFilterOpenCL));
 
   Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(writeToFile));
 
