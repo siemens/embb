@@ -87,12 +87,20 @@ void TaskTest::TestBasic() {
     PT_EXPECT_EQ(affinity.GetInternal(), 0u);
     affinity.Set(0u, true);
     PT_EXPECT_EQ(affinity.GetInternal(), 1u);
-    affinity.Set(1u, true);
-    PT_EXPECT_EQ(affinity.GetInternal(), 3u);
+    if (node.GetCoreCount() > 1) {
+      affinity.Set(1u, true);
+      PT_EXPECT_EQ(affinity.GetInternal(), 3u);
+    }
     affinity.Set(0u, false);
-    PT_EXPECT_EQ(affinity.GetInternal(), 2u);
+    if (node.GetCoreCount() > 1) {
+      PT_EXPECT_EQ(affinity.GetInternal(), 2u);
+    } else {
+      PT_EXPECT_EQ(affinity.GetInternal(), 0u);
+    }
     PT_EXPECT_EQ(affinity.Get(0), false);
-    PT_EXPECT_EQ(affinity.Get(1), true);
+    if (node.GetCoreCount() > 1) {
+      PT_EXPECT_EQ(affinity.Get(1), true);
+    }
   }
 
   {
