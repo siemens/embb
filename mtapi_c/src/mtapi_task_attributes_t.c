@@ -49,6 +49,7 @@ void mtapi_taskattr_init(
     attributes->priority = 0;
     attributes->complete_func = MTAPI_NULL;
     attributes->user_data = MTAPI_NULL;
+    attributes->problem_size = 1;
     mtapi_affinity_init(&attributes->affinity, MTAPI_TRUE, &local_status);
   } else {
     local_status = MTAPI_ERR_PARAMETER;
@@ -101,6 +102,11 @@ void mtapi_taskattr_set(
       case MTAPI_TASK_COMPLETE_FUNCTION:
         memcpy(&attributes->complete_func, &attribute, sizeof(void*));
         local_status = MTAPI_SUCCESS;
+        break;
+
+      case MTAPI_TASK_PROBLEM_SIZE:
+        local_status = embb_mtapi_attr_set_mtapi_uint_t(
+          &attributes->problem_size, attribute, attribute_size);
         break;
 
       default:

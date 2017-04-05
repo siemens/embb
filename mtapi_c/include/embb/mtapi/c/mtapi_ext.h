@@ -42,10 +42,11 @@ extern "C" {
  *
  * Provides extensions to the standard MTAPI API.
  *
- * There is a single extension function defined here to support user defined
- * behavior of an action to allow for actions that are not implemented locally
- * in software but e.g. on a remote node in a network or on an accelerator
- * device like a GPU or FPGA.
+ * There are two extension functions defined here.
+ * One to support user defined behavior of an action to allow for actions
+ * that are not implemented locally in software but e.g. on a remote node
+ * in a network or on an accelerator device like a GPU or FPGA.
+ * Another to support specifying job attributes.
  */
 
 /**
@@ -149,25 +150,114 @@ typedef void(*mtapi_ext_plugin_action_finalize_function_t)(
  * \ingroup C_MTAPI_EXT
  */
 mtapi_action_hndl_t mtapi_ext_plugin_action_create(
-  MTAPI_IN mtapi_job_id_t job_id, /**< [in] Job id */
+  MTAPI_IN mtapi_job_id_t job_id,      /**< [in] Job id */
   MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
-                              /**< [in] Task start function */
+                                       /**< [in] Task start function */
   MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
-                              /**< [in] Task cancel function */
-  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
-                              /**< [in] Finalize action function */
+                                       /**< [in] Task cancel function */
+  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t
+    action_finalize_function,          /**< [in] Finalize action function */
   MTAPI_IN void* plugin_data,
-                              /**< [in] Pointer to plugin data */
+                                       /**< [in] Pointer to plugin data */
   MTAPI_IN void* node_local_data,
-                              /**< [in] Pointer to node local data */
+                                       /**< [in] Pointer to node local data */
   MTAPI_IN mtapi_size_t node_local_data_size,
-                              /**< [in] Size of node local data */
+                                       /**< [in] Size of node local data */
   MTAPI_IN mtapi_action_attributes_t* attributes,
-                              /**< [out] Pointer to attributes */
-  MTAPI_OUT mtapi_status_t* status/**< [out] Pointer to error code,
+                                       /**< [out] Pointer to attributes */
+  MTAPI_OUT mtapi_status_t* status     /**< [out] Pointer to error code,
                                              may be \c MTAPI_NULL */
 );
 
+/** problem size calculation callback */
+typedef mtapi_uint_t(*mtapi_ext_problem_size_function_t)(
+  MTAPI_IN mtapi_task_hndl_t task);
+
+/** task attributes */
+enum mtapi_ext_job_attributes_enum {
+  MTAPI_JOB_PROBLEM_SIZE_FUNCTION,     /**< function to calculate the
+                                            relative problem size of tasks
+                                            started on this job */
+  MTAPI_JOB_DEFAULT_PROBLEM_SIZE       /**< integer indicating the default
+                                            relative problem size of tasks
+                                            started on this job */
+};
+/** size of the \a MTAPI_TASK_PROBLEM_SIZE attribute */
+#define MTAPI_JOB_DEFAULT_PROBLEM_SIZE_SIZE sizeof(mtapi_uint_t)
+
+/**
+ * Task attributes.
+ * \ingroup TASKS
+ */
+struct mtapi_ext_job_attributes_struct {
+  mtapi_ext_problem_size_function_t
+    problem_size_func;                 /**< stores
+                                       MTAPI_JOB_PROBLEM_SIZE_FUNCTION */
+  mtapi_uint_t default_problem_size;   /**< stores
+                                       MTAPI_JOB_DEFAULT_PROBLEM_SIZE_SIZE */
+};
+
+/**
+ * Job attributes type.
+ * \memberof mtapi_ext_job_attributes_struct
+ */
+typedef struct mtapi_ext_job_attributes_struct mtapi_ext_job_attributes_t;
+
+/**
+ * This function changes the value of the attribute that corresponds to the
+ * given \c attribute_num for this job.
+ *
+ * \c attribute must point to the attribute value, and \c attribute_size must
+ * be set to the exact size of the attribute value.
+ *
+ * MTAPI-defined action attributes:
+ * <table>
+ *   <tr>
+ *     <th>Attribute num</th>
+ *     <th>Description</th>
+ *     <th>Data Type</th>
+ *     <th>Default</th>
+ *   </tr>
+ *   <tr>
+ *     <td>MTAPI_JOB_PROBLEM_SIZE_FUNCTION</td>
+ *     <td>Function to calculate the relative problem size of tasks started on
+ *         this job.</td>
+ *     <td>mtapi_ext_problem_size_function_t</td>
+ *     <td>MTAPI_NULL</td>
+ *   </tr>
+ *   <tr>
+ *     <td>MTAPI_JOB_DEFAULT_PROBLEM_SIZE</td>
+ *     <td>Indicates the default relative problem size of tasks tarted on this
+ *         job</td>
+ *     <td>mtapi_uint_t</td>
+ *     <td>1</td>
+ *   </tr>
+ * </table>
+ *
+ * On success, \c *status is set to \c MTAPI_SUCCESS. On error, \c *status is
+ * set to the appropriate error defined below.
+ * Error code                  | Description
+ * --------------------------- | ----------------------------------------------
+ * \c MTAPI_ERR_PARAMETER      | Invalid attribute parameter.
+ * \c MTAPI_ERR_JOB_INVALID    | Argument is not a valid job handle.
+ * \c MTAPI_ERR_ATTR_NUM       | Unknown attribute number.
+ * \c MTAPI_ERR_ATTR_SIZE      | Incorrect attribute size.
+ * \c MTAPI_ERR_NODE_NOTINIT   | The calling node is not initialized.
+ *
+ * \notthreadsafe
+ * \ingroup JOBS
+ */
+void mtapi_ext_job_set_attribute(
+  MTAPI_IN mtapi_job_hndl_t job, /**< [in] Action handle */
+  MTAPI_IN mtapi_uint_t attribute_num, /**< [in] Attribute id */
+  MTAPI_IN void* attribute,            /**< [in] Pointer to attribute value */
+  MTAPI_IN mtapi_size_t attribute_size,
+                                       /**< [in] Size of attribute value. may
+                                            be 0, attribute is interpreted as
+                                            value in that case */
+  MTAPI_OUT mtapi_status_t* status     /**< [out] Pointer to error code,
+                                            may be \c MTAPI_NULL */
+  );
 
 #ifdef __cplusplus
 }
