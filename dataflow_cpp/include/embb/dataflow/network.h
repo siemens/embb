@@ -1187,7 +1187,6 @@ class Network : public internal::ClockListener {
     int clock = 0;
     while (clock >= 0) {
       const int idx = clock % slices_;
-      while (sink_counter_[idx] > 0) embb::base::Thread::CurrentYield();
       sched_->WaitForSlice(idx);
       if (!SpawnClock(clock))
         break;
@@ -1198,7 +1197,6 @@ class Network : public internal::ClockListener {
     if (ii < 0) ii = 0;
     for (; ii < clock; ii++) {
       const int idx = ii % slices_;
-      while (sink_counter_[idx] > 0) embb::base::Thread::CurrentYield();
       sched_->WaitForSlice(idx);
     }
   }
