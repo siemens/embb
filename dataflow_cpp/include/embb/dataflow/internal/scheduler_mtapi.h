@@ -102,17 +102,16 @@ class SchedulerMTAPI : public Scheduler {
     const int idx = action.GetClock() % slices_;
     embb::mtapi::TaskAttributes task_attr;
     task_attr.SetPolicy(policy);
-    group_[idx].Start(job_, &action, static_cast<void*>(NULL),
-      task_attr);
+    group_[idx].Start(job_, &action, static_cast<void*>(NULL), task_attr);
   }
   virtual void Run(
     Action & action,
     embb::mtapi::ExecutionPolicy const & policy) {
-    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    const int idx = action.GetClock() % slices_;
     embb::mtapi::TaskAttributes task_attr;
     task_attr.SetPolicy(policy);
-    embb::mtapi::Task task = node.Start(job_, &action, static_cast<void*>(NULL),
-      task_attr);
+    embb::mtapi::Task task =
+      group_[idx].Start(job_, &action, static_cast<void*>(NULL), task_attr);
     task.Wait();
   }
   virtual void Enqueue(
