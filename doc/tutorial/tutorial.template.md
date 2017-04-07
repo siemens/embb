@@ -2,39 +2,39 @@
 
 ## Contents
 
-[**Introduction**](#cha_introduction)  
-&nbsp;&nbsp;[Overview](#sec_introduction_overview)  
-&nbsp;&nbsp;[Outline](#sec_introduction_outline)  
-&nbsp;&nbsp;[Functions, Functors, and Lambdas](#sec_introduction_function_objects)  
+[**Introduction**](#cha_introduction)
+&nbsp;&nbsp;[Overview](#sec_introduction_overview)
+&nbsp;&nbsp;[Outline](#sec_introduction_outline)
+&nbsp;&nbsp;[Functions, Functors, and Lambdas](#sec_introduction_function_objects)
 
-[**Algorithms**](#cha_algorithms)  
-&nbsp;&nbsp;[Function Invocation](#sec_algorithms_invoke)  
-&nbsp;&nbsp;[Sorting](#sec_algorithms_sorting)  
-&nbsp;&nbsp;[Counting](#sec_algorithms_counting)  
-&nbsp;&nbsp;[Foreach Loops](#sec_algorithms_foreach)  
-&nbsp;&nbsp;[Reductions](#sec_algorithms_reductions)  
-&nbsp;&nbsp;[Prefix Computations](#sec_algorithms_prefix)  
+[**Algorithms**](#cha_algorithms)
+&nbsp;&nbsp;[Function Invocation](#sec_algorithms_invoke)
+&nbsp;&nbsp;[Sorting](#sec_algorithms_sorting)
+&nbsp;&nbsp;[Counting](#sec_algorithms_counting)
+&nbsp;&nbsp;[Foreach Loops](#sec_algorithms_foreach)
+&nbsp;&nbsp;[Reductions](#sec_algorithms_reductions)
+&nbsp;&nbsp;[Prefix Computations](#sec_algorithms_prefix)
 
-[**Dataflow**](#cha_dataflow)  
-&nbsp;&nbsp;[Linear Pipelines](#sec_dataflow_linear_pipelines)  
-&nbsp;&nbsp;[Nonlinear Pipelines](#sec_dataflow_nonlinear_pipelines)  
+[**Dataflow**](#cha_dataflow)
+&nbsp;&nbsp;[Linear Pipelines](#sec_dataflow_linear_pipelines)
+&nbsp;&nbsp;[Nonlinear Pipelines](#sec_dataflow_nonlinear_pipelines)
 
-[**Containers**](#cha_containers)  
-&nbsp;&nbsp;[Object Pools](#sec_containers_object_pools)  
-&nbsp;&nbsp;[Stacks](#sec_containers_stacks)  
-&nbsp;&nbsp;[Queues](#sec_containers_queues)  
+[**Containers**](#cha_containers)
+&nbsp;&nbsp;[Object Pools](#sec_containers_object_pools)
+&nbsp;&nbsp;[Stacks](#sec_containers_stacks)
+&nbsp;&nbsp;[Queues](#sec_containers_queues)
 
-[**MTAPI**](#cha_mtapi)  
-&nbsp;&nbsp;[Foundations](#sec_mtapi_foundations)  
-&nbsp;&nbsp;[C Interface](#sec_mtapi_c_interface)  
-&nbsp;&nbsp;[C++ Interface](#sec_mtapi_cpp_interface)  
-&nbsp;&nbsp;[Plugins](#sec_mtapi_plugins)  
+[**MTAPI**](#cha_mtapi)
+&nbsp;&nbsp;[Foundations](#sec_mtapi_foundations)
+&nbsp;&nbsp;[C Interface](#sec_mtapi_c_interface)
+&nbsp;&nbsp;[C++ Interface](#sec_mtapi_cpp_interface)
+&nbsp;&nbsp;[Plugins](#sec_mtapi_plugins)
 
-[**Heterogeneous Systems**](#cha_heterogeneous_systems)  
-&nbsp;&nbsp;[Algorithms](#sec_algorithms_heterogeneous_systems)  
-&nbsp;&nbsp;[Dataflow](#sec_dataflow_heterogeneous_systems)  
+[**Heterogeneous Systems**](#cha_heterogeneous_systems)
+&nbsp;&nbsp;[Algorithms](#sec_algorithms_heterogeneous_systems)
+&nbsp;&nbsp;[Dataflow](#sec_dataflow_heterogeneous_systems)
 
-[**Bibliography**](#cha_bibliography)  
+[**Bibliography**](#cha_bibliography)
 
 
 ## <a name="cha_introduction"></a>Introduction
@@ -54,21 +54,21 @@ Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent
 
 The purpose of this document is to introduce the basic concepts of EMB² and to demonstrate typical application scenarios by means of simple examples. The tutorial is not intended to be complete in the sense that it describes every feature of EMB². For a detailed description of the API, please see the reference manual.
 
-In the next subsection, we briefly describe the concept of function objects which is essential for using EMB². We then describe our implementation of various parallel algorithms in Chapter [Algorithms](#cha_algorithms) and a dataflow framework in Chapter [Dataflow](#cha_dataflow). In Chapter [MTAPI](#cha_mtapi), we present the task management features of EMB². Finally, we show how MTAPI features can be used together with Algorithms and Dataflow in Chapter [Heterogeneous Systems](#cha_heterogeneous_systems) 
+In the next subsection, we briefly describe the concept of [function objects](#sec_introduction_function_objects) which is essential for using EMB². We then present various parallel [algorithms](#cha_algorithms) and the [dataflow](#cha_dataflow) framework. After that, we explain the usage of [MTAPI](#cha_mtapi) and how to leverage [heterogeneous systems](#cha_heterogeneous_systems).
 
 ### <a name="sec_introduction_function_objects"></a>Functions, Functors, and Lambdas
 
-Throughout this tutorial, we will encounter C++ types which model the C++ concept[<sup>1</sup>](#footnote_1) `FunctionObject`. The function object concept comprises function pointer, functor, and lambda types that are callable with suitable arguments by the function call syntax. Given a function object `f` and arguments `arg1`, `arg2`, `...`, the expression `f(arg1, arg2, ...)` is a valid function invocation. If you are already familiar with function objects, you can safely skip the rest of this section. Otherwise, it might be worth reading it to get an idea of what is meant when talking about a function objects.
+Throughout this tutorial, we will encounter C++ types which model the C++ concept `FunctionObject`. The function object concept comprises function pointer, functor, and lambda types that are callable with suitable arguments by the function call syntax. Given a function object `f` and arguments `arg1`, `arg2`, `...`, the expression `f(arg1, arg2, ...)` is a valid function invocation. If you are already familiar with function objects, you can safely skip the rest of this section. Otherwise, it might be worth reading it to get an idea of what is meant when talking about a function objects.
 
-Consider, for example, the transformation of an iterable range of data values. Specifically, consider a vector of integers initialized as follows: 
+Consider, for example, the transformation of an iterable range of data values. Specifically, consider a vector of integers initialized as follows:
 
     \\\inputlistingsnippet{../examples/stl_for_each/stl_for_each.cc:setup}
 
-The range consists of the values (`1, 2, 3, 4, 5`) and we now want to double each of them. We could simply get an iterator from the container holding the range, iterate over every element, and multiply it by two:
+The range consists of the values `(1, 2, 3, 4, 5)`. To double each value, we could simply iterate over the vector as follows:
 
     \\\inputlistingsnippet{../examples/stl_for_each/stl_for_each.cc:manual}
 
-The range then contains the values (`2, 4, 6, 8, 10`). In order to demonstrate the concept of function objects, we are now going to use the `std::for_each` function defined in the `algorithm` header of the C++ Standard Library. This function accepts as argument a `UnaryFunction`, that is, a function object which takes only one argument. In case of `std::for_each`, the argument has to have the same type as the elements in the range, as these are passed to the unary function. In our example, the unary function’s task is to double the incoming value. We could define a function for that purpose:
+The range then contains the values `(2, 4, 6, 8, 10)`. In order to demonstrate the concept of function objects, we are now going to use the `std::for_each` function defined in the `algorithm` header of the C++ Standard Library. This function accepts as argument a `UnaryFunction`, that is, a function object which takes only one argument. In case of `std::for_each`, the argument has to have the same type as the elements in the range, as these are passed to the unary function. In our example, the unary function’s task is to double the passed value. We could define a function for that purpose:
 
     \\\inputlistingsnippet{../examples/stl_for_each/stl_for_each.cc:function_define}
 
@@ -84,31 +84,21 @@ and to pass an instance of this class to `std::for_each`:
 
     \\\inputlistingsnippet{../examples/stl_for_each/stl_for_each.cc:functor_run}
 
-Functors as well as the function pointers separate the actual implementation from its place of usage which can be useful if the functionality is needed at different places. In many cases, however, it is advantageous to have the implementation of the function object at the same place as it is used. C++11 provides lambda expressions for that purpose which make our example more concise:
+Functors as well as function pointers separate the actual implementation from its usage which can be helpful if the functionality is needed at different places. In many cases, however, it is easier to have the implementation of the function object at the same place as it is used. C++11 provides lambda expressions for that purpose which make our example more concise:
 
     \\\inputlistingsnippet{../examples/stl_for_each/stl_for_each.cc:lambda}
 
-Of course, this example is too simple to really benefit from function objects and the algorithms contained in the C++ Standard Library. However, in combination with the parallelization features provided by EMB², function objects are a helpful mechanism to boost productivity. Within this document, whenever a function object or one of its subtypes is required, one can use a function pointer, a functor, or a lambda. For simplicity, we will restrict ourselves to lambdas in subsequent examples, as they are most suitable for this kind of tutorial.
-
-<sub>_<a name="footnote_1"></a><sup>1</sup> In this context, the term_ concept _refers to a named set of requirements on a type._</sub>
+Of course, this example is too simple to really benefit from function objects and the algorithms contained in the C++ Standard Library. However, in combination with the parallelization features provided by EMB², function objects are very useful. Within this document, whenever a function object or one of its subtypes is required, one can use a function pointer, a functor, or a lambda. For simplicity, we will restrict ourselves to lambdas in subsequent examples, as they are most suitable for this tutorial.
 
 ## <a name="cha_algorithms"></a>Algorithms
 
-The *Algorithms* building block of EMB² provides high-level constructs for typical parallelization tasks. They are aligned to the functions provided by the C++ Standard Library, but contain additional functionality typical for embedded systems such as task priorities. Although the algorithms can be used in a black-box way, it is good to have a basic understanding of their implementation: The algorithms split computations to be performed in parallel into tasks which are executed by the MTAPI task scheduler (cf. Chapter [MTAPI](#cha_mtapi)). For that purpose, the tasks are stored in queues and mapped to a fixed number of worker threads at runtime. Since MTAPI allocates the necessary data structures during initialization, the maximum number of tasks in flight is fixed. In case one of the algorithms exceeds this limit, an exception is thrown.
+The *Algorithms* building block of EMB² provides high-level constructs for typical parallelization tasks. They are similar to the functions provided by the C++ Standard Library, but contain additional functionality typical for embedded systems such as task priorities. Although the algorithms can be used in a black-box way, it is good to have a basic understanding of their implementation: The algorithms split computations to be performed in parallel into tasks which are executed by the MTAPI task scheduler (see chapter on [MTAPI](#cha_mtapi)). For that purpose, the tasks are stored in queues and mapped to a fixed number of worker threads at runtime.
 
-_**Note:** The_ Algorithms _building block is implemented using the MTAPI C++ interface. By calling `embb::mtapi::Node::Initialize` task and other limits can be customized. Explicit initialization also eliminates unexpected delays when measuring performance. See Section [MTAPI C++ Interface](#sec_mtapi_cpp_interface) for details._
-
-In the following, we look at parallel function invocation
-(Section [Function Invokation](#sec_algorithms_invoke)), sorting
-(Section [Sorting](#sec_algorithms_sorting)), counting
-(Section [Counting](#sec_algorithms_counting)), foreach loops
-(Section [Foreach Loops](#sec_algorithms_foreach)), reductions
-(Section [Reductions](#sec_algorithms_reductions)), and prefix computations
-(Section [Prefix Computations](#sec_algorithms_prefix)).
+_**Note:** The algorithms are implemented using the MTAPI C++ interface. Since MTAPI allocates the necessary data structures during initialization, the maximum number of tasks in flight is fixed. In case one of the algorithms exceeds this limit, an exception is thrown. By calling `embb::mtapi::Node::Initialize`, the maximum number of tasks and other limits can be customized. Explicit initialization also eliminates unexpected delays when measuring performance. See the section on the [MTAPI C++ Interface](#sec_mtapi_cpp_interface) for details._
 
 ### <a name="sec_algorithms_invoke"></a>Function Invocation
 
-Let us start with the parallel execution of several work packages encapsulated in functions. Suppose that the following functions operate on different data sets, and thus are independent of each other:
+Let us start with the parallel execution of several work packages encapsulated in functions. Suppose that the following functions operate on different data sets and are thus independent of each other:
 
     \\\inputlistingsnippet{../examples/algorithms/invoke.cc:packages}
 
@@ -118,7 +108,7 @@ The functions can be executed in parallel using the `ParallelInvoke` construct p
 
 Note that `ParallelInvoke` waits until all its arguments have finished execution.
 
-Next, let us consider a more elaborate example. The following piece of code shows a serial quick sort algorithm which we want to parallelize (do not care about the details of the `Partition` function for the moment):
+Next, let us consider a more elaborate example. The following piece of code shows a sequential implementation of the quicksort algorithm, which we want to parallelize (do not care about the details of the `Partition` function for the moment):
 
     \\\inputlistingsnippet{../examples/algorithms/invoke.cc:quick_sort}
 
@@ -126,15 +116,15 @@ A straightforward approach to parallelize this algorithm is to execute the recur
 
     \\\inputlistingsnippet{../examples/algorithms/invoke.cc:parallel_quick_sort}
 
-The lambdas capture the `first`, `mid`, and `last` pointers to the range to be sorted and forward them to the recursive calls of quick sort. These are executed in parallel, where `Invoke` does not return before both have finished execution. The above implementation of parallel quick sort is of course not yet optimal. In particular, the creation of new tasks should be stopped when a certain lower bound on the size of the subranges has been reached. The subranges can then be sorted sequentially in order to reduce the overhead for task creation and management. Fortunately, EMB² already provides solutions for parallel sorting, which will be covered in the following section.
+The lambdas capture the `first`, `mid`, and `last` pointers to the range to be sorted and forward them to the recursive calls of quicksort. These are executed in parallel, where `Invoke` does not return before both have finished execution. The above implementation of parallel quicksort is not yet optimal. In particular, the creation of new tasks should be stopped when a certain lower bound on the size of the subranges has been reached. The subranges can then be sorted sequentially in order to reduce the overhead for task creation and management. Fortunately, EMB² already provides solutions for parallel sorting, which will be covered in the following section.
 
 ### <a name="sec_algorithms_sorting"></a>Sorting
 
-For systems with constraints on memory consumption, the quick sort algorithm provided by is usually the best choice, since it works in-place which means that it does not require additional memory. Considering real-time systems, however, its worst-case runtime of _O(N<sup>2</sup>)_, where _N_ is the number of elements to be sorted, can be a problem. For this reason, EMB² also provides a parallel merge sort algorithm. Merge sort does not work in-place, but has a predictable runtime complexity of _ϴ(N log N)_. Assume we want to sort a vector of integers:
+For systems with constraints on memory consumption, the quicksort implementation provided by EMB² is usually the best choice, since it works in-place, which means that it does not require additional memory. Considering real-time systems, however, its worst-case runtime of _O(n<sup>2</sup>)_, where _n_ is the number of elements to be sorted, can be a problem. For this reason, EMB² also provides a parallel merge sort algorithm. Merge sort does not work in-place, but has a predictable runtime complexity of _ϴ(n log n)_. Assume we want to sort a vector of integers:
 
     \\\inputlistingsnippet{../examples/algorithms/sorting.cc:range_define}
 
-Using quick sort, we simply write:
+Using quicksort, we simply write:
 
     \\\inputlistingsnippet{../examples/algorithms/sorting.cc:quick_sort}
 
@@ -166,15 +156,15 @@ In case the comparison operation is not equality, we can employ the `CountIf` fu
 
 ### <a name="sec_algorithms_foreach"></a>Foreach Loops
 
-A frequently encountered task in parallel programming is to apply some operation on a range of values, as illustrated in the example of Section [Function Objects](#sec_introduction_function_objects). In principle, one could apply the operation to all elements in parallel provided that there are no data dependencies. However, this results in unnecessary overhead if the number of elements is greater than the number of available processor cores _p_. A better solution is to partition the range into _p_ blocks and to process the elements of a block sequentially. With the `ForEach` construct provided by EMB², users do not have to care about the partitioning, since this is done automatically. Similar to the Standard Library’s `for_each` function, it is sufficient to pass the operation in form of a function object. The following piece of code shows how to implement the example of Section [Function Objects](#sec_introduction_function_objects) using EMB²:
+A frequently encountered task in parallel programming is to apply some operation to a range of values, as illustrated previously. In principle, one could apply the operation to all elements in parallel provided that there are no data dependencies. However, this results in unnecessary overhead if the number of elements is greater than the number of available processor cores _p_. A better solution is to partition the range into _p_ blocks and to process the elements of a block sequentially. With the `ForEach` construct provided by EMB², users do not have to care about the partitioning, since this is done automatically. Similar to the Standard Library’s `for_each` function, it is sufficient to pass the operation in form of a function object. The following piece of code shows how to double the elements of a range in parallel:
 
     \\\inputlistingsnippet{../examples/algorithms/for_each.cc:doubling}
 
-In the above code snippet, the results of the computation overwrite the input. If the input has to be left unchanged, the results must be written to a separate output range. Thus, the operation requires two ranges. EMB² supports such scenarios by the `ZipIterator`, which wraps two iterators into one. Consider the following revised example for doubling the elements of a vector:
+In the above code snippet, the results of the computation overwrite the input. If the input has to be left unchanged, the results must be written to a separate output range. Thus, the operation requires two ranges. EMB² supports such scenarios by the `ZipIterator`, which wraps two iterators into one. Consider the following revised example:
 
     \\\inputlistingsnippet{../examples/algorithms/for_each.cc:zip_setup}
 
-Using the `Zip` function as convenient way to create a zip iterator, the doubling can be performed as follows:
+Using the `Zip` function as a convenient way to create a zip iterator, the doubling of elements can be performed as follows:
 
     \\\inputlistingsnippet{../examples/algorithms/for_each.cc:zip_doubling}
 
@@ -200,7 +190,7 @@ Next, let us consider the parallel computation of a dot product. Given two input
 
     \\\inputlistingsnippet{../examples/algorithms/reduce.cc:second_range_init}
 
-The reduction consists of two steps: First, the input ranges are transformed and then, the reduction is performed on the transformed range. For that purpose, the `Reduce` function allows to specify a transformation function object. By default, this is the identity functor which does not modify the input range. To implement the dot product, we can use the `Zip` function (see Section [Foreach Loops](#sec_algorithms_foreach)) and a lambda function for computing the transformed range:
+The reduction consists of two steps: First, the input ranges are transformed and then, the reduction is performed on the transformed range. For that purpose, the `Reduce` function allows to specify a transformation function object. By default, this is the identity functor which does not modify the input range. To implement the dot product, we can use the `Zip` function and a lambda function for computing the transformed range:
 
     \\\inputlistingsnippet{../examples/algorithms/reduce.cc:dot_product}
 
@@ -208,14 +198,14 @@ The reduction consists of two steps: First, the input ranges are transformed and
 
 Prefix computations (or scans) can be viewed as a generalization of reductions. They transform an input range _x<sub>i</sub> ϵ X_ into an output range _y<sub>i</sub> ϵ Y_ with _i=1,...,n_ such that
 
-&nbsp;&nbsp;_y<sub>0</sub> = id · x<sub>0</sub>_  
-&nbsp;&nbsp;_y<sub>1</sub> = y<sub>0</sub> · x<sub>1</sub>_  
-&nbsp;&nbsp;&nbsp;&nbsp;⁞  
-&nbsp;&nbsp;_y<sub>i</sub> = y<sub>i-1</sub> · x<sub>i</sub>_  
-&nbsp;&nbsp;&nbsp;&nbsp;⁞  
-&nbsp;&nbsp;_y<sub>n</sub> = y<sub>n-1</sub> · x<sub>n</sub>_  
+&nbsp;&nbsp;_y<sub>0</sub> = id · x<sub>0</sub>_
+&nbsp;&nbsp;_y<sub>1</sub> = y<sub>0</sub> · x<sub>1</sub>_
+&nbsp;&nbsp;&nbsp;&nbsp;⁞
+&nbsp;&nbsp;_y<sub>i</sub> = y<sub>i-1</sub> · x<sub>i</sub>_
+&nbsp;&nbsp;&nbsp;&nbsp;⁞
+&nbsp;&nbsp;_y<sub>n</sub> = y<sub>n-1</sub> · x<sub>n</sub>_,
 
-_id_ is the identity (neutral element) with respect to the operation _·: X_ <sup><sub>x</sub></sup> _X → Y_. As an example, consider the following range:
+where _id_ is the identity (neutral element) with respect to the operation _·: X_ <sup><sub>x</sub></sup> _X → Y_. As an example, consider the following range:
 
     \\\inputlistingsnippet{../examples/algorithms/scan.cc:setup}
 
@@ -227,7 +217,7 @@ Note the dependency on loop iteration _i-1_ to compute the result in iteration _
 
     \\\inputlistingsnippet{../examples/algorithms/scan.cc:prefix_sum}
 
-As in the case of reductions, the neutral element has to be given explicitly. Also, a transformation function can be passed as additional argument to `Scan`. The elements of the input range are then transformed before given to the prefix operation.
+As in the case of reductions, the neutral element has to be given explicitly. Also, a transformation function can be passed as additional argument to `Scan`. The elements of the input range are then transformed before passed to the prefix operation.
 
 
 ## <a name="cha_dataflow"></a>Dataflow
@@ -661,11 +651,11 @@ MTAPI CPP provides a simpler version of the MTAPI interface for SMP actions. The
       TaskContext & task_context
     ) {
       // something useful
-    } 
+    }
 
 The action function does not need to be registered with a job. Instead a preregistered job is used that expects a `embb::base::Function<void, embb::mtapi::TaskContext &>` object. Therefore a task can be scheduled directly using only the function above:
 
-    embb::mtapi::Task task = node.Start(simpleActionFunction); 
+    embb::mtapi::Task task = node.Start(simpleActionFunction);
 
 ### <a name="sec_mtapi_plugins"></a>Plugins
 
@@ -810,7 +800,7 @@ Now the plugin action can be registered with the `CUDA_JOB`:
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda.cc:mtapi_cuda_c_action_create}
 
 The precompiled kernel binary and the name of the kernel to use need to be specified while creating the action. The kernel and node local data provided are transferred to accelerator memory. The local work size is the number of threads that will share CUDA local memory, in this case 32. The element size instructs the CUDA plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The CUDA plugin will launch `result_buffer_size/element_size` CUDA threads to calculate the result.
-	
+
 Now the `CUDA_JOB` can be used like a normal MTAPI job to start tasks.
 
 After all work is done, the plugin needs to be finalized. This will free all memory on the accelerator and delete the corresponding CUDA context:
@@ -1000,7 +990,7 @@ Finally the calculation can commence:
 
 #### Accumulate
 
-The sink is supposed to add up all incoming values. It returns no results and expects a value of type `int` wich is packed into a struct again: 
+The sink is supposed to add up all incoming values. It returns no results and expects a value of type `int` wich is packed into a struct again:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:input_struct_int}
 
@@ -1026,7 +1016,7 @@ Then, the job handles are obtained:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:get_jobs}
 
-After that the network, source, sink and process can be defined: 
+After that the network, source, sink and process can be defined:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:define_net}
 
