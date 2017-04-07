@@ -51,7 +51,7 @@ endif()
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
         DESTINATION include FILES_MATCHING PATTERN "*.h")
-install(TARGETS embb_mtapi_network_c DESTINATION lib)
+install(TARGETS embb_mtapi_network_c EXPORT EMBB-Targets DESTINATION lib)
 if (MSVC)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/embb_mtapi_network_c.pdb
           DESTINATION lib

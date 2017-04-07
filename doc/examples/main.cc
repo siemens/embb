@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <embb/base/c/thread.h>
+#include <embb/mtapi/mtapi.h>
 
 void RunMTAPI_C();
 void RunMTAPI_C_Plugin();
@@ -87,6 +88,8 @@ int main() {
   std::cout << "RunMTAPI_CPP() ..." << std::endl;
   RunMTAPI_CPP();
   std::cout << "RunMTAPI_CPP() ... done" << std::endl;
+
+  embb::mtapi::Node::Initialize(1, 1);
 
   std::cout << "RunDataflowLinear() ..." << std::endl;
   RunDataflowLinear();

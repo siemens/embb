@@ -49,7 +49,7 @@ class In {
  public:
   typedef Signal<Type> SignalType;
 
-  In() : values_(NULL), connected_(false), slices_(0) {}
+  In() : values_(NULL), connected_(false), slices_(0), listener_(NULL) {}
 
   ~In() {
     if (NULL != values_) {
@@ -107,9 +107,9 @@ class In {
 
  private:
   SignalType * values_;
-  ClockListener * listener_;
   bool connected_;
   int slices_;
+  ClockListener * listener_;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
   embb::base::Spinlock lock_;
   std::vector<SignalType> history_;

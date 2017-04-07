@@ -156,7 +156,7 @@ int embb_duration_as_nanoseconds(const embb_duration_t* duration,
   if (duration == NULL || nanoseconds == NULL) {
     return EMBB_ERROR;
   }
-  if (duration->seconds*1000000000 + duration->nanoseconds > ULLONG_MAX) {
+  if (duration->seconds*1000000000.0 + duration->nanoseconds > ULLONG_MAX) {
     return EMBB_OVERFLOW;
   }
   *nanoseconds = duration->seconds*1000000000 + duration->nanoseconds;
@@ -171,7 +171,7 @@ int embb_duration_as_microseconds(const embb_duration_t* duration,
   if (duration->nanoseconds % 1000 > 0) {
     return EMBB_UNDERFLOW;
   }
-  if (duration->seconds*1000000 + duration->nanoseconds/1000 > ULLONG_MAX) {
+  if (duration->seconds*1000000.0 + duration->nanoseconds/1000 > ULLONG_MAX) {
     return EMBB_OVERFLOW;
   }
   *microseconds = duration->seconds*1000000 + duration->nanoseconds / 1000;
@@ -186,7 +186,7 @@ int embb_duration_as_milliseconds(const embb_duration_t* duration,
   if (duration->nanoseconds % 1000000 > 0) {
     return EMBB_UNDERFLOW;
   }
-  if (duration->seconds*1000 + duration->nanoseconds/1000000 > ULLONG_MAX) {
+  if (duration->seconds*1000.0 + duration->nanoseconds/1000000 > ULLONG_MAX) {
     return EMBB_OVERFLOW;
   }
   *milliseconds = duration->seconds*1000 + duration->nanoseconds / 1000000;
@@ -200,9 +200,6 @@ int embb_duration_as_seconds(const embb_duration_t* duration,
   }
   if (duration->nanoseconds % 1000000000 > 0) {
     return EMBB_UNDERFLOW;
-  }
-  if (duration->seconds > ULLONG_MAX) {
-    return EMBB_OVERFLOW;
   }
   *seconds = duration->seconds;
   return EMBB_SUCCESS;

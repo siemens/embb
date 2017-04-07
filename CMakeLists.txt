@@ -30,8 +30,6 @@ set (EMBB_BASE_VERSION_MAJOR 0)
 set (EMBB_BASE_VERSION_MINOR 5)
 set (EMBB_BASE_VERSION_PATCH 0)
 
-include(FindCUDA)
-
 # Fix compilation for CMake versions >= 3.1
 #
 # New Policy 0054:
@@ -85,12 +83,25 @@ option(INSTALL_DOCS "Specify whether Doxygen docs should be installed" ON)
 option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors" OFF)
 option(USE_AUTOMATIC_INITIALIZATION "Specify whether the MTAPI C++ interface, algorithms and dataflow should automatically intialize the MTAPI node if no explicit initialization is present" ON)
 option(BUILD_OPENCL_PLUGIN "Specify whether the MTAPI OpenCL plugin should be built" OFF)
+option(BUILD_CUDA_PLUGIN "Specify whether the MTAPI CUDA plugin should be built" OFF)
 option(THREADING_ANALYSIS_MODE "Replaces lock-free synchronization constructs by mutex-based implementations to support threading analysis tools" OFF)
+option(BUILD_SHARED_LIBS "Specify whether shared libs should be built" OFF)
+
+if (BUILD_CUDA_PLUGIN STREQUAL ON)
+  include(FindCUDA)
+endif()
 
 ## LOCAL INSTALLATION OF SUBPROJECT BINARIES
 #
 include(CMakeCommon/CopyInstallFiles.cmake) # Needed in all subprojects
 set(local_install_dir ${CMAKE_CURRENT_BINARY_DIR}/binaries)
+
+if (BUILD_SHARED_LIBS STREQUAL ON)
+  message("-- Building shared libs enabled")
+else()
+  message("-- Building shared libs disabled (default)")
+endif()
+message("   (set with command line option -DBUILD_SHARED_LIBS=ON/OFF)")
 
 if (WARNINGS_ARE_ERRORS STREQUAL ON)
   message("-- Warnings are treated as errors")
@@ -111,7 +122,7 @@ if (THREADING_ANALYSIS_MODE STREQUAL ON)
   set(EMBB_THREADING_ANALYSIS_MODE 1)
   message("-- Threading analysis mode enabled")
 else()
-  message("-- Threading analysis mode disabled (default")
+  message("-- Threading analysis mode disabled (default)")
 endif()
 message("   (set with command line option -DTHREADING_ANALYSIS_MODE=ON/OFF)")
 
@@ -151,16 +162,33 @@ set(EXPECTED_EMBB_TEST_EXECUTABLES "embb_algorithms_cpp_test"
                 )
 
 # if opencl is there, we also expect the mtapi opencl test to be generated
+if (BUILD_OPENCL_PLUGIN STREQUAL ON)
+  message("-- Building OpenCL plugin enabled")
+else()
+  message("-- Building OpenCL plugin disabled (default)")
+endif()
+message("   (set with command line option -DBUILD_OPENCL_PLUGIN=ON/OFF)")
+
 if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   list(APPEND EXPECTED_EMBB_TEST_EXECUTABLES "embb_mtapi_opencl_c_test")
 endif()
-if(CUDA_FOUND)
-  list(APPEND EXPECTED_EMBB_TEST_EXECUTABLES "embb_mtapi_cuda_c_test")
+
+if (BUILD_CUDA_PLUGIN STREQUAL ON)
+  message("-- Building CUDA plugin enabled")
+else()
+  message("-- Building CUDA plugin disabled (default)")
+endif()
+message("   (set with command line option -DBUILD_CUDA_PLUGIN=ON/OFF)")
+
+if (BUILD_CUDA_PLUGIN STREQUAL ON)
+  if(CUDA_FOUND)
+    list(APPEND EXPECTED_EMBB_TEST_EXECUTABLES "embb_mtapi_cuda_c_test")
+  else()
+    message("   Cannot build CUDA plugin: CUDA not found")
+  endif()
 endif()
 
-
 ## Copy test execution script to local binaries folder
-
 if (DEFINED CYGWIN)
   set(test_script_in run_tests_cygwin.sh)
   set(test_script_out run_tests.sh)
@@ -171,7 +199,7 @@ else()
   set(test_script_in run_tests_windows.bat)
   set(test_script_out run_tests.bat)
 endif()
-CONFIGURE_FILE( ${CMAKE_SOURCE_DIR}/scripts/${test_script_in}.cmake binaries/${test_script_out} )
+configure_file( ${CMAKE_SOURCE_DIR}/scripts/${test_script_in}.cmake binaries/${test_script_out} )
 
 ## Test and Partest build
 #
@@ -193,8 +221,10 @@ add_subdirectory(mtapi_plugins_c/mtapi_network_c)
 if(BUILD_OPENCL_PLUGIN STREQUAL ON)
   add_subdirectory(mtapi_plugins_c/mtapi_opencl_c)
 endif()
-if(CUDA_FOUND)
-  add_subdirectory(mtapi_plugins_c/mtapi_cuda_c)
+if(BUILD_CUDA_PLUGIN STREQUAL ON)
+  if(CUDA_FOUND)
+    add_subdirectory(mtapi_plugins_c/mtapi_cuda_c)
+  endif()
 endif()
 add_subdirectory(mtapi_cpp)
 add_subdirectory(containers_cpp)
@@ -220,8 +250,25 @@ if(EXISTS "${EMBB_SOURCE_DIR}/doc/reference/Doxyfile.in")
   CreateDoxygenDocumentationTarget()
 endif()
 
+if (INSTALL_DOCS STREQUAL ON)
+  message("-- Installing documentation enabled (default)")
+else()
+  message("-- Installing documentation disabled")
+endif()
+message("   (set with command line option -DINSTALL_DOCS=ON/OFF)")
 
 if (INSTALL_DOCS STREQUAL ON)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/
           DESTINATION ${INSTALL_PREFIX_DOCS} FILES_MATCHING PATTERN "*.*" PATTERN "CMakeLists.txt" EXCLUDE)
 endif()
+
+## create cmake finder
+configure_file("EMBBConfig.cmake.in" "EMBBConfig.cmake")
+configure_file("UseEMBB.cmake.in" "UseEMBB.cmake")
+install(FILES "${CMAKE_BINARY_DIR}/EMBBConfig.cmake" DESTINATION "CMake")
+install(FILES "${CMAKE_BINARY_DIR}/UseEMBB.cmake" DESTINATION "CMake")
+install(
+   EXPORT EMBB-Targets
+   DESTINATION "CMake"
+   FILE EMBB-Targets.cmake
+)

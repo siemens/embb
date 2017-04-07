@@ -40,7 +40,8 @@ const int PoolTest<ValuePool_t>::pool_elements_per_thread = 5;
 template<typename ValuePool_t>
 PoolTest<ValuePool_t>::PoolTest() :
   number_threads_(static_cast<int>
-  (partest::TestSuite::GetDefaultNumThreads())) {
+    (partest::TestSuite::GetDefaultNumThreads())),
+  pool(NULL) {
   CreateUnit("PoolTestStatic").Add(&PoolTest::PoolTestStatic, this);
 
   CreateUnit("AllocFreeParallel")

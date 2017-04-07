@@ -33,8 +33,9 @@
 namespace embb {
 namespace mtapi {
 
-ExecutionPolicy::ExecutionPolicy() :
-    priority_(DefaultPriority) {
+ExecutionPolicy::ExecutionPolicy()
+  : affinity_(0)
+  , priority_(DefaultPriority) {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
@@ -47,7 +48,8 @@ ExecutionPolicy::ExecutionPolicy() :
 }
 
 ExecutionPolicy::ExecutionPolicy(bool initial_affinity, mtapi_uint_t priority)
-:priority_(priority) {
+  : affinity_(0)
+  , priority_(priority) {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
@@ -61,7 +63,8 @@ ExecutionPolicy::ExecutionPolicy(bool initial_affinity, mtapi_uint_t priority)
 }
 
 ExecutionPolicy::ExecutionPolicy(mtapi_uint_t priority)
-:priority_(priority) {
+  : affinity_(0)
+  , priority_(priority) {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
@@ -74,7 +77,8 @@ ExecutionPolicy::ExecutionPolicy(mtapi_uint_t priority)
 }
 
 ExecutionPolicy::ExecutionPolicy(bool initial_affinity)
-:priority_(DefaultPriority) {
+  : affinity_(0)
+  , priority_(DefaultPriority) {
 #if MTAPI_CPP_AUTOMATIC_INITIALIZE
   Node::GetInstance(); // MTAPI has to be initialized
 #endif
