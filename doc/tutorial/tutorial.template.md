@@ -1,40 +1,40 @@
-# Embedded Multicore Building Blocks (EMB²) Tutorial
+# Embedded Multicore Building Blocks Tutorial
 
 ## Contents
 
-[**Introduction**](#cha_introduction)
-&nbsp;&nbsp;[Overview](#sec_introduction_overview)
-&nbsp;&nbsp;[Outline](#sec_introduction_outline)
-&nbsp;&nbsp;[Functions, Functors, and Lambdas](#sec_introduction_function_objects)
+[**Introduction**](#cha_introduction)  
+&nbsp;&nbsp;[Overview](#sec_introduction_overview)  
+&nbsp;&nbsp;[Outline](#sec_introduction_outline)  
+&nbsp;&nbsp;[Functions, Functors, and Lambdas](#sec_introduction_function_objects)  
 
-[**Algorithms**](#cha_algorithms)
-&nbsp;&nbsp;[Function Invocation](#sec_algorithms_invoke)
-&nbsp;&nbsp;[Sorting](#sec_algorithms_sorting)
-&nbsp;&nbsp;[Counting](#sec_algorithms_counting)
-&nbsp;&nbsp;[Foreach Loops](#sec_algorithms_foreach)
-&nbsp;&nbsp;[Reductions](#sec_algorithms_reductions)
-&nbsp;&nbsp;[Prefix Computations](#sec_algorithms_prefix)
+[**Algorithms**](#cha_algorithms)  
+&nbsp;&nbsp;[Function Invocation](#sec_algorithms_invoke)  
+&nbsp;&nbsp;[Sorting](#sec_algorithms_sorting)  
+&nbsp;&nbsp;[Counting](#sec_algorithms_counting)  
+&nbsp;&nbsp;[Foreach Loops](#sec_algorithms_foreach)  
+&nbsp;&nbsp;[Reductions](#sec_algorithms_reductions)  
+&nbsp;&nbsp;[Prefix Computations](#sec_algorithms_prefix)  
 
-[**Dataflow**](#cha_dataflow)
-&nbsp;&nbsp;[Linear Pipelines](#sec_dataflow_linear_pipelines)
-&nbsp;&nbsp;[Nonlinear Pipelines](#sec_dataflow_nonlinear_pipelines)
+[**Dataflow**](#cha_dataflow)  
+&nbsp;&nbsp;[Linear Pipelines](#sec_dataflow_linear_pipelines)  
+&nbsp;&nbsp;[Nonlinear Pipelines](#sec_dataflow_nonlinear_pipelines)  
 
-[**Containers**](#cha_containers)
-&nbsp;&nbsp;[Object Pools](#sec_containers_object_pools)
-&nbsp;&nbsp;[Stacks](#sec_containers_stacks)
-&nbsp;&nbsp;[Queues](#sec_containers_queues)
+[**Containers**](#cha_containers)  
+&nbsp;&nbsp;[Object Pools](#sec_containers_object_pools)  
+&nbsp;&nbsp;[Stacks](#sec_containers_stacks)  
+&nbsp;&nbsp;[Queues](#sec_containers_queues)  
 
-[**MTAPI**](#cha_mtapi)
-&nbsp;&nbsp;[Foundations](#sec_mtapi_foundations)
-&nbsp;&nbsp;[C Interface](#sec_mtapi_c_interface)
-&nbsp;&nbsp;[C++ Interface](#sec_mtapi_cpp_interface)
-&nbsp;&nbsp;[Plugins](#sec_mtapi_plugins)
+[**MTAPI**](#cha_mtapi)  
+&nbsp;&nbsp;[Foundations](#sec_mtapi_foundations)  
+&nbsp;&nbsp;[C Interface](#sec_mtapi_c_interface)  
+&nbsp;&nbsp;[C++ Interface](#sec_mtapi_cpp_interface)  
+&nbsp;&nbsp;[Plugins](#sec_mtapi_plugins)  
 
-[**Heterogeneous Systems**](#cha_heterogeneous_systems)
-&nbsp;&nbsp;[Algorithms](#sec_algorithms_heterogeneous_systems)
-&nbsp;&nbsp;[Dataflow](#sec_dataflow_heterogeneous_systems)
+[**Heterogeneous Systems**](#cha_heterogeneous_systems)  
+&nbsp;&nbsp;[Algorithms](#sec_algorithms_heterogeneous_systems)  
+&nbsp;&nbsp;[Dataflow](#sec_dataflow_heterogeneous_systems)  
 
-[**Bibliography**](#cha_bibliography)
+[**Bibliography**](#cha_bibliography)  
 
 
 ## <a name="cha_introduction"></a>Introduction
@@ -47,8 +47,8 @@ EMB² is independent of the hardware architecture (x86, ARM, ...) and runs on va
 
 Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent data structures, and skeletons for implementing stream processing applications (see [Figure 1](#fig_embb)). These building blocks are largely implemented in a non-blocking fashion, thus preventing frequently encountered pitfalls like lock contention, deadlocks, and priority inversion. As another advantage in real-time systems, the algorithms and data structures give certain progress guarantees. For example, wait-free data structures guarantee system-wide progress which means that every operation completes within a finite number of steps independently of any other concurrent operations on the same data structure.
 
-<a name="fig_embb"></a>![Figure 1: Main Building Blocks of EMB²](md_fig_embb.png)
-<sub>**Figure 1**: Main Building Blocks of EMB²</sub>
+![Figure 1: Main Building Blocks of EMB²](md_fig_embb.png)
+<a name="fig_embb"></a>**Figure 1**: Main Building Blocks of EMB²
 
 ### <a name="sec_introduction_outline"></a>Outline
 
@@ -92,9 +92,9 @@ Of course, this example is too simple to really benefit from function objects an
 
 ## <a name="cha_algorithms"></a>Algorithms
 
-The *Algorithms* building block of EMB² provides high-level constructs for typical parallelization tasks. They are similar to the functions provided by the C++ Standard Library, but contain additional functionality typical for embedded systems such as task priorities. Although the algorithms can be used in a black-box way, it is good to have a basic understanding of their implementation: The algorithms split computations to be performed in parallel into tasks which are executed by the MTAPI task scheduler (see chapter on [MTAPI](#cha_mtapi)). For that purpose, the tasks are stored in queues and mapped to a fixed number of worker threads at runtime.
+The *Algorithms* building block of EMB² provides high-level constructs for typical parallelization tasks. They are similar to the functions provided by the C++ Standard Library, but contain additional functionality typical for embedded systems such as task priorities. Although the algorithms can be used in a black-box way, it is good to have a basic understanding of their implementation: The algorithms split computations to be performed in parallel into tasks which are executed by the MTAPI task scheduler (see chapter on [MTAPI](#cha_mtapi)). For that purpose, the tasks are stored in queues and mapped to a fixed number of worker threads at runtime.
 
-_**Note:** The algorithms are implemented using the MTAPI C++ interface. Since MTAPI allocates the necessary data structures during initialization, the maximum number of tasks in flight is fixed. In case one of the algorithms exceeds this limit, an exception is thrown. By calling `embb::mtapi::Node::Initialize`, the maximum number of tasks and other limits can be customized. Explicit initialization also eliminates unexpected delays when measuring performance. See the section on the [MTAPI C++ Interface](#sec_mtapi_cpp_interface) for details._
+_**Note:** The algorithms are implemented using the MTAPI C++ interface. Since MTAPI allocates the necessary data structures during initialization, the maximum number of tasks in flight is fixed. In case one of the algorithms exceeds this limit, an exception is thrown. By calling `embb::mtapi::Node::Initialize`, the maximum number of tasks and other limits can be customized. Explicit initialization also eliminates unexpected delays when measuring performance. See the section on the [MTAPI C++ Interface](#sec_mtapi_cpp_interface) for details._
 
 ### <a name="sec_algorithms_invoke"></a>Function Invocation
 
@@ -198,12 +198,12 @@ The reduction consists of two steps: First, the input ranges are transformed and
 
 Prefix computations (or scans) can be viewed as a generalization of reductions. They transform an input range _x<sub>i</sub> ϵ X_ into an output range _y<sub>i</sub> ϵ Y_ with _i=1,...,n_ such that
 
-&nbsp;&nbsp;_y<sub>0</sub> = id · x<sub>0</sub>_
-&nbsp;&nbsp;_y<sub>1</sub> = y<sub>0</sub> · x<sub>1</sub>_
-&nbsp;&nbsp;&nbsp;&nbsp;⁞
-&nbsp;&nbsp;_y<sub>i</sub> = y<sub>i-1</sub> · x<sub>i</sub>_
-&nbsp;&nbsp;&nbsp;&nbsp;⁞
-&nbsp;&nbsp;_y<sub>n</sub> = y<sub>n-1</sub> · x<sub>n</sub>_,
+&nbsp;&nbsp;_y<sub>0</sub> = id · x<sub>0</sub>_  
+&nbsp;&nbsp;_y<sub>1</sub> = y<sub>0</sub> · x<sub>1</sub>_  
+&nbsp;&nbsp;&nbsp;&nbsp;⁞  
+&nbsp;&nbsp;_y<sub>i</sub> = y<sub>i-1</sub> · x<sub>i</sub>_  
+&nbsp;&nbsp;&nbsp;&nbsp;⁞  
+&nbsp;&nbsp;_y<sub>n</sub> = y<sub>n-1</sub> · x<sub>n</sub>_,  
 
 where _id_ is the identity (neutral element) with respect to the operation _·: X_ <sup><sub>x</sub></sup> _X → Y_. As an example, consider the following range:
 
@@ -222,13 +222,13 @@ As in the case of reductions, the neutral element has to be given explicitly. Al
 
 ## <a name="cha_dataflow"></a>Dataflow
 
-With the *Dataflow* building block, EMB² provides generic skeletons for the development of parallel stream-based applications. These skeletons are based on dataflow process networks (DPNs), a model of computation which is, due to its simplicity and flexibility, widely employed in different domains like digital signal processing and imaging. As a major advantage, DPNs are deterministic which significantly simplifies testing and debugging. This is particularly important in safety-critical systems, where high demands are put on correctness and reliability. Moreover, DPNs are inherently parallel and hence, lend themselves well for execution on a multicore processor. In fact, they can be viewed as a generalization of pipelining, a frequently encountered parallel pattern.
+EMB² provides generic skeletons for the development of parallel stream-based applications. These skeletons are based on dataflow networks, a model of computation widely employed in different domains like digital signal processing and imaging due to its simplicity and flexibility. As a major advantage, these networks are deterministic which significantly simplifies testing and debugging. This is particularly important in embedded systems, where high demands are put on correctness and reliability. Moreover, they are inherently parallel and lend themselves well for execution on a multicore processor. In fact, they can be viewed as a generalization of pipelining, a frequently encountered parallel pattern.
 
-_**Note:** The_ Dataflow _building block is implemented using the MTAPI C++ interface. Since MTAPI does not allocate memory after initialization, the number of tasks and other resources are limited. By calling `embb::mtapi::Node::Initialize` these limits can be customized. Explicit initialization also eliminates unexpected delays when measuring performance. See Section [MTAPI C++ Interface](sec_mtapi_cpp_interface) for details._
+_**Note:** Dataflow networks are internally implemented using the MTAPI C++ interface. Since MTAPI does not allocate memory after initialization, the number of tasks and other resources are limited. By calling `embb::mtapi::Node::Initialize`, these limits can be customized. Explicit initialization also eliminates unexpected delays when measuring performance. See the section on the [MTAPI C++ Interface](#mtapi_cpp_interface) for details._
 
 ### <a name="sec_dataflow_linear_pipelines"></a>Linear Pipelines
 
-Before we go into detail, we demonstrate the basic concepts of this building block by means of a simple application which finds and replaces strings in a file. Let us start with the sequential implementation. The program shown in [Listing 2](#lst_replace_seq) reads a file line by line and replaces each occurrence of a given string with a new string.
+Before we go into detail, we demonstrate the basic concepts of dataflow networks by means of a simple application which finds and replaces strings in a file. Let us start with the sequential implementation. The program shown in [Listing 1](#lst_replace_seq) reads a file line by line and replaces each occurrence of a given string with a new string.
 
     #include <iostream>
     #include <fstream>
@@ -274,7 +274,7 @@ Before we go into detail, we demonstrate the basic concepts of this building blo
       exit(EXIT_SUCCESS);
     }
 
-<sub><a name="lst_replace_seq"></a>**Listing 1**: Sequential program for replacing strings in a file</sub>
+<a name="lst_replace_seq"></a>**Listing 1**: Sequential program for replacing strings in a file
 
 The main part consists of the `while` loop which performs three steps:
 
@@ -284,22 +284,24 @@ The main part consists of the `while` loop which performs three steps:
 
 To run this program on a multicore processor, we may execute the above steps in a pipelined fashion. In this way, a new line can be read from the hard disk while the previous one is still being processed. Likewise, processing a string and writing the result to standard output can be performed in parallel. Thus, the pipeline may consist of three stages as depicted in [Figure 2](#fig_replace_par).
 
-![Figure 2: Pipeline for replacing strings in a file](md_fig_replace_par.png)
-<sub><a name="fig_replace_par"></a>**Figure 2**: Pipeline for replacing strings in a file</sub>
+![Figure 2: Pipeline for replacing strings in a file](md_fig_replace_par.png)
+<a name="fig_replace_par"></a>**Figure 2**: Pipeline for replacing strings in a file
 
-This pipeline can be easily implemented using the Dataflow building block. As the first step, we have to include the `dataflow.h` header file:
+This pipeline can be easily implemented using the dataflow networks. As the first step, we have to include the `dataflow.h` header file:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_include}
 
-Then, we have to construct a *network*. A network consists of a set of processes that are connected by communication channels. EMB² provides a class `Network` that handles data routing and scheduling of your processes:
+Then, we have to construct a network. A network consists of a set of processes that are connected by communication channels. EMB² provides a class `Network` that handles data routing and scheduling of your processes:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_network}
 
-We need to prepare the network for the desired maximum number of elements that can be in the network at a time. The number of elements is limited to avoid that the network is flooded with new elements before the previous elements have been processed. In a linear pipeline, for example, this may happen if the source is faster than the sink. In our example, at most four elements may be processed simultaneously: one in the source, one in the sink, and two in the middle stage (see below). Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput:
+We need to prepare the network for the desired maximum number of elements that can be in the network at a time. The number of elements is limited to avoid that the network is flooded with new elements before the previous elements have been processed. In a linear pipeline, for example, this may happen if the source is faster than the sink. For our example we assume that at most four elements may be processed simultaneously: one in the source, one in the sink, and two in the middle stage.
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_make}
 
-As the next step, we have to construct the processes shown in [Figure 2](#fig_replace_par). The easiest way to construct a process is to wrap the user-defined code in a lambda function and to pass it to the network. The network constructs an object for that process and executes the lambda function whenever new data is available. There are several methods for constructing processes depending on their type. The process **read** is a *source* process, since it produces data (by reading it from the specified file) but does not consume any data. Source processes are constructed from a function object
+Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput:
+	
+As the next step, we have to construct the processes shown in [Figure 2](#fig_replace_par). The easiest way to construct a process is to wrap the user-defined code in a lambda function and to pass it to the network. The network constructs an object for that process and executes the lambda function whenever new data is available. There are several methods for constructing processes depending on their type. The process **read** is a *source* process, since it produces data (by reading it from the specified file) but does not consume any data. Source processes are constructed from a function object
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_source_function}
 
@@ -307,17 +309,19 @@ like this:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_declare_source}
 
-Note the template argument `string` to `Source`. This tells that the process has exactly one *port* of type `string` and that this port is used to transmit data to other processes. The user-defined code can access the ports via the parameters of the function. Thus, each parameter corresponds to exactly one port. In our example, the result of the process is stored in a variable `str`, which is passed by reference. The replacement of the strings can be done by a *parallel* process, which means that multiple invocations of the process may be executed simultaneously. In general, processes that neither have any side effects nor maintain a state can safely be executed in parallel. This helps to avoid bottlenecks that arise when some processes are faster than others. Suppose, for example, that **replace** requires up to 50 ms to execute, whereas **read** and **write** each requires 10 ms to execute. If only one invocation of **replace** could be executed at a time, the throughput would be at most 20 elements per second. Since **replace** is a parallel process, however, the network may start a new invocation every 10 ms. Hence, up to five invocations may be executed in parallel, yielding a throughput of 100 elements per second. To compensate for variations in the runtime of parallel stages, may execute them *out-of-order*. As a result, the order in which the elements of a stream enter and leave parallel stages is not necessarily preserved. In our example, the runtime of **replace** may vary significantly due to the fact that not all lines have the same length and that the number of replacements depends on the content. However, let us now return to our example. The **replace** process is constructed from the function
+Note the template argument `std::string` to `Source`. This tells that the process has exactly one *port* of type `std::string` and that this port is used to transmit data to other processes. The user-defined code can access the ports via the parameters of the function. Thus, each parameter corresponds to exactly one port. In our example, the result of the process is stored in a variable `str`, which is passed by reference.
+
+The replacement of the strings can be done by a *parallel* process, which means that multiple invocations of the process may be executed simultaneously. In general, processes that neither have any side effects nor maintain a state can safely be executed in parallel. This helps to avoid bottlenecks that arise when some processes are faster than others. Suppose, for example, that **replace** requires up to 50 ms to execute, whereas **read** and **write** each require 10 ms to execute. If only one invocation of **replace** could be executed at a time, the throughput would be at most 20 elements per second. Since **replace** is a parallel process, however, the network may start a new invocation every 10 ms. Hence, up to five invocations may be executed in parallel, yielding a throughput of 100 elements per second. To compensate for variations in the runtime of parallel stages, they may be executed *out-of-order*. As a result, the order in which the elements of a stream enter and leave parallel stages is not necessarily preserved. In our example, the runtime of **replace** may vary significantly due to the fact that not all lines have the same length and that the number of replacements depends on the content. Before we go into more detail, let us first consider the following function
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_replace_function}
 
-like this:
+and how to construct the corresponding **replace** process:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_declare_replace}
 
-The template parameter `Network::Inputs<string>` specifies that the process has one port serving as input. Analogously, `Network::Outputs<string>` specifies that there is one port serving as output.
+The template parameter `Network::Inputs<std::string>` specifies that the process has one port serving as input. Analogously, `Network::Outputs<std::string>` specifies that there is one port serving as output.
 
-Since the last process (**write**) does not have any outputs, we make it a *Sink*. Unlike parallel processes, sinks are always executed *in-order*. takes care that the elements are automatically reordered according to their original order in the stream. In this way, the externally visible behavior is preserved even if some parallel stages may be executed out-of-order. The function
+Since the last process (**write**) does not have any outputs, we make it a *Sink*. Unlike parallel processes, sinks are always executed *in-order*. EMB² takes care that the elements are automatically reordered according to their original order in the stream. This way, the externally visible behavior is preserved even if some parallel stages may be executed out-of-order. The function
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_sink_function}
 
@@ -325,51 +329,49 @@ is used to construct the sink:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_declare_sink}
 
-_**Note:** If you parallelize your own application using EMB² and your compiler emits a lengthy error message containing lots of templates, it is very likely that for at least one process, the ports and their directions do not match the signature of the given function._
+_**Note:** If you parallelize an application using EMB² and your compiler emits a lengthy error message containing lots of templates, it is very likely that for at least one process, the ports and their directions do not match the signature of the given function._
 
 As the last step, we have to connect the processes (ports). This is straightforward using the C++ stream operator:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_connect}
 
-Then we can start the network:
+Then, we can start the network:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_run}
 
-Note that you will probably not observe a speedup when you run this program on a multicore processor. One reason for this is that input/output operations like reading a file from the hard disk and writing the output to the screen are typically a bottleneck. Moreover, the amount of work done in the middle stage of the pipeline (**replace**) is rather low. To outweigh the overhead for parallel execution, the amount of work must be much higher. In image processing, for example, a single pipeline stage may process a complete image. To sum up, we haven chosen this example for its simplicity, not for its efficiency.
+Note that you will probably not observe a speedup when you run this program on a multicore processor. One reason for this is that I/O operations like reading a file from the hard disk and writing the output to the screen are typically a bottleneck. Moreover, the amount of work done in the middle stage of the pipeline (**replace**) is rather low. To outweigh the overhead for parallel execution, the amount of work must be much higher. In image processing, for example, a single pipeline stage may process a complete image. To sum up, we haven chosen this example for its simplicity, not for its efficiency.
 
 ### <a name="sec_dataflow_nonlinear_pipelines"></a>Nonlinear Pipelines
 
 Some applications exhibit a more complex structure than the linear pipeline presented in the previous section. Typical examples are applications where the result of a pipeline stage is used by more than one successor stage. Such pipelines are said to be nonlinear. In principle, every nonlinear pipeline can be transformed to a linear one as depicted in [Figure 3](#fig_linearization). However, this increases the latency and complicates the implementation due to data that must be passed through intermediate stages. In [Figure 3](#fig_linearization), for example, the data transferred from stage A to stage C must be passed through stage B in the linearized implementation.
 
-![Figure 3: Nonlinear pipeline and linearized variant](md_fig_linearization.png)
-<sub><a name="fig_linearization"></a>**Figure 3**: Nonlinear pipeline and linearized variant</sub>
+![Figure 3: Nonlinear pipeline and linearized variant](md_fig_linearization.png)
+<a name="fig_linearization"></a>**Figure 3**: Nonlinear pipeline and linearized variant
 
-Nonlinear pipelines can be implemented as they are using , i.e., there is need not linearize them. As an example, let us consider the implementation of a sorting network. Sorting networks consist of a set of interconnected comparators and are used to sort sequences of data items. As depicted in [Figure 4](#fig_comparator), each comparator sorts a pair of values by putting the smaller value to one output, and the larger one to the other output. Thus, a comparator can be viewed as a switch that transfers the values at the inputs to the outputs, either directly or by swapping them (cf. [Figure 5](#fig_example_comparator)).
+Nonlinear pipelines can be implemented as they are using EMB², i.e., there is need not linearize them. As an example, let us consider the implementation of a sorting network. Sorting networks consist of a set of interconnected comparators and are used to sort sequences of data items. As depicted in [Figure 4](#fig_comparator), each comparator sorts a pair of values by putting the smaller value to one output, and the larger one to the other output. Thus, a comparator can be viewed as a switch that transfers the values at the inputs to the outputs, either directly or by swapping them (cf. [Figure 5](#fig_example_comparator)).
 
-![Figure 4: Block diagram of a comparator](md_fig_comparator.png)
-<sub><a name="fig_comparator"></a>**Figure 4**: Block diagram of a comparator</sub>
+![Figure 4: Block diagram of a comparator](md_fig_comparator.png)
+<a name="fig_comparator"></a>**Figure 4**: Block diagram of a comparator
 
-![Figure 5: Example for the operating principle of a comparator](md_fig_example_comparator.png)
-<sub><a name="fig_example_comparator"></a>**Figure 5**: Example for the operating principle of a comparator</sub>
+![Figure 5: Example for the operating principle of a comparator](md_fig_example_comparator.png)
+<a name="fig_example_comparator"></a>**Figure 5**: Example for the operating principle of a comparator
 
-[Figure 6](#fig_sorting_network) shows a sorting network with four inputs/outputs and five comparators. The numbers at the interconnections exemplify a “run” of the network. As can be seen from [Figure 6](#fig_sorting_network), the comparators _C<sub>1</sub>-C<sub>4</sub>_ “sink” the largest value to the bottom and “float” the smallest value to the top. The final comparator _C<sub>5</sub>_ simply sorts out the middle two values. In this way it is guaranteed that the values at the outputs occur in ascending order.
+[Figure 6](#fig_sorting_network) shows a sorting network with four inputs/outputs and five comparators. The numbers at the interconnections exemplify a “run” of the network. As can be seen from [Figure 6](#fig_sorting_network), the comparators _C<sub>1</sub>-C<sub>4</sub>_ “sink” the largest value to the bottom and “float” the smallest value to the top. The final comparator _C<sub>5</sub>_ simply sorts out the middle two values. This way it is guaranteed that the values at the outputs occur in ascending order.
 
-![Figure 6: Sorting network with four inputs=outputs and five comparators](md_fig_sorting_network.png)
-<sub><a name="fig_sorting_network"></a>**Figure 6**: Sorting network with four inputs=outputs and five comparators</sub>
+![Figure 6: Sorting network with four inputs=outputs and five comparators](md_fig_sorting_network.png)
+<a name="fig_sorting_network"></a>**Figure 6**: Sorting network with four inputs/outputs and five comparators
 
 Let us now consider the implementation of the sorting network using EMB². As in the previous example, we need three types of processes: one or more sources that produce a stream of data items, a total number of five processes that implement the comparators, and one or more sinks that consume the sorted sequences. The processes should be generic so that they can be used with different types. For example, in one application we might use the network to sort integers, and in another application to sort floating point values.
 
-The following Listing shows the implementation of the source processes using classes instead of functions.[<sup>2</sup>](#footnote_2)
+The following listing shows the implementation of the source processes using classes instead of functions (a complete implementation can be found in the examples directory):
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_nonlinear.cc:dataflow_producer}
 
-The class-based approach has several advantages besides the use of templates: Firstly, the creation of multiple processes is straightforward. Secondly, one can derive other processes from a given base class such as `Producer`. Thirdly, it eases migration of existing code. For example, if you want to use an object of an existing class `foo` as a process, you might derive a class `bar` from `foo`. The function operator of `bar` then has access to the members provided by `foo`.
+The class-based approach has several advantages besides the use of templates: Firstly, the creation of multiple processes is straightforward. Secondly, one can derive other processes from a given base class such as `Producer`. Thirdly, it eases migration of existing code. For example, if you want to use an object of an existing class `foo` as a process, you might derive a class `bar` from `foo` implementing any missing functionality.
 
-Each instance of the class `Network` maintains a list of source processes that belong to the network. You must explicitly add all sources to the network by a call to `AddSource`. For example, if we want to feed our sorting network `nw` with four streams of integer values, we may write:
+To feed our sorting network `nw` with four streams of integer values, we may write:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_nonlinear.cc:dataflow_declare_add_sources}
-
-This is only necessary for source processes. All other processes are automatically found via a depth-first search starting from the source processes.
 
 The code for the comparators looks like this:
 
@@ -381,10 +383,7 @@ To check whether the resulting values are sorted, we use a single sink with four
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_nonlinear.cc:dataflow_consumer}
 
-In general, however, we could also have a sink for each output of the sorting network. There is no restriction on the number of sources and sinks a network may have.
-
-<sub>_<a name="footnote_2"></a><sup>2</sup> For the sake of brevity, we omit the functionality. A complete
-implementation can be found in the examples directory._</sub>
+We could also have a sink for each output of the sorting network. There is no restriction on the number of sources and sinks a network may have.
 
 
 ## <a name="cha_containers"></a>Containers
@@ -403,7 +402,7 @@ An object pool allocates a fixed number of objects at construction. Objects can 
 
     \\\inputlistingsnippet{../examples/containers/object_pool.cc:object_pool}
 
-<sub><a name="lst_object_pool_lst1"></a>**Listing 2*: Object pool – initialization, allocation and deallocation</sub>
+<a name="lst_object_pool_lst1"></a>**Listing 2*: Object pool – initialization, allocation and deallocation
 
 For actually allocating and deallocating objects, the object pool’s implementation relies on a value pool which keeps track of the objects in use. If the value pool is implemented in a lock-free manner, the object pool is lock-free as well (analogously for wait-free pools). Currently, EMB² provides two value pools: `WaitFreeArrayValuePool` and `LockFreeTreeValuePool`. Normally (if nothing is specified), the wait-free pool is used. For having a lock-free object pool instead, one has to specify the corresponding value pool to use as additional template parameter. If we replace line 1 of the previous example with the following lines, the object pool is not wait-free anymore but lock-free (the values are of type `int` and initialized to `0`):
 
@@ -413,13 +412,13 @@ This will result in a speed-up for most applications, but progress guarantees ar
 
 ### <a name="sec_containers_stacks"></a>Stacks
 
-As the name indicates, the class template `LockFreeStack` implements a lock-free stack which stores elements according to the LIFO (Last-In, First-Out) principle. [Listing 3](#lst_stack_lst1) shows a simple example. In line 1, we create a stack of integers with a capacity of 10 elements.[<sup>3</sup>](#footnote_3) The stack provides two methods, `TryPush` and `TryPop`, both returning a Boolean value indicating success of the operation: `TryPop` returns `false` if the stack is empty, and `TryPush` returns false if the stack is full. `TryPop` returns the element removed from the stack via reference.
+As the name indicates, the class template `LockFreeStack` implements a lock-free stack which stores elements according to the LIFO (Last-In, First-Out) principle. [Listing 3](#lst_stack_lst1) shows a simple example. In line 1, we create a stack of integers with a capacity of 10 elements.[<sup>3</sup>](#footnote_3) The stack provides two methods, `TryPush` and `TryPop`, both returning a Boolean value indicating success of the operation: `TryPop` returns `false` if the stack is empty, and `TryPush` returns false if the stack is full. `TryPop` returns the element removed from the stack via reference.
 
     \\\inputlistingsnippet{../examples/containers/stack.cc:stack}
 
-<sub><a name="lst_stack_lst1"></a>**Listing 3**: Stack - initialization, push and pop</sub>
+<a name="lst_stack_lst1"></a>**Listing 3**: Stack - initialization, push and pop
 
-In line 4 of [Listing 4](#lst_stack_lst1), we try to pop an element from the empty stack, which has to fail. In the for-loop in line 7, we fill the stack with `int` values 0 ... 4. Afterwards, in the loop in line 12, we pop five values (line 13) from the stack into variable `j`. According to the LIFO semantics, the values are popped in reverse order, i.e., we get the sequence 4 ... 0. This is checked by the assertion in line 14.
+In line 4 of [Listing 3](#lst_stack_lst1), we try to pop an element from the empty stack, which has to fail. In the for-loop in line 7, we fill the stack with `int` values 0 ... 4. Afterwards, in the loop in line 12, we pop five values (line 13) from the stack into variable `j`. According to the LIFO semantics, the values are popped in reverse order, i.e., we get the sequence 4 ... 0. This is checked by the assertion in line 14.
 
 <sub>_<a name="footnote_3"></a><sup>3</sup> Due to the necessary over-provisioning of memory in thread-safe memory management, the stack might be able to hold more than 10 elements, but is guaranteed to be able to hold at least 10 elements._</sub>
 
@@ -427,13 +426,13 @@ In line 4 of [Listing 4](#lst_stack_lst1), we try to pop an element from the e
 
 There are two FIFO (First-In, First-Out) queue implementations in , `LockFreeMPMCQueue` and `WaitFreeSPSCQueue`. The former permits multiple producers and multiple consumers (MPMC), whereas the latter is restricted to a single producer and a single consumer (SPSC). The interfaces are the same for both queues.
 
-[Listing 4](#lst_queue_lst1) shows an example for the `LockFreeMPMCQueue`. In line 1, we create a queue with element type `int` and a capacity of 10 elements.[<sup>4</sup>](#footnote_4) The Boolean return value of the methods `TryEnqueue` and `TryDequeue` indicates success (`false` if the queue is full or empty, respectively).
+[Listing 4](#lst_queue_lst1) shows an example for the `LockFreeMPMCQueue`. In line 1, we create a queue with element type `int` and a capacity of 10 elements.[<sup>4</sup>](#footnote_4) The Boolean return value of the methods `TryEnqueue` and `TryDequeue` indicates success (`false` if the queue is full or empty, respectively).
 
     \\\inputlistingsnippet{../examples/containers/queues.cc:queue}
 
-<sub><a name="lst_queue_lst1"></a>**Listing 4**: Queue – initialization, enqueue and dequeue</sub>
+<a name="lst_queue_lst1"></a>**Listing 4**: Queue – initialization, enqueue and dequeue
 
-In line 4 of [Listing 5](#lst_queue_lst1), we try to dequeue an element from the empty queue, which has to fail. In the for-loop in line 7, we fill the queue with `int` values 0 ... 4. Afterwards, in the loop in line 12, we dequeue five values (line 13) from the queue into variable `j`. According to the FIFO semantics, the values are dequeued in the same order as they were enqueued, i.e., we get the sequence 0 ... 4. This is checked by the assertion in line 14.
+In line 4 of [Listing 4](#lst_queue_lst1), we try to dequeue an element from the empty queue, which has to fail. In the for-loop in line 7, we fill the queue with `int` values 0 ... 4. Afterwards, in the loop in line 12, we dequeue five values (line 13) from the queue into variable `j`. According to the FIFO semantics, the values are dequeued in the same order as they were enqueued, i.e., we get the sequence 0 ... 4. This is checked by the assertion in line 14.
 
 <sub>_<a name="footnote_4"></a><sup>4</sup> As in case of stacks, the queue may actually hold more than 10 elements._</sub>
 
@@ -514,7 +513,7 @@ At any time, the user can call `mtapi_<object>_get_attribute()` to query the val
 
 ### <a name="sec_mtapi_c_interface"></a>C Interface
 
-The calculation of Fibonacci numbers is a simple example for a recursive algorithm that can easily be parallelized. [Listing 5](#lst_mtapi_fibonacci_sequential) shows a sequential version:
+The calculation of Fibonacci numbers is a simple example for a recursive algorithm that can easily be parallelized. [Listing 5](#lst_mtapi_fibonacci_sequential) shows a sequential version:
 
     int fib(int n) {
       int x,y;
@@ -537,7 +536,7 @@ The calculation of Fibonacci numbers is a simple example for a recursive algorit
       printf("fib(%i) = %i\n", n, result);
     }
 
-<sub><a name="lst_mtapi_fibonacci_sequential"></a>**Listing 5**: Sequential program for computing Fibonacci numbers</sub>
+<a name="lst_mtapi_fibonacci_sequential"></a>**Listing 5**: Sequential program for computing Fibonacci numbers
 
 This algorithm can be parallelized by spawning a task for one of the recursive calls (`fib(n - 1)`, for example). When doing this with MTAPI, an action function that represents `fib(int n)` is needed. It has the following signature:
 
