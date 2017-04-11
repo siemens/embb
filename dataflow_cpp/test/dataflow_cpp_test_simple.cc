@@ -214,10 +214,6 @@ SimpleTest::SimpleTest() {
 void SimpleTest::TrySimple(bool reuse_main_thread) {
   // All available cores
   embb::base::CoreSet core_set(true);
-  // workaround for bug in dataflow, set issue #64
-  if (core_set.Count() < 2) {
-    reuse_main_thread = false;
-  }
   embb::mtapi::NodeAttributes node_attr;
   node_attr
     .SetReuseMainThread(reuse_main_thread ? MTAPI_TRUE : MTAPI_FALSE)
