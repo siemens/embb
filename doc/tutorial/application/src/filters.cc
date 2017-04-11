@@ -1,6 +1,5 @@
 #include "filters.h"
 
-#include "int_iterator.h"
 #include "ffmpeg.h"
 
 #include <exception>
@@ -122,8 +121,8 @@ void blurStripeParallel(int y_in, int y_end, int size, int width, int height,
   // number of pixels bottom right
   int const size_rb = size / 2;
 
-  embb::algorithms::ForEach(
-    int_iterator(y_in*width), int_iterator(y_end*width), [&](int idx) {
+  embb::algorithms::ForLoop(
+    y_in*width, y_end*width, [&](int idx) {
     int x = idx % width;
     int y = idx / width;
     int close = 0;
@@ -274,8 +273,7 @@ void applyBlackAndWhiteParallel(AVFrame* frame) {
   int const width = frame->width;
   int const height = frame->height;
 
-  embb::algorithms::ForEach(
-    int_iterator(0), int_iterator(width*height), [&](int idx) {
+  embb::algorithms::ForLoop(0, width*height, [&](int idx) {
     int x = idx % width;
     int y = idx / width;
     int p = mapToData(x, y, width);
@@ -356,8 +354,7 @@ void edgeDetectionParallel(AVFrame* frame) {
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
   uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
 
-  embb::algorithms::ForEach(
-    int_iterator(0), int_iterator(width*height), [&](int idx){
+  embb::algorithms::ForLoop(0, width*height, [&](int idx){
     int x = idx % width;
     int y = idx / width;
     p = mapToData(x, y, width);
@@ -446,8 +443,7 @@ void applyCartoonifyParallel(AVFrame* frame, int threshold, int discr) {
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
   uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
 
-  embb::algorithms::ForEach(
-    int_iterator(0), int_iterator(height*width), [&](int idx) {
+  embb::algorithms::ForLoop(0, height*width, [&](int idx) {
     int const x = idx % width;
     int const y = idx / width;
     int p = mapToData(x, y, width);
@@ -507,8 +503,7 @@ void changeSaturationParallel(AVFrame* frame, double amount) {
 
   av_frame_make_writable(frame);
 
-  embb::algorithms::ForEach(
-    int_iterator(0), int_iterator(height*width), [&](int idx) {
+  embb::algorithms::ForLoop(0, height*width, [&](int idx) {
     int const x = idx % width;
     int const y = idx / width;
     int p = mapToData(x, y, width);
