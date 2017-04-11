@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project (video_app)
 
-set(EMBB_DIR "D:/EMBB/_install/CMake")
+# uncomment the following line and provide the correct EMBB install directory
+# if EMBB is not found in the default locations
+
+#set(EMBB_DIR "MY-EMBB-DIRECTORY")
+
 find_package(EMBB REQUIRED NO_MODULE)
 include(${EMBB_USE_FILE})
 
@@ -10,7 +14,10 @@ file(GLOB_RECURSE SOURCES "*.cc" "*.h")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
 if (MSVC)
-    set(FFMPEG_DIR "d:/EMBB/ffmpeg")
+
+# provide the correct ffmpeg install directory in the line below
+    set(FFMPEG_DIR "MY-FFMPEG-DIRECTORY")
+
     include_directories("${FFMPEG_DIR}/include")
     link_directories("${FFMPEG_DIR}/lib")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
