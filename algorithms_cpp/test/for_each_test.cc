@@ -76,6 +76,7 @@ static void SquareActionFunction(
 }
 
 ForEachTest::ForEachTest() {
+  CreateUnit("ForLoop test").Add(&ForEachTest::TestLoop, this);
   CreateUnit("Different data structures")
     .Add(&ForEachTest::TestDataStructures, this);
   CreateUnit("Function Pointers").Add(&ForEachTest::TestFunctionPointers, this);
@@ -282,6 +283,35 @@ void ForEachTest::TestPolicy() {
   PT_EXPECT_MSG(negative_range_thrown,
     "Negative range should throw ErrorException");
 #endif
+}
+
+static std::vector<size_t> loop_result;
+
+static void SquareLoop(size_t value) {
+  loop_result[value] = value * value;
+}
+
+void ForEachTest::TestLoop() {
+  using embb::algorithms::ForLoop;
+
+  size_t count = 10;
+  loop_result.resize(count);
+  ForLoop(0u, count, SquareLoop);
+  for (size_t i = 0; i < count; i++) {
+    PT_EXPECT_EQ(loop_result[i], i * i);
+  }
+  loop_result.clear();
+
+  size_t stride = 3;
+  loop_result.resize(count * stride);
+  ForLoop(0u, count * stride, int(stride), SquareLoop);
+  for (size_t i = 0; i < count * stride; i += stride) {
+    PT_EXPECT_EQ(loop_result[i], i * i);
+    for (size_t k = 1; k < stride; k++) {
+      PT_EXPECT_EQ(loop_result[i + k], 0u);
+    }
+  }
+  loop_result.clear();
 }
 
 void ForEachTest::StressTest() {
