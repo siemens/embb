@@ -37,9 +37,12 @@ namespace internal {
 template <typename Integer>
 class IntIterator : public
   std::iterator<std::random_access_iterator_tag, Integer> {
+ public:
+  typedef typename std::iterator_traits<IntIterator>::difference_type Difference;
+
  private:
   Integer value_;
-  difference_type stride_;
+  Difference stride_;
 
  public:
   explicit IntIterator(Integer value)
@@ -47,7 +50,7 @@ class IntIterator : public
     // emtpy
   }
 
-  explicit IntIterator(Integer value, difference_type stride)
+  explicit IntIterator(Integer value, Difference stride)
     : value_(value), stride_(stride) {
     // emtpy
   }
@@ -63,12 +66,12 @@ class IntIterator : public
     return *this;
   }
 
-  IntIterator & operator +=(difference_type n) {
+  IntIterator & operator +=(Difference n) {
     value_ += n * stride_;
     return *this;
   }
 
-  IntIterator & operator -=(difference_type n) {
+  IntIterator & operator -=(Difference n) {
     value_ -= n * stride_;
     return *this;
   }
@@ -91,15 +94,15 @@ class IntIterator : public
     return IntIterator(value_ -= stride_);
   }
 
-  IntIterator operator +(difference_type n) const {
+  IntIterator operator +(Difference n) const {
     return IntIterator(value_ + n * stride_);
   }
 
-  difference_type operator -(IntIterator const & it) const {
-    return difference_type(value_ - it.value_) / stride_;
+  Difference operator -(IntIterator const & it) const {
+    return Difference(value_ - it.value_) / stride_;
   }
 
-  IntIterator operator -(difference_type n) const {
+  IntIterator operator -(Difference n) const {
     return IntIterator(value_ - n * stride_);
   }
 
@@ -135,14 +138,14 @@ class IntIterator : public
     return value_;
   }
 
-  Integer operator [](difference_type n) const {
+  Integer operator [](Difference n) const {
     return value_ + n * stride_;
   }
 };
 
 template <typename Integer>
 inline IntIterator<Integer> operator +(
-  typename IntIterator<Integer>::difference_type n,
+  typename IntIterator<Integer>::Difference n,
   IntIterator<Integer> const & it) {
   return it + n;
 }
