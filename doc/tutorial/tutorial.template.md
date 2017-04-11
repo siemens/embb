@@ -160,6 +160,10 @@ A frequently encountered task in parallel programming is to apply some operation
 
     \\\inputlistingsnippet{../examples/algorithms/for_each.cc:doubling}
 
+There is also a `ForLoop` variant that accepts integers as limits of the range directly:
+
+    \\\inputlistingsnippet{../examples/algorithms/for_each.cc:loop_doubling}
+
 In the above code snippet, the results of the computation overwrite the input. If the input has to be left unchanged, the results must be written to a separate output range. Thus, the operation requires two ranges. EMB² supports such scenarios by the `ZipIterator`, which wraps two iterators into one. Consider the following revised example:
 
     \\\inputlistingsnippet{../examples/algorithms/for_each.cc:zip_setup}
