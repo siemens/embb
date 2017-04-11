@@ -61,6 +61,7 @@ void filter_opencl(AVFrame* frame) {
   unsigned char * data;
   unsigned char * res;
 
+// snippet_begin:call_opencl_action
   args = new unsigned char[n_bytes + sizeof(int) * 4];
   res = new unsigned char[n_bytes + sizeof(int) * 4];
 
@@ -75,6 +76,7 @@ void filter_opencl(AVFrame* frame) {
   task = node.Start(MTAPI_TASK_ID_NONE, job.GetInternal(), args, size,
     res + sizeof(int)*4, n_bytes, MTAPI_DEFAULT_TASK_ATTRIBUTES);
   task.Wait();
+// snippet_end
 
   delete[] args;
   args = res;
@@ -188,7 +190,7 @@ void process_parallel_dataflow_and_opencl() {
   }
 
   int node_local = 1;
-
+// snippet_begin:make_opencl_action
   mtapi_opencl_action_create(JOB_MEAN, filters::mean_kernel,
     "mean", 32, 3, &node_local, sizeof(int), &status);
   if (status != MTAPI_SUCCESS) {
@@ -197,6 +199,7 @@ void process_parallel_dataflow_and_opencl() {
     embb::mtapi::Node::Finalize();
     return;
   }
+// snippet_end
 
   mtapi_opencl_action_create(JOB_CARTOONIFY, filters::cartoonify_kernel,
     "cartoonify", 32, 3, &node_local, sizeof(int), &status);
@@ -219,9 +222,11 @@ void process_parallel_dataflow_and_opencl() {
     Network::Outputs<AVFrame*> >
     original(nw, embb::base::MakeFunction(convertToOriginal));
 
+// snippet_begin:opencl_pipeline
   Network::ParallelProcess<Network::Inputs<AVFrame*>,
     Network::Outputs<AVFrame*> >
     filter(nw, embb::base::MakeFunction(applyFilterOpenCL));
+// snippet_end
 
   Network::Sink<AVFrame*> write(nw, embb::base::MakeFunction(writeToFile));
 
@@ -266,6 +271,7 @@ void process_parallel_dataflow_and_algorithms() {
 void process_parallel_dataflow() {
   embb::mtapi::Node::Initialize(1, 1);
 
+// snippet_begin:pipelined_execution
   Network nw(8);
 
   Network::Source<AVFrame*> read(nw, embb::base::MakeFunction(readFromFile));
@@ -287,6 +293,7 @@ void process_parallel_dataflow() {
   read >> rgb >> filter >> original >> write;
 
   nw();
+// snippet_end
 
   std::cout << std::endl;
   embb::mtapi::Node::Finalize();
@@ -315,14 +322,15 @@ void process_serial() {
   AVFrame* frame = nullptr;
   AVFrame* convertedFrame = nullptr;
   AVFrame* originalFrame = nullptr;
-  int gotFrame = 0;
 
+// snippet_begin:serial_execution
   while (readFromFile(frame)) {
     convertToRGB(frame, convertedFrame);
     filter(convertedFrame);
     convertToOriginal(convertedFrame, originalFrame);
     writeToFile(originalFrame);
   }
+// snippet_end
 
   std::cout << std::endl;
 }

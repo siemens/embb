@@ -152,6 +152,7 @@ void blurStripeParallel(int y_in, int y_end, int size, int width, int height,
 
 namespace filters {
 
+// snippet_begin:opencl_filter
 char const * mean_kernel =
 "__kernel void mean(\n"
 "  __global void* arguments,\n"
@@ -194,6 +195,7 @@ char const * mean_kernel =
 "  out_buffer[p + 1] = g / close;\n"
 "  out_buffer[p + 2] = b / close;\n"
 "}\n";
+// snippet_end
 
 char const * cartoonify_kernel =
 "__kernel void cartoonify(\n"
@@ -247,6 +249,7 @@ char const * cartoonify_kernel =
 "  buffer[p + 2] = f_value;\n"
 "}\n";
 
+// snippet_begin:serial_filter
 void applyBlackAndWhite(AVFrame* frame) {
   av_frame_make_writable(frame);
 
@@ -266,7 +269,9 @@ void applyBlackAndWhite(AVFrame* frame) {
     }
   }
 }
+// snippet_end
 
+// snippet_begin:parallel_filter
 void applyBlackAndWhiteParallel(AVFrame* frame) {
   av_frame_make_writable(frame);
 
@@ -286,6 +291,7 @@ void applyBlackAndWhiteParallel(AVFrame* frame) {
     frame->data[0][p + 2] = mean;
   });
 }
+// snippet_end
 
 void edgeDetection(AVFrame* frame) {
   int width = frame->width;
