@@ -54,7 +54,7 @@ Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent
 
 The purpose of this document is to introduce the basic concepts of EMB² and to demonstrate typical application scenarios by means of simple examples. The tutorial is not intended to be complete in the sense that it describes every feature of EMB². For a detailed description of the API, please see the reference manual.
 
-In the next subsection, we briefly describe the concept of [function objects](#sec_introduction_function_objects) which is essential for using EMB². We then present various parallel [algorithms](#cha_algorithms) and the [dataflow](#cha_dataflow) framework. After that, we explain the usage of [MTAPI](#cha_mtapi) and how to leverage [heterogeneous systems](#cha_heterogeneous_systems).
+In the next subsection, we briefly describe the concept of [function objects](#sec_introduction_function_objects) which is essential for using EMB². We then present various parallel [algorithms](#cha_algorithms) and the [dataflow](#cha_dataflow) framework. After that, we explain the usage of [MTAPI](#cha_mtapi) and how to leverage [heterogeneous systems](#cha_heterogeneous_systems). The complete source code for the examples presented in the following can be found in the `examples` directory.
 
 ### <a name="sec_introduction_function_objects"></a>Functions, Functors, and Lambdas
 
@@ -388,7 +388,7 @@ We could also have a sink for each output of the sorting network. There is no re
 
 ## <a name="cha_containers"></a>Containers
 
-Containers are essential for storing objects in an organized way. Unfortunately, the containers provided by the C++ Standard Library are not thread-safe. Attempts to read and write elements concurrently may corrupt the stored data. While such undefined behavior can be avoided by synchronizing all accesses using a mutex, this essentially eliminates any parallelism.
+Containers are essential for storing objects in an organized way. Unfortunately, the containers provided by the C++ Standard Library are not thread-safe. Attempts to read and write elements concurrently may corrupt the stored data. While such undefined behavior can be avoided by synchronizing all accesses using a mutex, this largely limits the available parallelism.
 
 The containers provided by EMB² enable a high degree of parallelism by design. They are implemented in a lock-free or wait-free fashion, thus avoiding any blocking operations. This way, multiple threads or tasks may access a container concurrently without suffering from typical side effects like convoying. Wait-free algorithms even guarantee that an operation completes within a bounded number of steps. Consequently, threads are immune to starvation which is critical for real-time systems.
 
@@ -396,15 +396,15 @@ In embedded systems, memory is often preallocated in the initialization phase to
 
 ### <a name="sec_containers_object_pools"></a>Object Pools
 
-An object pool allocates a fixed number of objects at construction. Objects can then be allocated from the pool and returned for later reuse. When implementing lock-free or wait-free algorithms, the underlying memory allocation scheme also to be lock-free or wait-free, respectively. However, memory allocation functions such as `new` and `delete` usually do not give any progress guarantees. To solve this problem, EMB² provides lock-free and wait-free object pools.
+An object pool allocates a fixed number of objects at construction. Objects can then be allocated from the pool and returned for later reuse. When implementing lock-free or wait-free algorithms, the underlying memory allocation scheme also has to be lock-free or wait-free, respectively. However, memory allocation functions such as `new` and `delete` usually do not give any progress guarantees. To solve this problem, EMB² provides lock-free and wait-free object pools.
 
-[Listing 2](#lst_object_pool_lst1) shows an example, where we create in line 1 an object pool with five objects of type `int`. If nothing else is specified, the object-pool uses a wait-free implementation. Then, we allocate five objects from the object pool and store the obtained pointers in a temporary array. The actual allocation takes place in line 6. After that, we deallocate them in the second loop be calling `FreeObject` on each pointer (see line 10).
+[Listing 2](#lst_object_pool_lst1) shows an example, where we create a pool containing five objects of type `int`. As the second step, we allocate five objects from the pool and store the obtained pointers in a temporary array. Finally, we deallocate them by calling `Free` on each pointer.
 
-    \\\inputlistingsnippet{../examples/containers/object_pool.cc:object_pool}
+    \\\inputlistingsnippet{../examples/containers/object_pool.cc:object_pool_1}
 
-<a name="lst_object_pool_lst1"></a>**Listing 2*: Object pool – initialization, allocation and deallocation
+<a name="lst_object_pool_lst1"></a>**Listing 2**: Object pool – initialization, allocation, and deallocation
 
-For actually allocating and deallocating objects, the object pool’s implementation relies on a value pool which keeps track of the objects in use. If the value pool is implemented in a lock-free manner, the object pool is lock-free as well (analogously for wait-free pools). Currently, EMB² provides two value pools: `WaitFreeArrayValuePool` and `LockFreeTreeValuePool`. Normally (if nothing is specified), the wait-free pool is used. For having a lock-free object pool instead, one has to specify the corresponding value pool to use as additional template parameter. If we replace line 1 of the previous example with the following lines, the object pool is not wait-free anymore but lock-free (the values are of type `int` and initialized to `0`):
+For allocating and deallocating objects, the object pool’s implementation relies on a value pool which keeps track of the objects in use. If the value pool is implemented in a lock-free manner, the object pool is lock-free as well (analogously for wait-free pools). Currently, EMB² provides two value pools: `WaitFreeArrayValuePool` and `LockFreeTreeValuePool`. Normally (if nothing else is specified), the wait-free pool is used. For having a lock-free object pool instead, one has to specify the corresponding value pool as additional template parameter. If we replace the first line of the previous example with the following lines, the object pool is not wait-free anymore but lock-free (the values are of type `int` and initialized with `0`):
 
     \\\inputlistingsnippet{../examples/containers/object_pool.cc:object_pool_2}
 
@@ -412,38 +412,30 @@ This will result in a speed-up for most applications, but progress guarantees ar
 
 ### <a name="sec_containers_stacks"></a>Stacks
 
-As the name indicates, the class template `LockFreeStack` implements a lock-free stack which stores elements according to the LIFO (Last-In, First-Out) principle. [Listing 3](#lst_stack_lst1) shows a simple example. In line 1, we create a stack of integers with a capacity of 10 elements.[<sup>3</sup>](#footnote_3) The stack provides two methods, `TryPush` and `TryPop`, both returning a Boolean value indicating success of the operation: `TryPop` returns `false` if the stack is empty, and `TryPush` returns false if the stack is full. `TryPop` returns the element removed from the stack via reference.
+As the name indicates, the class template `LockFreeStack` implements a lock-free stack which stores elements according to the LIFO (Last-In, First-Out) principle. The stack provides two methods, `TryPush` and `TryPop`, both returning a Boolean value indicating success of the operation: `TryPop` returns `false` if the stack is empty, and `TryPush` returns `false` if the stack is full. If successful, `TryPop` returns the element removed from the stack via reference. [Listing 3](#lst_stack_lst1) shows a simple example. First, we create a stack of integers with a capacity of 10 elements (due to necessary over-provisioning of memory in thread-safe memory management, the stack might be able to hold more than 10 elements, but is guaranteed to be able to hold at least 10 elements). Then, we try to pop an element from the empty stack, which has to fail. In the subsequent for-loop, we fill the stack with the values 0...4. Afterwards, we pop five values from the stack into variable `j`. According to the LIFO semantics, the values are popped in reverse order, i.e., we get the sequence 4...0, which is checked by the assertion.
 
     \\\inputlistingsnippet{../examples/containers/stack.cc:stack}
 
-<a name="lst_stack_lst1"></a>**Listing 3**: Stack - initialization, push and pop
-
-In line 4 of [Listing 3](#lst_stack_lst1), we try to pop an element from the empty stack, which has to fail. In the for-loop in line 7, we fill the stack with `int` values 0 ... 4. Afterwards, in the loop in line 12, we pop five values (line 13) from the stack into variable `j`. According to the LIFO semantics, the values are popped in reverse order, i.e., we get the sequence 4 ... 0. This is checked by the assertion in line 14.
-
-<sub>_<a name="footnote_3"></a><sup>3</sup> Due to the necessary over-provisioning of memory in thread-safe memory management, the stack might be able to hold more than 10 elements, but is guaranteed to be able to hold at least 10 elements._</sub>
+<a name="lst_stack_lst1"></a>**Listing 3**: Stack - initialization, push, and pop
 
 ### <a name="sec_containers_queues"></a>Queues
 
-There are two FIFO (First-In, First-Out) queue implementations in , `LockFreeMPMCQueue` and `WaitFreeSPSCQueue`. The former permits multiple producers and multiple consumers (MPMC), whereas the latter is restricted to a single producer and a single consumer (SPSC). The interfaces are the same for both queues.
+There are currently two FIFO (First-In, First-Out) queue implementations in EMB², `LockFreeMPMCQueue` and `WaitFreeSPSCQueue`. The former can deal with multiple producers and multiple consumers (MPMC), whereas the latter is restricted to a single producer and a single consumer (SPSC). The interfaces are the same for both queues. The Boolean return value of the methods `TryEnqueue` and `TryDequeue` indicates success (`false` if the queue is full or empty, respectively).
 
-[Listing 4](#lst_queue_lst1) shows an example for the `LockFreeMPMCQueue`. In line 1, we create a queue with element type `int` and a capacity of 10 elements.[<sup>4</sup>](#footnote_4) The Boolean return value of the methods `TryEnqueue` and `TryDequeue` indicates success (`false` if the queue is full or empty, respectively).
+[Listing 4](#lst_queue_lst1) shows an example for the `LockFreeMPMCQueue`. First, we create a queue with element type `int` and a capacity of (at least) 10 elements. Then, we try to dequeue an element from the empty queue, which has to fail. In the subsequent for-loop, we fill the queue with the values 0...4. Afterwards, we dequeue five values from the queue into variable `j`. According to the FIFO semantics, the values are dequeued in the same order as they were enqueued, i.e., we get the sequence 0...4, which is checked by the assertion.
 
     \\\inputlistingsnippet{../examples/containers/queues.cc:queue}
 
-<a name="lst_queue_lst1"></a>**Listing 4**: Queue – initialization, enqueue and dequeue
-
-In line 4 of [Listing 4](#lst_queue_lst1), we try to dequeue an element from the empty queue, which has to fail. In the for-loop in line 7, we fill the queue with `int` values 0 ... 4. Afterwards, in the loop in line 12, we dequeue five values (line 13) from the queue into variable `j`. According to the FIFO semantics, the values are dequeued in the same order as they were enqueued, i.e., we get the sequence 0 ... 4. This is checked by the assertion in line 14.
-
-<sub>_<a name="footnote_4"></a><sup>4</sup> As in case of stacks, the queue may actually hold more than 10 elements._</sub>
+<a name="lst_queue_lst1"></a>**Listing 4**: Queue – initialization, enqueue, and dequeue
 
 
 ## <a name="cha_mtapi"></a>MTAPI
 
 Leveraging the power of multicore processors requires to split computations into fine-grained tasks that can be executed in parallel. Threads are usually too heavy-weight for that purpose, since context switches consume a significant amount of time. Moreover, programming with threads is complex and error-prone due to typical pitfalls such as race conditions and deadlocks. To solve these problems, efficient task scheduling techniques have been developed which dynamically distribute the available tasks among a fixed number of worker threads. To reduce overhead, there is usually exactly one worker thread for each processor core.
 
-While task schedulers are nowadays widely employed, especially in desktop and server applications, they are typically limited to a single operating system running on a homogeneous multicore processor. System-wide task management in heterogeneous embedded systems must be realized explicitly with low-level communication mechanisms. MTAPI [[1]](#bib_mtapi) addresses those issues by providing an API which allows parallel embedded software to be designed in a straightforward way, covering homogeneous and heterogeneous multicore architectures, as well as acceleration units. It abstracts from the hardware details and lets software developers focus on the application. Moreover, MTAPI takes into account typical requirements of embedded systems such as real-time constraints and predictable memory consumption.
+While task schedulers are nowadays widely employed, especially in desktop and server applications, they are typically limited to a single operating system running on a homogeneous multicore processor. System-wide task management in heterogeneous embedded systems must be realized explicitly with low-level communication mechanisms. MTAPI [[1]](#bib_mtapi) addresses those issues by providing an API which allows parallel embedded software to be designed in a straightforward way, covering homogeneous and heterogeneous multicore architectures, as well as accelerators such as GPUs or FPGAs. As a major advantage, it abstracts from the hardware details and lets software developers focus on the application. Moreover, MTAPI takes into account typical requirements of embedded systems such as real-time constraints and predictable memory consumption.
 
-The remainder of this chapter is structured as follows: The next section explains the basic terms and concepts of MTAPI as given in the specification [[1]](#bib_mtapi). Section [MTAPI C Interface](#sec_mtapi_c_interface) describes the C API using a simple example taken from [[1]](#bib_mtapi). Finally, Section [MTAPI C++ Interface](#sec_mtapi_cpp_interface) outlines the use of MTAPI in C++ applications. Note that the C++ interface is provided by EMB² for convenience but it is not part of the standard.
+The remainder of this chapter is structured as follows: The next section explains the basic terms and concepts of MTAPI as given in the specification [[1]](#bib_mtapi). The section on the [MTAPI C Interface](#sec_mtapi_c_interface) describes the C API using a simple example taken from [[1]](#bib_mtapi). Finally, the section on the [MTAPI C++ Interface](#sec_mtapi_cpp_interface) outlines the use of MTAPI in C++ applications. Note that the C++ interface is provided by EMB² for convenience but it is not part of the standard. Readers who are familiar with MTAPI or just want to get impression on how to use MTAPI in heterogeneous systems may skip this chapter on go directly to [Heterogeneous Systems](#cha_heterogeneous_systems).
 
 ### <a name="sec_mtapi_foundations"></a>Foundations
 
@@ -463,7 +455,7 @@ The definition allows portability of software at the interface level (e.g., the 
 
 #### Tasks
 
-A task represents the computation associated with the data to be processed. A task is executed concurrently to the code starting the task. The main API functions are `mtapi_task_start()` and `mtapi_task_wait()`. The semantics are similar to the corresponding thread functions (e.g. `pthread_create`/`pthread_join` in Pthreads). The lifetime of a task is limited; it can be started only once.
+A task represents the computation associated with the data to be processed. A task is executed concurrently to the code starting the task. The main API functions are `mtapi_task_start()` and `mtapi_task_wait()`. The semantics are similar to the corresponding thread functions (e.g., `pthread_create` / `pthread_join` in POSIX Threads). The lifetime of a task is limited; it can be started only once.
 
 #### Actions
 
@@ -477,7 +469,7 @@ Starting a task consists of three steps:
 
 #### Synchronization
 
-The basic synchronization mechanism provided with in MTAPI is waiting for task completion. Calling `mtapi_task_wait()` with a task handle blocks the current thread or task until the task referenced by the handle has completed. Depending on the implementation, the calling thread can be used for executing other tasks while waiting for the task to be completed. In order to synchronize with a set of tasks, every task can be associated with a task group. The methods `mtapi_group_wait_all()` and `mtapi_group_wait_any()` wait for a group of tasks or completion of any task in the group, respectively.
+The basic synchronization mechanism provided by MTAPI is waiting for task completion. Calling `mtapi_task_wait()` with a task handle blocks the current thread or task until the task referenced by the handle has completed. Depending on the implementation, the calling thread can be used for executing other tasks while waiting for the task to be completed. In order to synchronize with a set of tasks, every task can be associated with a task group. The methods `mtapi_group_wait_all()` and `mtapi_group_wait_any()` wait for a group of tasks or completion of any task in the group, respectively.
 
 #### Queues
 
@@ -499,12 +491,12 @@ Another important purpose of queues is that different queues can express differe
 
 #### Attributes
 
-Attributes are provided as a means to extend the API. Different implementations may define and support additional attributes beyond those predefined by the API. To promote portability and implementation flexibility, attributes are maintained in an opaque data object that may not be directly examined by the user. Each object (e.g., task, action, queue) has an attributes data object associated with it, and many attributes have a small set of predefined values that must be supported by MTAPI implementations. The user may initialize, get, and set these attributes. For default behavior, it is not necessary to call the initialize, get, and set attribute functions. However, to get non-default behavior, the typical four-step process is:
+Attributes are provided as a means to extend the API. Different implementations may define and support additional attributes beyond those predefined by the API. To foster portability and implementation flexibility, attributes are maintained in an opaque data object that may not be examined directly by the user. Each object (e.g., task, action, queue) has an attributes data object associated with it, and many attributes have a small set of predefined values that must be supported by MTAPI implementations. The user may initialize, get, and set these attributes. For default behavior, it is not necessary to call the initialize, get, and set attribute functions. However, to get non-default behavior, the typical four-step process is:
 
 1. Declare an attributes object of the `mtapi_<object>_attributes_t` data type.
 2. `mtapi_<object>attr_init()`: Returns an attributes object with all
    attributes set to their default values.
-3. `mtapi_<object>attr_set()`: (Repeat for all attributes to be set). Assigns a
+3. `mtapi_<object>attr_set()` (Repeat for all attributes to be set): Assigns a
    value to the specified attribute of the specified attributes object.
 4. `mtapi_<object>_create()`: Passes the attributes object modified in the
    previous step as a parameter when creating the object.
@@ -588,11 +580,11 @@ After everything is done, the action is deleted (`mtapi_action_delete()`) and th
 
 ### <a name="sec_mtapi_cpp_interface"></a>C++ Interface
 
-provides C++ wrappers for the MTAPI C interface. The full interface provides functions for all MTAPI releated tasks and supports heterogeneous systems. For ease of use a simpler version for SMP systems is provided.
+As mentioned previously, EMB² provides C++ wrappers for the MTAPI C interface. The full interface provides functions for all MTAPI releated tasks and even supports heterogeneous systems. For ease of use, a simpler version for SMP systems is also provided.
 
 #### Full Interface
 
-The signature of the action function for the C++ interface is the same as in the C interface:
+The signature of an action function for the C++ interface is the same as for the C interface:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_cpp.cc:mtapi_cpp_action_signature}
 
@@ -624,11 +616,11 @@ The `fibonacci()` function is about the same as in the C version. The MTAPI runt
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_cpp.cc:mtapi_cpp_initialize}
 
-Then the node instance can to be fetched:
+Then, the node instance can be fetched:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_cpp.cc:mtapi_cpp_get_node}
 
-After that, the action function needs to be associated to a job. By instancing an `embb::mtap::Action` object, the action function is registered with the job `FIBONACCI_JOB`. The job is stored in the global variable `embb::mtapi::Job fibonacciJob` so that it can be accessed by the action function later on:
+After that, the action function needs to be associated to a job. By instantiating an `embb::mtap::Action` object, the action function is registered with the job `FIBONACCI_JOB`. The job is stored in the global variable `embb::mtapi::Job fibonacciJob` so that it can be accessed by the action function later on:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_cpp.cc:mtapi_cpp_register_action}
 
@@ -644,7 +636,7 @@ The registered action will be unregistered when it goes out of scope. The runtim
 
 #### Simplified Interface for SMP actions
 
-MTAPI CPP provides a simpler version of the MTAPI interface for SMP actions. The signature of the action function for the simplified API looks like this:
+The signature of an action function for the simplified API (SMP systems) looks like this:
 
     void simpleActionFunction(
       TaskContext & task_context
@@ -652,17 +644,21 @@ MTAPI CPP provides a simpler version of the MTAPI interface for SMP actions. The
       // something useful
     }
 
-The action function does not need to be registered with a job. Instead a preregistered job is used that expects a `embb::base::Function<void, embb::mtapi::TaskContext &>` object. Therefore a task can be scheduled directly using only the function above:
+The action function does not need to be registered with a job. Instead, a preregistered job is used that expects an `embb::base::Function<void, embb::mtapi::TaskContext &>` object. Therefore, a task can be scheduled directly using only the function above:
 
     embb::mtapi::Task task = node.Start(simpleActionFunction);
 
 ### <a name="sec_mtapi_plugins"></a>Plugins
 
-The implementation of MTAPI provides an extension to allow for custom actions that are not executed by the scheduler for software actions as detailed in the previous sections. Three plugins are delivered with EMB², one for supporting distributed systems through TCP/IP networking and the other two to allow for transparently using OpenCL or CUDA accelerators.
+The implementation of MTAPI provides an extension to allow for custom actions that are not executed by the scheduler for software actions as described in the previous sections. Three plugins are delivered with EMB², one for supporting distributed systems through TCP/IP networking and the other two for OpenCL or CUDA-capable GPUs.
 
 #### Plugin API
 
-The plugin API consists of a single function named `mtapi_ext_plugin_action_create()` contained in the mtapi\_ext.h header file. It is used to associate the plugin action with a specific job ID:
+The plugin API essentially consists of a single function contained in the `mtapi_ext.h` header file:
+
+    mtapi_ext_plugin_action_create()
+
+This function is used to associate the plugin action with a specific job ID:
 
     mtapi_action_hndl_t mtapi_ext_plugin_action_create(
       MTAPI_IN mtapi_job_id_t job_id,
@@ -676,19 +672,19 @@ The plugin API consists of a single function named `mtapi_ext_plugin_action_crea
       MTAPI_OUT mtapi_status_t* status
     );
 
-The plugin action is implemented through 3 callbacks, task start, task cancel and action finalize.
+The plugin action is implemented through three callbacks: task start, task cancel, and action finalize.
 
-`task_start_function` is called when the user requests execution of the plugin action by calling `mtapi_task_start()` or `mtapi_task_enqueue()`. To those functions the fact that they operate on a plugin action is transparent, they only require the job handle of the job the action was registered with.
+`task_start_function` is called when the user requests execution of the plugin action by calling `mtapi_task_start()` or `mtapi_task_enqueue()`. To those functions the fact that they operate on a plugin action is transparent, they only require the handle of the job the action was registered with.
 
-`task_cancel_function` is called when the user requests cancelation of a tasks by calling `mtapi_task_cancel()` or by calling `mtapi_queue_disable()` on a non-retaining queue.
+`task_cancel_function` is called when the user requests cancelation of a task by calling `mtapi_task_cancel()` or by calling `mtapi_queue_disable()` on a non-retaining queue.
 
 `action_finalize_function` is called when the node is finalized and the action is deleted, or when the user explicitly deletes the action by calling `mtapi_action_delete()`.
 
-For illustration our example plugin will provide a no-op action. The task start callback in that case looks like this:
+For illustration, our example plugin will provide a no-op action. The task start callback in that case looks like this:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_task_start_cb}
 
-The scheduling operation is responsible for bringing the task to execution, this might involve instructing some hardware to execute the task or pushing the task into a queue for execution by a separate worker thread. Here however, the task is executed directly:
+The scheduling operation is responsible for bringing the task to execution. This might involve instructing some hardware to execute the task or pushing the task into a queue for execution by a separate worker thread. Here, however, the task is executed directly:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_task_schedule}
 
@@ -696,7 +692,7 @@ Since the task gets executed right away, it cannot be canceled and the task canc
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_task_cancel_cb}
 
-The plugin action did not acquire any resources so the action finalize callback is empty as well:
+The plugin action did not acquire any resources, so the action finalize callback is empty as well:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_action_finalize_cb}
 
@@ -704,23 +700,23 @@ Now that the callbacks are in place, the action can be registered with a job aft
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_action_create}
 
-The job handle can now be obtained the normal MTAPI way. The fact that there is a plugin working behind the scenes is transparent by now:
+The job handle can now be obtained the normal MTAPI way. The fact that there is a plugin working behind the scenes is transparent:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_get_job}
 
-Using the job handle tasks can be started like normal MTAPI tasks:
+Using the job handle, tasks can be started like normal MTAPI tasks:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_task_do_start}
 
-This call will lead to the invocation of then `plugin_task_start` callback function, where the plugin implementor is responsible for bringing the task to execution.
+This call will lead to the invocation of the `plugin_task_start` callback function, where the plugin implementor is responsible for bringing the task to execution.
 
 #### Network
 
-The MTAPI network plugin provides a means to distribute tasks over a TCP/IP network. As an example the following vector addition action is used:
+The MTAPI network plugin provides a means to distribute tasks over a TCP/IP network. As an example, the following vector addition action is used:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_network.cc:mtapi_network_c_action_function}
 
-It adds two float vectors and a float from node local data and writes the result into the result float vector. In the example code the vectors will hold `kElements` floats each.
+It adds two float vectors and a float from node local data, and writes the result into the result float vector. In the example, code the vectors will hold `kElements` floats each.
 
 To use the network plugin, its header file needs to be included first:
 
@@ -730,29 +726,29 @@ After initializing the node using `mtapi_initialize()`, the plugin itself needs 
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_network.cc:mtapi_network_c_plugin_initialize}
 
-This will set up a listening socket on the localhost interface (127.0.0.1) at port 12345. The socket will allow a maximum of 5 connections and have a maximum transfer buffer size of `kElements * 4 * 3 + 32`. This buffer size needs to be big enough to fit at least the argument and result buffer sizes at once. The example uses 3 vectors of `kElements` floats using `kElements * sizeof(float) * 3` bytes.
+This will set up a listening socket on the localhost interface (127.0.0.1) at port 12345. The socket will allow a maximum of five connections and has a maximum transfer buffer size of `kElements * 4 * 3 + 32`. This buffer size needs to be large enough to fit at least the argument and result buffer sizes at once. The example uses three vectors of `kElements` floats using `kElements * sizeof(float) * 3` bytes.
 
 Since the example connects to itself on localhost, the “remote” action needs to be registered with the `NETWORK_REMOTE_JOB`:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_network.cc:mtapi_network_c_remote_action_create}
 
-After that, the local network action is created, that maps `NETWORK_LOCAL_JOB` to `NETWORK_REMOTE_JOB` through the network:
+After that, the local network action is created that maps `NETWORK_LOCAL_JOB` to `NETWORK_REMOTE_JOB` through the network:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_network.cc:mtapi_network_c_local_action_create}
 
-Now, `NETWORK_LOCAL_JOB` can be used to execute tasks by simply calling `mtapi_task_start()`. Their parameters will be transmitted through a socket connection and are consumed by the network plugin worker thread. The thread will start a task using the `NETWORK_REMOTE_JOB`. When this task is finished, the results will be collected and sent back through the network. Again the network plugin thread will receive the results, provide them to the `NETWORK_LOCAL_JOB` task and mark that task as finished.
+Now, `NETWORK_LOCAL_JOB` can be used to execute tasks by simply calling `mtapi_task_start()`. Their parameters will be transmitted through a socket connection and are consumed by the network plugin worker thread. The thread will start a task using the `NETWORK_REMOTE_JOB`. When this task is finished, the results will be collected and sent back through the network. Again, the network plugin thread will receive the results, provide them to the `NETWORK_LOCAL_JOB` task and mark that task as finished.
 
 When all work is done, the plugin needs to be finalized. This will stop the plugin worker thread and close the sockets:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_network.cc:mtapi_network_c_plugin_finalize}
 
-Then the node may be finalized by calling `mtapi_finalize()`.
+After that, the node may be finalized by calling `mtapi_finalize()`.
 
 #### OpenCL
 
-The MTAPI OpenCL plugin allows the user to incorporate the computational power of an OpenCL accelerator, if one is available in the system.
+The MTAPI OpenCL plugin allows the user to leverage the computational power of an OpenCL accelerator, if one is available in the system.
 
-The vector addition example from the network plugin is used again. However, the action function is an OpenCL kernel now:
+Let us reuse the vector addition example from the network plugin. However, the action function is an OpenCL kernel now:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_opencl.cc:mtapi_opencl_c_kernel}
 
@@ -764,13 +760,13 @@ As with the network plugin, the OpenCL plugin needs to be initialized after the 
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_opencl.cc:mtapi_opencl_c_plugin_initialize}
 
-Then the plugin action can be registered with the `OPENCL_JOB`:
+Then, the plugin action can be registered with the `OPENCL_JOB`:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_opencl.cc:mtapi_opencl_c_action_create}
 
-The kernel source and the name of the kernel to use (AddVector) need to be specified while creating the action. The kernel will be compiled using the OpenCL runtime and the provided node local data transferred to accelerator memory. The local work size is the number of threads that will share OpenCL local memory, in this case 32. The element size instructs the OpenCL plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The OpenCL plugin will launch `result_buffer_size/element_size` OpenCL threads to calculate the result.
+The kernel source and the name of the kernel to use (`AddVector`) need to be specified while creating the action. The kernel will be compiled using the OpenCL runtime and the provided node local data will be transferred to the accelerator memory. The local work size is the number of threads that will share OpenCL local memory, in this case 32. The element size tells the OpenCL plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The OpenCL plugin will launch `result_buffer_size/element_size` OpenCL threads to calculate the result.
 
-Now the `OPENCL_JOB` can be used like a normal MTAPI job to start tasks.
+Now, the `OPENCL_JOB` can be used like a normal MTAPI job to start tasks.
 
 After all work is done, the plugin needs to be finalized. This will free all memory on the accelerator and delete the corresponding OpenCL context:
 
@@ -778,9 +774,9 @@ After all work is done, the plugin needs to be finalized. This will free all mem
 
 #### CUDA
 
-The MTAPI CUDA plugin allows the user to incorporate the computational power of an CUDA accelerator, if one is available in the system.
+Similar to the OpenCL plugin, the CUDA plugin can be used to start tasks on an Nvidia GPU.
 
-The vector addition example from the OpenCL plugin is used again. The action function looks slightly in CUDA:
+The vector addition example looks slightly different in CUDA:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda_kernel.cu:mtapi_cuda_c_kernel}
 
@@ -794,13 +790,13 @@ Then, the CUDA plugin needs to be initialized after the node has been initialize
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda.cc:mtapi_cuda_c_plugin_initialize}
 
-Now the plugin action can be registered with the `CUDA_JOB`:
+Now, the plugin action can be registered with the `CUDA_JOB`:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_cuda.cc:mtapi_cuda_c_action_create}
 
-The precompiled kernel binary and the name of the kernel to use need to be specified while creating the action. The kernel and node local data provided are transferred to accelerator memory. The local work size is the number of threads that will share CUDA local memory, in this case 32. The element size instructs the CUDA plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The CUDA plugin will launch `result_buffer_size/element_size` CUDA threads to calculate the result.
+The precompiled kernel binary and the name of the kernel to use need to be specified while creating the action. The kernel and node local data provided are transferred to the accelerator memory. The local work size is the number of threads that will share CUDA local memory, in this case 32. The element size tells the CUDA plugin how many bytes a single element in the result buffer consumes, in this case 4, as a single result is a single float. The CUDA plugin will launch `result_buffer_size/element_size` CUDA threads to calculate the result.
 
-Now the `CUDA_JOB` can be used like a normal MTAPI job to start tasks.
+Now, the `CUDA_JOB` can be used like a normal MTAPI job to start tasks.
 
 After all work is done, the plugin needs to be finalized. This will free all memory on the accelerator and delete the corresponding CUDA context:
 
@@ -1030,4 +1026,4 @@ and finally run:
 
 ## <a name="cha_bibliography"></a>Bibliography
 
-<a name="bib_mtapi"></a>[1] _Multicore Task Management API (MTAPI) Specification V1.0_, The Multicore Association, Mar. 2013.
+<a name="bib_mtapi"></a>[1] Multicore Task Management API (MTAPI) Specification V1.0, The Multicore Association, March 2013.

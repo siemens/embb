@@ -29,7 +29,7 @@
 #include<embb/containers/lock_free_tree_value_pool.h>
 
 void RunObjectPoolExample1() {
-  // snippet_begin:object_pool
+  // snippet_begin:object_pool_1
   embb::containers::ObjectPool<int> objPool(5); // create
 
   int* alloc[5];
@@ -47,7 +47,7 @@ void RunObjectPoolExample1() {
 void RunObjectPoolExample2() {
   // snippet_begin:object_pool_2
   embb::containers::ObjectPool<int, 
-    embb::containers::LockFreeTreeValuePool< int, 0 >> objPool(5); // create
+    embb::containers::LockFreeTreeValuePool< int, 0 >> objPool(5);
   // snippet_end
 }
 
