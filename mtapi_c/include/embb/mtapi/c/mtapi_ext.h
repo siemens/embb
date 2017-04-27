@@ -173,7 +173,7 @@ mtapi_action_hndl_t mtapi_ext_plugin_action_create(
 typedef mtapi_uint_t(*mtapi_ext_problem_size_function_t)(
   MTAPI_IN mtapi_task_hndl_t task);
 
-/** task attributes */
+/** job attributes */
 enum mtapi_ext_job_attributes_enum {
   MTAPI_JOB_PROBLEM_SIZE_FUNCTION,     /**< function to calculate the
                                             relative problem size of tasks
@@ -182,12 +182,12 @@ enum mtapi_ext_job_attributes_enum {
                                             relative problem size of tasks
                                             started on this job */
 };
-/** size of the \a MTAPI_TASK_PROBLEM_SIZE attribute */
+/** size of the \a MTAPI_JOB_DEFAULT_PROBLEM_SIZE attribute */
 #define MTAPI_JOB_DEFAULT_PROBLEM_SIZE_SIZE sizeof(mtapi_uint_t)
 
 /**
- * Task attributes.
- * \ingroup TASKS
+ * Job attributes.
+ * \ingroup JOBS
  */
 struct mtapi_ext_job_attributes_struct {
   mtapi_ext_problem_size_function_t
