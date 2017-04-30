@@ -339,7 +339,7 @@ Then, we can start the network:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_run}
 
-Note that you will probably not observe a speedup when you run this program on a multicore processor. One reason for this is that I/O operations like reading a file from the hard disk and writing the output to the screen are typically a bottleneck. Moreover, the amount of work done in the middle stage of the pipeline (**replace**) is rather low. To outweigh the overhead for parallel execution, the amount of work must be much higher. In image processing, for example, a single pipeline stage may process a complete image. To sum up, we haven chosen this example for its simplicity, not for its efficiency.
+Note that you will probably not observe a speedup when you run this program on a multicore processor. One reason for this is that I/O operations like reading a file from the hard disk and writing the output to the screen are typically a bottleneck. Moreover, the amount of work done in the middle stage of the pipeline (**replace**) is rather low. To outweigh the overhead for parallel execution, the amount of work must be much higher. In image processing, for example, a single pipeline stage may process a complete image. To sum up, we have chosen this example for its simplicity, not for its efficiency.
 
 ### <a name="sec_dataflow_nonlinear_pipelines"></a>Nonlinear Pipelines
 
@@ -580,7 +580,7 @@ After everything is done, the action is deleted (`mtapi_action_delete()`) and th
 
 ### <a name="sec_mtapi_cpp_interface"></a>C++ Interface
 
-As mentioned previously, EMB² provides C++ wrappers for the MTAPI C interface. The full interface provides functions for all MTAPI releated tasks and even supports heterogeneous systems. For ease of use, a simpler version for SMP systems is also provided.
+As mentioned previously, EMB² provides C++ wrappers for the MTAPI C interface. The full interface provides functions for all MTAPI related tasks and even supports heterogeneous systems. For ease of use, a simpler version for SMP systems is also provided.
 
 #### Full Interface
 
@@ -708,7 +708,7 @@ Using the job handle, tasks can be started like normal MTAPI tasks:
 
     \\\inputlistingsnippet{../examples/mtapi/mtapi_c_plugin.cc:mtapi_c_plugin_task_do_start}
 
-This call will lead to the invocation of the `plugin_task_start` callback function, where the plugin implementor is responsible for bringing the task to execution.
+This call will lead to the invocation of the `plugin_task_start` callback function, where the plugin implementer is responsible for bringing the task to execution.
 
 #### Network
 
@@ -807,7 +807,9 @@ After all work is done, the plugin needs to be finalized. This will free all mem
 
 ### <a name="sec_algorithms_heterogeneous_systems"></a>Algorithms
 
-All of the algorithms introduced in Chapter [Algorithms](#cha_algorithms) can be used on heterogeneous systems as well. Instead of functions, functors or lambdas the algoritm functions accept MTAPI job handles that implement the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used above. For the sake of simplicity, CPU actions are used to simulate a heterogeneous system. The CPU actions are functions that use the following signature:
+All of the algorithms provided by EMB² can also be used on heterogeneous systems. This allows to transparently offload work on different kinds of compute units, thus leveraging the available hardware resources in an optimal way. In the following, we focus on the key concepts&mdash;for more detailed information, please see the source code contained in the `examples` directory.
+
+In addition to functions, functors or lambdas, the algorithms accept MTAPI job handles that implement the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used above. For the sake of simplicity, CPU actions are used to simulate a heterogeneous system. The CPU actions are functions with the following signature:
 
     void Action(
       const void* args,
@@ -819,17 +821,17 @@ All of the algorithms introduced in Chapter [Algorithms](#cha_algorithms) can be
       mtapi_task_context_t* task_context
       );
 
-A node handle is retrieved and used by all the following examples like this:
+A node handle is retrieved and used by the following examples like this:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:get_node}
 
 #### Invoke
 
-First `Invoke` is used to start two jobs in parallel. Two action functions `InvokeA` and `InvokeB` are defined that have no parameters and just increment a global value (`a` and `b`):
+First, we consider `Invoke` to start two jobs in parallel. For that purpose, we define two action functions `InvokeA` and `InvokeB` that have no parameters and just increment a global value (`a` and `b`, respectively). For `InvokeA`, we have:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:invoke_action}
 
-The actions are associated with the job ids `JOB_A` and `JOB_B`. The job handles are retrieved:
+The actions are associated with the job IDs `JOB_A` and `JOB_B`. The job handles are retrieved as follows:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:invoke_jobs}
 
@@ -841,43 +843,43 @@ The global variables `a` and `b` are now both set to `1`.
 
 #### Sorting
 
-To use `QuickSort` we need a comparison function. An action function `DescendingCompare` is defined that has two arguments of type `int` and one result of type `bool`. Since the function signature is fixed, the arguments are packed into a struct:
+To use `QuickSort`, we need a comparison function. `DescendingCompare` has two arguments of type `int` and one result of type `bool`. Since the function signature is fixed, we pack the arguments into a struct:
 
-    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_input_int_int}
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_input_lhs_rhs}
 
 The same holds for the result:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_output_bool}
 
-`args` needs to be cast to `InT` and `result_buffer` to `OutT`:
+`args` needs to be casted to `InT` and `result_buffer` to `OutT`:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:cast_parameters}
 
-Now, the arguments can be accessed and compared and then the result can be written:
+Now, the arguments can be accessed, compared and the result can be written:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_action_body}
 
-`DescendingCompare` is associated with the job id `JOB_COMPARE` and the job handle can be retrieved:
+`DescendingCompare` is associated with the job ID `JOB_COMPARE` and the job handle can be retrieved as follows:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_job}
 
-Then, a vector with `int`s to sort is prepared
+Then, we prepare a vector with `int`'s to be sorted:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_data}
 
-Finally `QuickSort` is called
+Finally, we call `QuickSort`
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:sort_call}
 
-and the `int`s in the vector are now in descending order.
+and the `int`'s in the vector are now in descending order.
 
 #### Counting
 
-In `CountIf` a predicate can be supplied and is implemented in the action function `CheckZero` that has one argument of type `int` and one result of type `bool`. The arguments are packed into a struct:
+The predicate supplied to `CountIf` can be implemented by an action function `CheckZero` that takes one argument of type `int` and returns one result of type `bool`. The argument is again packed into a struct:
 
-    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_input_int}
+    \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_input_val}
 
-The result struct is the same as in the sorting example. Again `args` and `result_buffer` need to be cast to `InT` and `OutT`. Then the body of `CheckZero` is simply:
+The result struct is the same as in the sorting example. Also, `args` and `result_buffer` need to be casted to `InT` and `OutT`. Then, the body of `CheckZero` is simply:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_action_body}
 
@@ -885,23 +887,23 @@ After retrieving the job handle
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_job}
 
-a vector with `int`s to count (if they are zero) is prepared
+we prepare a vector with `int`'s to count (if they are zero):
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_data}
 
-Finally `CountIf` is called
+Finally, we call `CountIf`
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:count_call}
 
-and the numer of zeros in the vector is returned.
+which returns the number of zeros in the vector.
 
 #### Foreach Loops
 
-`ForEach` accepts functions receiving a reference from an iterator to work on the referenced object. An action function `Double` is implemented to double the given value. It has one argument of type `int` and one result of type `int`. The argument struct is thus the same as in the counting example. The result resides in a struct containing one `int`:
+`ForEach` accepts functions taking a reference to an iterator as argument in order to work on the referenced object. Consider, for example, an action function `Double` that doubles a given value. It has one argument of type `int` and one result of type `int`. The argument struct is thus the same as in the counting example. The result resides in a struct containing one `int`:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:struct_output_int}
 
-`args` and `result_buffer` need to be cast to `InT` and `OutT` once more. The body of `Double` is the:
+`args` and `result_buffer` need to be casted to `InT` and `OutT` once more. The body of `Double` is defined as follows:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:double_action_body}
 
@@ -909,36 +911,36 @@ After retrieving the job handle
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:foreach_job}
 
-a vector with `int`s to double is filled and `ForEach` is called
+we can call `ForEach` with this handle:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:foreach_call}
 
 #### Reductions and Prefix Computations
 
-`Reduce` and `Scan` use a reduction and a transformation function. The reduction function has two arguments and a result that all have the same type. The transformation function has one argument and one result with potentially different types. In this case they all are of type `int`. The `Double` action and `JOB_DOUBLE` from the `ForEach` example is reused as the transformation function and a new `Add` action is implemented to facilitate the reduction. After casting the parameters from the signature the body of `Add` is:
+`Reduce` and `Scan` use a reduction and a transformation function. The reduction function has two arguments and one result that all have the same type. The transformation function has one argument and one result with potentially different types. In our example, they are all of type `int`. For simplicity, we reuse the `Double` action and `JOB_DOUBLE` from the previous example as our transformation function. For the reduction function, we introduce an action `Add` with the following simple body:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:add_action_body}
 
-The job handles are retrieved
+The job handles are retrieved as follows:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:reduce_jobs}
 
-and a vector with `int`s to reduce or scan is prepared:
+Next, we create a vector of `int`'s:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:reduce_data}
 
-The reduction can then be achieved using:
+The elements of the vector can then be reduced by:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:reduce_call}
 
-and the prefix sum is computed using:
+The prefix sum is computed similarly:
 
     \\\inputlistingsnippet{../examples/algorithms/heterogeneous.cc:scan_call}
 
 
 ### <a name="sec_dataflow_heterogeneous_systems"></a>Dataflow
 
-Dataflow can be used on heterogeneous systems as well. In addition to functions and functors the dataflow sources, sinks and processes accept MTAPI job handles that implement the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used above. To simulate a heterogeneous system CPU actions with the following signature are used:
+Dataflow networks can be used on heterogeneous systems as well. In addition to functions and functors, dataflow sources, sinks, and processes accept MTAPI job handles implementing the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used previously. To simulate a heterogeneous system, CPU actions with the following signature are used:
 
     void Action(
       const void* args,
@@ -950,7 +952,7 @@ Dataflow can be used on heterogeneous systems as well. In addition to functions 
       mtapi_task_context_t* task_context
       );
 
-As an example the integers from 0 to 9 shall be doubled and summed. For that, three action functions are defined, one for a source called `Generate`, one for a process called `Double` and one for a sink called `Accumulate`. Each of them is associated with a different job.
+Suppose, for example, we want to double the integers from 0 to 9 and sum them up. For that purpose, we define three action functions, one for a source called `Generate`, one for a process called `Double`, and one for a sink called `Accumulate`. Each of them is associated with a different job.
 
 #### Generate
 
@@ -958,69 +960,59 @@ The source function generates integers from 0 to 9. It receives no arguments and
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:source_output_struct_int}
 
-and the `result_buffer` pointer needs to be cast to that `OutT`:
+The `result_buffer` pointer needs to be casted to `OutT`:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_output}
 
-Then the body of the function is:
+Then, the body of the function is:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:source_action_body}
 
 #### Double
 
-The process function expects and `int` and returns the double value of it. Both arguments and results are packed into a struct:
+The process function expects and `int` and returns the double of its value. Both, the argument and the result are packed into a struct:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:input_struct_int}
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:output_struct_int}
 
-and `args` as well as `result_buffer` need to be cast:
+As usual, `args` as well as `result_buffer` need to be casted:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_input}
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_output}
 
-Finally the calculation can commence:
+Finally, the actual calculation is simply:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:double_action_body}
 
 #### Accumulate
 
-The sink is supposed to add up all incoming values. It returns no results and expects a value of type `int` wich is packed into a struct again:
+The sink is supposed to add up all incoming values. It returns no result and expects a value of type `int` which is packed into a struct:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:input_struct_int}
 
-The argument is packed into a struct:
-
-    \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:input_struct_int}
-
-`args` needs to be cast to `InT`:
+After casting `args` to `InT`, the inputs can be accumulated:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:cast_input}
-
-and then the inputs are accumulated:
-
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:sink_action_body}
 
-#### The Network
+#### Network
 
-In the main function the node handle is retrieved:
+In the main function, we first retrieve the node handle:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:get_node}
 
-Then, the job handles are obtained:
+Then, we obtain the job handles:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:get_jobs}
 
-After that the network, source, sink and process can be defined:
+After that, we define the network and its processes:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:define_net}
 
-Now the network is connected
+Finally, we connect the processes and run the network:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:net_connect}
-
-and finally run:
-
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:net_run}
 
 

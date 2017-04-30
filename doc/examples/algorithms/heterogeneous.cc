@@ -69,7 +69,7 @@ static void DescendingCompare(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
-  // snippet_begin:struct_input_int_int
+  // snippet_begin:struct_input_lhs_rhs
   typedef struct {
     int lhs;
     int rhs;
@@ -100,7 +100,7 @@ static void CheckZero(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
-  // snippet_begin:struct_input_int
+  // snippet_begin:struct_input_val
   typedef struct {
     int val;
   } InT;
