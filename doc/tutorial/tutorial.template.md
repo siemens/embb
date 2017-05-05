@@ -455,7 +455,7 @@ The definition allows portability of software at the interface level (e.g., the 
 
 #### Tasks
 
-A task represents the computation associated with the data to be processed. A task is executed concurrently to the code starting the task. The main API functions are `mtapi_task_start()` and `mtapi_task_wait()`. The semantics are similar to the corresponding thread functions (e.g., `pthread_create` / `pthread_join` in POSIX Threads). The lifetime of a task is limited; it can be started only once.
+A task represents the computation associated with the data to be processed and is executed concurrently to the code starting it. The main API functions are `mtapi_task_start()` and `mtapi_task_wait()`. The semantics are similar to the corresponding thread functions (e.g., `pthread_create` / `pthread_join` in POSIX Threads). The lifetime of a task is limited; it can be started only once.
 
 #### Actions
 

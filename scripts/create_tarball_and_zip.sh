@@ -285,7 +285,7 @@ redirect_cmd rsync \
         --exclude "*.toc" \
         --exclude "*.aux" \
         --exclude "doc/tutorial/tutorial.template.md" \
-        --exclude "doc/tutorial/bakemd.py" \
+        --exclude "doc/tutorial/bake_tutorial.py" \
         --exclude "doc/reference/*.xml" \
         --exclude "doc/reference/*.dox" \
         --exclude "doc/reference/*.in" \
@@ -319,8 +319,8 @@ REMEMBER_CUR_DIR=$(pwd)
 
 if [ -f "$TUTORIAL_MD_DIR/tutorial.template.md" ]; then
         cd "$TUTORIAL_MD_DIR"
-        if [ -f "$TUTORIAL_MD_DIR/bakemd.py" ]; then
-                redirect_cmd python bakemd.py >> tutorial.md
+        if [ -f "$TUTORIAL_MD_DIR/bake_tutorial.py" ]; then
+                redirect_cmd python bake_tutorial.py >> tutorial.md
         fi
         if [ -f "$TUTORIAL_SOURCE" ]; then
                 cp $TUTORIAL_SOURCE $TUTORIAL_TARGET
