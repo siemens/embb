@@ -78,7 +78,7 @@ void ForEach(
   Function unary,
   /**< [IN] Unary function applied to each element in the range */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] embb::mtapi::ExecutionPolicy for the foreach loop execution */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the loop execution */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of elements into blocks that
             are treated in parallel. Partitioning of a block stops if its size
@@ -96,13 +96,12 @@ void ForEach(
  *
  * \throws embb::base::ErrorException if not enough MTAPI tasks can be created
  *         to satisfy the requirements of the algorithm.
- * \threadsafe if the integers in the range are not modified by another thread
- *             while the algorithm is executed.
+ * \threadsafe
  * \note No guarantee is given on the order in which the function is applied to
  *       the integers.<br/>
  *       For nested algorithms, the task limit may be exceeded. In that case,
  *       increase the task limit of the MTAPI node.
- * \see embb::mtapi::ExecutionPolicy, ZipIterator
+ * \see embb::mtapi::ExecutionPolicy
  * \tparam Integer integer type
  * \tparam Function Unary function with argument of type
  *         <tt>std::iterator_traits<RAI>::value_type</tt> or an
@@ -124,7 +123,7 @@ void ForLoop(
   Function unary,
   /**< [IN] Unary function applied to each element in the range */
   const embb::mtapi::ExecutionPolicy& policy = embb::mtapi::ExecutionPolicy(),
-  /**< [IN] embb::mtapi::ExecutionPolicy for the foreach loop execution */
+  /**< [IN] embb::mtapi::ExecutionPolicy for the loop execution */
   size_t block_size = 0
   /**< [IN] Lower bound for partitioning the range of integers into blocks that
             are treated in parallel. Partitioning of a block stops if its size
