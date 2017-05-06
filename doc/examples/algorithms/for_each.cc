@@ -55,6 +55,13 @@ void RunForEach() {
   // snippet_end
   CheckResults(range);
 
+  // snippet_begin:loop_doubling
+  using embb::algorithms::ForLoop;
+  ForLoop(0, int(range.size()),
+    [&](int to_double) { range[size_t(to_double)] = (to_double + 1) * 2; });
+  // snippet_end
+  CheckResults(range);
+
   // snippet_begin:zip_setup
   std::vector<int> input_range(5);
   for (size_t i=0; i < input_range.size(); i++) {
