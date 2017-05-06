@@ -160,7 +160,7 @@ A frequently encountered task in parallel programming is to apply some operation
 
     \\\inputlistingsnippet{../examples/algorithms/for_each.cc:doubling}
 
-There is also a `ForLoop` variant that accepts integers as limits of the range directly:
+There is also a `ForLoop` variant that accepts integers as limits of the range:
 
     \\\inputlistingsnippet{../examples/algorithms/for_each.cc:loop_doubling}
 
