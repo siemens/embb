@@ -227,7 +227,7 @@ typedef struct mtapi_ext_job_attributes_struct mtapi_ext_job_attributes_t;
  *   </tr>
  *   <tr>
  *     <td>MTAPI_JOB_DEFAULT_PROBLEM_SIZE</td>
- *     <td>Indicates the default relative problem size of tasks tarted on this
+ *     <td>Indicates the default relative problem size of tasks started on this
  *         job</td>
  *     <td>mtapi_uint_t</td>
  *     <td>1</td>
@@ -235,7 +235,7 @@ typedef struct mtapi_ext_job_attributes_struct mtapi_ext_job_attributes_t;
  * </table>
  *
  * On success, \c *status is set to \c MTAPI_SUCCESS. On error, \c *status is
- * set to the appropriate error defined below.
+ * set to one of the errors defined below.
  * Error code                  | Description
  * --------------------------- | ----------------------------------------------
  * \c MTAPI_ERR_PARAMETER      | Invalid attribute parameter.
