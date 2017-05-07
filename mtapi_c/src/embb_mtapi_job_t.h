@@ -27,7 +27,7 @@
 #ifndef MTAPI_C_SRC_EMBB_MTAPI_JOB_T_H_
 #define MTAPI_C_SRC_EMBB_MTAPI_JOB_T_H_
 
-#include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/c/mtapi_ext.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,6 +56,8 @@ struct embb_mtapi_job_struct {
   mtapi_uint_t num_actions;
   mtapi_uint_t max_actions;
   mtapi_action_hndl_t* actions;
+
+  mtapi_ext_job_attributes_t attributes;
 };
 
 #include <embb_mtapi_job_t_fwd.h>

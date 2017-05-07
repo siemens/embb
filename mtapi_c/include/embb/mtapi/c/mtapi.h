@@ -714,8 +714,10 @@ enum mtapi_task_attributes_enum {
   MTAPI_TASK_AFFINITY,                 /**< the affinity of the task */
   MTAPI_TASK_USER_DATA,                /**< pointer to user data associated
                                             with the task */
-  MTAPI_TASK_COMPLETE_FUNCTION         /**< pointer to a function being called
+  MTAPI_TASK_COMPLETE_FUNCTION,        /**< pointer to a function being called
                                             when the task finishes execution */
+  MTAPI_TASK_PROBLEM_SIZE              /**< integer indicating the relative
+                                            problem size of the task */
 };
 /** size of the \a MTAPI_TASK_DETACHED attribute */
 #define MTAPI_TASK_DETACHED_SIZE sizeof(mtapi_boolean_t)
@@ -725,6 +727,8 @@ enum mtapi_task_attributes_enum {
 #define MTAPI_TASK_PRIORITY_SIZE sizeof(mtapi_uint_t)
 /** size of the \a MTAPI_TASK_AFFINITY attribute */
 #define MTAPI_TASK_AFFINITY_SIZE sizeof(mtapi_affinity_t)
+/** size of the \a MTAPI_TASK_PROBLEM_SIZE attribute */
+#define MTAPI_TASK_PROBLEM_SIZE_SIZE sizeof(mtapi_uint_t)
 
 
 /**
@@ -829,6 +833,7 @@ struct mtapi_task_attributes_struct {
   mtapi_task_complete_function_t
     complete_func;                     /**< stores
                                             MTAPI_TASK_COMPLETE_FUNCTION */
+  mtapi_uint_t problem_size;           /**< stores MTAPI_TASK_PROBLEM_SIZE */
 };
 
 /**
