@@ -42,11 +42,11 @@ extern "C" {
  *
  * Provides extensions to the standard MTAPI API.
  *
- * There are two extension functions defined here.
- * One to support user defined behavior of an action to allow for actions
- * that are not implemented locally in software but e.g. on a remote node
- * in a network or on an accelerator device like a GPU or FPGA.
- * Another to support specifying job attributes.
+ * There are two extension functions defined here. One to support user
+ * defined behavior of an action to allow for actions that are not
+ * implemented locally in software, but e.g., on a remote node in a
+ * network or on an accelerator device like a GPU or an FPGA. The
+ * other one is used to specify job attributes.
  */
 
 /**
