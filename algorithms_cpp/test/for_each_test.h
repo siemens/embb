@@ -71,6 +71,11 @@ class ForEachTest : public partest::TestCase {
   void TestPolicy();
 
   /**
+   * Tests ForLoop.
+   */
+  void TestLoop();
+
+  /**
    * Stress tests by giving work for all workers.
    */
   void StressTest();

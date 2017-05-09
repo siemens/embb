@@ -34,6 +34,7 @@
 #include <mtapi_status_t.h>
 #include <embb_mtapi_action_t.h>
 #include <embb_mtapi_node_t.h>
+#include <embb_mtapi_attr.h>
 
 
 /* ---- POOL STORAGE FUNCTIONS --------------------------------------------- */
@@ -125,6 +126,8 @@ void embb_mtapi_job_initialize(
   } else {
     that->max_actions = 0;
   }
+  that->attributes.problem_size_func = MTAPI_NULL;
+  that->attributes.default_problem_size = 1;
 }
 
 void embb_mtapi_job_finalize(embb_mtapi_job_t * that) {
@@ -209,4 +212,55 @@ mtapi_job_hndl_t mtapi_job_get(
 
   mtapi_status_set(status, local_status);
   return job_hndl;
+}
+
+void mtapi_ext_job_set_attribute(
+  MTAPI_IN mtapi_job_hndl_t job,
+  MTAPI_IN mtapi_uint_t attribute_num,
+  MTAPI_IN void* attribute,
+  MTAPI_IN mtapi_size_t attribute_size,
+  MTAPI_OUT mtapi_status_t* status) {
+  mtapi_status_t local_status = MTAPI_ERR_UNKNOWN;
+  embb_mtapi_node_t * node = embb_mtapi_node_get_instance();
+
+  if (embb_mtapi_node_is_initialized()) {
+    if (embb_mtapi_job_is_handle_valid(node, job)) {
+      embb_mtapi_job_t * local_job =
+        embb_mtapi_job_get_storage_for_handle(node, job);
+
+      if (MTAPI_ATTRIBUTE_POINTER_AS_VALUE != attribute_size &&
+        MTAPI_NULL == attribute) {
+        local_status = MTAPI_ERR_PARAMETER;
+      } else {
+        switch (attribute_num) {
+        case MTAPI_JOB_PROBLEM_SIZE_FUNCTION:
+          memcpy(&local_job->attributes.problem_size_func,
+            &attribute, sizeof(mtapi_ext_problem_size_function_t*));
+          local_status = MTAPI_SUCCESS;
+          break;
+
+        case MTAPI_JOB_DEFAULT_PROBLEM_SIZE:
+          local_status = embb_mtapi_attr_set_mtapi_uint_t(
+            &local_job->attributes.default_problem_size,
+            attribute, attribute_size);
+          break;
+
+        default:
+          /* attribute unknown */
+          local_status = MTAPI_ERR_ATTR_NUM;
+          break;
+        }
+      }
+
+      local_status = MTAPI_SUCCESS;
+    } else {
+      local_status = MTAPI_ERR_JOB_INVALID;
+    }
+  }
+  else {
+    embb_mtapi_log_error("mtapi not initialized\n");
+    local_status = MTAPI_ERR_NODE_NOTINIT;
+  }
+
+  mtapi_status_set(status, local_status);
 }
