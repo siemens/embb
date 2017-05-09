@@ -7,7 +7,7 @@
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * 2. Redistributions in binary form must reproduce the abov\te copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
  *
@@ -60,7 +60,7 @@ void fibonacciActionFunction(
   if (arg_size != sizeof(int)) {
     printf("wrong size of arguments\n");
     mtapi_context_status_set(task_context, MTAPI_ERR_ARG_SIZE,
-	                         &status);
+                             &status);
     MTAPI_CHECK_STATUS(status);
     return;
   }

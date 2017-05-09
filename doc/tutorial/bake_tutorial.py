@@ -31,9 +31,11 @@ with open("tutorial.template.md") as f:
       epos = line.find("}")
       incfname = line[20:epos]
       with open(incfname) as incf:
+        print "```cpp"
         for incline in incf:
           incline = incline.strip("\n")
-          print "    " + incline
+          print incline
+        print "```"
     elif line.find("    \\\\\\inputlistingsnippet{") == 0:
       mpos = line.find(":")
       epos = line.find("}")
@@ -41,16 +43,24 @@ with open("tutorial.template.md") as f:
       incsname = line[mpos+1:epos]
       doprint = False
       didprint = False
+      leadingspaces = 0
       with open(incfname) as incf:
         for incline in incf:
           incline = incline.strip("\n")
           if incline.find("// snippet_begin:"+incsname) >= 0:
+            print "```cpp"
             doprint = True
           elif incline.find("// snippet_end") >= 0:
+            if doprint:
+              print "```"
             doprint = False
           elif doprint:
+            if not didprint:
+              leadingspaces = len(incline) - len(incline.lstrip())
             didprint = True
-            print "    " + incline
+            if len(incline[:leadingspaces].lstrip()) != 0:
+              print "    WARNING: Invalid indentation"
+            print incline[leadingspaces:]
       if not didprint:
         print "    WARNING: snippet "+incsname+" is empty"
     else:

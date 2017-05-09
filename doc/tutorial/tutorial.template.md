@@ -198,12 +198,12 @@ The reduction consists of two steps: First, the input ranges are transformed and
 
 Prefix computations (or scans) can be viewed as a generalization of reductions. They transform an input range _x<sub>i</sub> ϵ X_ into an output range _y<sub>i</sub> ϵ Y_ with _i=1,...,n_ such that
 
-&nbsp;&nbsp;_y<sub>0</sub> = id · x<sub>0</sub>_  
-&nbsp;&nbsp;_y<sub>1</sub> = y<sub>0</sub> · x<sub>1</sub>_  
-&nbsp;&nbsp;&nbsp;&nbsp;⁞  
-&nbsp;&nbsp;_y<sub>i</sub> = y<sub>i-1</sub> · x<sub>i</sub>_  
-&nbsp;&nbsp;&nbsp;&nbsp;⁞  
-&nbsp;&nbsp;_y<sub>n</sub> = y<sub>n-1</sub> · x<sub>n</sub>_,  
+_y<sub>0</sub> = id · x<sub>0</sub>_  
+_y<sub>1</sub> = y<sub>0</sub> · x<sub>1</sub>_  
+&nbsp;&nbsp;⁞  
+_y<sub>i</sub> = y<sub>i-1</sub> · x<sub>i</sub>_  
+&nbsp;&nbsp;⁞  
+_y<sub>n</sub> = y<sub>n-1</sub> · x<sub>n</sub>_,  
 
 where _id_ is the identity (neutral element) with respect to the operation _·: X_ <sup><sub>x</sub></sup> _X → Y_. As an example, consider the following range:
 
@@ -230,49 +230,51 @@ _**Note:** Dataflow networks are internally implemented using the MTAPI C++ inte
 
 Before we go into detail, we demonstrate the basic concepts of dataflow networks by means of a simple application which finds and replaces strings in a file. Let us start with the sequential implementation. The program shown in [Listing 1](#lst_replace_seq) reads a file line by line and replaces each occurrence of a given string with a new string.
 
-    #include <iostream>
-    #include <fstream>
-    #include <string>
-    #include <cstdlib>
+```cpp
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdlib>
 
-    using namespace std;
+using namespace std;
 
-    // replace all ocurrences of 'what' in 'str' with 'with'
-    void repl(string& str, const string &what,
-              const string& with) {
-      string::size_type pos = 0;
-      while((pos = str.find(what, pos)) != string::npos) {
-        str.replace(pos, what.length(), with);
-        pos += with.length();
-      }
-    }
+// replace all ocurrences of 'what' in 'str' with 'with'
+void repl(string& str, const string &what,
+          const string& with) {
+  string::size_type pos = 0;
+  while((pos = str.find(what, pos)) != string::npos) {
+    str.replace(pos, what.length(), with);
+    pos += with.length();
+  }
+}
 
-    int main(int argc, char *argv[]) {
-      // check and read command line arguments
-      if(argc != 4) {
-        cerr << "Usage: replace <what> <with> <file>" << endl;
-        exit(EXIT_FAILURE);
-      }
-      const string what(argv[1]), with(argv[2]);
+int main(int argc, char *argv[]) {
+  // check and read command line arguments
+  if(argc != 4) {
+    cerr << "Usage: replace <what> <with> <file>" << endl;
+    exit(EXIT_FAILURE);
+  }
+  const string what(argv[1]), with(argv[2]);
 
-      // open input file
-      ifstream file(argv[3]);
-      if(!file) {
-        cerr << "Cannot open file " << argv[3] << endl;
-        exit(EXIT_FAILURE);
-      }
+  // open input file
+  ifstream file(argv[3]);
+  if(!file) {
+    cerr << "Cannot open file " << argv[3] << endl;
+    exit(EXIT_FAILURE);
+  }
 
-      // read input file line by line and replace strings
-      string str;
-      while(getline(file, str)) {
-        repl(str, what, with);
-        cout << str << endl;
-      }
+  // read input file line by line and replace strings
+  string str;
+  while(getline(file, str)) {
+    repl(str, what, with);
+    cout << str << endl;
+  }
 
-      // close file and exit
-      file.close();
-      exit(EXIT_SUCCESS);
-    }
+  // close file and exit
+  file.close();
+  exit(EXIT_SUCCESS);
+}
+```
 
 <a name="lst_replace_seq"></a>**Listing 1**: Sequential program for replacing strings in a file
 
@@ -299,8 +301,8 @@ We need to prepare the network for the desired maximum number of elements that c
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_make}
 
-Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput:
-	
+Finding an optimal value depends on the application and usually requires some experimentation. In general, large values boost the throughput but also increase the latency. Conversely, small values reduce the latency but may lead to a drop of performance in terms of throughput.
+
 As the next step, we have to construct the processes shown in [Figure 2](#fig_replace_par). The easiest way to construct a process is to wrap the user-defined code in a lambda function and to pass it to the network. The network constructs an object for that process and executes the lambda function whenever new data is available. There are several methods for constructing processes depending on their type. The process **read** is a *source* process, since it produces data (by reading it from the specified file) but does not consume any data. Source processes are constructed from a function object
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_linear.cc:dataflow_source_function}
@@ -507,26 +509,28 @@ At any time, the user can call `mtapi_<object>_get_attribute()` to query the val
 
 The calculation of Fibonacci numbers is a simple example for a recursive algorithm that can easily be parallelized. [Listing 5](#lst_mtapi_fibonacci_sequential) shows a sequential version:
 
-    int fib(int n) {
-      int x,y;
-      if (n < 2) {
-        return n;
-      } else {
-        x = fib(n - 1);
-        y = fib(n - 2);
-        return x + y;
-      }
-    }
+```cpp
+int fib(int n) {
+  int x,y;
+  if (n < 2) {
+    return n;
+  } else {
+    x = fib(n - 1);
+    y = fib(n - 2);
+    return x + y;
+  }
+}
 
-    int fibonacci(int n) {
-      return fib(n);
-    }
+int fibonacci(int n) {
+  return fib(n);
+}
 
-    void main(void) {
-      int n = 6;
-      int result = fibonacci(n);
-      printf("fib(%i) = %i\n", n, result);
-    }
+void main(void) {
+  int n = 6;
+  int result = fibonacci(n);
+  printf("fib(%i) = %i\n", n, result);
+}
+```
 
 <a name="lst_mtapi_fibonacci_sequential"></a>**Listing 5**: Sequential program for computing Fibonacci numbers
 
@@ -638,15 +642,19 @@ The registered action will be unregistered when it goes out of scope. The runtim
 
 The signature of an action function for the simplified API (SMP systems) looks like this:
 
-    void simpleActionFunction(
-      TaskContext & task_context
-    ) {
-      // something useful
-    }
+```cpp
+void simpleActionFunction(
+  TaskContext & task_context
+) {
+  // something useful
+}
+```
 
 The action function does not need to be registered with a job. Instead, a preregistered job is used that expects an `embb::base::Function<void, embb::mtapi::TaskContext &>` object. Therefore, a task can be scheduled directly using only the function above:
 
-    embb::mtapi::Task task = node.Start(simpleActionFunction);
+```cpp
+embb::mtapi::Task task = node.Start(simpleActionFunction);
+```
 
 ### <a name="sec_mtapi_plugins"></a>Plugins
 
@@ -656,21 +664,25 @@ The implementation of MTAPI provides an extension to allow for custom actions th
 
 The plugin API essentially consists of a single function contained in the `mtapi_ext.h` header file:
 
-    mtapi_ext_plugin_action_create()
+```cpp
+mtapi_ext_plugin_action_create()
+```
 
 This function is used to associate the plugin action with a specific job ID:
 
-    mtapi_action_hndl_t mtapi_ext_plugin_action_create(
-      MTAPI_IN mtapi_job_id_t job_id,
-      MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
-      MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
-      MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
-      MTAPI_IN void* plugin_data,
-      MTAPI_IN void* node_local_data,
-      MTAPI_IN mtapi_size_t node_local_data_size,
-      MTAPI_IN mtapi_action_attributes_t* attributes,
-      MTAPI_OUT mtapi_status_t* status
-    );
+```cpp
+mtapi_action_hndl_t mtapi_ext_plugin_action_create(
+  MTAPI_IN mtapi_job_id_t job_id,
+  MTAPI_IN mtapi_ext_plugin_task_start_function_t task_start_function,
+  MTAPI_IN mtapi_ext_plugin_task_cancel_function_t task_cancel_function,
+  MTAPI_IN mtapi_ext_plugin_action_finalize_function_t action_finalize_function,
+  MTAPI_IN void* plugin_data,
+  MTAPI_IN void* node_local_data,
+  MTAPI_IN mtapi_size_t node_local_data_size,
+  MTAPI_IN mtapi_action_attributes_t* attributes,
+  MTAPI_OUT mtapi_status_t* status
+);
+```
 
 The plugin action is implemented through three callbacks: task start, task cancel, and action finalize.
 
@@ -811,15 +823,17 @@ All of the algorithms provided by EMB² can also be used on heterogeneous system
 
 In addition to functions, functors or lambdas, the algorithms accept MTAPI job handles that implement the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used above. For the sake of simplicity, CPU actions are used to simulate a heterogeneous system. The CPU actions are functions with the following signature:
 
-    void Action(
-      const void* args,
-      mtapi_size_t args_size,
-      void* result_buffer,
-      mtapi_size_t result_buffer_size,
-      const void* node_local_data,
-      mtapi_size_t node_local_data_size,
-      mtapi_task_context_t* task_context
-      );
+```cpp
+void Action(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* node_local_data,
+  mtapi_size_t node_local_data_size,
+  mtapi_task_context_t* task_context
+);
+```
 
 A node handle is retrieved and used by the following examples like this:
 
@@ -942,15 +956,17 @@ The prefix sum is computed similarly:
 
 Dataflow networks can be used on heterogeneous systems as well. In addition to functions and functors, dataflow sources, sinks, and processes accept MTAPI job handles implementing the intended functionality. The action functions will be given structures containing the arguments and results according to the signatures used previously. To simulate a heterogeneous system, CPU actions with the following signature are used:
 
-    void Action(
-      const void* args,
-      mtapi_size_t args_size,
-      void* result_buffer,
-      mtapi_size_t result_buffer_size,
-      const void* node_local_data,
-      mtapi_size_t node_local_data_size,
-      mtapi_task_context_t* task_context
-      );
+```cpp
+void Action(
+  const void* args,
+  mtapi_size_t args_size,
+  void* result_buffer,
+  mtapi_size_t result_buffer_size,
+  const void* node_local_data,
+  mtapi_size_t node_local_data_size,
+  mtapi_task_context_t* task_context
+);
+```
 
 Suppose, for example, we want to double the integers from 0 to 9 and sum them up. For that purpose, we define three action functions, one for a source called `Generate`, one for a process called `Double`, and one for a sink called `Accumulate`. Each of them is associated with a different job.
 
