@@ -26,8 +26,8 @@ project (EMBB)
 cmake_minimum_required (VERSION 2.8.9)
 
 # Version number
-set (EMBB_BASE_VERSION_MAJOR 0)
-set (EMBB_BASE_VERSION_MINOR 5)
+set (EMBB_BASE_VERSION_MAJOR 1)
+set (EMBB_BASE_VERSION_MINOR 0)
 set (EMBB_BASE_VERSION_PATCH 0)
 
 # Fix compilation for CMake versions >= 3.1
