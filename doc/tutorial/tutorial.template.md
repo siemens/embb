@@ -34,6 +34,8 @@
 &nbsp;&nbsp;[Algorithms](#sec_algorithms_heterogeneous_systems)  
 &nbsp;&nbsp;[Dataflow](#sec_dataflow_heterogeneous_systems)  
 
+[**Tutorial Application**](#cha_tutorial_application)  
+
 [**Bibliography**](#cha_bibliography)  
 
 
@@ -1034,6 +1036,61 @@ Finally, we connect the processes and run the network:
 
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:net_connect}
     \\\inputlistingsnippet{../examples/dataflow/dataflow_heterogeneous.cc:net_run}
+
+
+## <a name="cha_tutorial_application"></a>Tutorial Application
+
+To apply the concepts detailed above in practice, we create a video processing application in the following paragraphs. The application is supposed to accept a video file on the command line, apply some filter and write an output video to a given file. For handling video files, we are going to use ffmpeg. For details on how to build and run the application refer to the README.md file in doc/tutorial/application.
+
+The application consists of 5 parts, the main application, the filters, the input video handler, the frame format converter and the output video builder.
+
+Three parts relate to ffmpeg video de- and encoding. The input video handler opens a given video file and is used to read consecutive frames from the stream until there are no more frames. The frame format converter is used to convert from the source color format to RGB and vice versa, since all filter processing is done in RGB color space. The output video builder encodes the resulting image stream back into a video file. We will not cover these three in detail.
+
+We provide several example filters to use during processing. The filters come in 3 flavours: sequential, parallel using the algorithms library and as OpenCL kernels.
+
+Finally, the main application binds the other components into a working whole.
+
+### Filters
+
+The filters are just loops iterating over the pixels and applying their operation to them. Here is a simple color to greyscale filter:
+
+    \\\inputlistingsnippet{application/src/filters.cc:serial_filter}
+
+Parallelizing it is straightforward using the algorithms building block. We just replace the for loops by a single `ForLoop` operation and retrieve the `x` and `y` pixel positions from the single counter:
+
+    \\\inputlistingsnippet{application/src/filters.cc:parallel_filter}
+
+Now the filter runs in parallel, but the control flow is still running serially and limits scalability.
+
+### Control Flow
+
+Applying video decoding, format conversion, filtering, another format conversion and video encoding for a single frame yields the following sequence of calls:
+
+    \\\inputlistingsnippet{application/main.cc:serial_execution}
+
+This sequence can be seen as a pipeline and therefore we can parallelize it using the dataflow building block. Each of the operations is wrapped into a source, process or sink and the resulting objects are connected and deployed into a network:
+
+    \\\inputlistingsnippet{application/main.cc:pipelined_execution}
+
+Scalability is now significantly improved, as no part of the application runs serially anymore.
+
+#### Heterogeneous Systems
+
+Some systems feature additional accelerators, e.g. a GPU, to further improve processing speed. Using OpenCL we can leverage the power of such an accelerator to speed up the processing of the filters. The filter itself is implemented in OpenCL:
+
+    \\\inputlistingsnippet{application/src/filters.cc:opencl_filter}
+
+The kernel needs to be wrapped into a MTAPI action:
+
+    \\\inputlistingsnippet{application/main.cc:make_opencl_action}
+
+Now the filter can be used like any job. Note however the additional cost imposed by the need to copy the frame and the parameters of the filter into a single buffer:
+
+    \\\inputlistingsnippet{application/main.cc:call_opencl_action}
+
+When wrapped into a dataflow process it can even be used as a part of the pipeline outlined before:
+
+    \\\inputlistingsnippet{application/main.cc:opencl_pipeline}
 
 
 ## <a name="cha_bibliography"></a>Bibliography
