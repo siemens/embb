@@ -25,4 +25,4 @@
 # This file is used to set the include directories needed for using EMBB.
 # The user is supposed to use it by calling include(${FLTK_USE_FILE}).
 
-include_directories("@INSTALL_PREFIX@/include")
+include_directories("@CMAKE_INSTALL_PREFIX@/include")
