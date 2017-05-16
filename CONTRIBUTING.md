@@ -46,7 +46,35 @@ In addition to these two branches, there may be arbitrarily many feature branche
 
 ### Contributing
 
-Please report bugs, feature requests, etc. via GitHub (https://github.com/siemens/embb/issues). Alternatively, e.g. in case of vulnerabilities, send an email to embb.info@gmail.com. Bug fixes, extensions, etc. can be contributed as pull requests via GitHub or as patches via mail. If possible, refer to a current snapshot of the master branch and create pull requests against the *development* branch. Moreover, please include regression tests or additional unit tests that check new functionality. 
+Please report bugs, feature requests, etc. via GitHub (https://github.com/siemens/embb/issues). Alternatively, e.g. in case of vulnerabilities, send an email to embb.info@gmail.com. Bug fixes, extensions, etc. can be contributed as pull requests via GitHub or as patches via mail. If possible, refer to a current snapshot of the master branch and create pull requests against the *development* branch. Moreover, please include regression tests or additional unit tests that check new functionality. When signing-off a contribution (using your real name), you declare the following:
+
+```
+Developer's Certificate of Origin 1.1
+
+By making a contribution to this project, I certify that:
+
+(a) The contribution was created in whole or in part by me and I
+    have the right to submit it under the open source license
+    indicated in the file; or
+
+(b) The contribution is based upon previous work that, to the best
+    of my knowledge, is covered under an appropriate open source
+    license and I have the right under that license to submit that
+    work with modifications, whether created in whole or in part
+    by me, under the same open source license (unless I am
+    permitted to submit under a different license), as indicated
+    in the file; or
+
+(c) The contribution was provided directly to me by some other
+    person who certified (a), (b) or (c) and I have not modified
+    it.
+
+(d) I understand and agree that this project and the contribution
+    are public and that a record of the contribution (including all
+    personal information I submit with it, including my sign-off) is
+    maintained indefinitely and may be redistributed consistent with
+    this project or the open source license(s) involved.
+```
 
 ### Porting
 
