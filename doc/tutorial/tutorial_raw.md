@@ -1046,7 +1046,7 @@ The application consists of 5 parts, the main application, the filters, the inpu
 
 Three parts relate to ffmpeg video de- and encoding. The input video handler opens a given video file and is used to read consecutive frames from the stream until there are no more frames. The frame format converter is used to convert from the source color format to RGB and vice versa, since all filter processing is done in RGB color space. The output video builder encodes the resulting image stream back into a video file. We will not cover these three in detail.
 
-We provide several example filters to use during processing. The filters come in 3 flavours: sequential, parallel using the algorithms library and as OpenCL kernels.
+We provide several example filters to use during processing. The filters come in three flavors: sequential, parallel using the algorithms library and as OpenCL kernels.
 
 Finally, the main application binds the other components into a working whole.
 

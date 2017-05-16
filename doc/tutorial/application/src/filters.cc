@@ -9,8 +9,12 @@
 #include <algorithm>
 #include <embb/algorithms/algorithms.h>
 
-namespace {
+// Note: Not all of the filters implemented in this file are
+// actually used by the tutorial application. However, feel
+// free to experiment with them.
 
+namespace {
+	
 /**
  * Map the point (x,y) into the corresponding index in the 
  * image buffer.
@@ -26,8 +30,8 @@ inline int mapToData(int x, int y, int width) {
 /**
  * Compute the convolution of up to two kernels at pixel (x,y).
  *
- * @param x x coordinate of the pixel
- * @param y y coordinate of the pixel
+ * @param x x-coordinate of the pixel
+ * @param y y-coordinate of the pixel
  * @param data buffer of the image
  * @param width width in pixels of the image
  * @parama height height in pixels of the image
@@ -58,11 +62,11 @@ void convolve(int x, int y, uint8_t* data, int width, int height,
 }
 
 /**
- * Apply mean filter with specified size to a stripe and writes result to a
- * buffer (buffer must have size of the original image).
+ * Apply mean filter with specified size to a stripe and write result to a
+ * buffer (buffer must have the size of the original image).
  *
- * @param y_in lowest value of y coordinate of the stripe
- * @param y_out highest value of y coordinate of the stripe
+ * @param y_in lowest value of y-coordinate of the stripe
+ * @param y_out highest value of y-coordinate of the stripe
  * @param size size of the square used for the averaging
  * @param width width in pixels of the frame
  * @param height height in pixels of the frame
@@ -71,9 +75,9 @@ void convolve(int x, int y, uint8_t* data, int width, int height,
  */
 void blurStripe(int y_in, int y_end, int size, int width, int height,
   uint8_t* in_buffer, uint8_t* out_buffer) {
-  // number of pixels top left
+  // Number of pixels top left
   int const size_lt = (size % 2 != 0) ? size / 2 : size / 2 - 1;
-  // number of pixels bottom right
+  // Number of pixels bottom right
   int const size_rb = size / 2;
 
   for (int y = y_in; y < y_end; y++) {
@@ -103,11 +107,11 @@ void blurStripe(int y_in, int y_end, int size, int width, int height,
 }
 
 /**
- * Apply mean filter with specified size to a stripe and writes result to a
+ * Apply mean filter with specified size to a stripe and write result to a
  * buffer (buffer must have size of the original image).
  *
- * @param y_in lowest value of y coordinate of the stripe
- * @param y_out highest value of y coordinate of the stripe
+ * @param y_in lowest value of y-coordinate of the stripe
+ * @param y_out highest value of y-coordinate of the stripe
  * @param size size of the square used for the averaging
  * @param width width in pixels of the frame
  * @param height height in pixels of the frame
@@ -116,9 +120,9 @@ void blurStripe(int y_in, int y_end, int size, int width, int height,
  */
 void blurStripeParallel(int y_in, int y_end, int size, int width, int height,
   uint8_t* in_buffer, uint8_t* out_buffer) {
-  // number of pixels top left
+  // Number of pixels top left
   int const size_lt = (size % 2 != 0) ? size / 2 : size / 2 - 1;
-  // number of pixels bottom right
+  // Number of pixels bottom right
   int const size_rb = size / 2;
 
   embb::algorithms::ForLoop(

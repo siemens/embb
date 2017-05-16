@@ -79,7 +79,7 @@ retval=0
 
 ##Excluded files
 RAND_FILES=( embb_mtapi_test_group.cc embb_mtapi_test_queue.cc embb_mtapi_test_task.cc queue_test-inl.h )
-for project in base_c base_cpp mtapi_c mtapi_plugins_c/mtapi_network_c mtapi_plugins_c/mtapi_opencl_c mtapi_plugins_c/mtapi_cuda_c mtapi_cpp algorithms_cpp containers_cpp dataflow_cpp
+for project in base_c base_cpp mtapi_c mtapi_plugins_c/mtapi_network_c mtapi_plugins_c/mtapi_opencl_c mtapi_plugins_c/mtapi_cuda_c mtapi_cpp algorithms_cpp containers_cpp dataflow_cpp doc/tutorial/application
 do
   echo "-> Doing project: $project"
   dir=$d/$project

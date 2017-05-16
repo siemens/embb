@@ -5,7 +5,6 @@
 
 #include "ffmpeg.h"
 
-
 OutputVideoBuilder::OutputVideoBuilder(char* name, AVCodecContext* inputCtx) :
   formatCtx(nullptr),
   codec(nullptr),
@@ -47,7 +46,6 @@ void OutputVideoBuilder::init(char* name, AVCodecContext* inputCtx) {
     throw std::runtime_error("Could not allocate stream.");
   }
 
-  // not sure why this is needed
   stream->id = formatCtx->nb_streams - 1;
   stream->codec = codecCtx;
   stream->time_base = codecCtx->time_base;
@@ -71,7 +69,7 @@ void OutputVideoBuilder::writeFrame(AVFrame* frame) {
   av_init_packet(&packet);
 
   if (avcodec_encode_video2(codecCtx, &packet, frame, &success)) {
-    throw std::runtime_error("Error encoding frames");
+    throw std::runtime_error("Error while encoding frames");
   }
 
   if (success) {
@@ -96,6 +94,4 @@ void OutputVideoBuilder::logMsg(AVPacket* packet, AVRational* tb) {
 
 void OutputVideoBuilder::setMaxQB(int maxqb) {
   codecCtx->qmax = maxqb;
-  // Probably this is the best way to fix quality of result, but syntax is wrong
-  // av_opt_set(codecCtx->priv_data, "cfr", "18", 0);
 }

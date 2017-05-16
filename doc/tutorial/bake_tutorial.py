@@ -24,7 +24,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-with open("tutorial.template.md") as f:
+with open("tutorial_raw.md") as f:
   for line in f:
     line = line.strip("\n")
     if line.find("    \\\\\\inputlisting{") == 0:

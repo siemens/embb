@@ -14,10 +14,10 @@ enum ConversionType {
 };
 
 /**
- * This class is used for converting Frames from YUV format
- * to RGB format at viceversa. It is not strictly necessary to
- * change the format of frames before processing. However,
- * the effect of filters is probably clearer when they work with
+ * This class is used for converting frames from YUV format
+ * to RGB format and vice versa. It is not strictly necessary to
+ * change the format of the frames before processing. However,
+ * the effect of the filters is clearer when they work with
  * pictures in RGB format.
  */
 class FrameFormatConverter {
@@ -37,7 +37,7 @@ public:
    *
    * @param input input frame
    * @param outout output frame
-   * @param ct convertion type: either TO_RGB or TO_ORIGINAL
+   * @param ct conversion type: either TO_RGB or TO_ORIGINAL
    */
   void convertFormat(AVFrame** input, AVFrame** output, ConversionType ct);
 

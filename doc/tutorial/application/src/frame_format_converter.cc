@@ -2,7 +2,6 @@
 
 #include "ffmpeg.h"
 
-
 FrameFormatConverter::FrameFormatConverter()
   : toRGBCtx(nullptr)
   , toOriginalFormatCtx(nullptr) {
@@ -41,7 +40,7 @@ void FrameFormatConverter::convertFormat(
   int numBytes = avpicture_get_size(format, width, height);
   uint8_t *buffer = (uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
 
-  // associate buffer with output frame
+  // Associate buffer with output frame
   avpicture_fill((AVPicture *)convertedFrame, buffer, format, width, height);
 
   sws_scale(ctx, (uint8_t const * const *)(*input)->data,

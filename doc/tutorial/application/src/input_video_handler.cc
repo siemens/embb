@@ -60,7 +60,7 @@ void InputVideoHandler::init(char* name) {
     throw std::runtime_error("No video stream in input video file.");
   }
 
-  // find decoder using id
+  // Find decoder using id
   codec_ =
     avcodec_find_decoder(formatCtx_->streams[streamIndex_]->codec->codec_id);
   if (codec_ == nullptr) {
@@ -68,7 +68,7 @@ void InputVideoHandler::init(char* name) {
       "Could not find suitable decoder for input file.");
   }
 
-  // copy context from input stream
+  // Copy context from input stream
   codecCtx_ = avcodec_alloc_context3(codec_);
   if (avcodec_copy_context(
     codecCtx_, formatCtx_->streams[streamIndex_]->codec) != 0) {
@@ -80,8 +80,8 @@ void InputVideoHandler::init(char* name) {
     throw std::runtime_error("Could not open decoder.");
   }
 
-  // by setting this option we ensure that the reference to each frame
-  // is kept across multiple calls to read_frame function. This is
+  // By setting this option, we ensure that the reference to each frame
+  // is kept across multiple calls to the read_frame function. This is
   // needed if reading and writing are done by different processes.
   codecCtx_->refcounted_frames = 1;
 }

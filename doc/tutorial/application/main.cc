@@ -1,3 +1,27 @@
+# Copyright (c) 2014-2017, Siemens AG. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
 #include <iostream>
 #include <exception>
 #include <chrono>
@@ -12,10 +36,8 @@
 #include <embb/mtapi/c/mtapi_opencl.h>
 #include <embb/dataflow/dataflow.h>
 
-
 typedef embb::dataflow::Network Network;
 
-// maybe not optimal way of declaring inputHandler and outputBuilder
 static InputVideoHandler* inputHandler = nullptr;
 static OutputVideoBuilder* outputBuilder = nullptr;
 static FrameFormatConverter converter;
@@ -26,7 +48,7 @@ void terminate(char const * message, int code) {
 }
 
 void filter(AVFrame* frame) {
-  // apply filters to the frame. Here are some examples:
+  // Apply filters to the frame. Here are some examples:
   // filters::applyBlackAndWhite(frame);
   // filters::edgeDetection(frame);
   // filters::changeSaturation(frame, 0.2);
@@ -35,7 +57,7 @@ void filter(AVFrame* frame) {
 }
 
 void filter_parallel(AVFrame* frame) {
-  // apply filters to the frame. Here are some examples:
+  // Apply filters to the frame. Here are some examples:
   // filters::applyBlackAndWhiteParallel(frame);
   // filters::edgeDetectionParallel(frame);
   // filters::changeSaturationParallel(frame, 0.2);
@@ -105,7 +127,7 @@ bool readFromFile(AVFrame* &frame) {
     // ret != 1 if there are no more frames to process
     ret = inputHandler->readFrame(frame, &success);
   }
-  // if frame is not ready just send a nullptr frame
+  // If frame is not ready, just send a nullptr frame
   if (!success) {
     av_frame_free(&frame);
     frame = nullptr;
@@ -376,24 +398,24 @@ bool check_arguments(int argc, char * argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-  // silence warnings from ffmpeg
+  // Silence warnings from ffmpeg
   av_log_set_level(AV_LOG_QUIET);
 
   if (!check_arguments(argc, argv)) {
     return 30;
   }
 
-  // initialize ffmpeg libraries
+  // Initialize ffmpeg libraries
   av_register_all();
 
-  // open input video file
+  // Open input video file
   try {
     inputHandler = new InputVideoHandler(argv[1]);
   } catch (std::exception& e) {
     terminate(e.what(), 31);
   }
 
-  // open output video file
+  // Open output video file
   try {
     outputBuilder = new OutputVideoBuilder(argv[2],
       inputHandler->getCodecContext());
@@ -403,7 +425,7 @@ int main(int argc, char *argv[]) {
 
   converter.getFormatInfo(inputHandler->getCodecContext());
 
-  // change this value to determine output quality
+  // Modify this value to change output quality
   outputBuilder->setMaxQB(7);
 
   std::string mode = "serial";

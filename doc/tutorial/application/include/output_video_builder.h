@@ -13,10 +13,10 @@ struct AVFrame;
 
 /**
  * This class takes care of the output file (opening and closing
- * the file, extracting frames..). The builder cannot be created
+ * the file, extracting frames, ...). The builder cannot be created
  * without an input file (whose name is provided at construction
  * time). If during construction problems occur (file not found,
- * file cannot be opened,...) an exception is thrown.
+ * file cannot be opened, ...) an exception is thrown.
  *
  */
 class OutputVideoBuilder {
@@ -37,9 +37,9 @@ public:
   void writeVideo();
 
   /**
-   * Change quantization parameter. Low value tend to increase quality
+   * Change quantization parameter. Low values tend to increase quality
    * by increasing the size of the output (low compression), high values
-   * dicrease quality while dicreasing file size (high compression).
+   * decrease quality while decreasing file size (high compression).
    *
    * @param maxqb new value of maximum quantization parameter
    */
