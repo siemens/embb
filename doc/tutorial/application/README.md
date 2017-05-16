@@ -2,7 +2,8 @@
 
 To build the video processing application, a few preparation steps are required:
 
-- Install EMB² and set EMBB_DIR in CMakeLists.txt to the installation directory (if not the default).
+- Install EMB² with OpenCL enabled (using CMake option -DBUILD_OPENCL_PLUGIN=ON).
+- Set EMBB_DIR in CMakeLists.txt to the installation directory (if not the default one).
 - Provide the ffmpeg libraries as described below.
 - Create a build directory and run cmake.
 
