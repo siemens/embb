@@ -235,7 +235,7 @@ void mtapi_ext_job_set_attribute(
         switch (attribute_num) {
         case MTAPI_JOB_PROBLEM_SIZE_FUNCTION:
           memcpy(&local_job->attributes.problem_size_func,
-            &attribute, sizeof(mtapi_ext_problem_size_function_t*));
+            &attribute, sizeof(mtapi_ext_problem_size_function_t));
           local_status = MTAPI_SUCCESS;
           break;
 
