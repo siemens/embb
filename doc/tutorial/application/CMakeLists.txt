@@ -46,8 +46,8 @@ if (MSVC)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "-std=c++11 -pthread")
-  set (EXTRA_LIBS pthread dl rt)
+  set(CMAKE_CXX_FLAGS "-std=c++11 -pthread -Wno-deprecated-declarations")
+  set(EXTRA_LIBS pthread dl rt)
 endif()
 
 set(LINK_EMBB
@@ -71,4 +71,4 @@ set(LINK_FFMPEG
 )
 
 add_executable(video_app ${SOURCES})
-target_link_libraries(video_app ${LINK_EMBB} ${LINK_FFMPEG})
+target_link_libraries(video_app ${LINK_EMBB} ${LINK_FFMPEG} ${EXTRA_LIBS})
