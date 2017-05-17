@@ -296,7 +296,7 @@ void ForEachTest::TestLoop() {
 
   size_t count = 10;
   loop_result.resize(count);
-  ForLoop(static_cast<size_t>(0), count, SquareLoop);
+  ForLoop(size_t(0), count, SquareLoop);
   for (size_t i = 0; i < count; i++) {
     PT_EXPECT_EQ(loop_result[i], i * i);
   }
@@ -304,7 +304,7 @@ void ForEachTest::TestLoop() {
 
   size_t stride = 3;
   loop_result.resize(count * stride);
-  ForLoop(static_cast<size_t>(0), count * stride, int(stride), SquareLoop);
+  ForLoop(size_t(0), count * stride, static_cast<int>(stride), SquareLoop);
   for (size_t i = 0; i < count * stride; i += stride) {
     PT_EXPECT_EQ(loop_result[i], i * i);
     for (size_t k = 1; k < stride; k++) {
