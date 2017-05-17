@@ -256,8 +256,7 @@ void mtapi_ext_job_set_attribute(
     } else {
       local_status = MTAPI_ERR_JOB_INVALID;
     }
-  }
-  else {
+  } else {
     embb_mtapi_log_error("mtapi not initialized\n");
     local_status = MTAPI_ERR_NODE_NOTINIT;
   }
