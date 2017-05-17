@@ -38,7 +38,8 @@ template <typename Integer>
 class IntIterator : public
   std::iterator<std::random_access_iterator_tag, Integer> {
  public:
-  typedef typename std::iterator_traits<IntIterator>::difference_type Difference;
+  typedef typename std::iterator_traits<IntIterator>::difference_type
+    Difference;
 
  private:
   Integer value_;
@@ -138,7 +139,7 @@ class IntIterator : public
     return value_;
   }
 
-  Integer operator [](Difference n) const {
+  Integer operator[](Difference n) const {
     return value_ + n * stride_;
   }
 };
