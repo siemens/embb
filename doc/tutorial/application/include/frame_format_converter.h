@@ -29,10 +29,7 @@
 
 #include <embb/base/base.h>
 
-struct AVFrame;
-struct AVCodecContext;
-struct SwsContext;
-enum AVPixelFormat;
+#include "ffmpeg.h"
 
 enum ConversionType {
   TO_RGB,
