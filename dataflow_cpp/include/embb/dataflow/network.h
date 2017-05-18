@@ -50,7 +50,7 @@ namespace dataflow {
 #ifdef DOXYGEN
 
 /**
- * Represents a set of processes, that are connected by communication channels.
+ * Represents a set of processes that are connected by communication channels.
  *
  * \ingroup CPP_DATAFLOW
  */

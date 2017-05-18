@@ -64,7 +64,7 @@ while getopts "d:vq" o; do
 done
 shift $((OPTIND-1))
 
-#used as wrapper, for switching between verbose and normal mode
+#used as wrapper for switching between verbose and normal mode
 redirect_cmd() {
         if [ -z "${v}" ]; then
                 "$@" > /dev/null 2>&1
@@ -196,7 +196,7 @@ if [ \( -f "$ZIP_NAME" \) -a \( "$CREATE_ZIP" = true \) ]; then
         fi
 fi
 
-#exit if tarball and zip must not / cannot be created
+#exit if tarball and zip need not / cannot be created
 if [ \( "$CREATE_ZIP" = false \) -a \( "$CREATE_TARBALL" = false \) ] ; then
 	echo "Exiting, no files to generate";
 	exit 1;
@@ -259,7 +259,7 @@ cd "$REMEMBER_CUR_DIR"
 
 echo "--> Calling rsync to temporary folder 1/2 ($MYTMPDIR)"
 
-#this is the rsync, to the folder from which the tarball will be created later. Exclude everything, that should not be in the tarball. Also exclude things, that are generated somewhere else, like examples.
+#this is the rsync to the folder from which the tarball will be created later. Exclude everything that should not be in the tarball. Also exclude things that are generated somewhere else like examples.
 redirect_cmd rsync \
         --exclude ".git" \
         --exclude ".gitignore" \
@@ -307,7 +307,7 @@ fi
 
 echo "--> Calling rsync to temporary folder 2/2 ($MYTMPDIR_BUILD)"
 
-#doing a rsync to another temporary folder, which will be used to build things, like e.g. the tutorial.
+#doing an rsync to another temporary folder, which will be used to build things like the tutorial.
 redirect_cmd rsync \
         --archive --recursive ${d} $MYTMPDIR_BUILD 
 
@@ -361,7 +361,7 @@ fi
 
 echo "--> Checking line endings"
 
-#check for files, that have windows file endings. Those are forbidden.
+#check for files that have windows file endings. Those are forbidden.
 WINLINES=`find $MYTMPDIR/${n} -not -type d -exec file "{}" ";" | grep CRLF`
 
 if [ -n "$WINLINES" ]; then
@@ -371,7 +371,7 @@ if [ -n "$WINLINES" ]; then
         exit 1;
 fi
 
-#sanity check... verify, that expected targets are there, otherwise abort...
+#sanity check... verify that expected targets are there, otherwise abort...
 if ! [ -f $MYTMPDIR/${n}/doc/examples/main.cc ]; then
         echo "--> ! Examples missing. Exiting."
         exit 1;

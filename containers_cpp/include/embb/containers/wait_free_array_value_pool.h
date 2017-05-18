@@ -62,7 +62,7 @@ namespace containers {
  * given out to the user, even if being logically not part of the pool anymore.
  * However, the user might want to guarantee a certain amount of indices to the
  * user. Therefore, the static \c GetMinimumElementCountForGuaranteedCapacity
- * method is used. The user passes the count of indices to this method, that
+ * method is used. The user passes the count of indices to this method that
  * shall be guaranteed by the pool. The method returns the count on indices, the
  * pool has to be initialized with in order to guarantee this count on indices.
  *
@@ -289,7 +289,7 @@ class WaitFreeArrayValuePool {
   /**
    * Due to concurrency effects, a pool might provide less elements than managed
    * by it. However, usually one wants to guarantee a minimal capacity. The
-   * count of elements, that must be given to the pool when to guarantee \c
+   * count of elements that must be given to the pool when to guarantee \c
    * capacity elements is computed using this function.
    *
    * \return count of indices the pool has to be initialized with

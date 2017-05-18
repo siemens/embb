@@ -202,7 +202,7 @@ The reduction consists of two steps: First, the input ranges are transformed and
 
 ### <a name="sec_algorithms_prefix"></a>Prefix Computations
 
-Prefix computations (or scans) can be viewed as a generalization of reductions. They transform an input range _x<sub>i</sub> ϵ X_ into an output range _y<sub>i</sub> ϵ Y_ with _i=1,...,n_ such that
+Prefix computations (or scans) can be viewed as a generalization of reductions. They transform an input range _x<sub>i</sub>_ into an output range _y<sub>i</sub>_ with _i=1,...,n_ such that
 
 _y<sub>0</sub> = id · x<sub>0</sub>_  
 _y<sub>1</sub> = y<sub>0</sub> · x<sub>1</sub>_  
@@ -211,7 +211,7 @@ _y<sub>i</sub> = y<sub>i-1</sub> · x<sub>i</sub>_
 &nbsp;&nbsp;⁞  
 _y<sub>n</sub> = y<sub>n-1</sub> · x<sub>n</sub>_,  
 
-where _id_ is the identity (neutral element) with respect to the operation _·: X_ <sup><sub>x</sub></sup> _X → Y_. As an example, consider the following range:
+where _id_ is the identity (neutral element) with respect to the _·_ operation. As an example, consider the following range:
 
     \\\inputlistingsnippet{../examples/algorithms/scan.cc:setup}
 

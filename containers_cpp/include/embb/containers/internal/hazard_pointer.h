@@ -96,7 +96,7 @@ namespace internal {
  * Also in contrast to the original implementation, we do not provide a HelpScan
  * functionality, which gives threads the possibility, to not participate in the
  * garbage collection anymore: other threads will help to clean-up the objects
- * protected by the exiting thread. The reason is, that the only use-case would
+ * protected by the exiting thread. The reason is that the only use-case would
  * be a crashing thread, not participating anymore. However, as the thread has
  * to signal its exit himself, this is not possible to realize anyways. In the
  * end, it is still guaranteed that all memory is properly returned (in the
@@ -116,7 +116,7 @@ class HazardPointer  {
  public:
   /**
    * The user of the hazard pointer class has to provide the memory that is
-   * managed here. The user has to take into account, that releasing of memory
+   * managed here. The user has to take into account that releasing of memory
    * might be delayed. He has therefore to provide more memory than he wants to
    * guarantee at each point in time. More specific, on top of the guaranteed
    * count of objects, he has to provide the additional count of objects that
@@ -178,7 +178,7 @@ class HazardPointer  {
 
   /**
    * Guards \c to_guard. If the guarded_element is passed to \c EnqueueForDeletion
-   * it is prevented from release from now on. The user must have a check, that
+   * it is prevented from release from now on. The user must have a check that
    * EnqueueForDeletion has not been called on to_guard, before the guarding took
    * effect.
    *
@@ -262,7 +262,7 @@ class HazardPointer  {
 
   /**
    * A list of lists, represented as single array. Each thread maintains a list
-   * of retired pointers, that are objects that are logically released but not
+   * of retired pointers that are objects that are logically released but not
    * released because some thread placed a guard on it.
    */
   GuardType* thread_local_retired_lists_;
