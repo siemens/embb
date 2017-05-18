@@ -44,4 +44,4 @@ extern "C" {
 }
 #endif
 
-#endif // FFMPEG_H
+#endif // FFMPEG_H_

@@ -358,7 +358,7 @@ void edgeDetection(AVFrame* frame) {
       gx = 0;
       gy = 0;
       convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
-      f_value = (int)sqrt(gx*gx + gy*gy);
+      f_value = static_cast<int>(sqrt(gx*gx + gy*gy));
       buffer[p] = f_value;
       buffer[p+1] = f_value;
       buffer[p+2] = f_value;
@@ -523,7 +523,7 @@ void changeSaturation(AVFrame* frame, double amount) {
       int b = frame->data[0][p + 2];
       int maximum = std::max(r, std::max(g, b));
       int minimum = std::min(r, std::min(g, b));
-      int factor = (int)((maximum - minimum)*amount);
+      int factor = static_cast<int>((maximum - minimum)*amount);
 
       frame->data[0][p] =
         (r == maximum) ? std::min(255, r + factor) : std::max(0, r - factor*2);

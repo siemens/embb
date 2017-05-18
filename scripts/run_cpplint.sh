@@ -107,7 +107,7 @@ do
       current_rules+=",-build/header_guard" # This file needs to be included multiple times
     fi
     if [[ $file == *atomic.h ]]; then
-      current_rules+=",-whitespace/indent" # indention is misinterpreted for this file
+      current_rules+=",-whitespace/indent" # Indention is misinterpreted for this file
     fi
     if [[ $file == *atomic_arithmetic.h ]]; then
       current_rules+=",-readability/function" # All parameters should be named in a function
@@ -120,6 +120,9 @@ do
         current_rules+=",-runtime/threadsafe_fn" # These tests are allowed to use the thread unsafe rand()
       fi
     done
+    if [[ $file == */doc/tutorial/application/main.cc ]]; then
+      current_rules+=",-build/c++11" # Avoid "<chrono> is an unapproved C++11 header" error
+    fi
     python ${c} --extensions=c,cc,h --filter=$current_rules --root="$project/include" --output=vs7 $file
     if [[ ! $? -eq 0 ]]; then
       retval=$((retval+1))

@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FRAME_FORMAT_CONVERTER_H
-#define FRAME_FORMAT_CONVERTER_H
+#ifndef FRAME_FORMAT_CONVERTER_H_
+#define FRAME_FORMAT_CONVERTER_H_
 
 #include <embb/base/base.h>
 
@@ -71,4 +71,4 @@ class FrameFormatConverter {
   embb::base::Mutex mutex;
 };
 
-#endif // FRAME_FORMAT_CONVERTER_H
+#endif // FRAME_FORMAT_CONVERTER_H_
