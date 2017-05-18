@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _INPUT_VIDEO_HANDLER_H_
-#define _INPUT_VIDEO_HANDLER_H_
+#ifndef INPUT_VIDEO_HANDLER_H_
+#define INPUT_VIDEO_HANDLER_H_
 
 struct AVCodecContext;
 struct AVFormatContext;
@@ -42,8 +42,8 @@ struct AVFrame;
  *
  */
 class InputVideoHandler {
-public:
-  InputVideoHandler(char* name);
+ public:
+  explicit InputVideoHandler(char* name);
   ~InputVideoHandler();
 
   /**
@@ -63,7 +63,7 @@ public:
    */
   bool readFrame(AVFrame* frame, int* success);
 
-private:
+ private:
   InputVideoHandler();
   void init(char* name);
 
@@ -74,5 +74,5 @@ private:
   int streamIndex_;
 };
 
-#endif  // _INPUT_VIDEO_HANDLER_H_
+#endif // INPUT_VIDEO_HANDLER_H_
 

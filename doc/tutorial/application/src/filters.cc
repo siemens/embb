@@ -24,9 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "filters.h"
-
-#include "ffmpeg.h"
+#include "../include/filters.h"
 
 #include <exception>
 #include <cmath>
@@ -35,12 +33,14 @@
 #include <algorithm>
 #include <embb/algorithms/algorithms.h>
 
+#include "../include/ffmpeg.h"
+
 // Note: Not all of the filters implemented in this file are
 // actually used by the tutorial application. However, feel
 // free to experiment with them.
 
 namespace {
-	
+
 /**
  * Map the point (x,y) into the corresponding index in the 
  * image buffer.
@@ -49,8 +49,8 @@ namespace {
  * @param y y coordinate of the pixel.
  * @param width width in pixels of the image
  */
-inline int mapToData(int x, int y, int width) { 
-  return 3*(x+y*width); 
+inline int mapToData(int x, int y, int width) {
+  return 3*(x+y*width);
 }
 
 /**
@@ -178,7 +178,7 @@ void blurStripeParallel(int y_in, int y_end, int size, int width, int height,
   });
 }
 
-}
+} // namespace
 
 namespace filters {
 
@@ -193,11 +193,13 @@ char const * mean_kernel =
 "  int node_local_data_size) {\n"
 "  int idx = get_global_id(0);\n"
 "  int elements = (arguments_size - sizeof(int) * 3) / 3;\n"
-"  if (idx >= elements)"
-"    return;"
+"  if (idx >= elements)\n"
+"    return;\n"
 "  __global int * param = (__global int*)arguments;\n"
-"  __global unsigned char * in_buffer = ((__global unsigned char*)arguments) + sizeof(int) * 3;\n"
-"  __global unsigned char * out_buffer = (__global unsigned char*)result_buffer;\n"
+"  __global unsigned char * in_buffer ="
+"    ((__global unsigned char*)arguments) + sizeof(int) * 3;\n"
+"  __global unsigned char * out_buffer ="
+"    (__global unsigned char*)result_buffer;\n"
 "  int width = param[0];\n"
 "  int height = param[1];\n"
 "  int size = param[2];\n"
@@ -237,11 +239,13 @@ char const * cartoonify_kernel =
 "  int node_local_data_size) {\n"
 "  int idx = get_global_id(0);\n"
 "  int elements = (arguments_size - sizeof(int) * 4) / 3;\n"
-"  if (idx >= elements)"
-"    return;"
+"  if (idx >= elements)\n"
+"    return;\n"
 "  __global int * param = (__global int*)arguments;\n"
-"  __global unsigned char * data = ((__global unsigned char*)arguments) + sizeof(int) * 4;\n"
-"  __global unsigned char * buffer = (__global unsigned char*)result_buffer;\n"
+"  __global unsigned char * data ="
+"    ((__global unsigned char*)arguments) + sizeof(int) * 4;\n"
+"  __global unsigned char * buffer ="
+"    (__global unsigned char*)result_buffer;\n"
 "  int width = param[0];\n"
 "  int height = param[1];\n"
 "  int threshold = param[2];\n"
@@ -346,7 +350,7 @@ void edgeDetection(AVFrame* frame) {
   av_frame_make_writable(frame);
 
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
-  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  uint8_t* buffer = static_cast<uint8_t*>(av_malloc(sizeof(uint8_t)*n_bytes));
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
@@ -388,7 +392,7 @@ void edgeDetectionParallel(AVFrame* frame) {
   av_frame_make_writable(frame);
 
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
-  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  uint8_t* buffer = static_cast<uint8_t*>(av_malloc(sizeof(uint8_t)*n_bytes));
 
   embb::algorithms::ForLoop(0, width*height, [&](int idx){
     int x = idx % width;
@@ -397,7 +401,7 @@ void edgeDetectionParallel(AVFrame* frame) {
     gx = 0;
     gy = 0;
     convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
-    f_value = (int)sqrt(gx*gx + gy*gy);
+    f_value = static_cast<int>(sqrt(gx*gx + gy*gy));
     buffer[p] = f_value;
     buffer[p + 1] = f_value;
     buffer[p + 2] = f_value;
@@ -427,7 +431,7 @@ void applyCartoonify(AVFrame* frame, int threshold, int discr) {
   av_frame_make_writable(frame);
 
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
-  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  uint8_t* buffer = static_cast<uint8_t*>(av_malloc(sizeof(uint8_t)*n_bytes));
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
@@ -435,7 +439,7 @@ void applyCartoonify(AVFrame* frame, int threshold, int discr) {
       int gx = 0;
       int gy = 0;
       convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
-      int f_value = (int)sqrt(gx*gx + gy*gy);
+      int f_value = static_cast<int>(sqrt(gx*gx + gy*gy));
       if (f_value > threshold) {
         buffer[p] = 0;
         buffer[p + 1] = 0;
@@ -449,7 +453,6 @@ void applyCartoonify(AVFrame* frame, int threshold, int discr) {
         buffer[p + 1] = g;
         buffer[p + 2] = b;
       }
-
     }
   }
 
@@ -477,7 +480,7 @@ void applyCartoonifyParallel(AVFrame* frame, int threshold, int discr) {
   av_frame_make_writable(frame);
 
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
-  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  uint8_t* buffer = static_cast<uint8_t*>(av_malloc(sizeof(uint8_t)*n_bytes));
 
   embb::algorithms::ForLoop(0, height*width, [&](int idx) {
     int const x = idx % width;
@@ -486,13 +489,12 @@ void applyCartoonifyParallel(AVFrame* frame, int threshold, int discr) {
     int gx = 0;
     int gy = 0;
     convolve(x, y, data, width, height, Gx, Gy, &gx, &gy);
-    int f_value = (int)sqrt(gx*gx + gy*gy);
+    int f_value = static_cast<int>(sqrt(gx*gx + gy*gy));
     if (f_value > threshold) {
       buffer[p] = 0;
       buffer[p + 1] = 0;
       buffer[p + 2] = 0;
-    }
-    else {
+    } else {
       int r = (data[p] / discr) * discr;
       int g = (data[p + 1] / discr) * discr;
       int b = (data[p + 2] / discr) * discr;
@@ -548,7 +550,7 @@ void changeSaturationParallel(AVFrame* frame, double amount) {
     int b = frame->data[0][p + 2];
     int maximum = std::max(r, std::max(g, b));
     int minimum = std::min(r, std::min(g, b));
-    int factor = (int)((maximum - minimum)*amount);
+    int factor = static_cast<int>((maximum - minimum)*amount);
 
     frame->data[0][p] =
       (r == maximum) ? std::min(255, r + factor) : std::max(0, r - factor * 2);
@@ -566,7 +568,7 @@ void applyMeanFilter(AVFrame* frame, int size) {
   av_frame_make_writable(frame);
 
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
-  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  uint8_t* buffer = static_cast<uint8_t*>(av_malloc(sizeof(uint8_t)*n_bytes));
   uint8_t* data = frame->data[0];
 
   blurStripe(0, height, size, width, height, data, buffer);
@@ -582,7 +584,7 @@ void applyMeanFilterParallel(AVFrame* frame, int size) {
   av_frame_make_writable(frame);
 
   int n_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, width, height);
-  uint8_t* buffer = (uint8_t*)av_malloc(sizeof(uint8_t)*n_bytes);
+  uint8_t* buffer = static_cast<uint8_t*>(av_malloc(sizeof(uint8_t)*n_bytes));
   uint8_t* data = frame->data[0];
 
   blurStripeParallel(0, height, size, width, height, data, buffer);

@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _OUTPUT_VIDEO_BUILDER_H_
-#define _OUTPUT_VIDEO_BUILDER_H_
+#ifndef OUTPUT_VIDEO_BUILDER_H_
+#define OUTPUT_VIDEO_BUILDER_H_
 
 struct AVCodecContext;
 struct AVFormatContext;
@@ -46,7 +46,7 @@ struct AVFrame;
  *
  */
 class OutputVideoBuilder {
-public:
+ public:
   OutputVideoBuilder(char* name, AVCodecContext* inputCtx);
   ~OutputVideoBuilder();
 
@@ -71,7 +71,7 @@ public:
    */
   void setMaxQB(int maxqb);
 
-private:
+ private:
   OutputVideoBuilder();
   void init(char* name, AVCodecContext* inputCtx);
   void logMsg(AVPacket* packet, AVRational* tb);
@@ -81,4 +81,4 @@ private:
   AVStream* stream;
 };
 
-#endif  // _OUTPUT_VIDEO_BUILDER_H_
+#endif // OUTPUT_VIDEO_BUILDER_H_

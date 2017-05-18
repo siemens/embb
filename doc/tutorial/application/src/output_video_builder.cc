@@ -24,19 +24,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "output_video_builder.h"
+#include "../include/output_video_builder.h"
 
 #include <stdexcept>
 #include <iostream>
 
-#include "ffmpeg.h"
+#include "../include/ffmpeg.h"
 
 OutputVideoBuilder::OutputVideoBuilder(char* name, AVCodecContext* inputCtx) :
   formatCtx(nullptr),
   codec(nullptr),
   codecCtx(nullptr),
-  stream(nullptr){
-  init(name,inputCtx);
+  stream(nullptr) {
+  init(name, inputCtx);
 }
 
 OutputVideoBuilder::~OutputVideoBuilder() {
@@ -102,7 +102,7 @@ void OutputVideoBuilder::writeFrame(AVFrame* frame) {
     av_packet_rescale_ts(&packet, codecCtx->time_base, stream->time_base);
     packet.stream_index = stream->index;
 #ifdef LOG_MODE
-    logMsg(&packet,&stream->time_base);
+    logMsg(&packet, &stream->time_base);
 #endif
     av_interleaved_write_frame(formatCtx, &packet);
   }

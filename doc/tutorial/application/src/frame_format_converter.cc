@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "frame_format_converter.h"
+#include "../include/frame_format_converter.h"
 
 FrameFormatConverter::FrameFormatConverter()
   : toRGBCtx(nullptr)
@@ -62,12 +62,12 @@ void FrameFormatConverter::convertFormat(
   int height = (*input)->height;
   int width = (*input)->width;
   int numBytes = avpicture_get_size(format, width, height);
-  uint8_t *buffer = (uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
+  uint8_t *buffer = static_cast<uint8_t *>(av_malloc(numBytes*sizeof(uint8_t)));
 
   // Associate buffer with output frame
   avpicture_fill((AVPicture *)convertedFrame, buffer, format, width, height);
 
-  sws_scale(ctx, (uint8_t const * const *)(*input)->data,
+  sws_scale(ctx, static_cast<uint8_t const * const *>((*input)->data),
     (*input)->linesize, 0, height,
     convertedFrame->data, convertedFrame->linesize);
 

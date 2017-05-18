@@ -24,12 +24,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FRAME_FORMAT_CONVERTER_H
-#define _FRAME_FORMAT_CONVERTER_H
+#ifndef FRAME_FORMAT_CONVERTER_H
+#define FRAME_FORMAT_CONVERTER_H
 
 #include <embb/base/base.h>
 
-#include "ffmpeg.h"
+#include "./ffmpeg.h"
 
 enum ConversionType {
   TO_RGB,
@@ -44,7 +44,7 @@ enum ConversionType {
  * pictures in RGB format.
  */
 class FrameFormatConverter {
-public:
+ public:
   FrameFormatConverter();
   ~FrameFormatConverter();
 
@@ -64,12 +64,11 @@ public:
    */
   void convertFormat(AVFrame** input, AVFrame** output, ConversionType ct);
 
-private:
+ private:
   SwsContext* toRGBCtx;
   SwsContext* toOriginalFormatCtx;
   AVPixelFormat originalFormat;
   embb::base::Mutex mutex;
-
 };
 
-#endif  // _FRAME_FORMAT_CONVERTER_H
+#endif // FRAME_FORMAT_CONVERTER_H

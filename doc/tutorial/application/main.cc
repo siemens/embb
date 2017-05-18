@@ -28,11 +28,11 @@
 #include <exception>
 #include <chrono>
 
-#include "input_video_handler.h"
-#include "output_video_builder.h"
-#include "frame_format_converter.h"
-#include "filters.h"
-#include "ffmpeg.h"
+#include "include/input_video_handler.h"
+#include "include/output_video_builder.h"
+#include "include/frame_format_converter.h"
+#include "include/filters.h"
+#include "include/ffmpeg.h"
 
 #include <embb/base/base.h>
 #include <embb/mtapi/c/mtapi_opencl.h>

@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "input_video_handler.h"
+#include "../include/input_video_handler.h"
 
 #include <exception>
 #include <iostream>

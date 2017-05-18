@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FILTER_H_
-#define _FILTER_H_
+#ifndef FILTERS_H_
+#define FILTERS_H_
 
 struct AVFrame;
 
@@ -139,4 +139,4 @@ extern char const * mean_kernel;
 
 }  // namespace filters
 
-#endif  // _FILTER_H_
+#endif // FILTERS_H_

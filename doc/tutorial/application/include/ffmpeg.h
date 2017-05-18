@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FFMPEG_H_
-#define _FFMPEG_H_
+#ifndef FFMPEG_H_
+#define FFMPEG_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,4 +44,4 @@ extern "C" {
 }
 #endif
 
-#endif  // _FFMPEG_H
+#endif // FFMPEG_H
