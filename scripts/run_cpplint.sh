@@ -107,7 +107,7 @@ do
       current_rules+=",-build/header_guard" # This file needs to be included multiple times
     fi
     if [[ $file == *atomic.h ]]; then
-      current_rules+=",-whitespace/indent" # Indention is misinterpreted for this file
+      current_rules+=",-whitespace/indent" # Indentation is misinterpreted for this file
     fi
     if [[ $file == *atomic_arithmetic.h ]]; then
       current_rules+=",-readability/function" # All parameters should be named in a function

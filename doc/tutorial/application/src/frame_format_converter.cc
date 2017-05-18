@@ -65,7 +65,7 @@ void FrameFormatConverter::convertFormat(
   uint8_t *buffer = static_cast<uint8_t *>(av_malloc(numBytes*sizeof(uint8_t)));
 
   // Associate buffer with output frame
-  avpicture_fill(static_cast<AVPicture *>(convertedFrame),
+  avpicture_fill(reinterpret_cast<AVPicture *>(convertedFrame),
     buffer, format, width, height);
 
   sws_scale(ctx, static_cast<uint8_t const * const *>((*input)->data),
