@@ -443,7 +443,7 @@ Leveraging the power of multicore processors requires to split computations into
 
 While task schedulers are nowadays widely employed, especially in desktop and server applications, they are typically limited to a single operating system running on a homogeneous multicore processor. System-wide task management in heterogeneous embedded systems must be realized explicitly with low-level communication mechanisms. MTAPI [[1]](#bib_mtapi) addresses those issues by providing an API which allows parallel embedded software to be designed in a straightforward way, covering homogeneous and heterogeneous multicore architectures, as well as accelerators such as GPUs or FPGAs. As a major advantage, it abstracts from the hardware details and lets software developers focus on the application. Moreover, MTAPI takes into account typical requirements of embedded systems such as real-time constraints and predictable memory consumption.
 
-The remainder of this chapter is structured as follows: The next section explains the basic terms and concepts of MTAPI as given in the specification [[1]](#bib_mtapi). The section on the [MTAPI C Interface](#sec_mtapi_c_interface) describes the C API using a simple example taken from [[1]](#bib_mtapi). Finally, the section on the [MTAPI C++ Interface](#sec_mtapi_cpp_interface) outlines the use of MTAPI in C++ applications. Note that the C++ interface is provided by EMB² for convenience but it is not part of the standard. Readers who are familiar with MTAPI or just want to get impression on how to use MTAPI in heterogeneous systems may skip this chapter on go directly to [Heterogeneous Systems](#cha_heterogeneous_systems).
+The remainder of this chapter is structured as follows: The next section explains the basic terms and concepts of MTAPI as given in the specification [[1]](#bib_mtapi). The section on the [MTAPI C Interface](#sec_mtapi_c_interface) describes the C API using a simple example taken from [[1]](#bib_mtapi). Finally, the section on the [MTAPI C++ Interface](#sec_mtapi_cpp_interface) outlines the use of MTAPI in C++ applications. Note that the C++ interface is provided by EMB² for convenience but it is not part of the standard. Readers who are familiar with MTAPI or just want to get impression on how to use MTAPI in heterogeneous systems may skip this chapter on go directly to [Heterogeneous Systems](#cha_heterogeneous_systems) or the [Tutorial Application](#cha_tutorial_application).
 
 ### <a name="sec_mtapi_foundations"></a>Foundations
 
@@ -1040,55 +1040,51 @@ Finally, we connect the processes and run the network:
 
 ## <a name="cha_tutorial_application"></a>Tutorial Application
 
-To apply the concepts detailed above in practice, we create a video processing application in the following paragraphs. The application is supposed to accept a video file on the command line, apply some filter and write an output video to a given file. For handling video files, we are going to use ffmpeg. For details on how to build and run the application refer to the README.md file in doc/tutorial/application.
+In the following, we create a video processing application that applies the concepts described in the previous sections to a more complex problem. The application is supposed to read a video file, apply some filters, and write the resulting output video to a file. For handling video files, we are going to use <a href="https://ffmpeg.org/">FFmpeg</a>. Details on how to build and run the application can be found in the `README.md` file in `doc/tutorial/application`.
 
-The application consists of 5 parts, the main application, the filters, the input video handler, the frame format converter and the output video builder.
-
-Three parts relate to ffmpeg video de- and encoding. The input video handler opens a given video file and is used to read consecutive frames from the stream until there are no more frames. The frame format converter is used to convert from the source color format to RGB and vice versa, since all filter processing is done in RGB color space. The output video builder encodes the resulting image stream back into a video file. We will not cover these three in detail.
-
-We provide several example filters to use during processing. The filters come in three flavors: sequential, parallel using the algorithms library and as OpenCL kernels.
-
-Finally, the main application binds the other components into a working whole.
+The application consists of five parts, the main program, the filters, the input video handler, the frame format converter, and the output video builder. Three of them relate to FFmpeg video decoding and encoding. The input video handler opens a given video file and is used to read consecutive frames from the stream until there are no more frames. The frame format converter is used to convert from the source color format to RGB and vice versa, since the filtering is done in RGB color space. The output video builder encodes the resulting image stream and writes it back to a video file. For the sake of brevity, we will not cover these three parts in detail but focus on parallelizing the filters as well as the whole pipeline. The filters come in three flavors: sequential, parallel using the algorithms library, and as OpenCL kernels. The main application connects the pipeline stages into a working whole.
 
 ### Filters
 
-The filters are just loops iterating over the pixels and applying their operation to them. Here is a simple color to greyscale filter:
+The filters are essentially loops iterating over the pixels and applying some operation to them. Here is a simple color to greyscale filter:
 
     \\\inputlistingsnippet{application/src/filters.cc:serial_filter}
 
-Parallelizing it is straightforward using the algorithms building block. We just replace the for loops by a single `ForLoop` operation and retrieve the `x` and `y` pixel positions from the single counter:
+The other filters contained in `doc\tutorial\application\src\filters.cc` work similarly&mdash;feel free to experiment with them. By default, the application "cartoonifies" the incoming video stream (see function `filter` in `main.cc`).
+
+Parallelizing the above filter is straightforward using the algorithms building block: We replace the loops by a single call to `ForLoop` and compute the `x` and `y` pixel coordinates from the given index:
 
     \\\inputlistingsnippet{application/src/filters.cc:parallel_filter}
 
-Now the filter runs in parallel, but the control flow is still running serially and limits scalability.
+Now, the filter runs in parallel but the control flow of the whole application is still sequential which limits scalability.
 
 ### Control Flow
 
-Applying video decoding, format conversion, filtering, another format conversion and video encoding for a single frame yields the following sequence of calls:
+Applying video decoding, format conversion, filtering, another format conversion, and video encoding to a sequence of frames can be implemented using the following loop:
 
     \\\inputlistingsnippet{application/main.cc:serial_execution}
 
-This sequence can be seen as a pipeline and therefore we can parallelize it using the dataflow building block. Each of the operations is wrapped into a source, process or sink and the resulting objects are connected and deployed into a network:
+The steps executed in the loop body can be seen as a pipeline which allows us to parallelize them using dataflow networks. Each of the operations is wrapped into a source, a (parallel) process, or a sink. The resulting objects are then connected to a network:
 
     \\\inputlistingsnippet{application/main.cc:pipelined_execution}
 
-Scalability is now significantly improved, as no part of the application runs serially anymore.
+This way, scalability is significantly improved, as all parts now run in parallel.
 
 #### Heterogeneous Systems
 
-Some systems feature additional accelerators, e.g. a GPU, to further improve processing speed. Using OpenCL we can leverage the power of such an accelerator to speed up the processing of the filters. The filter itself is implemented in OpenCL:
+As discussed in the chapter on [heterogeneous systems](#cha_heterogeneous_systems), some systems feature additional accelerators, e.g. a GPU, to further improve processing speed. Using OpenCL (or CUDA), we can leverage the power of such accelerators to speed up the filters. Let us consider the following OpenCL implementation:
 
     \\\inputlistingsnippet{application/src/filters.cc:opencl_filter}
 
-The kernel needs to be wrapped into a MTAPI action:
+First, this kernel needs to be wrapped into an MTAPI action:
 
     \\\inputlistingsnippet{application/main.cc:make_opencl_action}
 
-Now the filter can be used like any job. Note however the additional cost imposed by the need to copy the frame and the parameters of the filter into a single buffer:
+Then, the filter can be used like any job. Note, however, the additional cost for copying the frame and the parameters of the filter into a single buffer:
 
     \\\inputlistingsnippet{application/main.cc:call_opencl_action}
 
-When wrapped into a dataflow process it can even be used as a part of the pipeline outlined before:
+When wrapped into a dataflow process, it can even be used as a part of the pipeline outlined before:
 
     \\\inputlistingsnippet{application/main.cc:opencl_pipeline}
 

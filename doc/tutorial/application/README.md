@@ -4,7 +4,7 @@ This application, which transforms ("cartoonifies") a given video in parallel, s
 
 - Install EMB² with OpenCL enabled (using CMake option -DBUILD_OPENCL_PLUGIN=ON).
 - Set EMBB_DIR in CMakeLists.txt to the installation directory (if not the default one).
-- Provide the ffmpeg libraries as described below.
+- Provide the FFmpeg libraries as described below.
 - Create a build directory and run cmake.
 
 Now, the video_app executable can be run with a video of your choice (only MPEG files are currently supported). It expects at least two command line arguments, the first one is the input video file and the second one the resulting output file. An optional third argument specifies the processing mode. There are five modes:
