@@ -56,8 +56,7 @@ extern void __fastcall embb_internal__atomic_memory_barrier_asm();
 #endif
 #endif
 
-EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier(void)
-{
+EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier(void) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   std::atomic_thread_fence(std::memory_order_seq_cst);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -110,8 +109,7 @@ typedef EMBB_BASE_BASIC_TYPE_SIZE_8 EMBB_BASE_BASIC_TYPE_ATOMIC_8;
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -122,8 +120,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_1(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -134,8 +131,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_2(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -146,8 +142,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_4(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_and_assign_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_and(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -159,8 +154,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_1 desired
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -172,8 +166,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_2 desired
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -185,8 +178,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_4 desired
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -198,8 +190,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8* expected,
   EMBB_BASE_BASIC_TYPE_SIZE_8 desired
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->compare_exchange_strong(*expected, desired);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -210,8 +201,7 @@ EMBB_PLATFORM_INLINE int embb_internal__atomic_compare_and_swap_8(
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_fetch_and_add_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -222,8 +212,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_fetch_and
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_fetch_and_add_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -234,8 +223,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_fetch_and
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_fetch_and_add_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -246,8 +234,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_fetch_and
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_fetch_and_add_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->fetch_add(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -257,8 +244,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_fetch_and
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_load_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -268,8 +254,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_load_1(
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_load_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -279,8 +264,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_load_2(
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_load_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -290,8 +274,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_load_4(
 
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_load_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->load();
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -302,8 +285,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_load_8(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -314,8 +296,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_1(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -326,8 +307,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_2(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -338,8 +318,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_4(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_or(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -350,8 +329,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_or_assign_8(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -362,8 +340,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_1(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -374,8 +351,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_2(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -386,8 +362,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_4(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_store_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   variable->store(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -398,8 +373,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_store_8(
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_swap_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -410,8 +384,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_1 embb_internal__atomic_swap_1(
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_swap_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -422,8 +395,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_2 embb_internal__atomic_swap_2(
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_swap_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -434,8 +406,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_4 embb_internal__atomic_swap_4(
 EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_swap_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   return variable->exchange(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -446,8 +417,7 @@ EMBB_PLATFORM_INLINE EMBB_BASE_BASIC_TYPE_SIZE_8 embb_internal__atomic_swap_8(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_1(
   EMBB_BASE_BASIC_TYPE_ATOMIC_1* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_1 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -458,8 +428,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_1(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_2(
   EMBB_BASE_BASIC_TYPE_ATOMIC_2* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_2 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -470,8 +439,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_2(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_4(
   EMBB_BASE_BASIC_TYPE_ATOMIC_4* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_4 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -482,8 +450,7 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_4(
 EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_8(
   EMBB_BASE_BASIC_TYPE_ATOMIC_8* variable,
   EMBB_BASE_BASIC_TYPE_SIZE_8 value
-  )
-{
+  ) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable->fetch_xor(value);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -760,8 +727,7 @@ typedef struct {
 EMBB_PLATFORM_INLINE void embb_atomic_init_char(
   embb_atomic_char* variable,
   char value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -780,8 +746,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_char(
 EMBB_PLATFORM_INLINE void embb_atomic_init_short(
   embb_atomic_short* variable,
   short value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -800,8 +765,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_short(
 EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -820,8 +784,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_short(
 EMBB_PLATFORM_INLINE void embb_atomic_init_int(
   embb_atomic_int* variable,
   int value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -840,8 +803,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_int(
 EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -860,8 +822,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_int(
 EMBB_PLATFORM_INLINE void embb_atomic_init_long(
   embb_atomic_long* variable,
   long value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -880,8 +841,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_long(
 EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -900,8 +860,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_long(
 EMBB_PLATFORM_INLINE void embb_atomic_init_long_long(
   embb_atomic_long_long* variable,
   long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -920,8 +879,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -940,8 +898,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_unsigned_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_init_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -960,8 +917,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_intptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_init_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -980,8 +936,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_uintptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_init_size_t(
   embb_atomic_size_t* variable,
   size_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1000,8 +955,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_size_t(
 EMBB_PLATFORM_INLINE void embb_atomic_init_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1020,8 +974,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_ptrdiff_t(
 EMBB_PLATFORM_INLINE void embb_atomic_init_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_MUTEX_INIT(variable->internal_mutex);
   EMBB_ATOMIC_INIT_MARKER(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1040,8 +993,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_init_uintmax_t(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_char(
   embb_atomic_char* variable,
   char value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1061,8 +1013,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_char(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_short(
   embb_atomic_short* variable,
   short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1082,8 +1033,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_short(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1103,8 +1053,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_short(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_int(
   embb_atomic_int* variable,
   int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1124,8 +1073,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_int(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1145,8 +1093,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_int(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_long(
   embb_atomic_long* variable,
   long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1166,8 +1113,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_long(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1187,8 +1133,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_long(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_long_long(
   embb_atomic_long_long* variable,
   long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1208,8 +1153,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1229,8 +1173,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_unsigned_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1250,8 +1193,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_intptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1271,8 +1213,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_uintptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_size_t(
   embb_atomic_size_t* variable,
   size_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1292,8 +1233,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_size_t(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1313,8 +1253,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_and_assign_ptrdiff_t(
 EMBB_PLATFORM_INLINE void embb_atomic_and_assign_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1335,8 +1274,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_char(
   embb_atomic_char* variable,
   char* expected,
   char desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1358,8 +1296,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_short(
   embb_atomic_short* variable,
   short* expected,
   short desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1381,8 +1318,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short* expected,
   unsigned short desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1404,8 +1340,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_int(
   embb_atomic_int* variable,
   int* expected,
   int desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1427,8 +1362,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int* expected,
   unsigned int desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1450,8 +1384,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_long(
   embb_atomic_long* variable,
   long* expected,
   long desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1473,8 +1406,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long* expected,
   unsigned long desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1496,8 +1428,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_long_long(
   embb_atomic_long_long* variable,
   long long* expected,
   long long desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1519,8 +1450,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long* expected,
   unsigned long long desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1542,8 +1472,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t* expected,
   intptr_t desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1565,8 +1494,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t* expected,
   uintptr_t desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1588,8 +1516,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_size_t(
   embb_atomic_size_t* variable,
   size_t* expected,
   size_t desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1611,8 +1538,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t* expected,
   ptrdiff_t desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1634,8 +1560,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t* expected,
   uintmax_t desired
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1656,8 +1581,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_compare_and_swap_uintmax_t(
 EMBB_PLATFORM_INLINE char embb_atomic_fetch_and_add_char(
   embb_atomic_char* variable,
   char value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1680,8 +1604,7 @@ EMBB_PLATFORM_INLINE char embb_atomic_fetch_and_add_char(
 EMBB_PLATFORM_INLINE short embb_atomic_fetch_and_add_short(
   embb_atomic_short* variable,
   short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1704,8 +1627,7 @@ EMBB_PLATFORM_INLINE short embb_atomic_fetch_and_add_short(
 EMBB_PLATFORM_INLINE unsigned short embb_atomic_fetch_and_add_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1728,8 +1650,7 @@ EMBB_PLATFORM_INLINE unsigned short embb_atomic_fetch_and_add_unsigned_short(
 EMBB_PLATFORM_INLINE int embb_atomic_fetch_and_add_int(
   embb_atomic_int* variable,
   int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1752,8 +1673,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_fetch_and_add_int(
 EMBB_PLATFORM_INLINE unsigned int embb_atomic_fetch_and_add_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1776,8 +1696,7 @@ EMBB_PLATFORM_INLINE unsigned int embb_atomic_fetch_and_add_unsigned_int(
 EMBB_PLATFORM_INLINE long embb_atomic_fetch_and_add_long(
   embb_atomic_long* variable,
   long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1800,8 +1719,7 @@ EMBB_PLATFORM_INLINE long embb_atomic_fetch_and_add_long(
 EMBB_PLATFORM_INLINE unsigned long embb_atomic_fetch_and_add_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1824,8 +1742,7 @@ EMBB_PLATFORM_INLINE unsigned long embb_atomic_fetch_and_add_unsigned_long(
 EMBB_PLATFORM_INLINE long long embb_atomic_fetch_and_add_long_long(
   embb_atomic_long_long* variable,
   long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1848,8 +1765,7 @@ EMBB_PLATFORM_INLINE long long embb_atomic_fetch_and_add_long_long(
 EMBB_PLATFORM_INLINE unsigned long long embb_atomic_fetch_and_add_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1872,8 +1788,7 @@ EMBB_PLATFORM_INLINE unsigned long long embb_atomic_fetch_and_add_unsigned_long_
 EMBB_PLATFORM_INLINE intptr_t embb_atomic_fetch_and_add_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1896,8 +1811,7 @@ EMBB_PLATFORM_INLINE intptr_t embb_atomic_fetch_and_add_intptr_t(
 EMBB_PLATFORM_INLINE uintptr_t embb_atomic_fetch_and_add_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1920,8 +1834,7 @@ EMBB_PLATFORM_INLINE uintptr_t embb_atomic_fetch_and_add_uintptr_t(
 EMBB_PLATFORM_INLINE size_t embb_atomic_fetch_and_add_size_t(
   embb_atomic_size_t* variable,
   size_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1944,8 +1857,7 @@ EMBB_PLATFORM_INLINE size_t embb_atomic_fetch_and_add_size_t(
 EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_fetch_and_add_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1968,8 +1880,7 @@ EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_fetch_and_add_ptrdiff_t(
 EMBB_PLATFORM_INLINE uintmax_t embb_atomic_fetch_and_add_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -1991,8 +1902,7 @@ EMBB_PLATFORM_INLINE uintmax_t embb_atomic_fetch_and_add_uintmax_t(
 #ifdef EMBB_CHAR_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE char embb_atomic_load_char(
   embb_atomic_char* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2012,8 +1922,7 @@ EMBB_PLATFORM_INLINE char embb_atomic_load_char(
 #ifdef EMBB_SHORT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE short embb_atomic_load_short(
   embb_atomic_short* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2033,8 +1942,7 @@ EMBB_PLATFORM_INLINE short embb_atomic_load_short(
 #ifdef EMBB_UNSIGNED_SHORT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE unsigned short embb_atomic_load_unsigned_short(
   embb_atomic_unsigned_short* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2054,8 +1962,7 @@ EMBB_PLATFORM_INLINE unsigned short embb_atomic_load_unsigned_short(
 #ifdef EMBB_INT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE int embb_atomic_load_int(
   embb_atomic_int* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2075,8 +1982,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_load_int(
 #ifdef EMBB_UNSIGNED_INT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE unsigned int embb_atomic_load_unsigned_int(
   embb_atomic_unsigned_int* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2096,8 +2002,7 @@ EMBB_PLATFORM_INLINE unsigned int embb_atomic_load_unsigned_int(
 #ifdef EMBB_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE long embb_atomic_load_long(
   embb_atomic_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2117,8 +2022,7 @@ EMBB_PLATFORM_INLINE long embb_atomic_load_long(
 #ifdef EMBB_UNSIGNED_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE unsigned long embb_atomic_load_unsigned_long(
   embb_atomic_unsigned_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2138,8 +2042,7 @@ EMBB_PLATFORM_INLINE unsigned long embb_atomic_load_unsigned_long(
 #ifdef EMBB_LONG_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE long long embb_atomic_load_long_long(
   embb_atomic_long_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2159,8 +2062,7 @@ EMBB_PLATFORM_INLINE long long embb_atomic_load_long_long(
 #ifdef EMBB_UNSIGNED_LONG_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE unsigned long long embb_atomic_load_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2180,8 +2082,7 @@ EMBB_PLATFORM_INLINE unsigned long long embb_atomic_load_unsigned_long_long(
 #ifdef EMBB_INTPTR_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE intptr_t embb_atomic_load_intptr_t(
   embb_atomic_intptr_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2201,8 +2102,7 @@ EMBB_PLATFORM_INLINE intptr_t embb_atomic_load_intptr_t(
 #ifdef EMBB_UINTPTR_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE uintptr_t embb_atomic_load_uintptr_t(
   embb_atomic_uintptr_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2222,8 +2122,7 @@ EMBB_PLATFORM_INLINE uintptr_t embb_atomic_load_uintptr_t(
 #ifdef EMBB_SIZE_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE size_t embb_atomic_load_size_t(
   embb_atomic_size_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2243,8 +2142,7 @@ EMBB_PLATFORM_INLINE size_t embb_atomic_load_size_t(
 #ifdef EMBB_PTRDIFF_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_load_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2264,8 +2162,7 @@ EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_load_ptrdiff_t(
 #ifdef EMBB_UINTMAX_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE uintmax_t embb_atomic_load_uintmax_t(
   embb_atomic_uintmax_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2286,8 +2183,7 @@ EMBB_PLATFORM_INLINE uintmax_t embb_atomic_load_uintmax_t(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_char(
   embb_atomic_char* variable,
   char value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2307,8 +2203,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_char(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_short(
   embb_atomic_short* variable,
   short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2328,8 +2223,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_short(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2349,8 +2243,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_short(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_int(
   embb_atomic_int* variable,
   int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2370,8 +2263,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_int(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2391,8 +2283,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_int(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_long(
   embb_atomic_long* variable,
   long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2412,8 +2303,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_long(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2433,8 +2323,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_long(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_long_long(
   embb_atomic_long_long* variable,
   long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2454,8 +2343,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2475,8 +2363,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_unsigned_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2496,8 +2383,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_intptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2517,8 +2403,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_uintptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_size_t(
   embb_atomic_size_t* variable,
   size_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2538,8 +2423,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_size_t(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2559,8 +2443,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_ptrdiff_t(
 EMBB_PLATFORM_INLINE void embb_atomic_or_assign_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2580,8 +2463,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_or_assign_uintmax_t(
 EMBB_PLATFORM_INLINE void embb_atomic_store_char(
   embb_atomic_char* variable,
   char value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2601,8 +2483,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_char(
 EMBB_PLATFORM_INLINE void embb_atomic_store_short(
   embb_atomic_short* variable,
   short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2622,8 +2503,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_short(
 EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2643,8 +2523,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_short(
 EMBB_PLATFORM_INLINE void embb_atomic_store_int(
   embb_atomic_int* variable,
   int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2664,8 +2543,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_int(
 EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2685,8 +2563,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_int(
 EMBB_PLATFORM_INLINE void embb_atomic_store_long(
   embb_atomic_long* variable,
   long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2706,8 +2583,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_long(
 EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2727,8 +2603,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_long(
 EMBB_PLATFORM_INLINE void embb_atomic_store_long_long(
   embb_atomic_long_long* variable,
   long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2748,8 +2623,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2769,8 +2643,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_unsigned_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_store_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2790,8 +2663,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_intptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_store_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2811,8 +2683,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_uintptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_store_size_t(
   embb_atomic_size_t* variable,
   size_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2832,8 +2703,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_size_t(
 EMBB_PLATFORM_INLINE void embb_atomic_store_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2853,8 +2723,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_ptrdiff_t(
 EMBB_PLATFORM_INLINE void embb_atomic_store_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2874,8 +2743,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_store_uintmax_t(
 EMBB_PLATFORM_INLINE char embb_atomic_swap_char(
   embb_atomic_char* variable,
   char value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2898,8 +2766,7 @@ EMBB_PLATFORM_INLINE char embb_atomic_swap_char(
 EMBB_PLATFORM_INLINE short embb_atomic_swap_short(
   embb_atomic_short* variable,
   short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2922,8 +2789,7 @@ EMBB_PLATFORM_INLINE short embb_atomic_swap_short(
 EMBB_PLATFORM_INLINE unsigned short embb_atomic_swap_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2946,8 +2812,7 @@ EMBB_PLATFORM_INLINE unsigned short embb_atomic_swap_unsigned_short(
 EMBB_PLATFORM_INLINE int embb_atomic_swap_int(
   embb_atomic_int* variable,
   int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2970,8 +2835,7 @@ EMBB_PLATFORM_INLINE int embb_atomic_swap_int(
 EMBB_PLATFORM_INLINE unsigned int embb_atomic_swap_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -2994,8 +2858,7 @@ EMBB_PLATFORM_INLINE unsigned int embb_atomic_swap_unsigned_int(
 EMBB_PLATFORM_INLINE long embb_atomic_swap_long(
   embb_atomic_long* variable,
   long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3018,8 +2881,7 @@ EMBB_PLATFORM_INLINE long embb_atomic_swap_long(
 EMBB_PLATFORM_INLINE unsigned long embb_atomic_swap_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3042,8 +2904,7 @@ EMBB_PLATFORM_INLINE unsigned long embb_atomic_swap_unsigned_long(
 EMBB_PLATFORM_INLINE long long embb_atomic_swap_long_long(
   embb_atomic_long_long* variable,
   long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3066,8 +2927,7 @@ EMBB_PLATFORM_INLINE long long embb_atomic_swap_long_long(
 EMBB_PLATFORM_INLINE unsigned long long embb_atomic_swap_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3090,8 +2950,7 @@ EMBB_PLATFORM_INLINE unsigned long long embb_atomic_swap_unsigned_long_long(
 EMBB_PLATFORM_INLINE intptr_t embb_atomic_swap_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3114,8 +2973,7 @@ EMBB_PLATFORM_INLINE intptr_t embb_atomic_swap_intptr_t(
 EMBB_PLATFORM_INLINE uintptr_t embb_atomic_swap_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3138,8 +2996,7 @@ EMBB_PLATFORM_INLINE uintptr_t embb_atomic_swap_uintptr_t(
 EMBB_PLATFORM_INLINE size_t embb_atomic_swap_size_t(
   embb_atomic_size_t* variable,
   size_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3162,8 +3019,7 @@ EMBB_PLATFORM_INLINE size_t embb_atomic_swap_size_t(
 EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_swap_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3186,8 +3042,7 @@ EMBB_PLATFORM_INLINE ptrdiff_t embb_atomic_swap_ptrdiff_t(
 EMBB_PLATFORM_INLINE uintmax_t embb_atomic_swap_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3210,8 +3065,7 @@ EMBB_PLATFORM_INLINE uintmax_t embb_atomic_swap_uintmax_t(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_char(
   embb_atomic_char* variable,
   char value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3231,8 +3085,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_char(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_short(
   embb_atomic_short* variable,
   short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3252,8 +3105,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_short(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_short(
   embb_atomic_unsigned_short* variable,
   unsigned short value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3273,8 +3125,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_short(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_int(
   embb_atomic_int* variable,
   int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3294,8 +3145,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_int(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_int(
   embb_atomic_unsigned_int* variable,
   unsigned int value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3315,8 +3165,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_int(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_long(
   embb_atomic_long* variable,
   long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3336,8 +3185,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_long(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_long(
   embb_atomic_unsigned_long* variable,
   unsigned long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3357,8 +3205,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_long(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_long_long(
   embb_atomic_long_long* variable,
   long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3378,8 +3225,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable,
   unsigned long long value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3399,8 +3245,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_unsigned_long_long(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_intptr_t(
   embb_atomic_intptr_t* variable,
   intptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3420,8 +3265,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_intptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_uintptr_t(
   embb_atomic_uintptr_t* variable,
   uintptr_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3441,8 +3285,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_uintptr_t(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_size_t(
   embb_atomic_size_t* variable,
   size_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3462,8 +3305,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_size_t(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable,
   ptrdiff_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3483,8 +3325,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_ptrdiff_t(
 EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_uintmax_t(
   embb_atomic_uintmax_t* variable,
   uintmax_t value
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
   EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex);
 #if defined EMBB_PLATFORM_ARCH_CXX11
@@ -3503,8 +3344,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_xor_assign_uintmax_t(
 #ifdef EMBB_CHAR_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_char(
   embb_atomic_char* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3521,8 +3361,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_char(
 #ifdef EMBB_SHORT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_short(
   embb_atomic_short* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3539,8 +3378,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_short(
 #ifdef EMBB_UNSIGNED_SHORT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_short(
   embb_atomic_unsigned_short* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3557,8 +3395,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_short(
 #ifdef EMBB_INT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_int(
   embb_atomic_int* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3575,8 +3412,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_int(
 #ifdef EMBB_UNSIGNED_INT_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_int(
   embb_atomic_unsigned_int* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3593,8 +3429,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_int(
 #ifdef EMBB_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_long(
   embb_atomic_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3611,8 +3446,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_long(
 #ifdef EMBB_UNSIGNED_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_long(
   embb_atomic_unsigned_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3629,8 +3463,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_long(
 #ifdef EMBB_LONG_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_long_long(
   embb_atomic_long_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3647,8 +3480,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_long_long(
 #ifdef EMBB_UNSIGNED_LONG_LONG_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_long_long(
   embb_atomic_unsigned_long_long* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3665,8 +3497,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_unsigned_long_long(
 #ifdef EMBB_INTPTR_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_intptr_t(
   embb_atomic_intptr_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3683,8 +3514,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_intptr_t(
 #ifdef EMBB_UINTPTR_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_uintptr_t(
   embb_atomic_uintptr_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3701,8 +3531,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_uintptr_t(
 #ifdef EMBB_SIZE_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_size_t(
   embb_atomic_size_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3719,8 +3548,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_size_t(
 #ifdef EMBB_PTRDIFF_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_ptrdiff_t(
   embb_atomic_ptrdiff_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;
@@ -3737,8 +3565,7 @@ EMBB_PLATFORM_INLINE void embb_atomic_destroy_ptrdiff_t(
 #ifdef EMBB_UINTMAX_T_TYPE_IS_ATOMIC
 EMBB_PLATFORM_INLINE void embb_atomic_destroy_uintmax_t(
   embb_atomic_uintmax_t* variable
-  )
-{
+  ) {
   EMBB_ATOMIC_INIT_CHECK(variable);
 #if defined EMBB_PLATFORM_ARCH_CXX11
   (void)variable;

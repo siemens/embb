@@ -92,8 +92,7 @@ extern void __fastcall embb_internal__atomic_memory_barrier_asm();
 #endif
 #endif
 
-EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier(void)
-{
+EMBB_PLATFORM_INLINE void embb_atomic_memory_barrier(void) {
 #if defined EMBB_PLATFORM_ARCH_CXX11
   std::atomic_thread_fence(std::memory_order_seq_cst);
 #elif defined EMBB_PLATFORM_ARCH_C11
@@ -198,8 +197,7 @@ internalOps = [
 print("#if defined EMBB_PLATFORM_ARCH_CXX11 || defined EMBB_PLATFORM_ARCH_C11\n")
 for o in internalOps:
 	for t in internalTypes:
-		s = "EMBB_PLATFORM_INLINE " + o.embbOp(t.designator()) + "\n"
-		s += "{\n"
+		s = "EMBB_PLATFORM_INLINE " + o.embbOp(t.designator()) + " {\n"
 		s += "#if defined EMBB_PLATFORM_ARCH_CXX11\n"
 		s += "  " + o.stdOp("variable->", "", "", "*") + ";\n"
 		s += "#elif defined EMBB_PLATFORM_ARCH_C11\n"
@@ -382,8 +380,7 @@ ops = [
 for o in ops:
 	for t in types:
 		s = "#ifdef EMBB_" + t.constantDesignator() + "_TYPE_IS_ATOMIC\n"
-		s += "EMBB_PLATFORM_INLINE " + o.embbOp(t) + "\n"
-		s += "{\n"
+		s += "EMBB_PLATFORM_INLINE " + o.embbOp(t) + " {\n"
 		s += o.preOp()
 		s += "#if defined EMBB_PLATFORM_ARCH_CXX11\n"
 		s += "  " + o.stdCXXOp(t) + ";\n"
