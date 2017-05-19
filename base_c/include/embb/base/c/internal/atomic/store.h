@@ -29,12 +29,6 @@
 
 #ifndef DOXYGEN
 
-#include <embb/base/c/internal/config.h>
-#include <embb/base/c/internal/atomic/atomic_sizes.h>
-#include <embb/base/c/internal/macro_helper.h>
-#include <embb/base/c/internal/atomic/atomic_variables.h>
-#include <string.h>
-
 /*
 * See file and_assign.h for a detailed (and operation independent) description
 * of the following macro.
@@ -44,9 +38,9 @@
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #define EMBB_DEFINE_STORE(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX)\
   extern void __fastcall EMBB_CAT2(embb_internal__atomic_store_, EMBB_PARAMETER_SIZE_BYTE)_asm( \
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value); \
+  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value); \
   EMBB_PLATFORM_INLINE void __fastcall EMBB_CAT2(embb_internal__atomic_store_, EMBB_PARAMETER_SIZE_BYTE)(\
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value) \
+  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value) \
   { \
   _ReadWriteBarrier(); \
   EMBB_CAT2(embb_internal__atomic_store_, \
@@ -55,7 +49,7 @@
   }
 #elif defined(EMBB_PLATFORM_COMPILER_GNUC)
 #define EMBB_DEFINE_STORE(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_X86_SIZE_SUFFIX)\
-  EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_internal__atomic_store_, EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, \
+  EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_internal__atomic_store_, EMBB_PARAMETER_SIZE_BYTE)(EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_PARAMETER_SIZE_BYTE) volatile* pointer_to_value, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value) {\
   __asm__ __volatile__("lock xchg" EMBB_ATOMIC_X86_SIZE_SUFFIX " %1, %0" \
   : "+m" (*pointer_to_value), "+q" (new_value) \
@@ -83,7 +77,7 @@ EMBB_DEFINE_STORE(8, "q")
 #define EMBB_DEFINE_STORE(EMBB_PARAMETER_SIZE_BYTE, EMBB_ATOMIC_ARM_SIZE_SUFFIX)\
   EMBB_PLATFORM_INLINE \
   void EMBB_CAT2(embb_internal__atomic_store_, EMBB_PARAMETER_SIZE_BYTE)(\
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) volatile* \
+  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_ATOMIC_, EMBB_PARAMETER_SIZE_BYTE) volatile* \
   pointer_to_value, \
   EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_PARAMETER_SIZE_BYTE) new_value) {\
   __asm__ __volatile__( \
@@ -108,26 +102,6 @@ EMBB_DEFINE_STORE(4, "")
 #else
 #error "Unknown architecture"
 #endif
-
-/*
-* See file and_assign.h for a detailed (and operation independent) description
-* of the following macro.
-*/
-#define EMBB_ATOMIC_INTERNAL_DEFINE_STORE_METHOD(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) \
-  EMBB_PLATFORM_INLINE void EMBB_CAT2(embb_atomic_store_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)(EMBB_CAT2(embb_atomic_, EMBB_ATOMIC_PARAMETER_ATOMIC_TYPE_SUFFIX)* variable, EMBB_ATOMIC_PARAMETER_TYPE_NATIVE value) { \
-  EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) value_pun; \
-  memcpy(&value_pun, &value, sizeof(EMBB_ATOMIC_PARAMETER_TYPE_NATIVE)); \
-  EMBB_ATOMIC_INIT_CHECK(variable); \
-  EMBB_ATOMIC_MUTEX_LOCK(variable->internal_mutex); \
-  EMBB_CAT2(embb_internal__atomic_store_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE)((EMBB_CAT2(EMBB_BASE_BASIC_TYPE_SIZE_, EMBB_ATOMIC_PARAMETER_TYPE_SIZE) volatile *)\
-  (&(variable->internal_variable)), value_pun); \
-  EMBB_ATOMIC_MUTEX_UNLOCK(variable->internal_mutex); \
-  }
-
-#undef EMBB_ATOMIC_METHOD_TO_GENERATE
-#define EMBB_ATOMIC_METHOD_TO_GENERATE STORE_METHOD
-#include <embb/base/c/internal/atomic/generate_atomic_implementation_template.h>
-#undef EMBB_ATOMIC_METHOD_TO_GENERATE
 
 #endif //DOXYGEN
 

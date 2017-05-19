@@ -40,7 +40,7 @@
  * This function has local scope.
  */
 static int embb_max_number_thread_indices_max = 0;
-static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_max_number_thread_indices_flag = 0;
+static EMBB_BASE_BASIC_TYPE_ATOMIC_4 embb_max_number_thread_indices_flag = 0;
 
 unsigned int* embb_max_number_thread_indices() {
   EMBB_BASE_BASIC_TYPE_SIZE_4 compare_to = 0;
@@ -63,7 +63,7 @@ unsigned int* embb_max_number_thread_indices() {
  *
  * This function has local scope.
  */
-static EMBB_BASE_BASIC_TYPE_SIZE_4 embb_thread_index_counter_flag = 0;
+static EMBB_BASE_BASIC_TYPE_ATOMIC_4 embb_thread_index_counter_flag = 0;
 static embb_counter_t embb_thread_index_counter_index;
 embb_counter_t* embb_thread_index_counter() {
   EMBB_BASE_BASIC_TYPE_SIZE_4 compare_to = 0;

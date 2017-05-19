@@ -44,8 +44,14 @@ function(SetGNUCompilerFlags compiler_libs)
     if (WARNINGS_ARE_ERRORS STREQUAL ON)
       set(warning_flags "${warning_flags} -Werror")
     endif()
+    set(c_std_flag "-std=c99")
+    set(cxx_std_flag "-std=c++03")
+    if (USE_C11_AND_CXX11 STREQUAL ON)
+      set(c_std_flag "-std=c11")
+      set(cxx_std_flag "-std=c++11")
+    endif()
     if(CMAKE_COMPILER_IS_GNUCC)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -std=c99 ${warning_flags}"
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread ${c_std_flag} ${warning_flags}"
           PARENT_SCOPE)
       set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DEMBB_DEBUG"
           PARENT_SCOPE)
@@ -56,7 +62,7 @@ function(SetGNUCompilerFlags compiler_libs)
          PARENT_SCOPE)
     endif()
     if(CMAKE_COMPILER_IS_GNUCXX)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++03 ${warning_flags}"
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread ${cxx_std_flag} ${warning_flags}"
           PARENT_SCOPE)
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DEMBB_DEBUG"
           PARENT_SCOPE)

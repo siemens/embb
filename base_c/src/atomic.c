@@ -24,9 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-
 #include <embb/base/c/atomic.h>
+#include <embb/base/c/internal/macro_helper.h>
 
 // Break compiling, if we assumed wrong sizes for types...
 // Function should never be called!

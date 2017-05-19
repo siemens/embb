@@ -78,6 +78,7 @@ endif()
 #
 option(BUILD_TESTS "Specify whether tests should be built" ON)
 option(BUILD_EXAMPLES "Specify whether examples should be built" OFF)
+option(USE_C11_AND_CXX11 "Specify whether the C11 and C++11 standard versions should be used instead of C99 and C++03" OFF)
 option(USE_EXCEPTIONS "Specify whether exceptions should be activated in C++" ON)
 option(INSTALL_DOCS "Specify whether Doxygen docs should be installed" ON)
 option(WARNINGS_ARE_ERRORS "Specify whether warnings should be treated as errors" OFF)

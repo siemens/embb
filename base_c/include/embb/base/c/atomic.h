@@ -288,15 +288,14 @@ void embb_atomic_xor_assign_TYPE(
   );
 #endif
 
+#include <embb/base/c/internal/config.h>
+#include <embb/base/c/internal/platform.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <embb/base/c/internal/config.h>
-
 #ifdef EMBB_THREADING_ANALYSIS_MODE
-
-#include <embb/base/c/internal/platform.h>
 
 int embb_mutex_init(
   embb_mutex_t* mutex,
@@ -354,24 +353,10 @@ static int embb_atomic_test_marker(uint32_t marker) {
 
 #endif
 
-#include <embb/base/c/internal/platform.h>
-#include <embb/base/c/internal/atomic/atomic_sizes.h>
-#include <embb/base/c/internal/atomic/atomic_variables.h>
-#include <embb/base/c/internal/macro_helper.h>
-#include <embb/base/c/internal/atomic/init.h>
-#include <embb/base/c/internal/atomic/destroy.h>
-#include <embb/base/c/internal/atomic/load.h>
-#include <embb/base/c/internal/atomic/and_assign.h>
-#include <embb/base/c/internal/atomic/store.h>
-#include <embb/base/c/internal/atomic/or_assign.h>
-#include <embb/base/c/internal/atomic/xor_assign.h>
-#include <embb/base/c/internal/atomic/swap.h>
-#include <embb/base/c/internal/atomic/fetch_and_add.h>
-#include <embb/base/c/internal/atomic/compare_and_swap.h>
-#include <embb/base/c/internal/atomic/memory_barrier.h>
-
 #ifdef __cplusplus
 }
 #endif
+
+#include <embb/base/c/internal/atomic/atomic.h>
 
 #endif //EMBB_BASE_C_ATOMIC_H_
