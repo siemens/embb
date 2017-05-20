@@ -132,7 +132,7 @@ Version 0.3.2
 
 ### Build system:
 - Given user the ability to append compiler flags
-- Let Cmake return an error on Doxygen warnings when WARNINGS_ARE_ERRORS is enabled
+- Let CMake return an error on Doxygen warnings when WARNINGS_ARE_ERRORS is enabled
 - Fixed cpplint warnings
 
 ### Documentation:
