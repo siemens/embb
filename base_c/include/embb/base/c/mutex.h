@@ -27,6 +27,10 @@
 #ifndef EMBB_BASE_C_MUTEX_H_
 #define EMBB_BASE_C_MUTEX_H_
 
+#include <embb/base/c/internal/platform.h>
+#include <embb/base/c/errors.h>
+#include <embb/base/c/atomic.h>
+
 /**
  * \defgroup C_BASE_MUTEX Mutex
  *
@@ -43,10 +47,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <embb/base/c/internal/platform.h>
-#include <embb/base/c/errors.h>
-#include <embb/base/c/atomic.h>
 
 #ifdef DOXYGEN
 /**

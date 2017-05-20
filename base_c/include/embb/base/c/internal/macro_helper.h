@@ -28,6 +28,7 @@
 #define EMBB_BASE_C_INTERNAL_MACRO_HELPER_H_
 
 #define EMBB_CAT2(_1, _2) _1 ## _2
+#define EMBB_XCAT2(_1, _2) EMBB_CAT2(_1, _2)
 #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
 
 #endif /* EMBB_BASE_C_INTERNAL_MACRO_HELPER_H_ */

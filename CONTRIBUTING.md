@@ -88,6 +88,8 @@ To distinguish between compilers, EMB² currently uses the following defines:
 
 Different architectures are distinguished using:
 
+- EMBB_PLATFORM_ARCH_C11
+- EMBB_PLATFORM_ARCH_CXX11
 - EMBB_PLATFORM_ARCH_X86
 - EMBB_PLATFORM_ARCH_X86_32
 - EMBB_PLATFORM_ARCH_X86_64
