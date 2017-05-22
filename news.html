@@ -1,0 +1,60 @@
+---
+layout: page
+permalink: news.html
+title: Embedded Multicore Building Blocks
+subTitle: Boost your applications' performance
+---
+<div class="lead">
+
+  {% for item in site.news reversed %}
+  {% capture thecycle %}{% cycle 'odd', 'even' %}{% endcapture %}
+  {% if thecycle == 'odd' %}
+
+  <div class="content-section-a">
+    <div class="container">
+      <h4 class="section-heading">{{ item.date | date_to_long_string }}</h4>
+      <div class="row">
+        <div class="col-sm-12">
+          <hr class="section-heading-spacer">
+          <div class="clearfix"></div>
+          <h2 class="section-heading">{{ item.title }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          {{ item.content }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.content-section-a -->
+
+  {% else %}
+
+  <div class="content-section-b">
+    <div class="container">
+      <h4 class="section-heading">{{ item.date | date_to_long_string }}</h4>
+      <div class="row">
+        <div class="col-sm-12">
+          <hr class="section-heading-spacer">
+          <div class="clearfix"></div>
+          <h2 class="section-heading">{{ item.title }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          {{ item.content }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.content-section-b -->
+
+  {% endif %}
+  {% endfor %}
+
+</div>

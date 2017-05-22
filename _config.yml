@@ -8,7 +8,7 @@ email: embb.info@gmail.com
 author: Tobias Schuele
 description: 'EMB² is an open source C/C++ library for parallel programming of embedded systems'
 copyright: '&copy; Siemens AG, 2017'
-credits: 'Credits: This site is based on &lsquo;Landing Page&rsquo;, a free to use, open source Bootstrap theme created by <a href="http://startbootstrap.com/">Start Bootstrap</a>, and hosted by <a href="https://github.com/">GitHub</a>.'
+credits: 'Credits: This site is based on &lsquo;Landing Page&rsquo;, a free to use, open source Bootstrap theme created by <a href="http://startbootstrap.com/">Start Bootstrap</a>, and hosted by <a href="https://github.com/">GitHub</a>. Images by <a href="https://123rf.com/">123rf</a> and <a href="https://www.shutterstock.com/">Shutterstock</a>.'
 
 # ----------------------- #
 #    Jekyll & Plugins     #
@@ -23,10 +23,13 @@ permalink: pretty
 
 collections:
 - intro
+- news
 - faq
 
 collections:
   intro:
+    output: false
+  news:
     output: false
   faq:
     output: false
