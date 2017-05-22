@@ -155,11 +155,7 @@ for t in internalTypes:
 	print("typedef atomic_" + t.stdName() + " EMBB_BASE_BASIC_TYPE_ATOMIC_" + t.designator() + ";")
 print("\n#else\n")
 for t in internalTypes:
-	if int(t.name()) == 8:
-		print("#ifdef EMBB_64_BIT_ATOMIC_AVAILABLE")
 	print("typedef EMBB_BASE_BASIC_TYPE_SIZE_" + t.designator() + " EMBB_BASE_BASIC_TYPE_ATOMIC_" + t.designator() + ";")
-	if int(t.name()) == 8:
-		print("#endif")
 print("\n#endif\n")
 
 # Internal ops
