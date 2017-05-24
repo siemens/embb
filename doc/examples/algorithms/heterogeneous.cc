@@ -69,6 +69,8 @@ static void DescendingCompare(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
+  EMBB_UNUSED_IN_RELEASE(args_size);
+  EMBB_UNUSED_IN_RELEASE(result_buffer_size);
   // snippet_begin:struct_input_lhs_rhs
   typedef struct {
     int lhs;
@@ -100,6 +102,8 @@ static void CheckZero(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
+  EMBB_UNUSED_IN_RELEASE(args_size);
+  EMBB_UNUSED_IN_RELEASE(result_buffer_size);
   // snippet_begin:struct_input_val
   typedef struct {
     int val;
@@ -126,6 +130,8 @@ static void Double(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
+  EMBB_UNUSED_IN_RELEASE(args_size);
+  EMBB_UNUSED_IN_RELEASE(result_buffer_size);
   typedef struct {
     int val;
   } InT;
@@ -152,6 +158,8 @@ static void Add(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
+  EMBB_UNUSED_IN_RELEASE(args_size);
+  EMBB_UNUSED_IN_RELEASE(result_buffer_size);
   typedef struct {
     int lhs;
     int rhs;
@@ -253,6 +261,7 @@ void RunHeterogeneous() {
       embb::algorithms::CountIf(vector.begin(), vector.end(), job_check_zero);
     // snippet_end
 
+    EMBB_UNUSED_IN_RELEASE(count);
     assert(count == 5);
 
     action_check_zero.Delete();
@@ -314,6 +323,7 @@ void RunHeterogeneous() {
         job_add, job_double);
     // snippet_end
 
+    EMBB_UNUSED_IN_RELEASE(result);
     assert(result == kCountSize * (kCountSize - 1));
 
     // snippet_begin:scan_call

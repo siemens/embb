@@ -36,6 +36,7 @@ static void Generate(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
+  EMBB_UNUSED_IN_RELEASE(result_buffer_size);
   // snippet_begin:source_output_struct_int
   typedef struct {
     bool more;
@@ -63,6 +64,8 @@ static void Double(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
+  EMBB_UNUSED_IN_RELEASE(args_size);
+  EMBB_UNUSED_IN_RELEASE(result_buffer_size);
   // snippet_begin:input_struct_int
   typedef struct {
     int val;
@@ -97,6 +100,7 @@ static void Accumulate(
   mtapi_size_t /*node_local_data_size*/,
   mtapi_task_context_t* /*task_context*/
 ) {
+  EMBB_UNUSED_IN_RELEASE(args_size);
   typedef struct {
     int val;
   } InT;
