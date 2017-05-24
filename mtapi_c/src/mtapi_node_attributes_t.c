@@ -52,7 +52,7 @@ void mtapi_nodeattr_init(
     attributes->max_jobs = MTAPI_NODE_MAX_JOBS_DEFAULT;
     attributes->max_actions_per_job = MTAPI_NODE_MAX_ACTIONS_PER_JOB_DEFAULT;
     attributes->max_priorities = MTAPI_NODE_MAX_PRIORITIES_DEFAULT;
-    attributes->reuse_main_thread = MTAPI_FALSE;
+    attributes->reuse_main_thread = MTAPI_TRUE;
     attributes->worker_priorities = NULL;
 
     embb_core_set_init(&attributes->core_affinity, 1);
