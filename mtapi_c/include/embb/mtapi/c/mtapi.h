@@ -1213,6 +1213,7 @@ void mtapi_nodeattr_set(
  * \c attributes is \c MTAPI_NULL, then the following default
  * attributes will be used:
  *   - all available cores will be used
+ *   - the main thread will be reused as a worker
  *   - maximum number of tasks is 1024
  *   - maximum number of groups is 128
  *   - maximum number of queues is 16
