@@ -97,10 +97,21 @@ NetworkTaskTest::NetworkTaskTest() {
 void NetworkTaskTest::TestBasic() {
   mtapi_status_t status;
 
+  // we need to disable main thread reuse since the cancel task blocks
+  // and the timed wait before the cancel call will not return if the
+  // blocking task is executed in that wait
+  mtapi_node_attributes_t node_attr;
+  mtapi_nodeattr_init(&node_attr, & status);
+  MTAPI_CHECK_STATUS(status);
+  mtapi_nodeattr_set(&node_attr, MTAPI_NODE_REUSE_MAIN_THREAD,
+    MTAPI_ATTRIBUTE_VALUE(MTAPI_FALSE), MTAPI_ATTRIBUTE_POINTER_AS_VALUE,
+    &status);
+  MTAPI_CHECK_STATUS(status);
+
   mtapi_initialize(
     NETWORK_DOMAIN,
     NETWORK_LOCAL_NODE,
-    MTAPI_NULL,
+    &node_attr,
     MTAPI_NULL,
     &status);
   MTAPI_CHECK_STATUS(status);
