@@ -49,7 +49,17 @@
 #if defined EMBB_PLATFORM_ARCH_X86
 #ifdef EMBB_PLATFORM_COMPILER_MSVC
 #include <intrin.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern void __fastcall embb_internal__atomic_memory_barrier_asm();
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 #elif !defined EMBB_PLATFORM_ARCH_ARM
 #error "unsupported platform"
@@ -458,6 +468,10 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_8(
 
 #else
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <embb/base/c/internal/atomic/load.h>
 #include <embb/base/c/internal/atomic/and_assign.h>
 #include <embb/base/c/internal/atomic/store.h>
@@ -466,6 +480,10 @@ EMBB_PLATFORM_INLINE void embb_internal__atomic_xor_assign_8(
 #include <embb/base/c/internal/atomic/swap.h>
 #include <embb/base/c/internal/atomic/fetch_and_add.h>
 #include <embb/base/c/internal/atomic/compare_and_swap.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
