@@ -89,6 +89,9 @@ set(CMAKE_EXTRA_INCLUDE_FILES)
 if(DEFINED EMBB_PLATFORM_HAS_GLIB_CPU)
   add_definitions(-D_GNU_SOURCE) # Needed to activate CPU_ macros
 endif()
+if (USE_C11_AND_CXX11 STREQUAL ON)
+  set(EMBB_PLATFORM_USE_C11_CXX11 1)
+endif()
 
 # Create header file from input file
 configure_file("include/embb/base/c/internal/cmake_config.h.in" 

@@ -77,9 +77,9 @@
 #define EMBB_PLATFORM_COMPILER_UNKNOWN
 #endif
 
-#if __cplusplus >= 201103
+#if (__cplusplus >= 201103) && defined(EMBB_PLATFORM_USE_C11_CXX11)
 #define EMBB_PLATFORM_ARCH_CXX11
-#elif __STDC_VERSION__ >= 201112
+#elif (__STDC_VERSION__ >= 201112) && defined(EMBB_PLATFORM_USE_C11_CXX11)
 #define EMBB_PLATFORM_ARCH_C11
 #elif defined(__x86_64__) || defined(_M_X64)
 #define EMBB_PLATFORM_ARCH_X86_64
