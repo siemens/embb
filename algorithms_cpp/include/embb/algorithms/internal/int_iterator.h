@@ -68,22 +68,24 @@ class IntIterator : public
   }
 
   IntIterator & operator +=(Difference n) {
-    value_ += n * stride_;
+    value_ = Integer(value_ + n * stride_);
     return *this;
   }
 
   IntIterator & operator -=(Difference n) {
-    value_ -= n * stride_;
+    value_ = Integer(value_ - n * stride_);
     return *this;
   }
 
   IntIterator & operator ++() {
-    value_ += stride_;
+    value_ = Integer(value_ + stride_);
     return *this;
   }
 
   IntIterator operator ++(int) {
-    return IntIterator(value_ += stride_);
+    Integer result = value_;
+    value_ = Integer(value_ + stride_);
+    return IntIterator(result, stride_);
   }
 
   IntIterator & operator --() {
@@ -92,11 +94,13 @@ class IntIterator : public
   }
 
   IntIterator operator --(int) {
-    return IntIterator(value_ -= stride_);
+    Integer result = value_;
+    value_ = Integer(value_ - stride_);
+    return IntIterator(result, stride_);
   }
 
   IntIterator operator +(Difference n) const {
-    return IntIterator(value_ + n * stride_);
+    return IntIterator(Integer(value_ + n * stride_), stride_);
   }
 
   Difference operator -(IntIterator const & it) const {
@@ -104,7 +108,7 @@ class IntIterator : public
   }
 
   IntIterator operator -(Difference n) const {
-    return IntIterator(value_ - n * stride_);
+    return IntIterator(Integer(value_ - n * stride_), stride_);
   }
 
   bool operator ==(IntIterator const & it) const {
@@ -140,7 +144,7 @@ class IntIterator : public
   }
 
   Integer operator[](Difference n) const {
-    return value_ + n * stride_;
+    return Integer(value_ + n * stride_);
   }
 };
 
