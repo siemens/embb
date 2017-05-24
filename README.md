@@ -57,7 +57,7 @@ It is strongly recommended to build from a release file and not from a repositor
 
 ### Platforms
 
-EMB² is regularly built and tested on a variety of OS/compiler/architecture combinations including Linux (x86 and ARM using GCC/Clang) and Windows (x86 using MSVC). Other platforms may be supported without any changes to the source code. The included unit tests can be used to find out whether a system not officially supported is suitable to run EMB². If the build process or the unit tests fail on your system, please contact us.
+EMB² is regularly built and tested on a variety of OS/compiler/architecture combinations including Linux (x86 and ARM using GCC/Clang) and Windows (x86 using MSVC). Moreover, it has been successfully built and tested on RTEMS and FreeBSD. Other platforms may be supported without any changes to the source code. The included unit tests can be used to find out whether a system not officially supported is suitable to run EMB². If the build process or the unit tests fail on your system, please contact us.
 
 ### Prerequisites
 
@@ -272,3 +272,5 @@ The release files of EMB² come with a tutorial, example programs, and a referen
 - For memory management reasons, the number of threads EMB² can deal with is bounded by a predefined but modifiable constant (see functions `embb_thread_get_max_count()` / `embb_thread_set_max_count()` and class `embb::base::Thread`).
 - The MTAPI C++ interface supports automatic initialization, which allows for easy usage of the MTAPI C++, Algorithms, and Dataflow components. For performance measurements, explicit initialization is strongly recommended since the measurements will otherwise include the initialization time of MTAPI.
 - When using ThreadSanitizer, a bug causes the built-in CMake type size determination to fail which in turn leads to a broken configuration. Therefore, you have to do a normal build first and then run CMake again with flags and libs configured for ThreadSanitizer.
+- Compilation with option -DUSE_C11_AND_CXX11=ON to enable C11/C++11-based atomics has no effect with MSVC.
+

@@ -2,6 +2,64 @@ Embedded Multicore Building Blocks (EMB²)
 =========================================
 
 
+Version 1.0.0
+-------------
+
+### Features:
+- Added support for heterogeneous systems in algorithms and dataflow
+- Added ForLoop function for parallel index-based loops
+- Added extension for MTAPI callback functions
+- Added job and task attributes for scheduling based on problem size
+- Added functions to retrieve context for OpenCL and CUDA plugins
+
+### Changes and improvements:
+- Added support for atomic operations provided by C11/C++11
+- Optimized spinlock implementation
+- Added default constructors for Group and Queue
+- Added test for exceptions in mtapi_cpp
+- Added initialization of affinity in execution policy constructors
+- Added initialization of user_data pointer in task attributes
+- Corrected return code for cancelled task in network plugin
+- Improved error handling in MTAPI CPP interface
+- Enabled reuse of main thread by default
+- Removed spinlock from dataflow
+- Added initialization of clock listeners in dataflow
+- Changed dataflow so that sources are run within slice group
+- Changed iterators in containers to return pairs and added documentation
+- Added iterators to value pools and changed destruction of elements in object pools
+- Added initializers in unit tests
+- Resolved Coverity Scan warnings
+- Resolved warning when compiling with GCC 7.1
+
+### Bug fixes:
+- Fixed resource leak in unit test for pool
+- Fixed potential resource leak and remote task cancel handling in network plugin
+- Fixed MTAPI_CPP affinity test on single-core machines
+- Fixed handling of task error conditions encountered during execution
+- Fixed wrong allocation size in MTAPI C implementation
+- Fixed possible overflow in unit test for algorithms
+
+### Build system:
+- Added option for generating shared libraries
+- Added CMake package finder and use-script for integration of EMB² in applications
+- Added output for all options in CMake build script
+- Integrated Coverity Scan into Travis CI builds
+- Fixed linker problem with CUDA plugin
+- Fixed script that creates tarball and zip file
+- Updated .travis.yml
+
+### Documentation:
+- Added sample application (video processing)
+- Revised tutorial and converted to markdown format
+- Included generation of HTML and EPUB files (in addition to PDF)
+- Added example for CUDA plugin
+- Improved Doxygen documentation
+- Extended CONTRIBUTING file
+- Updated README file
+- Updated year in license headers
+- Fixed typos
+
+
 Version 0.5.0
 -------------
 
@@ -71,8 +129,8 @@ Version 0.5.0
 - Changed CMake scripts (caching of install prefix)
 
 ### Documentation:
-- Revised and updated README.md
-- Added CONTRIBUTING.md
+- Revised and updated README file
+- Added CONTRIBUTING file
 - Improved examples for mtapi_cpp
 - Updated and extended Doxygen documentation
 - Updated license headers in MTAPI plugin sources
