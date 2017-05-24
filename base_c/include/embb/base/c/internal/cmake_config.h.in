@@ -63,6 +63,8 @@
  */
 #cmakedefine EMBB_THREADING_ANALYSIS_MODE
 
+#cmakedefine EMBB_PLATFORM_USE_C11_CXX11
+
 /**
  * Version defines.
  */
