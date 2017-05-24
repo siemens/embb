@@ -353,10 +353,10 @@ static int embb_atomic_test_marker(uint32_t marker) {
 
 #endif
 
+#include <embb/base/c/internal/atomic/atomic.h>
+
 #ifdef __cplusplus
 }
 #endif
-
-#include <embb/base/c/internal/atomic/atomic.h>
 
 #endif //EMBB_BASE_C_ATOMIC_H_
