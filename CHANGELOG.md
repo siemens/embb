@@ -22,6 +22,7 @@ Version 1.0.0
 - Corrected return code for cancelled task in network plugin
 - Improved error handling in MTAPI CPP interface
 - Enabled reuse of main thread by default
+- Added explicit finalization of allocated elements in MTAPI pool
 - Removed spinlock from dataflow
 - Added initialization of clock listeners in dataflow
 - Changed dataflow so that sources are run within slice group
@@ -38,6 +39,7 @@ Version 1.0.0
 - Fixed handling of task error conditions encountered during execution
 - Fixed wrong allocation size in MTAPI C implementation
 - Fixed possible overflow in unit test for algorithms
+- Fixed problem in unit test where mutex could be destroyed while still being locked
 
 ### Build system:
 - Added option for generating shared libraries
