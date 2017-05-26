@@ -56,8 +56,8 @@ void ConditionVarTest::TestNotify() {
     embb_mutex_lock(&mutex_cond_notify_);
     embb_counter_increment(&counter_);
     embb_condition_wait(&cond_notify_, &mutex_cond_notify_);
-    embb_counter_increment(&counter_);
     embb_mutex_unlock(&mutex_cond_notify_);
+    embb_counter_increment(&counter_);
   } else {
     embb_duration_t duration = EMBB_DURATION_INIT;
     embb_duration_set_milliseconds(&duration, 1);
