@@ -252,8 +252,6 @@ void mtapi_ext_job_set_attribute(
           break;
         }
       }
-
-      local_status = MTAPI_SUCCESS;
     } else {
       local_status = MTAPI_ERR_JOB_INVALID;
     }
