@@ -38,7 +38,8 @@ file(GLOB_RECURSE SOURCES "*.cc" "*.h")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
 if(MSVC)
-    # Provide the correct ffmpeg installation directory in the line below
+    # Provide the correct FFmpeg installation directory in the line below.
+	# Make sure to use slashes instead of backslashes in paths.
     set(FFMPEG_DIR "MY-FFMPEG-DIRECTORY")
     include_directories("${FFMPEG_DIR}/include")
     link_directories("${FFMPEG_DIR}/lib")
