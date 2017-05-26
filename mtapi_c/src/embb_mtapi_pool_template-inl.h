@@ -74,8 +74,17 @@ mtapi_boolean_t embb_mtapi_##TYPE##_pool_initialize( \
 } \
 \
 void embb_mtapi_##TYPE##_pool_finalize(embb_mtapi_##TYPE##_pool_t * that) { \
-  embb_mtapi_id_pool_finalize(&that->id_pool); \
+  mtapi_uint_t ii; \
+  assert(MTAPI_NULL != that); \
+  if (NULL != that->storage) { \
+    for (ii = 0; ii <= that->id_pool.capacity; ii++) { \
+      if (that->storage[ii].handle.id != EMBB_MTAPI_IDPOOL_INVALID_ID) { \
+        embb_mtapi_##TYPE##_finalize(&that->storage[ii]); \
+      } \
+    } \
+  } \
   embb_mtapi_alloc_deallocate(that->storage); \
+  embb_mtapi_id_pool_finalize(&that->id_pool); \
   that->storage = MTAPI_NULL; \
 } \
 \
