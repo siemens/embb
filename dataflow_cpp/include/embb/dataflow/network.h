@@ -1196,9 +1196,9 @@ class Network {
 #endif
 
   bool SpawnClock(int clock) {
-    const int idx = clock % slices_;
     bool result = true;
 #if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
+    const int idx = clock % slices_;
     spawn_history_[idx].push_back(clock);
 #endif
     for (size_t kk = 0; kk < sources_.size(); kk++) {
