@@ -48,8 +48,7 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   typedef SinkExecutor< InputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  Sink(Scheduler * sched, ClockListener * listener,
-    FunctionType function)
+  Sink(Scheduler * sched, FunctionType function)
     : inputs_()
     , executor_(function)
     , action_(NULL)
@@ -58,12 +57,10 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     queued_clock_ = 0;
     queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
-    listener_ = listener;
     SetScheduler(sched);
   }
 
-  Sink(Scheduler * sched, ClockListener * listener,
-    embb::mtapi::Job job)
+  Sink(Scheduler * sched, embb::mtapi::Job job)
     : inputs_()
     , executor_(job)
     , action_(NULL)
@@ -72,7 +69,6 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     queued_clock_ = 0;
     queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
-    listener_ = listener;
     SetScheduler(sched);
   }
 
@@ -90,7 +86,6 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     if (inputs_.AreNoneBlank(clock)) {
       executor_.Execute(clock, inputs_);
     }
-    listener_->OnClock(clock);
   }
 
   virtual bool IsFullyConnected() {
@@ -142,7 +137,6 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   InputsType inputs_;
   ExecutorType executor_;
   Action * action_;
-  ClockListener * listener_;
   embb::base::Atomic<int> next_clock_;
   embb::base::Atomic<int> queued_clock_;
   int queue_id_;
