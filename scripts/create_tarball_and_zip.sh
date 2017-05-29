@@ -313,17 +313,34 @@ redirect_cmd rsync \
 
 echo "--> Generating Tutorial MD"
 TUTORIAL_MD_DIR="$MYTMPDIR_BUILD/doc/tutorial"
-TUTORIAL_SOURCE="$MYTMPDIR_BUILD/doc/tutorial/tutorial.md"
-TUTORIAL_TARGET="$MYTMPDIR/${n}/doc/tutorial/tutorial.md"
+TUTORIAL_TARGET_DIR="$MYTMPDIR/${n}/doc/tutorial"
 REMEMBER_CUR_DIR=$(pwd)
 
 if [ -f "$TUTORIAL_MD_DIR/tutorial_raw.md" ]; then
         cd "$TUTORIAL_MD_DIR"
         if [ -f "$TUTORIAL_MD_DIR/bake_tutorial.py" ]; then
-                redirect_cmd python bake_tutorial.py >> tutorial.md
+		# "redirect_cmd" prefix missing, as output of bake_tutorial.py is redirected
+		# itself.
+		# TODO: give output file as script input parameter. Modify bake script accordingly.
+                python bake_tutorial.py >> tutorial.md
+
+		redirect_cmd sed -i -e 's/<\/\?sub>/~/g' tutorial.md
+		redirect_cmd sed -i -e 's/<\/\?sup>/\^/g' tutorial.md
+		redirect_cmd pandoc tutorial.md --latex-engine=xelatex -V papersize=a4 -V geometry:margin=3cm -o tutorial.pdf
+		redirect_cmd pandoc tutorial.md --css=pandoc.css --self-contained -o tutorial.html
+		redirect_cmd pandoc tutorial.md tutorial.yml --epub-stylesheet=pandoc.css -o tutorial.epub
         fi
-        if [ -f "$TUTORIAL_SOURCE" ]; then
-                cp $TUTORIAL_SOURCE $TUTORIAL_TARGET
+
+	if [ -f "$TUTORIAL_MD_DIR/tutorial.pdf" ]; then
+                cp $TUTORIAL_MD_DIR/tutorial.pdf $TUTORIAL_TARGET_DIR/
+        fi
+
+	if [ -f "$TUTORIAL_MD_DIR/tutorial.epub" ]; then
+                cp $TUTORIAL_MD_DIR/tutorial.epub $TUTORIAL_TARGET_DIR/
+        fi
+
+	if [ -f "$TUTORIAL_MD_DIR/tutorial.html" ]; then
+                cp $TUTORIAL_MD_DIR/tutorial.html $TUTORIAL_TARGET_DIR/
         fi
 fi
 cd "$REMEMBER_CUR_DIR"
@@ -377,8 +394,18 @@ if ! [ -f $MYTMPDIR/${n}/doc/examples/main.cc ]; then
         exit 1;
 fi
 
-if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.md ]; then
-        echo "--> ! Tutorial MD missing. Exiting."
+if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.html ]; then
+        echo "--> ! Tutorial HTML missing. Exiting."
+        exit 1;
+fi
+
+if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.html ]; then
+        echo "--> ! Tutorial PDF missing. Exiting."
+        exit 1;
+fi
+
+if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.html ]; then
+        echo "--> ! Tutorial EPUB missing. Exiting."
         exit 1;
 fi
 
