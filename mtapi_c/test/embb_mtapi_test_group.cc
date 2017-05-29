@@ -195,7 +195,7 @@ void GroupTest::TestBasic() {
   }
 
   status = MTAPI_ERR_UNKNOWN;
-  mtapi_action_delete(action, 10, &status);
+  mtapi_action_delete(action, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
