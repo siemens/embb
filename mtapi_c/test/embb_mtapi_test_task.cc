@@ -247,11 +247,11 @@ void TaskTest::TryDetached() {
   testDoSomethingElse();
 
   status = MTAPI_ERR_UNKNOWN;
-  mtapi_action_delete(action, 0, &status);
+  mtapi_action_delete(action, 10, &status);
   PT_EXPECT((MTAPI_TIMEOUT == status) || (MTAPI_SUCCESS == status));
   if (MTAPI_SUCCESS != status) {
     status = MTAPI_ERR_UNKNOWN;
-    mtapi_action_delete(action, 1000, &status);
+    mtapi_action_delete(action, MTAPI_INFINITE, &status);
     MTAPI_CHECK_STATUS(status);
   }
 }
@@ -313,7 +313,7 @@ void TaskTest::TryMultiInstance() {
   }
 
   status = MTAPI_ERR_UNKNOWN;
-  mtapi_action_delete(multiinstance_action, 10, &status);
+  mtapi_action_delete(multiinstance_action, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 }
 

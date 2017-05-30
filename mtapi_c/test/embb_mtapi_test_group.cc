@@ -146,8 +146,13 @@ void GroupTest::TestBasic() {
   testDoSomethingElse();
 
   /* wait for completion of all tasks in the group */
-  mtapi_group_wait_all(group, 10000, &status);
-  MTAPI_CHECK_STATUS(status);
+  mtapi_group_wait_all(group, 10, &status);
+  PT_EXPECT((MTAPI_TIMEOUT == status) || (MTAPI_SUCCESS == status));
+  if (MTAPI_SUCCESS != status) {
+    status = MTAPI_ERR_UNKNOWN;
+    mtapi_group_wait_all(group, MTAPI_INFINITE, &status);
+    MTAPI_CHECK_STATUS(status);
+  }
 
   /* ---- mtapi_group_wait_any test ---- */
 
@@ -175,24 +180,26 @@ void GroupTest::TestBasic() {
   bool run = true;
   while (run) {
     mtapi_group_wait_any(group, reinterpret_cast<void**>(&tmp_result),
-      10000, &status);
+      10, &status);
     if (status == MTAPI_TIMEOUT) {
-      embb_mtapi_log_error("wait timed out\n");
-      status = MTAPI_SUCCESS;
+      mtapi_group_wait_any(group, reinterpret_cast<void**>(&tmp_result),
+        MTAPI_INFINITE, &status);
     }
-    /* status will be MTAPI_ERR_RESULT_SIZE on result size mismatch */
-    if (status != MTAPI_SUCCESS) {
-      /* MTAPI_GROUP_COMPLETED */
+    if (status == MTAPI_GROUP_COMPLETED) {
       run = false;
-    } else {
+    } else if (status == MTAPI_SUCCESS) {
       /* ... process 'tmp_result' here ...
       temp_result contains the pointer that was passed at mtapi_task_start
       to the task which just returned */
       embb_mtapi_log_trace(
         "result.value1 = %i, result.value2 = %i\n",
         tmp_result->value1, tmp_result->value2);
+    } else {
+      /* status will be MTAPI_ERR_RESULT_SIZE on result size mismatch */
+      run = false;
     }
   }
+  PT_EXPECT(MTAPI_GROUP_COMPLETED == status);
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_action_delete(action, MTAPI_INFINITE, &status);

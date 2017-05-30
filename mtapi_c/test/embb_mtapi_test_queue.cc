@@ -159,11 +159,11 @@ void QueueTest::TrySimple() {
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
-  mtapi_queue_delete(queue, 10, &status);
+  mtapi_queue_delete(queue, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
-  mtapi_action_delete(action, 10, &status);
+  mtapi_action_delete(action, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 }
 
@@ -235,14 +235,19 @@ void QueueTest::TryWithWait() {
 
   status = MTAPI_ERR_UNKNOWN;
   mtapi_queue_delete(queue, 10, &status);
+  PT_EXPECT((MTAPI_TIMEOUT == status) || (MTAPI_SUCCESS == status));
+  if (MTAPI_SUCCESS != status) {
+    status = MTAPI_ERR_UNKNOWN;
+    mtapi_queue_delete(queue, MTAPI_INFINITE, &status);
+    MTAPI_CHECK_STATUS(status);
+  }
+
+  status = MTAPI_ERR_UNKNOWN;
+  mtapi_action_delete(action, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
   status = MTAPI_ERR_UNKNOWN;
-  mtapi_action_delete(action, 10, &status);
-  MTAPI_CHECK_STATUS(status);
-
-  status = MTAPI_ERR_UNKNOWN;
-  mtapi_action_delete(test_action, 10, &status);
+  mtapi_action_delete(test_action, MTAPI_INFINITE, &status);
   MTAPI_CHECK_STATUS(status);
 
   embb_atomic_destroy_int(&test);
