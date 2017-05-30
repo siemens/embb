@@ -285,7 +285,10 @@ redirect_cmd rsync \
         --exclude "*.toc" \
         --exclude "*.aux" \
         --exclude "doc/tutorial/tutorial_raw.md" \
-        --exclude "doc/tutorial/bake_tutorial.py" \
+        --exclude "doc/tutorial/*.py" \
+        --exclude "doc/tutorial/*.png" \
+        --exclude "doc/tutorial/*.css" \
+        --exclude "doc/tutorial/*.yml" \
         --exclude "doc/reference/*.xml" \
         --exclude "doc/reference/*.dox" \
         --exclude "doc/reference/*.in" \
@@ -311,14 +314,14 @@ echo "--> Calling rsync to temporary folder 2/2 ($MYTMPDIR_BUILD)"
 redirect_cmd rsync \
         --archive --recursive ${d} $MYTMPDIR_BUILD 
 
-echo "--> Generating Tutorial MD"
-TUTORIAL_MD_DIR="$MYTMPDIR_BUILD/doc/tutorial"
+echo "--> Generating Tutorial"
+TUTORIAL_SOURCE_DIR="$MYTMPDIR_BUILD/doc/tutorial"
 TUTORIAL_TARGET_DIR="$MYTMPDIR/${n}/doc/tutorial"
 REMEMBER_CUR_DIR=$(pwd)
 
-if [ -f "$TUTORIAL_MD_DIR/tutorial_raw.md" ]; then
-        cd "$TUTORIAL_MD_DIR"
-        if [ -f "$TUTORIAL_MD_DIR/bake_tutorial.py" ]; then
+if [ -f "$TUTORIAL_SOURCE_DIR/tutorial_raw.md" ]; then
+        cd "$TUTORIAL_SOURCE_DIR"
+        if [ -f "$TUTORIAL_SOURCE_DIR/bake_tutorial.py" ]; then
 		# "redirect_cmd" prefix missing, as output of bake_tutorial.py is redirected
 		# itself.
 		# TODO: give output file as script input parameter. Modify bake script accordingly.
@@ -331,16 +334,16 @@ if [ -f "$TUTORIAL_MD_DIR/tutorial_raw.md" ]; then
 		redirect_cmd pandoc tutorial.md tutorial.yml --epub-stylesheet=pandoc.css -o tutorial.epub
         fi
 
-	if [ -f "$TUTORIAL_MD_DIR/tutorial.pdf" ]; then
-                cp $TUTORIAL_MD_DIR/tutorial.pdf $TUTORIAL_TARGET_DIR/
+	if [ -f "$TUTORIAL_SOURCE_DIR/tutorial.pdf" ]; then
+                cp $TUTORIAL_SOURCE_DIR/tutorial.pdf $TUTORIAL_TARGET_DIR/
         fi
 
-	if [ -f "$TUTORIAL_MD_DIR/tutorial.epub" ]; then
-                cp $TUTORIAL_MD_DIR/tutorial.epub $TUTORIAL_TARGET_DIR/
+	if [ -f "$TUTORIAL_SOURCE_DIR/tutorial.epub" ]; then
+                cp $TUTORIAL_SOURCE_DIR/tutorial.epub $TUTORIAL_TARGET_DIR/
         fi
 
-	if [ -f "$TUTORIAL_MD_DIR/tutorial.html" ]; then
-                cp $TUTORIAL_MD_DIR/tutorial.html $TUTORIAL_TARGET_DIR/
+	if [ -f "$TUTORIAL_SOURCE_DIR/tutorial.html" ]; then
+                cp $TUTORIAL_SOURCE_DIR/tutorial.html $TUTORIAL_TARGET_DIR/
         fi
 fi
 cd "$REMEMBER_CUR_DIR"
@@ -399,12 +402,12 @@ if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.html ]; then
         exit 1;
 fi
 
-if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.html ]; then
+if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.pdf ]; then
         echo "--> ! Tutorial PDF missing. Exiting."
         exit 1;
 fi
 
-if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.html ]; then
+if ! [ -f $MYTMPDIR/${n}/doc/tutorial/tutorial.epub ]; then
         echo "--> ! Tutorial EPUB missing. Exiting."
         exit 1;
 fi
