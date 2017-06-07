@@ -2,7 +2,7 @@
 title: Usage
 faq:
   - question: Where do I find the documentation?
-    answer: The <code>doc</code> folder in the root directory contains a tutorial (<code>doc/tutorial/tutorial.pdf</code>), the reference manual in HTML format (<code>doc/reference/index.html</code>) as well as in PDF format (<code>doc/reference/reference.pdf</code>), and a number of examples (<code>doc/examples</code>). Note that both the documentation and the examples are only available in the release files. If you pull from the repository, you have to build them on your own (see the <a href="https://github.com/siemens/embb/blob/master/README.md">README.md</a> file for more information).
+    answer: The <code>doc</code> folder in the root directory contains a tutorial (<code>doc/tutorial/tutorial.[pdf|html|epub]</code>), the reference manual (<code>doc/reference/index.html</code>, <code>doc/reference/reference.pdf</code>), a number of simple examples (<code>doc/examples</code>), as well as a more complex application (<code>doc/tutorial/application</code>). Note that the documentation is only available in the release files. If you pull from the repository, you have to build them on your own (see the <a href="https://github.com/siemens/embb/blob/master/README.md">README.md</a> file for more information).
   - question: Why do I get a linker error when building my project?
     answer: "Make sure that you link all necessary libraries in the following order:
     <ul>
