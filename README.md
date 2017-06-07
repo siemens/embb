@@ -265,7 +265,7 @@ If EMB² was not installed to the default directory, you have to specify the dir
 
 ### Documentation
 
-The release files of EMB² come with a tutorial, example programs, and a reference manual (HTML) describing the APIs. All documentation is contained in the "doc" folder. The root document of the HTML reference is `doc/reference/index.html`. Note that the generated documentation files are not under version control and hence not contained in the repository. As mentioned above, it is therefore recommended to download one of the packaged release files in order to have ready-to-use documentation.
+The release files of EMB² come with a tutorial, example programs, and a reference manual describing the APIs. All documentation is contained in the "doc" folder. The root document of the reference manual (HTML) is `doc/reference/index.html`. Note that the generated documentation files are not under version control and hence not contained in the repository. As mentioned above, it is therefore recommended to download one of the packaged release files in order to have ready-to-use documentation.
 
 ### Limitations and Important Notes
 
