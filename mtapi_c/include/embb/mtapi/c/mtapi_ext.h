@@ -259,6 +259,13 @@ void mtapi_ext_job_set_attribute(
                                             may be \c MTAPI_NULL */
   );
 
+/**
+ * This function yields execution to the MTAPI scheduler for at most one task.
+ * \notthreadsafe
+ * \ingroup C_MTAPI_EXT
+ */
+void mtapi_ext_yield();
+
 #ifdef __cplusplus
 }
 #endif

@@ -718,3 +718,13 @@ mtapi_boolean_t embb_mtapi_scheduler_schedule_task(
 
   return pushed;
 }
+
+void mtapi_ext_yield() {
+  embb_mtapi_node_t* node = embb_mtapi_node_get_instance();
+  embb_mtapi_thread_context_t * context =
+    embb_mtapi_scheduler_get_current_thread_context(node->scheduler);
+  embb_mtapi_scheduler_execute_task_or_yield(
+    node->scheduler,
+    node,
+    context);
+}

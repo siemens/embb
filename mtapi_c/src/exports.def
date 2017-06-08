@@ -63,3 +63,4 @@ embb_mtapi_group_pool_is_handle_valid
 embb_mtapi_group_pool_get_storage_for_handle
 embb_mtapi_node_is_initialized
 embb_mtapi_node_get_instance
+mtapi_ext_yield
