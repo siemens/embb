@@ -30,6 +30,7 @@
 #include <embb/base/memory_allocation.h>
 #include <embb/base/function.h>
 #include <embb/mtapi/c/mtapi.h>
+#include <embb/mtapi/c/mtapi_ext.h>
 #include <embb/mtapi/execution_policy.h>
 #include <embb/mtapi/status_exception.h>
 #include <embb/mtapi/node_attributes.h>
@@ -484,6 +485,14 @@ class Node {
       &status);
     internal::CheckStatus(status);
     return Task(task_hndl);
+  }
+
+  /**
+   * This function yields execution to the MTAPI scheduler for at most one task.
+   * \threadsafe
+   */
+  void YieldToScheduler() {
+    mtapi_ext_yield();
   }
 
  private:
