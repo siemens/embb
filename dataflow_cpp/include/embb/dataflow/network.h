@@ -874,24 +874,28 @@ class Network {
 
 #else
 
-class Network {
+class Network : public internal::ClockListener {
  public:
   Network()
-    : slices_(0), sched_(NULL), policy_() {
+    : sink_counter_(NULL), sink_count_(0)
+    , slices_(0), sched_(NULL), policy_() {
     // empty
   }
 
   explicit Network(int slices)
-    : slices_(slices), sched_(NULL), policy_() {
+    : sink_counter_(NULL), sink_count_(0)
+    , slices_(slices), sched_(NULL), policy_() {
     PrepareSlices();
   }
 
   explicit Network(embb::mtapi::ExecutionPolicy const & policy)
-    : slices_(0), sched_(NULL), policy_(policy) {
+    : sink_counter_(NULL), sink_count_(0)
+    , slices_(0), sched_(NULL), policy_(policy) {
   }
 
   Network(int slices, embb::mtapi::ExecutionPolicy const & policy)
-    : slices_(slices), sched_(NULL), policy_(policy) {
+    : sink_counter_(NULL), sink_count_(0)
+    , slices_(slices), sched_(NULL), policy_(policy) {
     PrepareSlices();
   }
 
@@ -899,6 +903,13 @@ class Network {
     if (NULL != sched_) {
       embb::base::Allocation::Delete(sched_);
       sched_ = NULL;
+    }
+    if (NULL != sink_counter_) {
+      for (int ii = 0; ii < slices_; ii++) {
+        sink_counter_[ii].~Atomic<int>();
+      }
+      embb::base::Allocation::Free(sink_counter_);
+      sink_counter_ = NULL;
     }
   }
 
@@ -1053,25 +1064,28 @@ class Network {
     Sink(Network & network, FunctionType function)
       : internal::Sink<
           internal::Inputs<I1, I2, I3, I4, I5> >(
-            network.sched_, function) {
+            network.sched_, &network, function) {
       this->SetPolicy(network.policy_);
       network.sinks_.push_back(this);
+      network.sink_count_++;
     }
 
     Sink(Network & network, FunctionType function,
       embb::mtapi::ExecutionPolicy const & policy)
       : internal::Sink<
       internal::Inputs<I1, I2, I3, I4, I5> >(
-        network.sched_, function) {
+        network.sched_, &network, function) {
       this->SetPolicy(policy);
       network.sinks_.push_back(this);
+      network.sink_count_++;
     }
 
     Sink(Network & network, embb::mtapi::Job job)
       : internal::Sink<
       internal::Inputs<I1, I2, I3, I4, I5> >(
-        network.sched_, job) {
+        network.sched_, &network, job) {
       network.sinks_.push_back(this);
+      network.sink_count_++;
     }
   };
 
@@ -1169,7 +1183,9 @@ class Network {
     int clock = 0;
     while (clock >= 0) {
       const int idx = clock % slices_;
-      sched_->WaitForSlice(idx);
+      while (sink_counter_[idx] > 0) {
+        sched_->YieldToScheduler();
+      }
       if (!SpawnClock(clock))
         break;
       clock++;
@@ -1179,14 +1195,30 @@ class Network {
     if (ii < 0) ii = 0;
     for (; ii < clock; ii++) {
       const int idx = ii % slices_;
-      sched_->WaitForSlice(idx);
+      while (sink_counter_[idx] > 0) {
+        sched_->YieldToScheduler();
+      }
     }
+  }
+
+  /**
+   * Internal.
+   * \internal
+   * Gets called when a token has reached all sinks and frees up the
+   * corresponding slot, thus allowing a new token to be emitted.
+   */
+  virtual void OnClock(int clock) {
+    const int idx = clock % slices_;
+    assert(sink_counter_[idx] > 0);
+    --sink_counter_[idx];
   }
 
  private:
   std::vector<internal::Node*> processes_;
   std::vector<internal::Node*> sources_;
   std::vector<internal::Node*> sinks_;
+  embb::base::Atomic<int> * sink_counter_;
+  int sink_count_;
   int slices_;
   internal::Scheduler * sched_;
   embb::mtapi::ExecutionPolicy policy_;
@@ -1196,13 +1228,18 @@ class Network {
 #endif
 
   bool SpawnClock(int clock) {
-    bool result = true;
-#if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
     const int idx = clock % slices_;
+#if EMBB_DATAFLOW_TRACE_SIGNAL_HISTORY
     spawn_history_[idx].push_back(clock);
 #endif
+    assert(sink_counter_[idx] == 0);
+    sink_counter_[idx] = sink_count_;
     for (size_t kk = 0; kk < sources_.size(); kk++) {
-      result &= sources_[kk]->Start(clock);
+      sources_[kk]->Start(clock);
+    }
+    bool result = true;
+    for (size_t kk = 0; kk < sources_.size(); kk++) {
+      result &= sources_[kk]->Wait(clock);
     }
     return result;
   }
@@ -1211,6 +1248,12 @@ class Network {
     sched_ = embb::base::Allocation::New<internal::SchedulerMTAPI>(slices_);
     if (sched_->GetSlices() != slices_) {
       slices_ = sched_->GetSlices();
+    }
+    sink_counter_ = reinterpret_cast<embb::base::Atomic<int>*>(
+      embb::base::Allocation::Allocate(
+        sizeof(embb::base::Atomic<int>)*slices_));
+    for (int ii = 0; ii < slices_; ii++) {
+      new(sink_counter_ + ii) embb::base::Atomic<int>(0);
     }
   }
 };

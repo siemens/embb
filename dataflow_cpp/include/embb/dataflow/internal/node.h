@@ -40,18 +40,43 @@ namespace internal {
 
 class Node {
  public:
-  Node() : sched_(NULL) {}
-  virtual ~Node() {}
-  virtual bool HasInputs() const { return false; }
-  virtual bool HasOutputs() const { return false; }
+  Node() : sched_(NULL) {
+    // empty
+  }
+
+  virtual ~Node() {
+    // empty
+  }
+
+  virtual bool HasInputs() const {
+    return false;
+  }
+
+  virtual bool HasOutputs() const {
+    return false;
+  }
+
   virtual void Run(int clock) = 0;
-  virtual bool IsFullyConnected() = 0;
-  virtual bool IsSequential() { return true; }
-  virtual bool HasCycle() { return false; }
-  virtual bool Start(int /*clock*/) {
+
+  virtual bool IsFullyConnected() const = 0;
+
+  virtual bool IsSequential() const {
+    return true;
+  }
+
+  virtual bool HasCycle() const {
+    return false;
+  }
+
+  virtual void Start(int /*clock*/) {
     EMBB_THROW(embb::base::ErrorException,
       "Nodes are started implicitly.");
   }
+
+  virtual bool Wait(int /*clock*/) {
+    return false;
+  }
+
   void SetScheduler(Scheduler * sched) {
     sched_ = sched;
     if (NULL != sched_) {
@@ -60,17 +85,18 @@ class Node {
       SetSlices(0);
     }
   }
+
   void SetPolicy(embb::mtapi::ExecutionPolicy const & policy) {
     policy_ = policy;
   }
 
  protected:
   Scheduler * sched_;
-  static int next_process_id_;
   embb::mtapi::ExecutionPolicy policy_;
 
-  static int GetNextProcessID() { return next_process_id_++; }
-  virtual void SetSlices(int /*slices*/) {}
+  virtual void SetSlices(int /*slices*/) {
+    // empty
+  }
 };
 
 } // namespace internal

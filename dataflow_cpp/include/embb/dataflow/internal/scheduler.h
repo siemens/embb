@@ -37,20 +37,21 @@ class Action;
 
 class Scheduler {
  public:
-  Scheduler() {}
-  virtual ~Scheduler() {}
+  Scheduler() {
+    // empty
+  }
+
+  virtual ~Scheduler() {
+    // empty
+  }
+
   virtual void Start(
     Action & action,
     embb::mtapi::ExecutionPolicy const & policy) = 0;
-  virtual void Enqueue(
-    int process_id,
-    Action & action,
-    embb::mtapi::ExecutionPolicy const & policy) = 0;
-  virtual void Run(
-    Action & action,
-    embb::mtapi::ExecutionPolicy const & policy) = 0;
-  virtual void WaitForSlice(int slice) = 0;
-  virtual int GetSlices() = 0;
+
+  virtual void YieldToScheduler() = 0;
+
+  virtual int GetSlices() const = 0;
 };
 
 } // namespace internal

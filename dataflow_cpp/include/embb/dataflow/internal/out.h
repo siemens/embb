@@ -71,7 +71,7 @@ class Out {
     return targets_.size() > 0;
   }
 
-  bool HasCycle(ClockListener * node) {
+  bool HasCycle(ClockListener const * node) const {
     bool result = false;
     for (size_t ii = 0; ii < targets_.size() && !result; ii++) {
       result = result || targets_[ii]->HasCycle(node);

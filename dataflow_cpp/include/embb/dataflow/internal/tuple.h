@@ -123,8 +123,8 @@ class Tuple :
 
   template <int Index>
   typename TypeAt< Types, Index >::Result const & Get() const {
-    typename TypeAt< LeafTypes, Index >::Result * leaf =
-      static_cast<typename TypeAt< LeafTypes, Index >::Result *>(this);
+    typename TypeAt< LeafTypes, Index >::Result const * leaf =
+      static_cast<typename TypeAt< LeafTypes, Index >::Result const *>(this);
     return leaf->Get();
   }
 };

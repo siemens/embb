@@ -50,13 +50,35 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
   typedef typename ExecutorType::FunctionType FunctionType;
 
   Source(Scheduler * sched, FunctionType function)
-    : executor_(function), not_done_(true) {
+    : executor_(function)
+    , not_done_(true)
+    , stop_(false)
+    , running_(0)
+    , next_clock_(0)
+    , action_(NULL)
+    , slices_(0) {
     SetScheduler(sched);
   }
 
   Source(Scheduler * sched, embb::mtapi::Job job)
-    : executor_(job), not_done_(true) {
+    : executor_(job)
+    , not_done_(true)
+    , stop_(false)
+    , running_(0)
+    , next_clock_(0)
+    , action_(NULL)
+    , slices_(0) {
     SetScheduler(sched);
+  }
+
+  ~Source() {
+    stop_ = true;
+    while (running_ > 0) {
+      sched_->YieldToScheduler();
+    }
+    if (NULL != action_) {
+      embb::base::Allocation::Free(action_);
+    }
   }
 
   virtual bool HasOutputs() const {
@@ -64,17 +86,37 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
   }
 
   virtual void Run(int clock) {
-    not_done_ = executor_.Execute(clock, outputs_);
+    if (stop_) {
+      return;
+    }
+    ++running_;
+    // check if this process is due
+    if (next_clock_ == clock) {
+      not_done_ = executor_.Execute(clock, outputs_);
+      ++next_clock_;
+    } else {
+      sched_->YieldToScheduler();
+      // redeploy if not
+      const int idx = clock % slices_;
+      action_[idx] = Action(this, clock);
+      sched_->Start(action_[idx], policy_);
+    }
+    --running_;
   }
 
-  virtual bool IsFullyConnected() {
+  virtual bool IsFullyConnected() const {
     return outputs_.IsFullyConnected();
   }
 
-  virtual bool Start(int clock) {
-    if (not_done_) {
-      Action act(this, clock);
-      sched_->Run(act, embb::mtapi::ExecutionPolicy());
+  virtual void Start(int clock) {
+    const int idx = clock % slices_;
+    action_[idx] = Action(this, clock);
+    sched_->Start(action_[idx], policy_);
+  }
+
+  virtual bool Wait(int clock) {
+    while (next_clock_ <= clock) {
+      sched_->YieldToScheduler();
     }
     return not_done_;
   }
@@ -98,6 +140,27 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
   OutputsType outputs_;
   ExecutorType executor_;
   embb::base::Atomic<bool> not_done_;
+  Action * action_;
+  embb::base::Atomic<bool> stop_;
+  embb::base::Atomic<int> running_;
+  embb::base::Atomic<int> next_clock_;
+  int slices_;
+
+  virtual void SetSlices(int slices) {
+    if (0 < slices_) {
+      embb::base::Allocation::Free(action_);
+      action_ = NULL;
+    }
+    slices_ = slices;
+    if (0 < slices_) {
+      action_ = reinterpret_cast<Action*>(
+        embb::base::Allocation::Allocate(
+          sizeof(Action)*slices_));
+      for (int ii = 0; ii < slices_; ii++) {
+        action_[ii] = Action();
+      }
+    }
+  }
 };
 
 } // namespace internal

@@ -73,7 +73,7 @@ class In {
   bool IsConnected() const { return connected_; }
   void SetConnected() { connected_ = true; }
 
-  bool HasCycle(ClockListener * node) {
+  bool HasCycle(ClockListener const * node) const {
     return listener_->OnHasCycle(node);
   }
 

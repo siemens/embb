@@ -57,15 +57,10 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     : inputs_()
     , executor_(function)
     , action_(NULL)
+    , stop_(false)
+    , running_(0)
+    , next_clock_(0)
     , slices_(0) {
-    next_clock_ = 0;
-    queued_clock_ = 0;
-    bool ordered = Serial;
-    if (ordered) {
-      queue_id_ = GetNextProcessID();
-    } else {
-      queue_id_ = 0;
-    }
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
@@ -74,20 +69,19 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
     : inputs_()
     , executor_(job)
     , action_(NULL)
+    , stop_(false)
+    , running_(0)
+    , next_clock_(0)
     , slices_(0) {
-    next_clock_ = 0;
-    queued_clock_ = 0;
-    bool ordered = Serial;
-    if (ordered) {
-      queue_id_ = GetNextProcessID();
-    } else {
-      queue_id_ = 0;
-    }
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
 
   ~Process() {
+    stop_ = true;
+    while (running_ > 0) {
+      sched_->YieldToScheduler();
+    }
     if (NULL != action_) {
       embb::base::Allocation::Free(action_);
     }
@@ -102,18 +96,39 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   }
 
   virtual void Run(int clock) {
-    executor_.Execute(clock, inputs_, outputs_);
+    if (stop_) {
+      return;
+    }
+    ++running_;
+    bool ordered = Serial;
+    if (ordered) {
+      // check if this process is due
+      if (next_clock_ == clock) {
+        executor_.Execute(clock, inputs_, outputs_);
+        ++next_clock_;
+      } else {
+        sched_->YieldToScheduler();
+        // redeploy if not
+        const int idx = clock % slices_;
+        action_[idx] = Action(this, clock);
+        sched_->Start(action_[idx], policy_);
+      }
+    } else {
+      // just execute, no ordering required
+      executor_.Execute(clock, inputs_, outputs_);
+    }
+    --running_;
   }
 
-  virtual bool IsFullyConnected() {
+  virtual bool IsFullyConnected() const {
     return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
-  virtual bool IsSequential() {
+  virtual bool IsSequential() const {
     return Serial;
   }
 
-  virtual bool HasCycle() {
+  virtual bool HasCycle() const {
     return outputs_.HasCycle(this);
   }
 
@@ -144,43 +159,13 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   virtual void OnClock(int clock) {
     assert(inputs_.AreAtClock(clock));
 
-    bool ordered = Serial;
-    if (ordered) {
-      bool retry = true;
-      while (retry) {
-        int clk = next_clock_;
-        int clk_end = clk + slices_;
-        int clk_res = clk;
-        for (int ii = clk; ii < clk_end; ii++) {
-          if (!inputs_.AreAtClock(ii)) {
-            break;
-          }
-          clk_res++;
-        }
-        if (clk_res > clk) {
-          if (next_clock_.CompareAndSwap(clk, clk_res)) {
-            while (queued_clock_.Load() < clk) continue;
-            for (int ii = clk; ii < clk_res; ii++) {
-              const int idx = ii % slices_;
-              action_[idx] = Action(this, ii);
-              sched_->Enqueue(queue_id_, action_[idx], policy_);
-            }
-            queued_clock_.Store(clk_res);
-            retry = false;
-          }
-        } else {
-          retry = false;
-        }
-      }
-    } else {
-      const int idx = clock % slices_;
-      action_[idx] = Action(this, clock);
-      sched_->Start(action_[idx], policy_);
-    }
+    const int idx = clock % slices_;
+    action_[idx] = Action(this, clock);
+    sched_->Start(action_[idx], policy_);
   }
 
-  virtual bool OnHasCycle(ClockListener * node) {
-    ClockListener * this_node = this;
+  virtual bool OnHasCycle(ClockListener const * node) const {
+    ClockListener const * this_node = this;
     if (this_node == node) {
       return true;
     } else {
@@ -193,9 +178,9 @@ class Process< Serial, Inputs<I1, I2, I3, I4, I5>,
   OutputsType outputs_;
   ExecutorType executor_;
   Action * action_;
+  embb::base::Atomic<bool> stop_;
+  embb::base::Atomic<int> running_;
   embb::base::Atomic<int> next_clock_;
-  embb::base::Atomic<int> queued_clock_;
-  int queue_id_;
   int slices_;
 
   virtual void SetSlices(int slices) {

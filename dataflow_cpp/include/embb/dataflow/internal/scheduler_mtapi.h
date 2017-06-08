@@ -46,9 +46,7 @@ class SchedulerMTAPI : public Scheduler {
     : slices_(slices) {
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
 
-    int tl = std::min(
-      static_cast<int>(node.GetTaskLimit()),
-      static_cast<int>(node.GetGroupCount()));
+    int tl = static_cast<int>(node.GetTaskLimit());
     if (tl < slices_) {
       slices_ = tl;
     }
@@ -56,82 +54,35 @@ class SchedulerMTAPI : public Scheduler {
     job_ = node.GetJob(EMBB_DATAFLOW_JOB_ID);
     action_ = node.CreateAction(EMBB_DATAFLOW_JOB_ID,
       SchedulerMTAPI::action_func);
-
-    group_ = reinterpret_cast<embb::mtapi::Group*>(
-      embb::base::Allocation::Allocate(
-      sizeof(embb::mtapi::Group)*slices_));
-
-    for (int ii = 0; ii < slices_; ii++) {
-      group_[ii] = node.CreateGroup();
-    }
-
-    queue_count_ = std::min(
-      static_cast<int>(node.GetQueueCount()),
-      static_cast<int>(node.GetWorkerThreadCount()) );
-    queue_ = reinterpret_cast<embb::mtapi::Queue*>(
-      embb::base::Allocation::Allocate(
-      sizeof(embb::mtapi::Queue)*queue_count_));
-
-    embb::mtapi::QueueAttributes queue_attr;
-    queue_attr
-      .SetPriority(0)
-      .SetOrdered(true);
-    for (int ii = 0; ii < queue_count_; ii++) {
-      queue_[ii] = node.CreateQueue(job_, queue_attr);
-    }
   }
+
   virtual ~SchedulerMTAPI() {
     if (embb::mtapi::Node::IsInitialized()) {
-      // only destroy groups and queues if there still is an instance
-      for (int ii = 0; ii < slices_; ii++) {
-        group_[ii].WaitAll(MTAPI_INFINITE);
-        group_[ii].Delete();
-      }
-      for (int ii = 0; ii < queue_count_; ii++) {
-        queue_[ii].Delete();
-      }
-      // delete action as well
+      // delete action
       action_.Delete();
     }
-    embb::base::Allocation::Free(group_);
-    embb::base::Allocation::Free(queue_);
   }
+
   virtual void Start(
     Action & action,
     embb::mtapi::ExecutionPolicy const & policy) {
-    const int idx = action.GetClock() % slices_;
-    embb::mtapi::TaskAttributes task_attr;
-    task_attr.SetPolicy(policy);
-    group_[idx].Start(job_, &action, static_cast<void*>(NULL), task_attr);
-  }
-  virtual void Run(
-    Action & action,
-    embb::mtapi::ExecutionPolicy const & policy) {
-    const int idx = action.GetClock() % slices_;
-    embb::mtapi::TaskAttributes task_attr;
-    task_attr.SetPolicy(policy);
-    embb::mtapi::Task task =
-      group_[idx].Start(job_, &action, static_cast<void*>(NULL), task_attr);
-    task.Wait();
-  }
-  virtual void Enqueue(
-    int process_id,
-    Action & action,
-    embb::mtapi::ExecutionPolicy const & policy) {
-    const int idx = action.GetClock() % slices_;
-    const int queue_id = process_id % queue_count_;
-    embb::mtapi::TaskAttributes task_attr;
-    task_attr.SetPolicy(policy);
-    queue_[queue_id].Enqueue(&action, static_cast<void*>(NULL),
-      task_attr, group_[idx]);
-  }
-  virtual void WaitForSlice(int slice) {
-    group_[slice].WaitAll(MTAPI_INFINITE);
-    // group is invalid now, recreate
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    group_[slice] = node.CreateGroup();
+    const int idx = action.GetClock() % slices_;
+    embb::mtapi::TaskAttributes task_attr;
+    task_attr.SetPolicy(policy);
+    task_attr.SetDetached(true);
+    embb::mtapi::Task task =
+      node.Start(job_, &action, static_cast<void*>(NULL), task_attr);
   }
-  virtual int GetSlices() { return slices_; }
+
+  virtual void YieldToScheduler() {
+    embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
+    node.YieldToScheduler();
+  }
+
+  virtual int GetSlices() const {
+    return slices_;
+  }
 
  private:
   static void action_func(
@@ -150,9 +101,6 @@ class SchedulerMTAPI : public Scheduler {
 
   embb::mtapi::Action action_;
   embb::mtapi::Job job_;
-  embb::mtapi::Group * group_;
-  embb::mtapi::Queue * queue_;
-  int queue_count_;
   int slices_;
 };
 

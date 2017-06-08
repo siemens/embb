@@ -78,12 +78,12 @@ class Switch
     }
   }
 
-  virtual bool IsFullyConnected() {
+  virtual bool IsFullyConnected() const {
     return inputs_.IsFullyConnected() && outputs_.IsFullyConnected();
   }
 
-  virtual bool OnHasCycle(ClockListener * node) {
-    ClockListener * this_node = this;
+  virtual bool OnHasCycle(ClockListener const * node) const {
+    ClockListener const * this_node = this;
     if (this_node == node) {
       return true;
     } else {

@@ -48,31 +48,37 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   typedef SinkExecutor< InputsType > ExecutorType;
   typedef typename ExecutorType::FunctionType FunctionType;
 
-  Sink(Scheduler * sched, FunctionType function)
+  Sink(Scheduler * sched, ClockListener * listener, FunctionType function)
     : inputs_()
     , executor_(function)
+    , listener_(listener)
     , action_(NULL)
+    , stop_(false)
+    , running_(0)
+    , next_clock_(0)
     , slices_(0) {
-    next_clock_ = 0;
-    queued_clock_ = 0;
-    queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
 
-  Sink(Scheduler * sched, embb::mtapi::Job job)
+  Sink(Scheduler * sched, ClockListener * listener, embb::mtapi::Job job)
     : inputs_()
     , executor_(job)
+    , listener_(listener)
     , action_(NULL)
+    , stop_(false)
+    , running_(0)
+    , next_clock_(0)
     , slices_(0) {
-    next_clock_ = 0;
-    queued_clock_ = 0;
-    queue_id_ = GetNextProcessID();
     inputs_.SetListener(this);
     SetScheduler(sched);
   }
 
   ~Sink() {
+    stop_ = true;
+    while (running_ > 0) {
+      sched_->YieldToScheduler();
+    }
     if (NULL != action_) {
       embb::base::Allocation::Free(action_);
     }
@@ -83,12 +89,28 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
   }
 
   virtual void Run(int clock) {
-    if (inputs_.AreNoneBlank(clock)) {
-      executor_.Execute(clock, inputs_);
+    if (stop_) {
+      return;
     }
+    ++running_;
+    // check if this process is due
+    if (next_clock_ == clock) {
+      if (inputs_.AreNoneBlank(clock)) {
+        executor_.Execute(clock, inputs_);
+      }
+      ++next_clock_;
+      listener_->OnClock(clock);
+    } else {
+      sched_->YieldToScheduler();
+      // redeploy if not
+      const int idx = clock % slices_;
+      action_[idx] = Action(this, clock);
+      sched_->Start(action_[idx], policy_);
+    }
+    --running_;
   }
 
-  virtual bool IsFullyConnected() {
+  virtual bool IsFullyConnected() const {
     return inputs_.IsFullyConnected();
   }
 
@@ -105,41 +127,19 @@ class Sink< Inputs<I1, I2, I3, I4, I5> >
     EMBB_UNUSED_IN_RELEASE(clock);
     assert(inputs_.AreAtClock(clock));
 
-    bool retry = true;
-    while (retry) {
-      int clk = next_clock_;
-      int clk_end = clk + slices_;
-      int clk_res = clk;
-      for (int ii = clk; ii < clk_end; ii++) {
-        if (!inputs_.AreAtClock(ii)) {
-          break;
-        }
-        clk_res++;
-      }
-      if (clk_res > clk) {
-        if (next_clock_.CompareAndSwap(clk, clk_res)) {
-          while (queued_clock_.Load() < clk) continue;
-          for (int ii = clk; ii < clk_res; ii++) {
-            const int idx = ii % slices_;
-            action_[idx] = Action(this, ii);
-            sched_->Enqueue(queue_id_, action_[idx], policy_);
-          }
-          queued_clock_.Store(clk_res);
-          retry = false;
-        }
-      } else {
-        retry = false;
-      }
-    }
+    const int idx = clock % slices_;
+    action_[idx] = Action(this, clock);
+    sched_->Start(action_[idx], policy_);
   }
 
  private:
   InputsType inputs_;
   ExecutorType executor_;
+  ClockListener * listener_;
   Action * action_;
+  embb::base::Atomic<bool> stop_;
+  embb::base::Atomic<int> running_;
   embb::base::Atomic<int> next_clock_;
-  embb::base::Atomic<int> queued_clock_;
-  int queue_id_;
   int slices_;
 
   virtual void SetSlices(int slices) {

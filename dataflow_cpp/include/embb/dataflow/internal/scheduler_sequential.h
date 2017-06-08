@@ -36,26 +36,28 @@ namespace internal {
 
 class SchedulerSequential : public Scheduler {
  public:
-  SchedulerSequential() {}
-  virtual ~SchedulerSequential() {}
+  SchedulerSequential() {
+    // empty
+  }
+
+  virtual ~SchedulerSequential() {
+    // empty
+  }
+
   virtual void Start(
     Action & action,
     embb::mtapi::ExecutionPolicy const &) {
     action.RunSequential();
   }
-  virtual void Run(
-    Action & action,
-    embb::mtapi::ExecutionPolicy const &) {
-    action.RunSequential();
+
+
+  virtual void YieldToScheduler() {
+    // empty
   }
-  virtual void Enqueue(
-    int,
-    Action & action,
-    embb::mtapi::ExecutionPolicy const &) {
-    action.RunSequential();
+
+  virtual int GetSlices() const {
+    return 1;
   }
-  virtual void WaitForSlice(int /*slice*/) {}
-  virtual int GetSlices() { return 1; }
 };
 
 } // namespace internal

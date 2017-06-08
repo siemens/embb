@@ -59,12 +59,15 @@ class ConstantSource
     GetOutput<0>().Send(Signal<Type>(clock, value_));
   }
 
-  virtual bool IsFullyConnected() {
+  virtual bool IsFullyConnected() const {
     return outputs_.IsFullyConnected();
   }
 
-  virtual bool Start(int clock) {
+  virtual void Start(int clock) {
     Run(clock);
+  }
+
+  virtual bool Wait(int /*clock*/) {
     return true;
   }
 

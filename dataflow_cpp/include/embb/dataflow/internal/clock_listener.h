@@ -33,9 +33,15 @@ namespace internal {
 
 class ClockListener {
  public:
-  virtual ~ClockListener() {}
+  virtual ~ClockListener() {
+    // empty
+  }
+
   virtual void OnClock(int /*clock*/) = 0;
-  virtual bool OnHasCycle(ClockListener * /*node*/) { return false; }
+
+  virtual bool OnHasCycle(ClockListener const * /*node*/) const {
+    return false;
+  }
 };
 
 } // namespace internal

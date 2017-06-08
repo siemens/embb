@@ -52,10 +52,11 @@ class Outputs<embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil> {
  public:
-  bool IsFullyConnected() {
+  bool IsFullyConnected() const {
     return true;
   }
-  bool HasCycle(ClockListener * /*node*/) {
+
+  bool HasCycle(ClockListener const * /*node*/) const {
     return false;
   }
 };
@@ -67,10 +68,11 @@ class Outputs<T1, embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil,
     embb::base::internal::Nil> {
  public:
-  bool IsFullyConnected() {
+  bool IsFullyConnected() const {
     return this->template Get<0>().IsConnected();
   }
-  bool HasCycle(ClockListener * node) {
+
+  bool HasCycle(ClockListener const * node) const {
     return this->template Get<0>().HasCycle(node);
   }
 };
@@ -81,11 +83,12 @@ class Outputs<T1, T2, embb::base::internal::Nil,
   : public Tuple<Out<T1>, Out<T2>, embb::base::internal::Nil,
     embb::base::internal::Nil, embb::base::internal::Nil> {
  public:
-  bool IsFullyConnected() {
+  bool IsFullyConnected() const {
     return this->template Get<0>().IsConnected() &&
       this->template Get<1>().IsConnected();
   }
-  bool HasCycle(ClockListener * node) {
+
+  bool HasCycle(ClockListener const * node) const {
     return this->template Get<0>().HasCycle(node) ||
       this->template Get<1>().HasCycle(node);
   }
@@ -97,12 +100,13 @@ class Outputs<T1, T2, T3, embb::base::internal::Nil,
   : public Tuple<Out<T1>, Out<T2>, Out<T3>,
     embb::base::internal::Nil, embb::base::internal::Nil> {
  public:
-  bool IsFullyConnected() {
+  bool IsFullyConnected() const {
     return this->template Get<0>().IsConnected() &&
       this->template Get<1>().IsConnected() &&
       this->template Get<2>().IsConnected();
   }
-  bool HasCycle(ClockListener * node) {
+
+  bool HasCycle(ClockListener const * node) const {
     return this->template Get<0>().HasCycle(node) ||
       this->template Get<1>().HasCycle(node) ||
       this->template Get<2>().HasCycle(node);
@@ -114,13 +118,14 @@ class Outputs<T1, T2, T3, T4, embb::base::internal::Nil>
   : public Tuple<Out<T1>, Out<T2>, Out<T3>,
       Out<T4>, embb::base::internal::Nil>{
  public:
-  bool IsFullyConnected() {
+  bool IsFullyConnected() const {
     return this->template Get<0>().IsConnected() &&
       this->template Get<1>().IsConnected() &&
       this->template Get<2>().IsConnected() &&
       this->template Get<3>().IsConnected();
   }
-  bool HasCycle(ClockListener * node) {
+
+  bool HasCycle(ClockListener const * node) const {
     return this->template Get<0>().HasCycle(node) ||
       this->template Get<1>().HasCycle(node) ||
       this->template Get<2>().HasCycle(node) ||
@@ -134,14 +139,15 @@ class Outputs
   : public Tuple<Out<T1>, Out<T2>, Out<T3>,
       Out<T4>, Out<T5> > {
  public:
-  bool IsFullyConnected() {
+  bool IsFullyConnected() const {
     return this->template Get<0>().IsConnected() &&
       this->template Get<1>().IsConnected() &&
       this->template Get<2>().IsConnected() &&
       this->template Get<3>().IsConnected() &&
       this->template Get<4>().IsConnected();
   }
-  bool HasCycle(ClockListener * node) {
+
+  bool HasCycle(ClockListener const * node) const {
     return this->template Get<0>().HasCycle(node) ||
       this->template Get<1>().HasCycle(node) ||
       this->template Get<2>().HasCycle(node) ||
