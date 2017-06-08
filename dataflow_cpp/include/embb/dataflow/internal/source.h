@@ -52,10 +52,10 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
   Source(Scheduler * sched, FunctionType function)
     : executor_(function)
     , not_done_(true)
+    , action_(NULL)
     , stop_(false)
     , running_(0)
     , next_clock_(0)
-    , action_(NULL)
     , slices_(0) {
     SetScheduler(sched);
   }
@@ -63,10 +63,10 @@ class Source< Outputs<O1, O2, O3, O4, O5> >
   Source(Scheduler * sched, embb::mtapi::Job job)
     : executor_(job)
     , not_done_(true)
+    , action_(NULL)
     , stop_(false)
     , running_(0)
     , next_clock_(0)
-    , action_(NULL)
     , slices_(0) {
     SetScheduler(sched);
   }

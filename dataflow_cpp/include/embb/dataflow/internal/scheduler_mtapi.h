@@ -67,7 +67,6 @@ class SchedulerMTAPI : public Scheduler {
     Action & action,
     embb::mtapi::ExecutionPolicy const & policy) {
     embb::mtapi::Node & node = embb::mtapi::Node::GetInstance();
-    const int idx = action.GetClock() % slices_;
     embb::mtapi::TaskAttributes task_attr;
     task_attr.SetPolicy(policy);
     task_attr.SetDetached(true);
