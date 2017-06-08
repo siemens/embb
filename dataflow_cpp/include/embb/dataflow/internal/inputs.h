@@ -70,8 +70,8 @@ class Inputs<embb::base::internal::Nil, embb::base::internal::Nil,
 
   bool IsFullyConnected() const {
     return true;
-
   }
+
   void SetSlices(int /*slices*/) {
     // emtpy
   }
