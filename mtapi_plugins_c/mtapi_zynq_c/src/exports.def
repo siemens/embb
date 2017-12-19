@@ -1,0 +1,5 @@
+LIBRARY embb_mtapi_pl_c
+EXPORTS
+mtapi_pl_plugin_initialize
+mtapi_pl_plugin_finalize
+mtapi_pl_action_create
