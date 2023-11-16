@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/siemens/embb.svg?branch=master)](https://travis-ci.org/siemens/embb)
 [![Coverity Scan Status](https://scan.coverity.com/projects/11842/badge.svg)](https://scan.coverity.com/projects/siemens-embb)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/654/badge)](https://bestpractices.coreinfrastructure.org/projects/654)
 
@@ -19,9 +18,6 @@ Besides the task scheduler, EMB² provides basic parallel algorithms, concurrent
 <img src="doc/images/embb.png" alt="Building blocks of EMB²" width="500"/>
 
 ### Important Links
-
-Website:
-  - https://embb.io
 
 GitHub:
   - https://github.com/siemens/embb
